@@ -29,5 +29,5 @@ theorem q2e : ∃ n : ℕ, ∀ n₂ : ℕ, (n % 3 = 1 ∧ n % 5 = 4 ∧ n % 7 = 
 -- Let m and n be integers. Show that the greatest common divisor of m and n is the unique positive integer d such that:
 --     - d divides both m and n, and
 --     - if x divides both m and n, then x divides d.
--- theorem q3 : ∀ x y : ℕ, gcd m n = 
+theorem q3 : ∀ x y : ℕ, gcd m n = 
 
