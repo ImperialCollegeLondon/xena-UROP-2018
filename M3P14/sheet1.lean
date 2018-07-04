@@ -2,7 +2,7 @@ import data.nat.gcd
 namespace nat
 
 def divides : ℕ → ℕ → bool
-| x y := x ≤ y ∧ gcd x y > 1
+| x y := y % x = 0
 
 -- Show that for a, b, d integers, we have (da, db) = d(a,b)
 theorem q1a (a b d : ℕ) : gcd (d*a) (d*b) = d * (gcd a b) := sorry
