@@ -6,8 +6,6 @@ namespace nat
 -- TODO: import mathlib, use their polymorphic definition of gcd
 -- TODO: change some theorem signatures from ℕ to ℤ 
 
-def divides (x y : ℕ) := y % x = 0 -- It's already defined in mathlib or the standard library
-
 -- Show that for a, b, d integers, we have (da, db) = d(a,b)
 theorem q1a (a b d : ℕ) : gcd (d*a) (d*b) = d * (gcd a b) := gcd_mul_left d a b
 
@@ -25,7 +23,6 @@ begin
   have := coprime.dvd_of_dvd_mul_right 
     (coprime_div_gcd_div_gcd (gcd_pos_of_pos_left a hn)) this,
   rwa gcd_comm,
-
 end
 
 -- Express 18 as an integer linear combination of 327 and 120.
@@ -48,7 +45,7 @@ theorem q2e : ∃ n : ℕ, ∀ n₂ : ℕ, n % 3 = 1 → n % 5 = 4 → n % 7 = 3
 -- Let m and n be integers. Show that the greatest common divisor of m and n is the unique positive integer d such that:
 --      - d divides both m and n, and
 --      - if x divides both m and n, then x divides d.
-theorem q3 : ∀ m n : ℕ, ∃! d : ℕ, ∀ x : ℕ, gcd m n = d → divides d m → divides d n → divides x m → divides x n → divides x d
+theorem q3 : ∀ m n : ℕ, ∃! d : ℕ, ∀ x : ℕ, gcd m n = d → d ∣ m → d ∣ n → x ∣ m → x ∣ n → x ∣ d
                                     := sorry
 
 -- Let a and b be nonzero integers. Show that there is a unique positive integer m with the following two properties:
@@ -56,7 +53,7 @@ theorem q3 : ∀ m n : ℕ, ∃! d : ℕ, ∀ x : ℕ, gcd m n = d → divides d
 --      - if n is any number divisible by both a and b, then m|n
 -- The number m is called the least common multiple of a and b
 theorem q4a : ∀ a b : ℕ, ∃! m : ℕ, ∀ n : ℕ, ¬(a = 0) → ¬(b = 0) →   
-                                divides a m → divides b m → divides a n → divides b n → divides m n
+                                a ∣ m → b ∣ m → a ∣ n → b ∣ n → m ∣ n
                                 := sorry 
 
 -- Show that the least common multiple of a and b is given by |ab|/(a,b)
