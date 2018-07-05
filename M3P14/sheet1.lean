@@ -1,8 +1,12 @@
-import data.nat.gcd
+--import data.nat.gcd
+--import algebra.euclidean_domain
+
 namespace nat
 
-def divides : ℕ → ℕ → bool
-| x y := y % x = 0
+-- TODO: import mathlib, use their polymorphic definition of gcd
+-- TODO: change some theorem signatures from ℕ to ℤ 
+
+def divides (x y : ℕ) := y % x = 0 -- It's already defined in mathlib or the standard library
 
 -- Show that for a, b, d integers, we have (da, db) = d(a,b)
 theorem q1a (a b d : ℕ) : gcd (d*a) (d*b) = d * (gcd a b) := sorry
@@ -36,10 +40,15 @@ theorem q3 : ∀ m n : ℕ, ∃! d : ℕ, ∀ x : ℕ, gcd m n = d → divides d
 -- Let a and b be nonzero integers. Show that there is a unique positive integer m with the following two properties:
 --      - a and b divide m, and
 --      - if n is any number divisible by both a and b, then m|n
+-- The number m is called the least common multiple of a and b
 theorem q4a : ∀ a b : ℕ, ∃! m : ℕ, ∀ n : ℕ, ¬(a = 0) → ¬(b = 0) →   
                                 divides a m → divides b m → divides a n → divides b n → divides m n
                                 := sorry 
 
+-- Show that the least common multiple of a and b is given by |ab|/(a,b)
+-- theorem q4b
+
+-- Let m and n be 
 
 
 end nat
