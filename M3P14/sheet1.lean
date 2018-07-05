@@ -1,4 +1,6 @@
---import data.nat.gcd
+import data.nat.gcd
+import data.nat.modeq
+import data.nat.prime
 --import algebra.euclidean_domain
 
 namespace nat
@@ -73,7 +75,8 @@ theorem q6 :
 theorem q7 :
 
 -- Let p be a prime, and a be any integer. Show that a^(p²+p+1) is congruent to a^3 modulo p.
-theorem q8 :
+theorem q8: ∀ a p :ℕ, p →  a^(p^2+p+1) ≡ a^3 [MOD p] := sorry
+
 
 -- Let n be a squarefree positive integer, and suppose that for all primes p dividing n, we have (p-1)∣(n - 1).
 -- Show that for all integers a with (a, n) = 1, we have a^n = a (mod n).
