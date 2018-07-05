@@ -1,11 +1,12 @@
 import data.nat.gcd
 import data.nat.modeq
 import data.nat.prime
+import tactic.norm_num
 --import algebra.euclidean_domain
 
 namespace nat
 
--- TODO: import mathlib, use their polymorphic definition of gcd
+-- TODO: import mathlib
 -- TODO: change some theorem signatures from ℕ to ℤ (need to extend the definition of some gcd lemmas)
 
 -- Show that for a, b, d integers, we have (da, db) = d(a,b).
@@ -28,7 +29,8 @@ begin
 end
 
 -- Express 18 as an integer linear combination of 327 and 120.
-theorem q2a : ∃ x y : ℕ, 18 = 327*x + 120*y := sorry
+theorem q2a : ∃ x y : ℕ, 18 = 327*x + 120*y := 
+    ⟨-66, 180, by norm_num⟩
 
 -- Find, with proof, all solutions to the linear diophantine equation 100x + 68y = 14.
 theorem q2b : ∀ x y : ℕ, 100*x + 68*y = 14 := sorry
@@ -37,7 +39,8 @@ theorem q2b : ∀ x y : ℕ, 100*x + 68*y = 14 := sorry
 theorem q2c :
 
 -- Find an integer congruent to 3 mod 9 and congruent to 1 mod 49.
-theorem q2d : ∃ x : ℕ, x % 9 = 3 → x % 49 = 1 := sorry
+theorem q2d : ∃ x : ℤ, x % 9 = 3 → x % 49 = 1 :=  
+    ⟨-195, by rfl⟩
 
 -- Find, with proof, the smallest nonnegative integer n such that n = 1 (mod 3), n = 4 (mod 5), and n = 3 (mod 7).
 theorem q2e : ∃ n : ℕ, ∀ n₂ : ℕ, n % 3 = 1 → n % 5 = 4 → n % 7 = 3
@@ -75,8 +78,7 @@ theorem q6 :
 theorem q7 :
 
 -- Let p be a prime, and a be any integer. Show that a^(p²+p+1) is congruent to a^3 modulo p.
-theorem q8: ∀ a p :ℕ, p →  a^(p^2+p+1) ≡ a^3 [MOD p] := sorry
-
+theorem q8: ∀ a p : ℕ, p →  a^(p^2+p+1) ≡ a^3 [MOD p] := sorry
 
 -- Let n be a squarefree positive integer, and suppose that for all primes p dividing n, we have (p-1)∣(n - 1).
 -- Show that for all integers a with (a, n) = 1, we have a^n = a (mod n).
