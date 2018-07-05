@@ -5,10 +5,24 @@ def divides : ℕ → ℕ → bool
 | x y := y % x = 0
 
 -- Show that for a, b, d integers, we have (da, db) = d(a,b)
-theorem q1a (a b d : ℕ) : gcd (d*a) (d*b) = d * (gcd a b) := sorry
+theorem q1a (a b d : ℕ) : gcd (d*a) (d*b) = d * (gcd a b) := gcd_mul_left d a b
 
--- Let a, b, n integers, and suppose that n|ab. Show that n/(a,b) divides b 
-theorem q1b (a b n : ℕ) : divides n (a*b) → divides (n / gcd a b) b := sorry
+-- Let a, b, n integers, and suppose that n|ab. Show that n/(a,b) divides b
+theorem q1b (a b n : ℕ) (ha : a > 0) (hn : n > 0) : n ∣ (a*b) → (n / gcd a n) ∣ b := λ h,
+have n / gcd n a ∣ b * (a / gcd n a) := dvd_of_mul_dvd_mul_right (gcd_pos_of_pos_left a hn) 
+begin
+  rw ← nat.mul_div_assoc _ (gcd_dvd_right n a),
+  rw nat.div_mul_cancel (gcd_dvd_left n a),
+  rw mul_comm b,
+  rwa nat.div_mul_cancel (dvd_trans (gcd_dvd_left n a) h),
+end,
+begin
+  cases exists_eq_mul_left_of_dvd h with c hc,
+  have := coprime.dvd_of_dvd_mul_right 
+    (coprime_div_gcd_div_gcd (gcd_pos_of_pos_left a hn)) this,
+  rwa gcd_comm,
+
+end
 
 -- Express 18 as an integer linear combination of 327 and 120.
 theorem q2a : ∃ x y : ℕ, 18 = 327*x + 120*y := sorry
