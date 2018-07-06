@@ -1,5 +1,8 @@
 import algebra.group
 
+--TODO:
+--clarify which bits of mathlib are worth importing for this.
+
 -- M1P2 has a mixture of questions concerning groups. I have tried to include as many as possible. 
 
 -- sheet 4
@@ -8,7 +11,7 @@ import algebra.group
 
 theorem q4:
 
--- Let S be the set of all real numbers except −1. For a, b ∈ S define a ∗ b = ab + a + b. Show that (S, ∗) is a group. (Note: you need to check the closure axiom.)
+-- Let S be the set of all real numbers except −1. For a, b ∈ S define a ∗ b = ab + a + b. Show that (S, ∗) is a group. 
 theorem q7:
 
 -- 8. Let G be a group, and let a, b, c ∈ G. Prove the following facts.
@@ -17,9 +20,9 @@ theorem q7:
 theorem q8a: (G : group) (a b c ∈ G) a*b = a*c → b = c 
 --(b) The equation axb = c has a unique solution for x ∈ G.
 theorem q8b:
---(c) (a−1)−1 = a.
+--(c) (a^{−1})^{−1} = a.
 theorem q8c:
---(d) (ab)−1 = b−1a−1.
+--(d) (ab)^{−1} = b^{-1}a^{−1}.
 theorem q8d:
 
 -- 9. Let G be a group, and let e be the identity of G. Suppose that x∗x=e for all x∈G. Show that y ∗ z = z ∗ y for all y, z ∈ G.
