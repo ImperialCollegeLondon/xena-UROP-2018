@@ -70,7 +70,7 @@ theorem q4a : ∀ a b : ℤ, ∃! m : ℕ, ∀ n : ℤ, a ≠ 0 → b ≠ 0 →
                                 := sorry 
 
 -- Show that the least common multiple of a and b is given by |ab|/(a,b)
-theorem q4b : ∀ a b : ℤ, lcm a b = abs(a*b)/(gcd (a:ℕ) (b:ℕ)) := sorry
+theorem q4b : ∀ a b : ℕ, lcm a b = abs(a*b)/(gcd a b) := sorry
 
 
 -- Let m and n be positive integers, and let K be the kernel of the map:
@@ -88,7 +88,7 @@ theorem q6 : -- ¬(gcd a n ∣ b) → ¬(∃ x, a*x ≡ b [MOD n])
 theorem q7 :
 
 -- Let p be a prime, and a be any integer. Show that a^(p²+p+1) is congruent to a^3 modulo p.
-theorem q8: ∀ a p : ℤ, prime p →  a^(p^2+p+1) ≡ a^3 [MOD p] := sorry
+theorem q8: ∀ a p : ℕ, prime p →  a^(p^2+p+1) ≡ a^3 [MOD p] := sorry
 
 -- Let n be a squarefree positive integer, and suppose that for all primes p dividing n, we have (p-1)∣(n - 1).
 -- Show that for all integers a with (a, n) = 1, we have a^n = a (mod n).
@@ -97,6 +97,5 @@ theorem q9 : ∀ n p a, square_free_int n → prime p → p ∣ n → (p-1)∣(n
 -- Let n be a positive integer. Show that Σ Φ(d) for d∣n and d>0 = n.
 -- [Hint: First show that the number of integers a with a ≤ 0 < n and (a, n) = n/d is equal to Φ(d).] 
 theorem q10 :
-
 
 end nat
