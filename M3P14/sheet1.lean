@@ -59,23 +59,54 @@ theorem q4a : ∀ a b : ℕ, ∃! m : ℕ, ∀ n : ℕ, ¬(a = 0) → ¬(b = 0) 
                                 := sorry 
 
 -- Show that the least common multiple of a and b is given by |ab|/(a,b)
-theorem q4b :
 
 -- Let m and n be positive integers, and let K be the kernel of the map:
 --      ℤ/mnℤ → ℤ/mℤ x ℤ/nℤ 
 -- that takes a class mod mn to the corresponding classes modulo m and n.
 -- Show that K has (m, n) elements. What are they?
-theorem q5 :
+-- theorem q5 :
 
--- Show that the equation ax = b (mod n) has no solutions if b is not divisible by (a, n), and exactly (a, n) solutions in ℤ/n otherwise.
-theorem q6 :
+-- -- Show that the equation ax = b (mod n) has no solutions if b is not divisible by (a, n), and exactly (a, n) solutions in ℤ/n otherwise.
+-- theorem q6 :
 
--- For n a positive integer, let σ(n) denote the sum Σ d for d∣n and d>0, of the positive divisors of n.
--- Show that the function n ↦ σ(n) is multiplicative.
-theorem q7 :
+-- -- For n a positive integer, let σ(n) denote the sum Σ d for d∣n and d>0, of the positive divisors of n.
+-- -- Show that the function n ↦ σ(n) is multiplicative.
+-- theorem q7 :
 
 -- Let p be a prime, and a be any integer. Show that a^(p²+p+1) is congruent to a^3 modulo p.
-theorem q8: ∀ a p :ℕ, p →  a^(p^2+p+1) ≡ a^3 [MOD p] := sorry
+--set_option trace.simplify.rewrite true
+lemma nat.pow_mul (a b c : ℕ) : a ^ (b * c) = (a ^ b) ^ c :=
+begin
+  induction c with c ih,
+  simp,
+  rw [nat.mul_succ, nat.pow_add, nat.pow_succ, ih],
+end
+
+lemma nat.pow_mull (a b p q: ℕ) : a ≡ b [MOD q] → a ^ p ≡ b ^ p [MOD q] :=
+begin 
+  intro h,
+  induction p with p ih,
+  simp,
+  rw [nat.pow_succ, nat.pow_succ], 
+  apply nat.modeq.modeq_mul ih h,
+end 
+
+theorem fermat_little_theorem : ∀ a p : ℕ, prime p → a ^ p ≡ a [MOD p] :=sorry
+theorem q8 : ∀ a p :ℕ, prime p →  a^(p^2+p+1) ≡ a^3 [MOD p] := 
+begin 
+assume a p hp,
+rw [nat.pow_add, nat.pow_one, nat.pow_add, nat.pow_succ, nat.pow_one, nat.pow_succ, nat.pow_succ, nat.pow_one],
+apply nat.modeq.modeq_mul,
+apply nat.modeq.modeq_mul,
+rw nat.pow_mul,
+have middle_step : (a ^ p) ^ p ≡ a ^ p [MOD p],
+let b := a ^ p,
+exact fermat_little_theorem b p hp,
+
+exact modeq.trans middle_step (fermat_little_theorem a p hp),
+exact fermat_little_theorem a p hp,
+exact modeq.refl a:ℕ,
+end 
 
 
 -- Let n be a squarefree positive integer, and suppose that for all primes p dividing n, we have (p-1)∣(n - 1).
