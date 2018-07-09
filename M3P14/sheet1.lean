@@ -34,7 +34,7 @@ theorem q2a : ∃ x y : ℕ, 18 = 327*x + 120*y := sorry
 theorem q2b : ∀ x y : ℕ, 100*x + 68*y = 14 := sorry
 
 -- Find a multiplicative inverse of 31 modulo 132.
-theorem q2c :
+--theorem q2c :
 
 -- Find an integer congruent to 3 mod 9 and congruent to 1 mod 49.
 theorem q2d : ∃ x : ℕ, x % 9 = 3 → x % 49 = 1 := sorry
@@ -111,11 +111,11 @@ end
 
 -- Let n be a squarefree positive integer, and suppose that for all primes p dividing n, we have (p-1)∣(n - 1).
 -- Show that for all integers a with (a, n) = 1, we have a^n = a (mod n).
-theorem q9 :
+--theorem q9 :
 
 -- Let n be a positive integer. Show that Σ Φ(d) for d∣n and d>0 = n.
 -- [Hint: First show that the number of integers a with a ≤ 0 < n and (a, n) = n/d is equal to Φ(d).] 
-theorem q10 :
+--theorem q10 :
 
 
 end nat
