@@ -3,18 +3,9 @@ import data.nat.modeq
 import data.nat.prime
 import tactic.norm_num
 
-
--- Definitions:
-
--- A square-free integer is an integer which is divisible by no perfect square other than 1.
-def square_free_int (a : ℕ) := ∀ n : ℕ, (n*n) ∣ a → n = 1
-
-
--- Questions:
+namespace nat
 
 -- TODO : change ℕ to ℤ, but before that need to extend gcd to integers.
-
-namespace nat
 
 -- Show that for a, b, d integers, we have (da, db) = d(a,b).
 theorem q1a (a b d : ℕ) : gcd (d*a) (d*b) = d * (gcd a b) := gcd_mul_left d a b
@@ -43,6 +34,7 @@ theorem q2a : ∃ x y : ℤ, 18 = 327*x + 120*y :=
 theorem q2b : ∀ x y : ℤ, 100*x + 68*y = 14 := sorry
 
 -- Find a multiplicative inverse of 31 modulo 132.
+--theorem q2c :
 theorem q2c : ∃ x : ℤ, 31*x % 132 = 1 := 
     ⟨115, by norm_num⟩
 
@@ -65,37 +57,75 @@ theorem q3 : ∀ m n : ℕ, ∃! d : ℕ, ∀ x : ℤ, gcd m n = d → d ∣ m �
 --      - a and b divide m, and
 --      - if n is any number divisible by both a and b, then m|n.
 -- The number m is called the least common multiple of a and b.
-theorem q4a : ∀ a b : ℤ, ∃! m : ℕ, ∀ n : ℤ, a ≠ 0 → b ≠ 0 →   
+theorem q4a : ∀ a b : ℕ, ∃! m : ℕ, ∀ n : ℕ, a ≠ 0 → b ≠ 0 →   
                                 a ∣ m → b ∣ m → a ∣ n → b ∣ n → m ∣ n
                                 := sorry 
 
 -- Show that the least common multiple of a and b is given by |ab|/(a,b)
-theorem q4b : ∀ a b : ℕ, lcm a b = abs(a*b)/(gcd a b) := sorry
+-- TODO: need to change ℕ to ℤ and use abs(a*b)
+theorem q4b : ∀ a b : ℕ, lcm a b = a*b/(gcd a b) := sorry
 
 
 -- Let m and n be positive integers, and let K be the kernel of the map:
 --      ℤ/mnℤ → ℤ/mℤ x ℤ/nℤ 
 -- that takes a class mod mn to the corresponding classes modulo m and n.
 -- Show that K has (m, n) elements. What are they?
-theorem q5 :
+-- theorem q5 :
 
+-- -- Show that the equation ax = b (mod n) has no solutions if b is not divisible by (a, n), and exactly (a, n) solutions in ℤ/n otherwise.
+-- theorem q6 :
 -- Show that the equation ax = b (mod n) has no solutions if b is not divisible by (a, n), and exactly (a, n) solutions in ℤ/n otherwise.
 -- TODO: how to specify "there are exactly n solutions to an equation"?
-theorem q6 : -- ¬(gcd a n ∣ b) → ¬(∃ x, a*x ≡ b [MOD n])
+--theorem q6 :  ¬(gcd a n ∣ b) → ¬(∃ x, a*x ≡ b [MOD n])
 
--- For n a positive integer, let σ(n) denote the sum Σ d for d∣n and d>0, of the positive divisors of n.
--- Show that the function n ↦ σ(n) is multiplicative.
-theorem q7 :
+-- -- For n a positive integer, let σ(n) denote the sum Σ d for d∣n and d>0, of the positive divisors of n.
+-- -- Show that the function n ↦ σ(n) is multiplicative.
+-- theorem q7 :
 
 -- Let p be a prime, and a be any integer. Show that a^(p²+p+1) is congruent to a^3 modulo p.
-theorem q8: ∀ a p : ℕ, prime p →  a^(p^2+p+1) ≡ a^3 [MOD p] := sorry
+lemma nat.pow_mul (a b c : ℕ) : a ^ (b * c) = (a ^ b) ^ c :=
+begin
+  induction c with c ih,
+  simp,
+  rw [nat.mul_succ, nat.pow_add, nat.pow_succ, ih],
+end
+
+lemma nat.pow_mull (a b p q: ℕ) : a ≡ b [MOD q] → a ^ p ≡ b ^ p [MOD q] :=
+begin 
+  intro h,
+  induction p with p ih,
+  simp,
+  rw [nat.pow_succ, nat.pow_succ], 
+  apply nat.modeq.modeq_mul ih h,
+end 
+
+theorem fermat_little_theorem : ∀ a p : ℕ, prime p → a ^ p ≡ a [MOD p] := sorry
+
+theorem q8 : ∀ a p : ℕ, prime p →  a^(p^2+p+1) ≡ a^3 [MOD p] := 
+begin 
+  assume a p hp,
+  rw [nat.pow_add, nat.pow_one, nat.pow_add, nat.pow_succ, nat.pow_one, nat.pow_succ, nat.pow_succ, nat.pow_one],
+  apply nat.modeq.modeq_mul,
+  apply nat.modeq.modeq_mul,
+  rw nat.pow_mul,
+  have middle_step : (a ^ p) ^ p ≡ a ^ p [MOD p],
+  let b := a ^ p,
+  exact fermat_little_theorem b p hp,
+
+  exact modeq.trans middle_step (fermat_little_theorem a p hp),
+  exact fermat_little_theorem a p hp,
+  exact modeq.refl a,
+end 
 
 -- Let n be a squarefree positive integer, and suppose that for all primes p dividing n, we have (p-1)∣(n - 1).
 -- Show that for all integers a with (a, n) = 1, we have a^n = a (mod n).
+
+def square_free_int (a : ℕ) := ∀ n : ℕ, (n*n) ∣ a → n = 1
+
 theorem q9 : ∀ n p a, square_free_int n → prime p → p ∣ n → (p-1)∣(n - 1) → gcd a n = 1 → a^n ≡ a [MOD n] := sorry
 
 -- Let n be a positive integer. Show that Σ Φ(d) for d∣n and d>0 = n.
 -- [Hint: First show that the number of integers a with a ≤ 0 < n and (a, n) = n/d is equal to Φ(d).] 
-theorem q10 :
+--theorem q10 :
 
 end nat
