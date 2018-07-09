@@ -105,7 +105,7 @@ exact fermat_little_theorem b p hp,
 
 exact modeq.trans middle_step (fermat_little_theorem a p hp),
 exact fermat_little_theorem a p hp,
-exact modeq.refl a:ℕ,
+exact modeq.refl a,
 end 
 
 
