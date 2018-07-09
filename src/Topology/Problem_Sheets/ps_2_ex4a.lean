@@ -1,5 +1,4 @@
 -- Setup for doing the topology problem sheet 2 exercise 4
-
 import analysis.topology.continuity
 import analysis.topology.topological_space
 import analysis.topology.infinite_sum
