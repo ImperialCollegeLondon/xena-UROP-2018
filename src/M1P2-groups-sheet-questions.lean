@@ -1,4 +1,4 @@
-import algebra.group  algebra.group_power init.algebra data.real.basic group_theory.subgroup
+import algebra.group  algebra.group_power init.algebra data.real.basic group_theory.subgroup analysis.complex data.complex.basic
 
 --TODO:
 --clarify which bits of mathlib are worth importing for this.
