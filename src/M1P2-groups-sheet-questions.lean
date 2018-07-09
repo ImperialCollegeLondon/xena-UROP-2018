@@ -15,6 +15,9 @@ variables a b c : G
 -- 4. Let S be the two-element set {a, b}. Show that there are precisely 16 distinct binary operations on S. How many of them make S a group? Find a formula for the total number of binary operations on a set of n elements.
 theorem sheet04_q4:
 
+-- 5. Prove that multiplication of ℂ numbers is associative.
+variables z z₁ z₂ : ℂ 
+theorem sheet04_q05 : ∀ z z₁ z₂ : ℂ, (z * z₁) * z₂ = z * (z₁ * z₂) → true := sorry
 
 -- 6. Which of the following are groups? Prove one, delete another.
 --(a)
