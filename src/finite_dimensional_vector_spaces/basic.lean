@@ -6,5 +6,5 @@ structure finite_dimensional_vector_space (k : Type u) (V : Type v) [field k]
   extends vector_space k V :=
 (ordered_basis : list V)
 (is_ordered_basis : is_basis {v : V | v ∈ ordered_basis})
- 
 
+-- Now all we need is some theorems!
