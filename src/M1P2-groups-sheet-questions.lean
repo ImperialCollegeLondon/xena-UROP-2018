@@ -1,7 +1,12 @@
-import algebra.group
+import algebra.group  algebra.group_power init.algebra data.real.basic group_theory.subgroup
 
 --TODO:
 --clarify which bits of mathlib are worth importing for this.
+
+variables (G : Type*) --(G₁ : Type*) (G₂ : Type*)
+variable [group G]
+-- need to the variables comm_group and add_group, and maybe add_comm_group
+variables a b c : G 
 
 -- M1P2 has a mixture of questions concerning groups. I have tried to include as many as possible. 
 
@@ -17,18 +22,20 @@ theorem q7:
 -- 8. Let G be a group, and let a, b, c ∈ G. Prove the following facts.
 
 --(a) If ab=ac then b=c.
-theorem q8a: (G : group) (a b c ∈ G) a*b = a*c → b = c 
+theorem sheet4_q8a: ∀(a b c : G), a * b = a * c ↔ b = c := mul_left_inj
 --(b) The equation axb = c has a unique solution for x ∈ G.
 theorem q8b:
 --(c) (a^{−1})^{−1} = a.
-theorem q8c:
+theorem q8c: ∀(a : G), a⁻¹⁻¹ = a := sorry
 --(d) (ab)^{−1} = b^{-1}a^{−1}.
-theorem q8d:
+theorem q8d: ∀(a b : G), (a*b)⁻¹ = b⁻¹*a⁻¹ := sorry
 
 -- 9. Let G be a group, and let e be the identity of G. Suppose that x∗x=e for all x∈G. Show that y ∗ z = z ∗ y for all y, z ∈ G.
 theorem q8d:
 
 -- sheet 5
+
+variables H K : G
 
 -- 3. Let G be a group with subgroups H and K.
 
