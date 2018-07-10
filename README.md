@@ -11,7 +11,7 @@ and
 
 `$ lean --version`
 
-and not get errors, you're probably good to go.
+and not get errors, you're probably good to go. Don't forget to make sure that your VS Code is pointing to the same version of Lean! (File -> Preferences -> Settings and look in user settings) 
 
 1) Clone the repo:
 
