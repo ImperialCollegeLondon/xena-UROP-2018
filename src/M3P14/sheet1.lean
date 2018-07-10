@@ -42,10 +42,26 @@ theorem q2c : ∃ x : ℤ, 31*x % 132 = 1 :=
 theorem q2d : ∃ x : ℤ, x % 9 = 3 → x % 49 = 1 :=  
     ⟨-195, by norm_num⟩
 
+theorem extended_chinese_remainder 
+{p q r : ℕ}
+(co : coprime p q ∧ coprime q r ∧ coprime r p) (a b c: ℕ) : {k // k ≡ a [MOD p] ∧ k ≡ b [MOD q] ∧ k ≡ c[MOD r]} :=sorry 
+
 -- Find, with proof, the smallest nonnegative integer n such that n = 1 (mod 3), n = 4 (mod 5), and n = 3 (mod 7).
-theorem q2e : ∃ n : ℤ, ∀ n₂ : ℕ, n % 3 = 1 → n % 5 = 4 → n % 7 = 3
-                            → n₂ % 3 = 1 → n₂ % 5 = 4 → n₂ % 7 = 3 → n ≤ n₂ 
-                            := sorry
+theorem q2e : ∃ n : ℕ, ∀ n₂ : ℕ, n % 3 = 1 ∧ n % 5 = 4 ∧ n % 7 = 3
+                            → n₂ % 3 = 1 ∧ n₂ % 5 = 4 ∧ n₂ % 7 = 3 → n ≤ n₂ 
+                            := 
+begin
+--@extended_chinese_remainder 3 5 7 dec_trivial 1 4 3
+let n := 94,
+let p := λ n, n % 3 = 1 ∧ n % 5 = 4 ∧ n % 7 = 3,
+have h : ∃ n : ℕ, p n, from  ⟨94, dec_trivial⟩,
+apply exists.intro (nat.find h),
+assume n₂ hn hn₂,
+exact nat.find_min' h hn₂,
+end 
+
+
+
 
 -- Let m and n be integers. Show that the greatest common divisor of m and n is the unique positive integer d such that:
 --      - d divides both m and n, and
@@ -90,7 +106,7 @@ begin
   rw [nat.mul_succ, nat.pow_add, nat.pow_succ, ih],
 end
 
-lemma nat.pow_mull (a b p q: ℕ) : a ≡ b [MOD q] → a ^ p ≡ b ^ p [MOD q] :=
+lemma nat.pow.mul (a b p q: ℕ) : a ≡ b [MOD q] → a ^ p ≡ b ^ p [MOD q] :=
 begin 
   intro h,
   induction p with p ih,
