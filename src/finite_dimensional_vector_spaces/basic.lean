@@ -1,3 +1,13 @@
+/- 
+Copyright (c) 2018 Blair Shi. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Author: Kevin Buzzard, Blair Shi
+
+This file is inspired by Johannes Hölzl's implementation of linear algebra in mathlib.
+
+The thing we improved is this file descripes finite dimentional vector spaces
+-/
+
 import algebra.module -- for definition of vector_space  
 import linear_algebra.basic -- for definition of is_basis 
 import data.list.basic
@@ -10,27 +20,32 @@ class finite_dimensional_vector_space (k : Type u) (V : Type v) [field k]
 
 -- Now all we need is some theorems!
 
+variables {k : Type u} {V : Type v}
+variable [field k]
+variables [ring k] [module k V]
+variables (a : k) (b : V)
+include k 
+
 definition f_dimention
-(k : Type u) (V : Type v) [field k] [fvs : finite_dimensional_vector_space k V] : ℕ :=
+(k : Type u) (V : Type v) [field k] (fvs : finite_dimensional_vector_space k V) : ℕ :=
 fvs.ordered_basis.length
 
-variables (k : Type u) (V : Type v)
-variable [field k]
-variables (a : k) (b : V)
-include k
-
 def f_span (l : list V) : set V :=
-{x | ∃(vc : lc k V), (∀x∉l, vc x = 0) ∧ x = vc.sum (λb a, a • b)}
-
+span {vc : V | vc ∈ l}
+ 
 def f_linear_independent (l : list V) : Prop := 
 linear_independent {vc : V | vc ∈ l}
--- ∀li : lc k V, (∀x∉l, li x = 0) → li.sum (λv c, c • v) = 0 → li = 0
+
+-- helper function to check whether two basis are equal
+def are_basis_equal (l₀ : list V) (l₁ : list V) : Prop := 
+∀vc : V, vc ∈ (f_span l₀) ∧ vc ∈ (f_span l₁) 
 
 def is_basis_of_vecsp (l : list V) (fvs : finite_dimensional_vector_space k V) : Prop := 
-(f_span l = f_span fvs.ordered_basis) ∧ (f_linear_independent l)
+(are_basis_equal l fvs.ordered_basis) ∧ (f_linear_independent l)
 
 def is_in_vecsp (v : V) (fvs : finite_dimensional_vector_space k V) : Prop :=
 v ∈ span {v₁ : V | v₁ ∈ fvs.ordered_basis}
+
 
 variables v₀ v₁ v₂ : V
 variables l₀ l₁: list V
@@ -40,14 +55,14 @@ theorem linear_dependence_th (l : list V)
   (h₀ : ¬(f_linear_independent l)) 
   (h₁ : ∃vc ∈ l, (vc ≠ 0)) 
   (res₀  : v₀ ∈ span {vr : V | vr ∈ l ∧ vr ≠ v₀}) 
-  (res₁ : ∀v₁ ∈ l, span {vr : V | vr ∈ l ∧ vr ≠ v₁} = f_span l): h₀ ∧ h₁ → (res₀  ∧ res₁) := sorry
+  (res₁ : ∀v₁ ∈ l, span {vr : V | vr ∈ l ∧ vr ≠ v₁} = f_span l): h₀ ∧ h₁ → (res₀ ∧ res₁) := sorry
 
 -- 2.5 In a finite-dimensional vector space, the length of 
 -- every linearly independent list of vectors is less 
 -- than or equal to the length of every spanning list of vectors.
 theorem len_of_lide_le_dimention (fvs : finite_dimensional_vector_space k V) (l : list V) 
   (h₀ : f_linear_independent l)
-  (h₁ : f_span l₀ = f_span fvs.ordered_basis)
+  (h₁ : are_basis_equal l₀ fvs.ordered_basis)
   (res₀ : l.length <= l₀.length) : h₀ ∧ h₁ → res₀ := sorry
 
 -- 2.8
@@ -70,10 +85,11 @@ theorem any_basis_same_length:
 
 -- If V is finite dimensional, then every spanning list of vectors in V with length dimV is a basis of V.
 theorem span_with_dim_is_basis:
-  ∀l₀ , (f_span l₀ = f_span fvs.ordered_basis ∧ l₀.length = f_dimention k V) → is_basis_of_vecsp l₀ fvs := sorry
+  ∀l₀ , (are_basis_equal l₀ fvs.ordered_basis ∧ l₀.length = f_dimention k V fvs) → is_basis_of_vecsp l₀ fvs := sorry
 
 theorem liide_list_with_dim_is_basis:
-  ∀l₀ , (f_linear_independent l₀ ∧ l₀.length = f_dimention k V) → is_basis_of_vecsp l₀ fvs := sorry 
+  ∀(l₀ : list V) , (f_linear_independent l₀ ∧ l₀.length = f_dimention k V fvs) → is_basis_of_vecsp l₀ fvs := sorry 
+
 
 
 
