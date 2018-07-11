@@ -1,12 +1,11 @@
-structure Euclidean_plane :=
-
-(point : Type)
+class Euclidean_plane (point : Type) :=
 -- Equidistance of 4 Points
 (eqd : point → point → point → point → Prop)
 -- between A B C means B is on the line segment AC
 (B : point → point → point → Prop)
+
 (reflex : ∀ a b : point, eqd a b b a)
-(trans : ∀ a b p q r s, eqd a b p q → eqd p q r s → eqd a b r s)
+(trans : ∀ a b p q r s, eqd a b p q → eqd a b r s → eqd p q r s)
 (id_eqd : ∀ a b c, eqd a b c c → a = b)
 (segment_construction : ∀ a b c q, ∃ x, B q a x → eqd a x b c)
 (five_segment : ∀ a b c d a' b' c' d', a ≠ b → B a b c → B a' b' c' → eqd a b a' b' 
@@ -35,3 +34,10 @@ structure Euclidean_plane :=
 → eqd y z y' z' → eqd x z x' z')
 (subtracting_distances : ∀ x y z x' y' z', B x y z → B x' y' z' → eqd x z x' z' 
 → eqd y z y' z' → eqd x y x' y')
+
+open Euclidean_plane 
+
+variables {point : Type} [Euclidean_plane point]
+
+example (a b : point) : eqd a a b b :=
+    sorry
