@@ -13,7 +13,7 @@ structure Euclidean_plane :=
 → eqd a d a' d' → eqd b d b' d' → eqd c d c' d')
 (betweenness : ∀ a b, B a b a → a = b)
 (inner_pasch : ∀ a b c p q, B a p c → B b q c → ∃ x, B p x b → B q x a)
-
+--something
 
 (continuity : ∀ X Y : set point, 
   (∃ a, ∀ x y, x ∈ X → y ∈ Y → B a x y) → (∃ b, ∀ x y, x ∈ X → y ∈ Y → B x b y)
