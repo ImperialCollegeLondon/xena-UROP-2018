@@ -78,7 +78,7 @@ theorem q3 : ∀ m n : ℕ, ∃! d : ℕ, ∀ x : ℤ, gcd m n = d → d ∣ m �
 -- The number m is called the least common multiple of a and b.  
  
  
-theorem gcd_dvd_trans (a b c : ℕ) : a ∣ b → b ∣ c → a ∣ c := 
+theorem gcd_dvd_trans {a b c : ℕ} : a ∣ b → b ∣ c → a ∣ c := 
 begin 
   intro Hab, 
   intro Hbc, 
@@ -89,6 +89,9 @@ begin
   rw He, 
   exact mul_assoc _ _ _, 
 end  
+
+variables a b c : ℕ 
+variables (h1 : (a ∣ b)) (h2 : (b ∣ c))
 
 theorem q4a : ∀ a b : ℕ, ∃! m : ℕ, ∀ n : ℕ, a ≠ 0 ∧ b ≠ 0 ∧   
                                 a ∣ m ∧ b ∣ m ∧ a ∣ n ∧ b ∣ n → m ∣ n
@@ -105,34 +108,39 @@ apply exists_unique.intro m,
   let a' := a/(gcd a b), 
   let b':= b/(gcd a b),
   let d:= gcd a b,
-  cases em (coprime d a' ∨ coprime d b'),
-    assume h1 : (coprime d a' ∨ coprime d b'),
-    cases h1, 
-      assume h2 : coprime d a',
-      have h3 : a' ∣ a, from ,
-      --have h4 : a'∣ n, from gcd_dvd_trans a' a n,
-      --assume h2 : coprime d b',
-
-    --assume h1 : ¬(coprime d a' ∨ coprime d b'), 
-  
-
-  --or.elim (em (coprime d a' ∨ coprime d b')),
-
+  cases em (coprime d a' ∨ coprime d b') with h1 h2,
+  {
+    cases h1 with cda' cdb',
+    {
+      have a'_dvd_a : a' ∣ a, sorry,
+      have a_dvd_n : a ∣ n, sorry,
+      have a'_dvd_n : a' ∣ n, from gcd_dvd_trans a'_dvd_a a_dvd_n,  
+      have cba' : coprime b a', sorry, --coprime.coprime_mul_left_right a (d * b'),
+      sorry,
+    },
+    {
+      sorry, 
+    }
+  },
+  {
+    sorry,
+  }
+},
+{
+  sorry,
 }
-
-
-
-
---let p := λ m, a ∣ m ∧ b ∣ m,
-
---have h : ∃ m : ℕ, p m := gcd_dvd_left b a,
---uniqueness 
---Say both m, n satisfy 
---m ∣ n ∧ n ∣ m → m=n
 end 
+
+#print coprime
+
 -- Show that the least common multiple of a and b is given by |ab|/(a,b)
 -- TODO: need to change ℕ to ℤ and use abs(a*b)
-theorem q4b : ∀ a b : ℕ, lcm a b = a*b/(gcd a b) := sorry
+theorem q4b : ∀ a b : ℕ, lcm a b = a*b/(gcd a b) := 
+begin
+  intros a b,
+  exact gcd_mul_lcm a b,
+  sorry
+end
 
 
 -- Let m and n be positive integers, and let K be the kernel of the map:
