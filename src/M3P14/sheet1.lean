@@ -2,6 +2,8 @@ import data.nat.gcd
 import data.nat.modeq
 import data.nat.prime
 import tactic.norm_num
+import data.nat.gcd
+open classical 
 
 namespace nat
 
@@ -46,6 +48,7 @@ theorem extended_chinese_remainder
 {p q r : ℕ}
 (co : coprime p q ∧ coprime q r ∧ coprime r p) (a b c: ℕ) : {k // k ≡ a [MOD p] ∧ k ≡ b [MOD q] ∧ k ≡ c[MOD r]} :=sorry 
 
+
 -- Find, with proof, the smallest nonnegative integer n such that n = 1 (mod 3), n = 4 (mod 5), and n = 3 (mod 7).
 theorem q2e : ∃ n : ℕ, ∀ n₂ : ℕ, n % 3 = 1 ∧ n % 5 = 4 ∧ n % 7 = 3
                             → n₂ % 3 = 1 ∧ n₂ % 5 = 4 ∧ n₂ % 7 = 3 → n ≤ n₂ 
@@ -72,11 +75,61 @@ theorem q3 : ∀ m n : ℕ, ∃! d : ℕ, ∀ x : ℤ, gcd m n = d → d ∣ m �
 -- Let a and b be nonzero integers. Show that there is a unique positive integer m with the following two properties:
 --      - a and b divide m, and
 --      - if n is any number divisible by both a and b, then m|n.
--- The number m is called the least common multiple of a and b.
-theorem q4a : ∀ a b : ℕ, ∃! m : ℕ, ∀ n : ℕ, a ≠ 0 → b ≠ 0 →   
-                                a ∣ m → b ∣ m → a ∣ n → b ∣ n → m ∣ n
-                                := sorry 
+-- The number m is called the least common multiple of a and b.  
+ 
+ 
+theorem gcd_dvd_trans (a b c : ℕ) : a ∣ b → b ∣ c → a ∣ c := 
+begin 
+  intro Hab, 
+  intro Hbc, 
+  cases Hab with e He, 
+  cases Hbc with f Hf, 
+  existsi e * f, 
+  rw Hf, 
+  rw He, 
+  exact mul_assoc _ _ _, 
+end  
 
+theorem q4a : ∀ a b : ℕ, ∃! m : ℕ, ∀ n : ℕ, a ≠ 0 ∧ b ≠ 0 ∧   
+                                a ∣ m ∧ b ∣ m ∧ a ∣ n ∧ b ∣ n → m ∣ n
+                                := 
+begin 
+--existence
+--define m = ab/(a,b) , a=da', b=db' → d ∣ n, a'∣ n, b'∣ n → m= da'b' ∣n as d, a', b' is coprime 
+intro a, intro b,
+let m := a*b/(gcd a b),
+apply exists_unique.intro m,
+{
+  assume n,
+  assume h,
+  let a' := a/(gcd a b), 
+  let b':= b/(gcd a b),
+  let d:= gcd a b,
+  cases em (coprime d a' ∨ coprime d b'),
+    assume h1 : (coprime d a' ∨ coprime d b'),
+    cases h1, 
+      assume h2 : coprime d a',
+      have h3 : a' ∣ a, from ,
+      --have h4 : a'∣ n, from gcd_dvd_trans a' a n,
+      --assume h2 : coprime d b',
+
+    --assume h1 : ¬(coprime d a' ∨ coprime d b'), 
+  
+
+  --or.elim (em (coprime d a' ∨ coprime d b')),
+
+}
+
+
+
+
+--let p := λ m, a ∣ m ∧ b ∣ m,
+
+--have h : ∃ m : ℕ, p m := gcd_dvd_left b a,
+--uniqueness 
+--Say both m, n satisfy 
+--m ∣ n ∧ n ∣ m → m=n
+end 
 -- Show that the least common multiple of a and b is given by |ab|/(a,b)
 -- TODO: need to change ℕ to ℤ and use abs(a*b)
 theorem q4b : ∀ a b : ℕ, lcm a b = a*b/(gcd a b) := sorry
@@ -97,6 +150,7 @@ theorem q4b : ∀ a b : ℕ, lcm a b = a*b/(gcd a b) := sorry
 -- -- For n a positive integer, let σ(n) denote the sum Σ d for d∣n and d>0, of the positive divisors of n.
 -- -- Show that the function n ↦ σ(n) is multiplicative.
 -- theorem q7 :
+--finset.range
 
 -- Let p be a prime, and a be any integer. Show that a^(p²+p+1) is congruent to a^3 modulo p.
 lemma nat.pow_mul (a b c : ℕ) : a ^ (b * c) = (a ^ b) ^ c :=
@@ -138,7 +192,7 @@ end
 
 def square_free_int (a : ℕ) := ∀ n : ℕ, (n*n) ∣ a → n = 1
 
-theorem q9 : ∀ n p a, square_free_int n → prime p → p ∣ n → (p-1)∣(n - 1) → gcd a n = 1 → a^n ≡ a [MOD n] := sorry
+theorem q9 : ∀ n p a, square_free_int n ∧ prime p ∧ p ∣ n → (p-1)∣(n - 1) → gcd a n = 1 → a^n ≡ a [MOD n] := sorry
 
 -- Let n be a positive integer. Show that Σ Φ(d) for d∣n and d>0 = n.
 -- [Hint: First show that the number of integers a with a ≤ 0 < n and (a, n) = n/d is equal to Φ(d).] 
