@@ -1,17 +1,12 @@
 import algebra.group  algebra.group_power init.algebra data.real.basic group_theory.subgroup analysis.complex data.complex.basic 
 import group_theory.coset
 
---TODO:
---clarify which bits of mathlib are worth importing for this.
-
 universes u v w x
 variables {G : Type u} {G₂ : Type v} {G₃ : Type w} {G₄ : Type x}
 --variables {G5 : Type*} {G6 : Type*}
 variables [group G] [comm_group G₂] [add_group G₃] [add_comm_group G₄]
 
 variables a b c : G 
-
--- M1P2 has a mixture of questions concerning groups. I have tried to include as many as possible. 
 
 -- sheet 4
 
@@ -161,12 +156,3 @@ theorem sheet07_q6b:
 -- (c) Use Fermat’s Little Theorem to show that n17 ≡ n mod 255 for all n ∈ Z. (d) Prove that if p and q are distinct prime numbers then
 -- pq−1 + qp−1 ≡ 1 mod pq.
 theorem sheet07_q6c:
-
--- 7. Suppose p is a prime number.
-
--- (a) Prove that (p − 1)! ≡ −1 mod p (Wilson’s Theorem).
-theorem sheet07_q7a:
--- (b) Show that if p≡1 mod 4,then there is x∈Z with x2 ≡−1modp.
-theorem sheet07_q7b:
--- (c) Show that if p̸=2 and there is x∈Z with x2 ≡−1 modp,then p ≡ 1 mod 4.
-theorem sheet07_q7c:
