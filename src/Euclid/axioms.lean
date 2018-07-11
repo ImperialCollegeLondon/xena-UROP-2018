@@ -54,5 +54,13 @@ theorem dist_trans (a b c d e f: point) : eqd a b c d → eqd c d e f → eqd a 
 assume h h1,
 eqd_trans c d a b e f (dist_symm a b c d h) h1
 
+-- a "setoid" is just a silly computer science name for a type with an equiv reln
+instance point_setoid : setoid (point × point) :=
+{ r := λ ⟨a,b⟩ ⟨c,d⟩, eqd a b c d,
+  iseqv := ⟨λ ⟨a,b⟩,dist_reflex a b,λ ⟨a,b⟩ ⟨c,d⟩,dist_symm a b c d,λ ⟨a,b⟩ ⟨c,d⟩ ⟨e,f⟩,dist_trans a b c d e f⟩
+}
 
-
+-- this type denotes the equiv classes. You may never need it but it's
+-- a good test to see if you've got the definitions right!
+definition distance_values (point : Type) [Euclidean_plane point] := 
+quotient (@point_setoid point _)
