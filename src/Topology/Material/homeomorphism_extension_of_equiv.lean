@@ -135,3 +135,44 @@ begin
 end
 
 theorem homeomorphism_is_equivalence : equivalence (λ X Y : Σ α, topological_space α, is_homeomorphic_to X.2 Y.2) := ⟨homeomorphism_is_reflexive, homeomorphism_is_symmetric, homeomorphism_is_transitive⟩ 
+
+theorem continuous_basis_to_continuous {α : Type*} {β : Type*} [X : topological_space α] [Y : topological_space β] : ∀ f : α → β, (∀ B : set (set β), topological_space.is_topological_basis B → (∀ b : B, is_open (f ⁻¹' b)) → continuous f) :=
+begin
+  intros f Basis HBasis HBasisInverses U HU,
+  have HU_union_basis : ∃ S ⊆ Basis, U = ⋃₀ S, by exact topological_space.sUnion_basis_of_is_open HBasis HU,
+  apply exists.elim HU_union_basis,
+  intros S HS,
+  apply exists.elim HS,
+  intros HS1 HS2,
+  rw HS2,
+  rw set.preimage_sUnion,
+  have f_inv_t_open : ∀ t : set β, t ∈ S → topological_space.is_open X (f ⁻¹' t),
+    intros t HtS,
+    have t_is_open : topological_space.is_open Y t,
+      exact topological_space.is_open_of_is_topological_basis HBasis (set.mem_of_subset_of_mem HS1 HtS),
+    simp at HBasisInverses,
+    exact HBasisInverses t (set.mem_of_subset_of_mem HS1 HtS),
+  let set_of_preimages : set (set α) := {x | ∃ t ∈ S, x = f ⁻¹' t},
+  have preimages_are_open : topological_space.is_open X (⋃₀ set_of_preimages),
+    have H3 : ∀ (t : set α), t ∈ set_of_preimages → topological_space.is_open X t,
+      intros tinv Htinv,
+      simp at Htinv,
+      apply exists.elim Htinv,
+      intros t Ht,
+      rw Ht.2,
+      exact f_inv_t_open t Ht.1,
+    exact X.is_open_sUnion set_of_preimages H3,  
+  unfold is_open,
+  have equal : (⋃₀ set_of_preimages) = (⋃ (t : set β) (H : t ∈ S), f ⁻¹' t),
+    rw set.sUnion_eq_Union,
+    apply set.ext,
+    intro x,
+    split,
+      intro Hx,
+      simp,  
+    
+
+
+end
+#print notation 
+#print prefix set
