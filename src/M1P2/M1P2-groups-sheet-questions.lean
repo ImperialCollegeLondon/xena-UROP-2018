@@ -1,11 +1,14 @@
-import algebra.group  algebra.group_power init.algebra data.real.basic group_theory.subgroup analysis.complex data.complex.basic
+import algebra.group  algebra.group_power init.algebra data.real.basic group_theory.subgroup analysis.complex data.complex.basic 
+import group_theory.coset
 
 --TODO:
 --clarify which bits of mathlib are worth importing for this.
 
-variables (G : Type*) --(G₁ : Type*) (G₂ : Type*)
-variable [group G]
--- need to the variables comm_group and add_group, and maybe add_comm_group
+universes u v w x
+variables {G : Type u} {G₂ : Type v} {G₃ : Type w} {G₄ : Type x}
+--variables {G5 : Type*} {G6 : Type*}
+variables [group G] [comm_group G₂] [add_group G₃] [add_comm_group G₄]
+
 variables a b c : G 
 
 -- M1P2 has a mixture of questions concerning groups. I have tried to include as many as possible. 
@@ -17,7 +20,7 @@ theorem sheet04_q4:
 
 -- 5. Prove that multiplication of ℂ numbers is associative.
 variables z z₁ z₂ : ℂ 
-theorem sheet04_q05 : ∀ z z₁ z₂ : ℂ, (z * z₁) * z₂ = z * (z₁ * z₂) → true := sorry
+theorem sheet04_q05 (z z₁ z₂ : ℂ) : z * z₁ * z₂ = z * (z₁ * z₂) := mul_assoc z z₁ z₂
 
 -- 6. Which of the following are groups? Prove one, delete another.
 --(a)
@@ -44,20 +47,21 @@ theorem q7:
 -- 8. Let G be a group, and let a, b, c ∈ G. Prove the following facts.
 
 --(a) If ab=ac then b=c.
-theorem sheet04_q8a: ∀(a b c : G), a * b = a * c ↔ b = c := mul_left_inj
+theorem sheet04_q8a (a b c : G) : a * b = a * c → b = c := mul_left_cancel a 
 --(b) The equation axb = c has a unique solution for x ∈ G.
-theorem sheet04_q8b: ∀ a b c : G, ∃! x : G, a*x*b = c := sorry
+theorem sheet04_q8b: ∀ a b c : G  ∃! x : G, a*x*b = c := sorry
 --(c) (a^{−1})^{−1} = a.
-theorem sheet04_q8c: ∀(a : G), a⁻¹⁻¹ = a := sorry
+theorem sheet04_q8c (a : G) : a⁻¹⁻¹ = a := inv_inv a
 --(d) (ab)^{−1} = b^{-1}a^{−1}.
-theorem sheet04_q8d: ∀(a b : G), (a*b)⁻¹ = b⁻¹*a⁻¹ := sorry
+theorem sheet04_q8d (a b : G) : (a*b)⁻¹ = b⁻¹*a⁻¹ := mul_inv_rev a b 
 
 -- 9. Let G be a group, and let e be the identity of G. Suppose that x∗x=e for all x∈G. Show that y ∗ z = z ∗ y for all y, z ∈ G.
 theorem sheet04_q8d:
 
 -- sheet 5
 
-variables H K : G
+variables (H) (K) 
+variables [is_subgroup H] [is_subgroup K]
 
 -- 3. Let G be a group with subgroups H and K.
 
@@ -117,8 +121,8 @@ theorem sheet06_q2f:
 -- 4. Let G be a finite group of order n, and H a subgroup of G of order m.
 
 -- (a) Forx,y∈G,showthatHx=Hy⇐⇒xy−1 ∈H.
-theorem sheet06_q4a:
--- (b) Suppose that r = n/m. Let x ∈ G. Show that there is an integer k in the range1≤k≤r,suchthatxk ∈H.
+theorem sheet06_q4a x y : G : x * l  = x * l ↔ x * y⁻¹ ∈ H := sorry 
+-- (b) Suppose that r = n/m. Let x ∈ G. Show that there is an integer k in the range 1≤k≤r,suchthatxk ∈H.
 theorem sheet06_q4b:
 -- (c) Give an example to show that in (b), the integer k need not divide r.
 theorem sheet06_q4c:
@@ -166,4 +170,3 @@ theorem sheet07_q7a:
 theorem sheet07_q7b:
 -- (c) Show that if p̸=2 and there is x∈Z with x2 ≡−1 modp,then p ≡ 1 mod 4.
 theorem sheet07_q7c:
- 
