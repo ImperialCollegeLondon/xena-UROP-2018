@@ -17,6 +17,8 @@ structure Euclidean_plane :=
 (not_three_dimensions : ∀ a b c p₁ p₂, p₁ ≠ p₂ → eqd a p₁ a p₂ → eqd b p₁ b p₂ 
 → eqd c p₁ c p₂ → (B a b c ∨ B b c a ∨ B c a b))
 (euclids : ∀ a b c d t, B a d t → B b d c → a ≠ d → ∃ x y, B a b x → B a c y → B y t x)
+(continuity : ∀ X Y : set point, 
+  (∃ a, ∀ x y, x ∈ X → y ∈ Y → B a x y) → (∃ b, ∀ x y, x ∈ X → y ∈ Y → B x b y))
 (reflexivity_betweenness : ∀ a b, B a b b)
 (between_itself : ∀ a b, a = b → B a b a)
 (inner_trans : ∀ a b c d, B a b d → B b c d → B a b c)
@@ -28,9 +30,8 @@ structure Euclidean_plane :=
 → B c d x → B c' d' x → d ≠ x → d' ≠ x → c = c')
 (existence_triangle : ∀ a b a' b' c' p, eqd a b a' b' → ∃ c x, eqd a c a' c' → eqd b c b' c' 
 → B c x p → (B a b x ∨ B b x a ∨ B x a b))
-(density_betweenness : ∀ x y z, x ≠ z → ∃ y, x ≠ y → z ≠ y → B x y z)
-
-
-(continuity : ∀ X Y : set point, 
-  (∃ a, ∀ x y, x ∈ X → y ∈ Y → B a x y) → (∃ b, ∀ x y, x ∈ X → y ∈ Y → B x b y))
-
+(density_betweenness : ∀ x z, x ≠ z → ∃ y, x ≠ y → z ≠ y → B x y z)
+(adding_distances : ∀ x y z x' y' z', B x y z → B x' y' z' → eqd x y x' y' 
+→ eqd y z y' z' → eqd x z x' z')
+(subtracting_distances : ∀ x y z x' y' z', B x y z → B x' y' z' → eqd x z x' z' 
+→ eqd y z y' z' → eqd x y x' y')
