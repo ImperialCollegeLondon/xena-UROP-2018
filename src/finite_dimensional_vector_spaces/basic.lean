@@ -46,16 +46,20 @@ def is_basis_of_vecsp (l : list V) (fvs : finite_dimensional_vector_space k V) :
 def is_in_vecsp (v : V) (fvs : finite_dimensional_vector_space k V) : Prop :=
 v ∈ span {v₁ : V | v₁ ∈ fvs.ordered_basis}
 
-
-variables v₀ v₁ v₂ : V
-variables l₀ l₁: list V
-variable fvs : finite_dimensional_vector_space k V
+variables (v₀ v₁ v₂ : V)
+variables (l₀ l₁: list V)
+variables (h₀ h₁ res₀ res₁ : Prop)
+variable (fvs : finite_dimensional_vector_space k V)
 -- 2.4
 theorem linear_dependence_th (l : list V)
   (h₀ : ¬(f_linear_independent l)) 
-  (h₁ : ∃vc ∈ l, (vc ≠ 0)) 
-  (res₀  : v₀ ∈ span {vr : V | vr ∈ l ∧ vr ≠ v₀}) 
-  (res₁ : ∀v₁ ∈ l, span {vr : V | vr ∈ l ∧ vr ≠ v₁} = f_span l): h₀ ∧ h₁ → (res₀ ∧ res₁) := sorry
+  (h₁ : ∃vc ∈ l, (vc ≠ (0:V)))
+  : ∃v₀, (v₀ ∈ l) ∧ (v₀ ∈ span {vr : V | vr ∈ l ∧ vr ≠ v₀}) 
+  ∧ (span {vr : V | vr ∈ l ∧ vr ≠ v₀} = f_span l) := 
+  begin
+  apply exists.elim h₁,
+  sorry  
+  end
 
 -- 2.5 In a finite-dimensional vector space, the length of 
 -- every linearly independent list of vectors is less 
@@ -63,12 +67,11 @@ theorem linear_dependence_th (l : list V)
 theorem len_of_lide_le_dimention (fvs : finite_dimensional_vector_space k V) (l : list V) 
   (h₀ : f_linear_independent l)
   (h₁ : are_basis_equal l₀ fvs.ordered_basis)
-  (res₀ : l.length <= l₀.length) : h₀ ∧ h₁ → res₀ := sorry
+  : l.length <= l₀.length := sorry
 
 -- 2.8
-theorem is_f_basis (l : list V) (fvs : finite_dimensional_vector_space k V)
-  (h₀ : ∀ v₀, (is_in_vecsp v₀ fvs) ∧  (v₀ ∈ f_span l))
-  (h₁ : is_basis_of_vecsp l fvs) : h₀ ↔ h₁ := sorry 
+theorem is_f_basis (l : list V) (fvs : finite_dimensional_vector_space k V):
+  (∀ v₀, (is_in_vecsp v₀ fvs) ∧  (v₀ ∈ f_span l)) ↔ (is_basis_of_vecsp l fvs) := sorry 
 
 -- 2.10 Every spanning list in a vector space can be reduced to a basis of the vector space.
 theorem span_set_can_be_basis (fvs : finite_dimensional_vector_space k V) : 
@@ -76,19 +79,24 @@ theorem span_set_can_be_basis (fvs : finite_dimensional_vector_space k V) :
 
 -- 2.12 Every linearly independent list of vectors in a finite- dimensional vector space can be extended to a basis of the vector space.
 theorem liide_list_can_be_basis (fvs : finite_dimensional_vector_space k V) :
-  ∀l₀, f_linear_independent l₀ → ∃l₁, is_basis_of_vecsp (l₀ ++ l₁) fvs := sorry
-
+  ∀l₀, linear_independent {vc : V | vc ∈ l₀} → ∃l₁, is_basis_of_vecsp (l₀ ++ l₁) fvs := 
+  begin
+  sorry
+  end
 
 -- Any two bases of a finite-dimensional vector space have the same length.
-theorem any_basis_same_length:
-  ∀l₀ l₁, (h₀ : is_basis_of_vecsp l₀ fvs) ∧ (h1 : is_basis_of_vecsp l₁ fvs) → (res : l₀.length = l₁.length) := sorry 
+theorem any_basis_have_len:
+  ∀l₀ l₁, (is_basis_of_vecsp l₀ fvs) ∧ (is_basis_of_vecsp l₁ fvs) →
+   (l₀.length = l₁.length) := sorry 
 
 -- If V is finite dimensional, then every spanning list of vectors in V with length dimV is a basis of V.
 theorem span_with_dim_is_basis:
-  ∀l₀ , (are_basis_equal l₀ fvs.ordered_basis ∧ l₀.length = f_dimention k V fvs) → is_basis_of_vecsp l₀ fvs := sorry
+  ∀l₀ , (are_basis_equal l₀ fvs.ordered_basis ∧ l₀.length = f_dimention k V fvs) 
+  → is_basis_of_vecsp l₀ fvs := sorry
 
 theorem liide_list_with_dim_is_basis:
-  ∀(l₀ : list V) , (f_linear_independent l₀ ∧ l₀.length = f_dimention k V fvs) → is_basis_of_vecsp l₀ fvs := sorry 
+  ∀(l₀ : list V) , (f_linear_independent l₀ ∧ l₀.length = f_dimention k V fvs) 
+  → is_basis_of_vecsp l₀ fvs := sorry 
 
 
 
@@ -107,4 +115,4 @@ theorem liide_list_with_dim_is_basis:
 -- 2.20 V=U1+···+Um
 -- 2.21 dimV =dimU1 +···+dimUm. Then V = U1 ⊕ · · · ⊕ Um.
 
--- linear map 
+-- define linear map 
