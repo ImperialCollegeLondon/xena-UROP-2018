@@ -31,10 +31,11 @@ theorem sheet04_q8a (a b c : G) : a * b = a * c ↔ b = c := by apply mul_left_i
 --(b) The equation axb = c has a unique solution for x ∈ G.
 theorem sheet04_q8b (a b c : G) : ∃! x : G, a * x * b = c := 
 begin
-existsi (a⁻¹ * c * b⁻¹),simp[ mul_assoc],
+intros,
+existsi (a⁻¹ * c * b⁻¹),simp [mul_assoc],
 assume y h,
 rw ← h,
-simp[mul_assoc],
+simp [mul_assoc],
 end
 --(c) (a^{−1})^{−1} = a.
 theorem sheet04_q8c (a : G) : a⁻¹⁻¹ = a := by apply inv_inv a
