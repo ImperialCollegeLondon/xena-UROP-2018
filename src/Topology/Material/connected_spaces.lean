@@ -8,7 +8,7 @@ open set filter lattice classical
 local attribute [instance] prop_decidable
 
 universe u
-variables {α : Type u} {β : Type u} {γ : Type u} {δ : Type u}
+variables {α : Type u} {β : Type u} {γ : Type u} 
 
 
 section
