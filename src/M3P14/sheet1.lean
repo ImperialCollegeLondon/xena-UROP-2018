@@ -109,7 +109,7 @@ apply exists_unique.intro m,
   have a_dvd_n : a ∣ n, from h.right.right.right.right.left,
   have b_dvd_n : b ∣ n, from h.right.right.right.right.right,
   let a' := a/(gcd a b), 
-  have a'_def : a/(gcd a b) = a', by simp,
+  have ap_eq : a/(gcd a b) = a', by simp,
   have gcd_dvd_a : (gcd a b) ∣ a, from gcd_dvd_left _ _,
   have gcd_dvd_b : (gcd a b) ∣ b, from gcd_dvd_right _ _,
   let b':= b/(gcd a b),
@@ -119,19 +119,35 @@ apply exists_unique.intro m,
 
   cases em (coprime d a' ∨ coprime d b') with h1 h2,
   {
-    have eq_a_bis : a = gcd a b * a', from nat.eq_mul_of_div_eq_right gcd_dvd_a a'_def,
+      have eq_a_bis : a = gcd a b * a', from nat.eq_mul_of_div_eq_right gcd_dvd_a ap_eq,
       have a'_dvd_a : a' ∣ a,
       {
         rw eq_a_bis,
         exact dvd_mul_left _ _,
       },
+      have eq_b_bis : b = gcd a b * b', from nat.eq_mul_of_div_eq_right gcd_dvd_b bp_eq,
+      have b'_dvd_b : b' ∣ b,
+      {
+        rw eq_b_bis,
+        exact dvd_mul_left _ _,
+      },
       have a_dvd_n : a ∣ n, from h.right.right.right.right.left,
       have a'_dvd_n : a' ∣ n, from gcd_dvd_trans a'_dvd_a a_dvd_n, 
+      have b'_dvd_n : b' ∣ n, from gcd_dvd_trans b'_dvd_b b_dvd_n, 
       have eq2 : (b / (gcd a b)) * gcd a b = b, from nat.div_mul_cancel gcd_dvd_b,
+      --have eq2_bis : gcd a b * a / (gcd a b) = a, from  nat.mul_comm (nat.div_mul_cancel gcd_dvd_a),
       have eq_b : d*b' = b, 
       {
         calc
            d*b' =  b : by rw [nat.mul_comm,d_eq, bp_eq, eq2]
+      },
+       have eq_a : d*a' = a,
+      {
+        calc
+           d*a' =  gcd a b * a' : by rw d_eq
+           ...  =  gcd a b * (a / (gcd a b))  : by rw ap_eq
+           ...  =   a / gcd a b * gcd a b  : by rw nat.mul_comm
+           ...  =  a  : by rw nat.div_mul_cancel gcd_dvd_a
       },
     cases h1 with cda' cdb',
     {
@@ -148,7 +164,7 @@ apply exists_unique.intro m,
               have cop_fractions : coprime (b /gcd b a) (a / gcd b a), from nat.coprime_div_gcd_div_gcd gcd_gr_0,
               have cop_fractions_2 : coprime (b /gcd a b) (a / gcd a b), from eq.subst (gcd_comm b a) cop_fractions,
               have cop_fractions_3 : coprime b' (a / gcd a b), from eq.subst bp_eq cop_fractions_2,
-              exact eq.subst a'_def cop_fractions_3,
+              exact eq.subst ap_eq cop_fractions_3,
           },
           exact coprime.mul cda' cbpap,
       },
@@ -157,15 +173,42 @@ apply exists_unique.intro m,
       have  eq3 : b*a' = m,
       {
         calc
-           b*a'    =  b * (a / gcd a b) : by rw a'_def
+           b*a'    =  b * (a / gcd a b) : by rw ap_eq
                ... =  (b * a) / gcd a b :  by rw nat.mul_div_assoc b gcd_dvd_a 
                ... =  a * b / gcd a b : by rw nat.mul_comm
                ... = m : by rw m_def 
       },
       exact eq.subst eq3 ba'_dvd_n,
+
     },
     {
-      sorry, 
+     have cdba : coprime (d*a') b', 
+      {
+          have capbp : coprime a' b',
+          {
+              have b_gr_0 : b > 0, 
+              {
+                 rw pos_iff_ne_zero,
+                 exact h.right.left,
+              },
+              have gcd_gr_0 : gcd a b > 0, from nat.gcd_pos_of_pos_right a b_gr_0,
+              have cop_fractions : coprime (a / gcd a b) (b /gcd a b), from nat.coprime_div_gcd_div_gcd gcd_gr_0,
+              have cop_fractions_2 : coprime a' (b / gcd a b), from eq.subst ap_eq cop_fractions,
+              exact eq.subst bp_eq cop_fractions_2,
+
+          },
+          exact coprime.mul cdb' capbp,
+      },
+      have cba : coprime a b', from eq.subst eq_a cdba,
+      have ba'_dvd_n : a*b' ∣ n, from coprime_dvd_of_dvd_mul a_dvd_n b'_dvd_n cba,
+      have  eq3 : a*b' = m,
+      {
+        calc
+           a*b'    =  a * (b / gcd a b) : by rw bp_eq
+               ... =  (a * b) / gcd a b :  by rw nat.mul_div_assoc a gcd_dvd_b
+               ... = m : by rw m_def 
+      },
+      exact eq.subst eq3 ba'_dvd_n,
     }
   },
   {
