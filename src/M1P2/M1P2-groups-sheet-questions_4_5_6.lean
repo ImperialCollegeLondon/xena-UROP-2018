@@ -42,7 +42,11 @@ theorem q7:
 -- 8. Let G be a group, and let a, b, c ∈ G. Prove the following facts.
 
 --(a) If ab=ac then b=c.
-theorem sheet04_q8a (a b c : G) : a * b = a * c → b = c := mul_left_cancel a 
+theorem sheet04_q8a (a b c : G) : a * b = a * c → b = c := begin
+intros,
+apply mul_left_cancel,
+assumption
+end 
 --(b) The equation axb = c has a unique solution for x ∈ G.
 theorem sheet04_q8b: ∀ a b c : G  ∃! x : G, a*x*b = c := sorry
 --(c) (a^{−1})^{−1} = a.
