@@ -1,11 +1,15 @@
-import algebra.order data.fintype
+import algebra.order data.fintype group_theory.subgroup data.set.basic data.equiv
+
+variables {G : Type*} [group G]
+variables (H K : set G)
+variables [is_subgroup H] [is_subgroup K]
 
 -- sheet 6
 
 -- 1. Let G be a group. For each of the following statements, say whether or not it is true in general, and give a proof or a counterexample.
 
--- -- (a) If G is not cyclic then G is not abelian.
--- theorem sheet06_q1a:
+-- (a) If G is not cyclic then G is not abelian.
+    -- False (e.g : (ℝ,+))
 -- -- (b) For every element g of G there is an abelian subgroup of G which contains g.
 -- theorem sheet06_q1b:
 -- -- (c) If G = ⟨g⟩ is an infinite cyclic group, then the only generators for G are g
@@ -16,9 +20,9 @@ import algebra.order data.fintype
 -- -- (e) If the order of every non-identity element of G is a prime number, then G is cyclic.
 -- theorem sheet06_q1e:
 -- (f) If G has order 4, then G is abelian.
---theorem sheet06_q1f:
--- -- (g) If G is abelian then every subgroup of G is abelian.
--- theorem sheet06_q1g:
+    --False. (e.g: Klein Four Group)
+-- (g) If G is abelian then every subgroup of G is abelian.
+theorem sheet06_q1g (G : Type*) [comm_group G] (H : set G) [is_subgroup H] : comm_group H := sorry 
 -- -- (h) If G is cyclic then every subgroup of G is cyclic.
 -- theorem sheet06_q1h:
 -- -- (i) If x, y ∈ G, then x and y−1xy have the same order.
@@ -26,6 +30,7 @@ import algebra.order data.fintype
 -- (j) If x,y ∈ G have order 2, then xy has order 2.
 --theorem sheet06_q1j:
 
+definition gsymmetric (n : ℕ) := equiv.perm (fin n)
 -- -- *2. (a) Write down all of the cycle shapes of the elements of S5. For each cycle shape, calculate how many elements there are with that shape. (Check that your answers add up to |S5| = 120.)
 -- theorem sheet06_q2a:
 -- -- (b) How many elements of S5 have order 2?
