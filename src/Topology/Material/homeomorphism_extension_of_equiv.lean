@@ -4,7 +4,8 @@ import analysis.topology.infinite_sum
 import analysis.topology.topological_structures
 import analysis.topology.uniform_space
 
-import data.equiv.basic
+import data.equiv
+-- import data.equiv.basic
 
 local attribute [instance] classical.prop_decidable
 
