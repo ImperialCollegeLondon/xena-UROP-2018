@@ -4,11 +4,13 @@ import analysis.topology.infinite_sum
 import analysis.topology.topological_structures
 import analysis.topology.uniform_space
 import analysis.real
+import data.real.basic tactic.norm_num
 
 universe u
 
 open set filter lattice classical
 
+noncomputable theory 
 
 section Mario
 
@@ -20,11 +22,11 @@ def I01 := {x : ℝ // 0 ≤ x ∧ x ≤ 1}
 
 #check I01 
 
-
+#check topological_space
 -- noncomputable def h : ℝ := 0.5 
 
 -- Has euclidean subspace topology/computability?? 
-noncomputable instance : topological_space I01 := by unfold I01; apply_instance
+instance : topological_space I01 := by unfold I01; apply_instance
 instance : has_zero I01 := ⟨⟨0, le_refl _, zero_le_one⟩⟩
 instance : has_one I01 := ⟨⟨1, zero_le_one, le_refl _⟩⟩
 /- instance : ( h : I01 ) := begin   
@@ -115,17 +117,34 @@ lemma cont_of_path ( g : path z w ) : continuous g.to_fun := g.cont
 def fun_of_path {α} [topological_space α ]  { x1 x2 : α  } ( g : path x1 x2 ) : I01 → α    := g.to_fun  
 #check fun_of_path g1 -- can write equal_of_path in terms of this 
 
-noncomputable def h : ℝ := 0.5  
+--- COMPOSITION OF PATHS
+
+noncomputable def h : ℝ := 1/2  
+lemma geq_half : (0 : ℝ) ≤ (1/2 : ℝ) := by norm_num
+lemma leq_half : (1/2 : ℝ) ≤ (1 : ℝ) := by norm_num
 
 #print h 
 
 #print prefix real.division_ring 
 
 noncomputable def comp_of_path {α} [topological_space α] { x y z : α } ( f : path x y )( g : path y z ) : path x z :=
- {  to_fun := sorry, -- λ t : I01, if t ≤ h then f.to_fun (2*t) else g.to_fun (2*t -1) ,
+{  to_fun := sorry,  ---λ t : I01, if t ≤ h then f.to_fun (2*t) else g.to_fun (2*t -1) ,
     at_zero := sorry,
     at_one := sorry,
     cont := sorry }
+
+
+---
+/- noncomputable def h : I01 :=  1 / 2 
+
+lemma geq_half : (0 : ℝ) ≤ (1/2 : ℝ) := by norm_num
+lemma leq_half : (1/2 : ℝ) ≤ (1 : ℝ) := by norm_num
+
+lemma geq_half2 : (0 : I01) ≤ (1/2 : I01) := by norm_num
+lemma leq_half2 : (1/2 : I01) ≤ (1 : I01) := by norm_num
+
+instance : ( h : I01 ) := ⟨⟨0, le_refl _, zero_le_one⟩⟩ -/
+
 
 
 -- LOOP 
@@ -263,7 +282,7 @@ begin
 intro s, exact (F.path_s s).right.right 
 end 
 
-definition is_homotopic_to (f : path x y) ( g : path x y) : Prop := nonempty ( path_homotopy f g) 
+definition is_homotopic_to { x y : β } (f : path x y) ( g : path x y) : Prop := nonempty ( path_homotopy f g) 
 
 
 /- 
@@ -283,13 +302,32 @@ end
 
 -- Homotopy as a class ????
 
-
+#check is_homotopic_to
 
 -- Equivalence of Homotopy 
---theorem homotopy_is_reflexive : reflexive (@is_homotopic_to ) :=
+def path_homotopy_id { x y : β} (f : path x y) : path_homotopy f f := 
+{   to_fun :=  λ pair  , f.to_fun pair.2 ,  
+    path_s := begin  intro s, unfold is_path, 
+    exact ⟨ f.at_zero,  f.at_one, f.cont ⟩ end, 
+    at_zero := by simp , 
+    at_one := by simp ,  
+    cont := sorry, --begin unfold continuous,   end  
+} 
 
---#check reflexive 
+
+theorem homotopy_is_reflexive : @reflexive (path x y) ( is_homotopic_to ) := 
+begin 
+  unfold reflexive, intro f, unfold is_homotopic_to, 
+    have H : path_homotopy f f, 
+        exact path_homotopy_id f , 
+    exact ⟨ H ⟩ 
+end
+
+#check @is_refl
+#check @reflexive 
+#check nonempty  
 
 -- Associativity of homotopy 
+
 
 end Interface_Two
