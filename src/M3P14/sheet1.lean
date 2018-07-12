@@ -90,8 +90,8 @@ begin
   exact mul_assoc _ _ _, 
 end  
 
-variables a b c : ℕ 
-variables (h1 : (a ∣ b)) (h2 : (b ∣ c))
+-- TODO: to find in mathlib
+theorem coprime_dvd_of_dvd_mul {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : coprime a b) : a*b ∣ c := sorry 
 
 theorem q4a : ∀ a b : ℕ, ∃! m : ℕ, ∀ n : ℕ, a ≠ 0 ∧ b ≠ 0 ∧   
                                 a ∣ m ∧ b ∣ m ∧ a ∣ n ∧ b ∣ n → m ∣ n
@@ -101,22 +101,68 @@ begin
 --define m = ab/(a,b) , a=da', b=db' → d ∣ n, a'∣ n, b'∣ n → m= da'b' ∣n as d, a', b' is coprime 
 intro a, intro b,
 let m := a*b/(gcd a b),
+have m_def : m = a*b/(gcd a b), by simp,
 apply exists_unique.intro m,
 {
   assume n,
   assume h,
+  have a_dvd_n : a ∣ n, from h.right.right.right.right.left,
+  have b_dvd_n : b ∣ n, from h.right.right.right.right.right,
   let a' := a/(gcd a b), 
+  have a'_def : a/(gcd a b) = a', by simp,
+  have gcd_dvd_a : (gcd a b) ∣ a, from gcd_dvd_left _ _,
+  have gcd_dvd_b : (gcd a b) ∣ b, from gcd_dvd_right _ _,
   let b':= b/(gcd a b),
-  let d:= gcd a b,
+  have bp_eq : b' = b/(gcd a b), by simp,
+  let d := gcd a b,
+  have d_eq : d = gcd a b, by simp,
+
   cases em (coprime d a' ∨ coprime d b') with h1 h2,
   {
+    have eq_a_bis : a = gcd a b * a', from nat.eq_mul_of_div_eq_right gcd_dvd_a a'_def,
+      have a'_dvd_a : a' ∣ a,
+      {
+        rw eq_a_bis,
+        exact dvd_mul_left _ _,
+      },
+      have a_dvd_n : a ∣ n, from h.right.right.right.right.left,
+      have a'_dvd_n : a' ∣ n, from gcd_dvd_trans a'_dvd_a a_dvd_n, 
+      have eq2 : (b / (gcd a b)) * gcd a b = b, from nat.div_mul_cancel gcd_dvd_b,
+      have eq_b : d*b' = b, 
+      {
+        calc
+           d*b' =  b : by rw [nat.mul_comm,d_eq, bp_eq, eq2]
+      },
     cases h1 with cda' cdb',
     {
-      have a'_dvd_a : a' ∣ a, sorry,
-      have a_dvd_n : a ∣ n, sorry,
-      have a'_dvd_n : a' ∣ n, from gcd_dvd_trans a'_dvd_a a_dvd_n,  
-      have cba' : coprime b a', sorry, --coprime.coprime_mul_left_right a (d * b'),
-      sorry,
+      have cdba : coprime (d*b') a', 
+      {
+          have cbpap : coprime b' a',
+          {
+              have b_gr_0 : b > 0, 
+              {
+                 rw pos_iff_ne_zero,
+                 exact h.right.left,
+              },
+              have gcd_gr_0 : gcd b a > 0, from nat.gcd_pos_of_pos_left a b_gr_0,
+              have cop_fractions : coprime (b /gcd b a) (a / gcd b a), from nat.coprime_div_gcd_div_gcd gcd_gr_0,
+              have cop_fractions_2 : coprime (b /gcd a b) (a / gcd a b), from eq.subst (gcd_comm b a) cop_fractions,
+              have cop_fractions_3 : coprime b' (a / gcd a b), from eq.subst bp_eq cop_fractions_2,
+              exact eq.subst a'_def cop_fractions_3,
+          },
+          exact coprime.mul cda' cbpap,
+      },
+      have cba : coprime b a', from eq.subst eq_b cdba,
+      have ba'_dvd_n : b*a' ∣ n, from coprime_dvd_of_dvd_mul b_dvd_n a'_dvd_n cba,
+      have  eq3 : b*a' = m,
+      {
+        calc
+           b*a'    =  b * (a / gcd a b) : by rw a'_def
+               ... =  (b * a) / gcd a b :  by rw nat.mul_div_assoc b gcd_dvd_a 
+               ... =  a * b / gcd a b : by rw nat.mul_comm
+               ... = m : by rw m_def 
+      },
+      exact eq.subst eq3 ba'_dvd_n,
     },
     {
       sorry, 
@@ -131,7 +177,29 @@ apply exists_unique.intro m,
 }
 end 
 
+#print notation ∣
+#print has_dvd.dvd
+variables a b c : ℕ 
+
+
+
+variable gcd_dvd_b : (gcd a b) ∣ b
+variable b_diff_0 : (b≠0)
+#check  nat.div_mul_cancel gcd_dvd_b
+#check  nat.div_mul_cancel gcd_dvd_b
+
+variable a' : ℕ
+variable (adiff0: (a' > 0))
+variable (advdb: (a' ∣ a))
+variable (gcddivides : (gcd a b ∣ a))
+variable (eq:  a/(gcd a b) = a')
+#check nat.div_eq_iff_eq_mul_right adiff0 advdb 
+#check nat.eq_mul_of_div_eq_right advdb eq
+#check nat.eq_mul_of_div_eq_right gcddivides eq
 #print coprime
+#print notation ∣ 
+#check has_dvd.dvd 
+
 
 -- Show that the least common multiple of a and b is given by |ab|/(a,b)
 -- TODO: need to change ℕ to ℤ and use abs(a*b)
