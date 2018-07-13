@@ -113,7 +113,8 @@ def discrete_topology (α : Type u) : topological_space α := {
   is_open_sUnion := λ _ _, trivial,
 }
 
-lemma map_from_discrete_is_continuous {α : Type u} {β : Type v} [topological_space α] [Y : topological_space β] 
+--get rid of mention of X??
+lemma map_from_discrete_is_continuous {α : Type u} {β : Type v} [X : topological_space α] [Y : topological_space β] 
 (H : X = indiscrete_topology α) (f : α → β) : continuous f := 
 begin
   admit,
