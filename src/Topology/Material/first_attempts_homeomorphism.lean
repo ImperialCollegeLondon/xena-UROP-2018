@@ -4,15 +4,10 @@ import analysis.topology.infinite_sum
 import analysis.topology.topological_structures
 import analysis.topology.uniform_space
 
-
 universes u v w
 
 open set filter lattice classical
 
-#print definition set
-
-
-#check empty 
 def empty_set_topology : topological_space empty := 
 {
 is_open := λ (a : set empty),
@@ -23,7 +18,6 @@ is_open_sUnion := begin intros h1 h2, trivial end
 #print univ
 #check empty_set_topology.is_open 
 
-#print set
 
 definition is_open_sets {α : Type u} (is_open : set α → Prop) :=
   is_open univ ∧ (∀s t, is_open s → is_open t → is_open (s ∩ t)) ∧ (∀s, (∀t∈s, is_open t) → is_open (⋃₀ s))
@@ -138,11 +132,3 @@ end
 --We require β : Sort v and two topological spaces of type β 
 --Sort?
 
-
---def reflexive := ∀ x, x ≺ x
-
---def symmetric := ∀ ⦃x y⦄, x ≺ y → y ≺ x
-
---def transitive := ∀ ⦃x y z⦄, x ≺ y → y ≺ z → x ≺ z
-
---def equivalence := reflexive r ∧ symmetric r ∧ transitive r
