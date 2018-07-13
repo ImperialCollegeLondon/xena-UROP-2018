@@ -293,3 +293,304 @@ begin
   exact absurd d1 hc.2.2.2,
 end
 
+------------------------------------------------------------
+
+theorem is_connected_pairwise_union [topological_space α] {A B : set α} :
+is_connected A ∧ is_connected B → (A ∩ B ≠ ∅) → is_connected (A ∪ B) := 
+begin
+  intros hc hn, rw is_connected, intros U' V' huv h,
+
+  have hU'n : U' ≠ ∅, from h.2.2.1, 
+  have hV'n : V' ≠ ∅, from h.2.2.2, 
+    
+  have hUV' : U' ∪ V' = A ∪ B, from h.1,
+  
+  have d2 : V' ∩ U' = ∅, {have d1, from h.2.1, rwa [inter_comm]},
+        
+  have hA : A = (A ∩ U') ∪ (A ∩ V'), 
+    begin
+      have a1 : A ∩ U' ⊆ A, from inter_subset_left _ _ ,  
+      have a2 : A ∩ V' ⊆ A, from inter_subset_left _ _ ,
+      have a3 : (A ∩ U') ∪ (A ∩ V') ⊆ A, from union_subset a1 a2,
+      have a4 : A ⊆ (A ∩ U') ∪ (A ∩ V'), 
+        begin 
+          rw subset_def, intros x e1,
+          suffices t : x ∈ U' ∪ V', 
+          from or.elim ((mem_union _ _ _).mp t) 
+            (assume h1 : x ∈ U', by exact (mem_union _ _ _).mpr 
+            (or.inl ((mem_inter_iff _ _ _).mpr ⟨e1,h1⟩)))
+            (assume h2 : x ∈ V', by exact (mem_union _ _ _).mpr 
+            (or.inr ((mem_inter_iff _ _ _).mpr ⟨e1,h2⟩))),
+          have q1 : x ∈ A ∪ B, exact (mem_union_left B) e1,
+          rwa [←h.1] at q1, 
+        end,
+      exact eq_comm.mp (subset.antisymm a3 a4),
+    end, 
+  have hB : B = (B ∩ U') ∪ (B ∩ V'), 
+    begin
+      have a1 : B ∩ U' ⊆ B, from inter_subset_left _ _ ,  
+      have a2 : B ∩ V' ⊆ B, from inter_subset_left _ _ ,
+      have a3 : (B ∩ U') ∪ (B ∩ V') ⊆ B, from union_subset a1 a2,
+      have a4 : B ⊆ (B ∩ U') ∪ (B ∩ V'), 
+        begin 
+          rw subset_def, intros x e1,
+          suffices t : x ∈ U' ∪ V', 
+          from or.elim ((mem_union _ _ _).mp t) 
+            (assume h1 : x ∈ U', by exact (mem_union _ _ _).mpr 
+            (or.inl ((mem_inter_iff _ _ _).mpr ⟨e1,h1⟩)))
+            (assume h2 : x ∈ V', by exact (mem_union _ _ _).mpr 
+            (or.inr ((mem_inter_iff _ _ _).mpr ⟨e1,h2⟩))),
+          have q1 : x ∈ A ∪ B, exact (mem_union_right A) e1,
+          rwa [←h.1] at q1, 
+        end,
+      exact eq_comm.mp (subset.antisymm a3 a4),
+    end,  
+
+
+  have hd : (A ∩ U') ∩ (A ∩ V') = ∅,
+    begin
+      rw [inter_assoc,inter_comm,inter_assoc], 
+      have d1 : A ∩ V' ∩ A = A ∩ V',
+        {rw [inter_comm,←inter_assoc], simp},
+      rw [d1,inter_comm,inter_assoc,d2], exact inter_empty A,
+    end,
+  have he : (B ∩ U') ∩ (B ∩ V') = ∅,
+    begin
+      rw [inter_assoc,inter_comm,inter_assoc], 
+      have e1 : B ∩ V' ∩ B = B ∩ V',
+        {rw [inter_comm,←inter_assoc], simp},
+      rw [e1,inter_comm,inter_assoc,d2], exact inter_empty B,
+    end,
+
+  have pA1, from hc.1, rw is_connected at pA1, 
+  have pB1, from hc.2, rw is_connected at pB1,
+  
+  have S1, from huv.1, rw is_open_in_subspace at S1,
+  have S2, from huv.2, rw is_open_in_subspace at S2,
+
+  have R2 : ∀ A B C : set α, A ∩ (A ∪ B) ∩ C = A ∩ C,
+    begin
+      intros A B C, 
+      have R3 : ∀ x, x ∈ A ∩ (A ∪ B) ∩ C → x ∈ A ∩ C,
+        {intros x Hx, rw [mem_inter_iff] at Hx, have Hy, from Hx.1, 
+        rw [mem_inter_iff] at Hy, by exact (mem_inter_iff _ _ _).mpr ⟨Hy.1,Hx.2⟩},
+      have R4 : ∀ x, x ∈ A ∩ C → x ∈ A ∩ (A ∪ B) ∩ C,
+        {intros x Hx, rw [mem_inter_iff] at Hx, 
+        have m1 : x ∈ (A ∪ B), by exact mem_union_left _ Hx.1,
+        by exact (mem_inter_iff _ _ _).mpr ⟨ (mem_inter_iff _ _ _).mpr ⟨Hx.1,m1⟩ , Hx.2⟩},
+      rw [←subset_def] at R3 R4, by exact subset.antisymm R3 R4,
+    end,
+
+  have R5 : ∀ U' A B U : set α, U' = (A ∪ B) ∩ U → A ∩ U' = A ∩ U,
+    begin
+      intros U' A B U heq, rw [heq,←inter_assoc], by exact R2 A B U,
+    end,
+
+  have R6 : ∀ U' A B U : set α, U' = (A ∪ B) ∩ U → B ∩ U' = B ∩ U,
+    begin
+      intros U' A B U, rw [union_comm], intro heq, rw [heq,←inter_assoc], by exact R2 B A U,
+    end,
+
+  have R1 : is_open_in_subspace A (A ∩ U'), 
+    begin
+      by exact exists.elim S1 
+        (assume U, 
+          assume hw : U' = (A ∪ B) ∩ U ∧ is_open U,
+          show ∃ (U : set α), A ∩ U' = A ∩ U ∧ is_open U,
+          from ⟨U, ⟨R5 U' A B U hw.1, hw.2⟩ ⟩) 
+    end,
+
+  have Q1 : is_open_in_subspace A (A ∩ V'), 
+    begin
+      by exact exists.elim S2 
+        (assume U, 
+          assume hw : V' = (A ∪ B) ∩ U ∧ is_open U,
+          show ∃ (U : set α), A ∩ V' = A ∩ U ∧ is_open U,
+          from ⟨U, ⟨R5 V' A B U hw.1, hw.2⟩ ⟩) 
+    end,
+
+  have T1 : is_open_in_subspace B (B ∩ U'), 
+    begin
+      by exact exists.elim S1 
+        (assume U, 
+          assume hw : U' = (A ∪ B) ∩ U ∧ is_open U,
+          show ∃ (U : set α), B ∩ U' = B ∩ U ∧ is_open U,
+          from ⟨U, ⟨R6 U' A B U hw.1, hw.2⟩ ⟩) 
+    end,
+
+  have T2 : is_open_in_subspace B (B ∩ V'), 
+    begin
+      by exact exists.elim S2 
+        (assume U, 
+          assume hw : V' = (A ∪ B) ∩ U ∧ is_open U,
+          show ∃ (U : set α), B ∩ V' = B ∩ U ∧ is_open U,
+          from ⟨U, ⟨R6 V' A B U hw.1, hw.2⟩ ⟩) 
+    end,
+
+  have pA2, from pA1 (A ∩ U') (A ∩ V') ⟨R1,Q1⟩, simp at pA2,
+  have pB2, from pB1 (B ∩ U') (B ∩ V') ⟨T1,T2⟩, simp at pB2, 
+
+  rw eq_comm at hA hB,
+
+  have wA1 : ¬A ∩ U' = ∅ → A ∩ V' = ∅, from pA2 hA hd,
+  have wB1 : ¬B ∩ U' = ∅ → B ∩ V' = ∅, from pB2 hB he,
+
+  rw [inter_comm] at wA1 wB1,
+
+  have v1 : ¬U' ∩ A = ∅ → V' ∩ A = ∅, {intro hv, have hv2, from wA1 hv, rwa [inter_comm]},
+  have v2 : ¬U' ∩ B = ∅ → V' ∩ B = ∅, {intro hv, have hv2, from wB1 hv, rwa [inter_comm]}, 
+
+
+  have HA : (U' ∩ A = ∅) ∨ (V' ∩ A = ∅),
+    by_contradiction HC, rw [not_or_distrib] at HC, 
+    exact absurd (v1 HC.1) HC.2,
+  have HB : (U' ∩ B = ∅) ∨ (V' ∩ B = ∅),
+    by_contradiction HC, rw [not_or_distrib] at HC, 
+    exact absurd (v2 HC.1) HC.2,
+
+  have H1 : V' ∩ A = ∅ → A ⊆ U',
+    begin
+      intro w1, 
+      have w2 : ∀ x, x ∈ A → x ∈ U', 
+        begin
+          intros x hx,
+          have w3, from mem_union_left B hx,
+          rw [←h.1,mem_union _ _ _] at w3,
+          have w4, from ((eq_empty_iff_forall_not_mem.mp w1) x),  
+          rw [mem_inter_iff _ _ _,not_and_distrib] at w4,
+          exact or.elim w3
+            (assume m1 : x ∈ U', by exact m1)
+            (assume m2 : x ∈ V', by exact or.elim w4
+              (assume n1 : x ∉ V', show x ∈ U', by exact false.elim (absurd m2 n1))
+              (assume n2 : x ∉ A, show x ∈ U', by exact false.elim (n2 hx))),  
+        end, 
+      rwa [←subset_def] at w2,
+    end, 
+
+  have H2 : U' ∩ A = ∅ → A ⊆ V',
+    begin
+      intro w1, 
+      have w2 : ∀ x, x ∈ A → x ∈ V', 
+        begin
+          intros x hx,
+          have w3, from mem_union_left B hx,
+          rw [←h.1,mem_union _ _ _] at w3,
+          have w4, from ((eq_empty_iff_forall_not_mem.mp w1) x),  
+          rw [mem_inter_iff _ _ _,not_and_distrib] at w4,
+          exact or.elim w3
+            (assume m2 : x ∈ U', by exact or.elim w4
+              (assume n1 : x ∉ U', show x ∈ V', by exact false.elim (absurd m2 n1))
+              (assume n2 : x ∉ A, show x ∈ V', by exact false.elim (n2 hx)))
+            (assume m1 : x ∈ V', by exact m1),
+        end, 
+      rwa [←subset_def] at w2,
+    end, 
+
+  have H3 : V' ∩ B = ∅ → B ⊆ U',
+    begin
+      intro w1, 
+      have w2 : ∀ x, x ∈ B → x ∈ U', 
+        begin
+          intros x hx,
+          have w3, from mem_union_right A hx,
+          rw [←h.1,mem_union _ _ _] at w3,
+          have w4, from ((eq_empty_iff_forall_not_mem.mp w1) x),  
+          rw [mem_inter_iff _ _ _,not_and_distrib] at w4,
+          exact or.elim w3
+            (assume m1 : x ∈ U', by exact m1)
+            (assume m2 : x ∈ V', by exact or.elim w4
+              (assume n1 : x ∉ V', show x ∈ U', by exact false.elim (absurd m2 n1))
+              (assume n2 : x ∉ B, show x ∈ U', by exact false.elim (n2 hx))),  
+        end, 
+      rwa [←subset_def] at w2,
+    end, 
+
+  have H4 : U' ∩ B = ∅ → B ⊆ V',
+    begin
+      intro w1, 
+      have w2 : ∀ x, x ∈ B → x ∈ V', 
+        begin
+          intros x hx,
+          have w3, from mem_union_right A hx,
+          rw [←h.1,mem_union _ _ _] at w3,
+          have w4, from ((eq_empty_iff_forall_not_mem.mp w1) x),  
+          rw [mem_inter_iff _ _ _,not_and_distrib] at w4,
+          exact or.elim w3
+            (assume m2 : x ∈ U', by exact or.elim w4
+              (assume n1 : x ∉ U', show x ∈ V', by exact false.elim (absurd m2 n1))
+              (assume n2 : x ∉ B, show x ∈ V', by exact false.elim (n2 hx)))
+            (assume m1 : x ∈ V', by exact m1),
+        end, 
+      rwa [←subset_def] at w2,
+    end, 
+
+  rw [inter_comm] at d2,
+
+  have zA : A ⊆ U' ∨ A ⊆ V', exact or.elim HA
+    (assume z1 : U' ∩ A = ∅, by exact or.inr (H2 z1))
+    (assume z2 : V' ∩ A = ∅, by exact or.inl (H1 z2)),
+  have zB : B ⊆ U' ∨ B ⊆ V', exact or.elim HB
+    (assume z1 : U' ∩ B = ∅, by exact or.inr (H4 z1))
+    (assume z2 : V' ∩ B = ∅, by exact or.inl (H3 z2)),
+
+  have G1 : A ⊆ U' → B ⊆ U' → false,
+    begin
+      intros f g,
+      have g1, from union_subset f g, rw [←hUV',union_subset_iff] at g1,
+      have g2 : V' = ∅, 
+        begin
+        by_contradiction C, rw [not_eq_empty_iff_exists] at C,
+        exact absurd d2 (ne_empty_iff_exists_mem.mpr 
+        (exists.elim C 
+          (assume w, assume hw : w ∈ V', 
+            show ∃ x, x ∈ U' ∩ V', from ⟨w, (mem_inter_iff _ _ _).mpr 
+            ⟨mem_of_subset_of_mem g1.2 hw, hw⟩⟩ ))), 
+        end,
+      by exact absurd g2 hV'n,
+    end,
+  have J1 : A ⊆ U' → B ⊆ V',
+    begin
+      intro j1, by_contradiction j2,
+      have j3 : B ⊆ U', by exact or.elim zB
+        (assume k1, by exact k1)
+        (assume k2, by exact absurd k2 j2), 
+      show false, from G1 j1 j3,
+    end,
+
+  have G2 : A ⊆ V' → B ⊆ V' → false,
+    begin
+      intros f g,
+      have g1, from union_subset f g, rw [←hUV',union_subset_iff] at g1,
+      have g2 : U' = ∅, 
+        begin
+        by_contradiction C, rw [not_eq_empty_iff_exists] at C,
+        exact absurd d2 (ne_empty_iff_exists_mem.mpr 
+        (exists.elim C 
+          (assume w, assume hw : w ∈ U', 
+            show ∃ x, x ∈ U' ∩ V', from ⟨w, (mem_inter_iff _ _ _).mpr 
+            ⟨hw, mem_of_subset_of_mem g1.1 hw⟩⟩ ))), 
+        end,
+      by exact absurd g2 hU'n,
+    end,
+  have J2 : A ⊆ V' → B ⊆ U',
+    begin
+      intro j1, by_contradiction j2,
+      have j3 : B ⊆ V', by exact or.elim zB
+        (assume k1, by exact absurd k1 j2)
+        (assume k2, by exact k2), 
+      show false, from G2 j1 j3,
+    end,
+
+  have L1 : A ⊆ U' → (A ∩ B) ⊆ (U' ∩ V'),
+    {intro l1, by exact inter_subset_inter l1 (J1 l1)}, 
+    rw [d2,subset_empty_iff] at L1,
+  have L2 : A ⊆ V' → (B ∩ A) ⊆ (U' ∩ V'),
+    {intro l1, by exact inter_subset_inter (J2 l1) l1 }, 
+    rw [inter_comm,d2,subset_empty_iff] at L2,  
+  show false, from or.elim zA
+      (assume z1, by exact absurd (L1 z1) hn)
+      (assume z2, by exact absurd (L2 z2) hn),
+end
+
+ ------------------------------------------------------------
+
