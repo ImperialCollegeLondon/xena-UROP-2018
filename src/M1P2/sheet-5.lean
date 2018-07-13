@@ -19,4 +19,4 @@ theorem sheet05_q4a : is_cyclic G → comm_group G := sorry
 --{ ..is_subgrou }
 definition gsymmetric (n : ℕ) := equiv.perm (fin n)
 -- (b) The symmetric group is not abelian, unless n < 3.
---theorem sheet05_q4b (n : ℕ) (n ≥ 4) : gsymmetric n → ¬(comm_group (gsymmetric n)) := sorry 
+theorem sheet05_q4b (n : ℕ) (n < 3) : comm_group (gsymmetric n) → gsymmetric n := sorry 
