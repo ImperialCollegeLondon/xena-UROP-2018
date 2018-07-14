@@ -3,34 +3,79 @@ import analysis.topology.continuity
 import data.set.basic
 import logic.basic
 
-
 open set filter lattice classical
 local attribute [instance] prop_decidable
 
 universe u
-variables {α : Type u} {β : Type u} {γ : Type u} 
+variables {α : Type u} {β : Type u} {γ : Type u} {δ : Type u}
 
 
-section
+def is_clopen [t : topological_space α] (s : set α) : Prop := is_open s ∧ is_closed s 
 
-variables [t : topological_space α]
-include t
+def is_open_in_subspace [t : topological_space α] (A : set α) (V : set α) : Prop := ∃ U, V = A ∩ U ∧ is_open U 
 
-def is_clopen (s : set α) : Prop := is_open s ∧ is_closed s 
+/- For subsets, connected def needs to 
+consider open sets in the subspace topology. 
+(TODO: unify this with connectedness of univ). -/
 
-def is_separated (s t : set α) : Prop := -s ∩ t = ∅ ∧ s ∩ -t = ∅
+def is_connected [t : topological_space α] (s : set α) : Prop := ∀ U' V' : set α, 
+is_open_in_subspace s U' ∧ is_open_in_subspace s V' → ¬( (U') ∪ (V') = s ∧ (U') ∩ (V') = ∅ ∧ U' ≠ ∅ ∧ V' ≠ ∅) 
 
--- For subsets, connected def needs to consider open sets in the subspace topology
-def is_connected (s : set α) : Prop := ∀ U V : set α, 
-is_open U ∧ is_open V → ¬( (U ∩ s) ∪ (V ∩ s) = s ∧ (U ∩ s) ∩ (V ∩ s) = ∅ ∧ U ∩ s ≠ ∅ ∧ V ∩ s ≠ ∅) 
-
-end
-
+def is_separated [topological_space α] (s t : set α) : Prop := (closure s) ∩ t = ∅ ∧ s ∩ (closure t) = ∅
 
 class connected_space (α : Type u) extends topological_space α :=
     (clopen_trivial : (∀ s : set α, is_clopen s → (s = univ ∨ s = ∅)))
 
+/- This is me cheating and defining a two point discrete space using the bools,
+but without any clever coercion since I have no idea how to do this yet. -/
+
+class discrete_two_point_space extends topological_space bool :=
+(discreteness : ∀ U : set bool, is_open U)
+
 -----------------------------------------------------------------
+
+theorem open_imp_inter_open_in_subspace [topological_space α] {s t v : set α} :
+is_open t → is_open_in_subspace s (t ∩ s) :=
+begin
+  intro h1,
+  show is_open_in_subspace s (t ∩ s), 
+    {rw is_open_in_subspace, by exact exists.intro t ⟨inter_comm t s, h1⟩},
+end
+
+-----------------------------------------------------------------
+-- Some useful set theory lemmas
+
+lemma disjoint_and_union_univ_imp_compl {A B : set α} (hU : A ∪ B = univ) 
+(hE : A ∩ B = ∅) : A = -B :=
+begin
+  have h1 : ∀ x, x ∈ A → x ∈ -B,
+    {intros x hA hc, rw eq_empty_iff_forall_not_mem at hE,
+    by exact absurd ((mem_inter_iff _ _ _).mpr ⟨hA,hc⟩) (hE x)},
+  have h2 : ∀ x, x ∈ -B → x ∈ A,
+    {intros x hB, by_contradiction hc,
+    have a1 := not_mem_of_mem_compl hB, have a2 := and.intro hc a1, 
+    have a3 : x ∈ A ∪ B, {rw [hU], simp}, have a4 := mem_or_mem_of_mem_union a3,
+    by exact or.elim a4
+        (assume b1, by exact absurd b1 a2.1)
+        (assume b2, by exact absurd b2 a2.2)},
+  rw [←subset_def] at h1 h2, by exact subset.antisymm h1 h2,
+end
+
+lemma eq_compl_iff_compl_eq {A B : set α} : A = -B ↔ B = -A :=
+begin
+  apply iff.intro, 
+    intro H1, by_contradiction HC, rw [H1,compl_compl] at HC, contradiction,
+  intro H2, by_contradiction HC, rw [H2,compl_compl] at HC, contradiction,
+end
+
+lemma neq_empty_imp_empty_to_union {A B : set α} (H : ¬A = ∅ → B = ∅) :
+A = ∅ ∨ B = ∅ :=
+begin
+  by_contradiction hc, rw [not_or_distrib] at hc, 
+  by exact absurd (H hc.1) hc.2,
+end
+
+
 
 lemma closure_eq_interior_iff_clopen [topological_space α] :
 (∀ s : set α, closure s = interior s ↔ is_clopen s) := 
@@ -61,7 +106,7 @@ begin
     rw [←interior_eq_iff_open] at Hop, rw [Hop, Hcl],
 end
 
-----------------------------------------------------------------
+
 
 theorem empty_frontier_iff_clopen [topological_space α] :
 (∀ s : set α, frontier s = ∅ ↔ is_clopen s) :=
@@ -107,27 +152,7 @@ begin
   rw [frontier, H2, H3, diff_eq], simp,  
 end
 
--------------------------------------------------------------
 
-theorem connected_to_empty_frontier_iff_trivial [c : connected_space α] : 
-∀ s : set α, frontier s = ∅ ↔ (s = univ ∨ s = ∅) := 
-begin
-  intro s, apply iff.intro, 
-  assume h1,
-    have A : is_clopen s, from (empty_frontier_iff_clopen s).mp h1,
-    exact connected_space.clopen_trivial _ A, 
-  assume h2, 
-    have B : is_clopen s, 
-
-    have G : s = univ → is_clopen s,
-      assume B1 : s = univ, rw B1, exact ⟨is_open_univ,is_closed_univ⟩,
-    have H : s = ∅ → is_clopen s,
-      assume B1 : s = ∅, rw B1, exact ⟨is_open_empty,is_closed_empty⟩,
-    exact or.elim h2 G H,
-  rwa [empty_frontier_iff_clopen],  
-end
-
-------------------------------------------------------------
 
 lemma components_of_separation_clopen [topological_space α] 
 {U1 U2 : set α} (hu1 : is_open U1) (hu2 : is_open U2) : (U1 ∪ U2 = univ ∧ U1 ∩ U2 = ∅ ∧ U1 ≠ ∅ ∧ U2 ≠ ∅) → 
@@ -160,6 +185,8 @@ begin
   exact ⟨⟨hu1,hu1c⟩,⟨hu2,hu2c⟩⟩,  
 end 
 
+
+
 lemma open_separation_to_closed [topological_space α] 
 {U1 U2 : set α} (hu1 : is_open U1) (hu2 : is_open U2) : (U1 ∪ U2 = univ ∧ U1 ∩ U2 = ∅ ∧ U1 ≠ ∅ ∧ U2 ≠ ∅) → 
 is_closed U1 ∧ is_closed U2 :=
@@ -190,6 +217,8 @@ begin
     end,
   exact ⟨hu1c,hu2c⟩,  
 end 
+
+
 
 lemma closed_separation_to_open [topological_space α] 
 {U1 U2 : set α} (hu1 : is_closed U1) (hu2 : is_closed U2) : (U1 ∪ U2 = univ ∧ U1 ∩ U2 = ∅ ∧ U1 ≠ ∅ ∧ U2 ≠ ∅) → 
@@ -222,9 +251,9 @@ begin
   exact ⟨hu1c,hu2c⟩,  
 end 
 
-------------------------------------------------------------
 
-theorem no_open_sep_iff_no_closed_sep [topological_space α] :
+
+lemma no_open_sep_iff_no_closed_sep [topological_space α] :
 (∀ U1 U2: set α, is_open U1 ∧ is_open U2 → ¬( U1 ∪ U2 = univ ∧ U1 ∩ U2 = ∅ ∧ U1 ≠ ∅ ∧ U2 ≠ ∅))
 ↔ (∀ V1 V2 : set α, is_closed V1 ∧ is_closed V2 → ¬( V1 ∪ V2 = univ ∧ V1 ∩ V2 = ∅ ∧ V1 ≠ ∅ ∧ V2 ≠ ∅)) :=
 begin
@@ -240,8 +269,35 @@ begin
   apply absurd c1 c2,
 end
 
-------------------------------------------------------------
 
+
+------------------------------------------------------------
+/- Alternate definitions of connected, proved to be implied by 
+the LEAN definition (TODO: Prove complete equivalence). -/
+
+
+-- 4.
+theorem connected_def_empty_frontier_iff_trivial [c : connected_space α] : 
+∀ s : set α, frontier s = ∅ ↔ (s = univ ∨ s = ∅) := 
+begin
+  intro s, apply iff.intro, 
+  assume h1,
+    have A : is_clopen s, from (empty_frontier_iff_clopen s).mp h1,
+    exact connected_space.clopen_trivial _ A, 
+  assume h2, 
+    have B : is_clopen s, 
+
+    have G : s = univ → is_clopen s,
+      assume B1 : s = univ, rw B1, exact ⟨is_open_univ,is_closed_univ⟩,
+    have H : s = ∅ → is_clopen s,
+      assume B1 : s = ∅, rw B1, exact ⟨is_open_empty,is_closed_empty⟩,
+    exact or.elim h2 G H,
+  rwa [empty_frontier_iff_clopen],  
+end
+
+
+
+-- 1.
 theorem connected_def_open_separation [c : connected_space α] : ∀ U V : set α, 
 is_open U ∧ is_open V → ¬( U ∪ V = univ ∧ U ∩ V = ∅ ∧ U ≠ ∅ ∧ V ≠ ∅ ) := 
 begin
@@ -250,7 +306,7 @@ begin
   have A, from components_of_separation_clopen H.1 H.2 h,
   have A1, from A.1, have A2, from A.2,
   rw [←empty_frontier_iff_clopen] at A1 A2, 
-  rw [connected_to_empty_frontier_iff_trivial] at A1 A2,
+  rw [connected_def_empty_frontier_iff_trivial] at A1 A2,
   have h2, from h.2.1, 
   have H1 : U = univ → false,
     begin
@@ -261,37 +317,158 @@ begin
    exact or.elim A1 H1 (assume B2 : U = ∅, absurd B2 h.2.2.1),
 end
 
-------------------------------------------------------------
 
+
+-- 2.
 theorem connected_def_closed_separation [c : connected_space α] : ∀ U V : set α, 
 is_closed U ∧ is_closed V → ¬( U ∪ V = univ ∧ U ∩ V = ∅ ∧ U ≠ ∅ ∧ V ≠ ∅ ) :=
 begin
   exact no_open_sep_iff_no_closed_sep.mp connected_def_open_separation, 
 end
 
-------------------------------------------------------------
 
 
+-- 3.
+-- clopen_trivial, the chosen definition
+
+
+
+-- 5.
 theorem connected_def_separated_sets [c : connected_space α] : ∀ U V : set α,
 is_separated U V → ¬( U ∪ V = univ ∧ U ∩ V = ∅ ∧ U ≠ ∅ ∧ V ≠ ∅ ) :=
 begin
-  intros U V hsep, rw is_separated at hsep, by_contradiction hc,
-  have c1, from hsep.1, 
-  rw [inter_comm,←diff_eq,diff_neq_empty,subset_def] at c1,
-  have c2, from hc.2.1, rw [eq_empty_iff_forall_not_mem] at c2, simp at c2,
-  have d1 : V = ∅, 
-    begin
-      rw [eq_empty_iff_forall_not_mem], by_contradiction d2, simp at d2,
-        exact exists.elim d2 
-        (assume x, assume hx : x ∈ V, 
-        begin
-          have hc1, from c1 x hx,
-           have hc2, from c2 x hc1,
-          apply absurd hx hc2,
-        end),
-    end,
-  exact absurd d1 hc.2.2.2,
+  intros U V hsep hc, rw is_separated at hsep,
+  have hU := hsep.1,
+  have hV := hsep.2,
+
+  have h1 : V = -(closure U),
+    {have a1 : closure U ∪ V = univ, 
+      {have b1 : U ⊆ closure U ∪ V,
+        {have c1 : U ⊆ closure U := subset_closure,
+        have c2 : closure U ⊆ closure U ∪ V := subset_union_left (closure U) V,
+        by exact subset.trans c1 c2},
+      have b2 : U ∪ V ⊆ closure U ∪ V := 
+        (union_subset_iff.mpr ⟨b1, subset_union_right (closure U) V⟩),
+      rwa [hc.1] at b2,
+      by exact eq_univ_of_univ_subset b2},
+    {rw [union_comm _ _] at a1, rw [inter_comm _ _] at hU,
+     by exact disjoint_and_union_univ_imp_compl a1 hU}},
+
+  have h2 : U = -(closure V),
+    {have a1 : U ∪ closure V = univ, 
+      {have b1 : V ⊆ U ∪ closure V,
+        {have c1 : V ⊆ closure V := subset_closure,
+        have c2 : closure V ⊆ U ∪ closure V := subset_union_right U (closure V),
+        by exact subset.trans c1 c2},
+      have b2 : U ∪ V ⊆ U ∪ closure V := 
+        (union_subset_iff.mpr ⟨subset_union_left U (closure V), b1⟩),
+      rwa [hc.1] at b2, by exact eq_univ_of_univ_subset b2},
+    by exact disjoint_and_union_univ_imp_compl a1 hV},
+
+  have h3 : is_open U, 
+    {have a1 : is_closed (closure V) := is_closed_closure, rw h2, rwa is_closed at a1},
+  have h4 : is_open V, 
+    {have a1 : is_closed (closure U) := is_closed_closure, rw h1, rwa is_closed at a1},
+  
+  have h5 : U = -V := disjoint_and_union_univ_imp_compl hc.1 hc.2.1,
+  have h6 : V = -U := eq_compl_iff_compl_eq.mp h5,
+
+  have h7 : is_closed U, {rwa [is_closed,←h6]},
+  have h8 : is_closed V, {rwa [is_closed,←h5]},
+
+  have g1 : is_clopen U := ⟨h3,h7⟩, have g2 : is_clopen V := ⟨h4,h8⟩,
+
+  have g3, from connected_space.clopen_trivial U g1,
+  have g4, from connected_space.clopen_trivial V g2,
+
+  have UneqV : U ≠ V, 
+    {by_contradiction ac, simp at ac, have a1 := hc.2.1,
+    rw ac at a1, simp at a1, by exact absurd a1 hc.2.2.2},
+
+  have toUeqV : U = univ → V = univ → U = V, {intros a1 a2, rwa [a2]},
+
+  have g5 : U = univ → false,
+    {intro a1, by exact or.elim g4 
+      (assume b1, by exact absurd (toUeqV a1 b1) UneqV)
+      (assume b2, by exact absurd b2 hc.2.2.2)},
+
+  have g6 : U = ∅ → false, {intro a1, by exact absurd a1 hc.2.2.1},
+  
+  by exact or.elim g3 (assume a1, by exact g5 a1) (assume a2, by exact g6 a2),
+
 end
+
+
+
+-- 6. (TODO: use coercion rather than using bool itself?)
+theorem connected_def_cts_to_discrete [connected_space α] [discrete_two_point_space] :
+∀ f : α → bool, continuous f → ¬function.surjective f :=
+begin
+  intros f cf, by_contradiction h,
+  rw function.surjective at h, rw continuous at cf,
+
+  have hff' : is_open (f ⁻¹' {ff}), 
+    from cf {ff} (discrete_two_point_space.discreteness {ff}),
+  have htt' : is_open (f ⁻¹' {tt}), 
+    from cf {tt} (discrete_two_point_space.discreteness {tt}),
+
+  have hs : (f ⁻¹' {ff}) ∪ (f ⁻¹' {tt}) = @univ α,
+    begin
+      have a1 : ∀ x, x ∈ (f ⁻¹' {ff}) ∪ (f ⁻¹' {tt}),
+        begin
+          intro x, rw [mem_union], by_contradiction hx,
+          simp at hx, rw [not_or_distrib] at hx, 
+          have hy, from hx.1, simp at hx,
+          by exact absurd hx.2 hy,
+        end,
+      rwa [eq_univ_iff_forall],
+    end,
+
+  have he : (f ⁻¹' {ff}) ∩ (f ⁻¹' {tt}) = ∅,
+    {have a1 : ∀ x, x ∉ (f ⁻¹' {ff}) ∩ (f ⁻¹' {tt}), 
+    by simp, by exact eq_empty_iff_forall_not_mem.mpr a1},
+       
+  have hc1 : (f ⁻¹' {ff}) = -(f ⁻¹' {tt}),
+    {by exact disjoint_and_union_univ_imp_compl hs he},
+
+  have hc2 : (f ⁻¹' {tt}) = -(f ⁻¹' {ff}),
+    {by exact eq_compl_iff_compl_eq.mp hc1},
+   
+  
+  have Hc1 : closure (f ⁻¹' {ff}) = (f ⁻¹' {ff}),
+    {have hclff : is_closed (f ⁻¹' {ff}), {rwa [is_closed,←hc2]}, 
+    by exact closure_eq_of_is_closed hclff},
+  have Hc2 : closure (f ⁻¹' {tt}) = (f ⁻¹' {tt}),
+    {have hcltt : is_closed (f ⁻¹' {tt}), {rwa [is_closed,←hc1]}, 
+    by exact closure_eq_of_is_closed hcltt},
+
+  have Hs : is_separated (f ⁻¹' {ff}) (f ⁻¹' {tt}),
+    {rw is_separated,
+    have a1 : closure (f ⁻¹' {ff}) ∩ (f ⁻¹' {tt}) = ∅, {rwa [Hc1]}, 
+    have a2 : f ⁻¹' {ff} ∩ closure (f ⁻¹' {tt}) = ∅, {rwa [Hc2]},
+    by exact ⟨a1,a2⟩},
+
+  have HS := connected_def_separated_sets (f ⁻¹' {ff}) (f ⁻¹' {tt}) Hs,
+  simp at HS, have HS2 := neq_empty_imp_empty_to_union (HS hs he),
+
+
+
+  have P : ∀ b : bool, f ⁻¹' {b} = ∅ → false,
+    {intros b a1, 
+    have a2, from h b, 
+    have a3 : ∀ a, f a = b → a ∈ f ⁻¹' {b},
+      {intros a b1, rw [mem_preimage_eq,b1], simp},
+    have a4 : ∃ x, x ∈ f ⁻¹' {b}, from exists.elim a2 
+      (assume x, assume hx : f x = b,
+        have hy : x ∈ f ⁻¹' {b} := a3 x hx,
+        by exact ⟨x,hy⟩), 
+    by exact absurd a1 (ne_empty_iff_exists_mem.mpr a4)},
+
+  by exact or.elim HS2
+    (assume a1, by exact P ff a1)
+    (assume a2, by exact P tt a2),
+end
+
 
 ------------------------------------------------------------
 
@@ -439,7 +616,6 @@ begin
 
   have v1 : ¬U' ∩ A = ∅ → V' ∩ A = ∅, {intro hv, have hv2, from wA1 hv, rwa [inter_comm]},
   have v2 : ¬U' ∩ B = ∅ → V' ∩ B = ∅, {intro hv, have hv2, from wB1 hv, rwa [inter_comm]}, 
-
 
   have HA : (U' ∩ A = ∅) ∨ (V' ∩ A = ∅),
     by_contradiction HC, rw [not_or_distrib] at HC, 
@@ -594,3 +770,45 @@ end
 
  ------------------------------------------------------------
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/-
+
+theorem open_imp_preiage [topological_space α] [topological_space β] (f : α → β) (hf : continuous f) 
+(U : set β) : is_open U → is_open (f ⁻¹' U) := 
+begin
+    intro h1, exact ((assume s h, hf s h) U) h1
+end
+
+theorem cts_image_of_connected_is_connected [connected_space α] [topological_space β]
+{f : α → β} (hf : continuous f) : ∀ s : set α, is_connected s → is_connected (f '' s) :=
+begin
+intros hs hcs, by_contradiction h, rw is_connected at h, rw [classical.not_forall] at h, simp at h,
+end
+ 
+
+
+
+theorem M2PM5_sheet3_question1_4 [topological_space α] [topological_space β] {f : α → β} (hf : continuous f) 
+(V : set β) : is_closed V → is_closed (f ⁻¹' V) := 
+begin
+   intro h1, have hs, from continuous_iff_is_closed.mp hf,
+   exact ((assume s h, hs s h) V) h1,
+end
+
+
+-/
