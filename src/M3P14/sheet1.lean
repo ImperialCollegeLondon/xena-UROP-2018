@@ -3,11 +3,15 @@ import data.nat.modeq
 import data.nat.prime
 import tactic.norm_num
 import data.nat.gcd
+--import data.set 
+
 open classical 
 
 namespace nat
 
--- TODO : change ℕ to ℤ, but before that need to extend gcd to integers.
+-- TODO : change ℕ to ℤ, but before that we need to extend the definition of gcd to integers.
+
+def gcd_int (x y : ℤ ) : ℕ := gcd (int.nat_abs x) (int.nat_abs y)
 
 -- Show that for a, b, d integers, we have (da, db) = d(a,b).
 theorem q1a (a b d : ℕ) : gcd (d*a) (d*b) = d * (gcd a b) := gcd_mul_left d a b
@@ -32,11 +36,30 @@ end
 theorem q2a : ∃ x y : ℤ, 18 = 327*x + 120*y := 
     ⟨-66, 180, by norm_num⟩
 
+  #check gcd
+
 -- Find, with proof, all solutions to the linear diophantine equation 100x + 68y = 14.
-theorem q2b : ∀ x y : ℤ, 100*x + 68*y = 14 := sorry
+theorem q2b : ∃ A : set (ℤ×ℤ), ∀ x y : ℤ, (100*x + 68*y = 14 ↔ (x,y) ∈ A ):= 
+begin
+apply exists.intro ∅,
+
+assume x y,
+apply iff.intro,
+{
+
+    sorry,
+},
+{
+
+  intro h,
+  exact false.elim ‹(x, y) ∈ (∅ : set (ℤ×ℤ))›,
+}
+end
+
+#print notation ∅
+#check has_emptyc.emptyc
 
 -- Find a multiplicative inverse of 31 modulo 132.
---theorem q2c :
 theorem q2c : ∃ x : ℤ, 31*x % 132 = 1 := 
     ⟨115, by norm_num⟩
 
@@ -69,8 +92,8 @@ end
 -- Let m and n be integers. Show that the greatest common divisor of m and n is the unique positive integer d such that:
 --      - d divides both m and n, and
 --      - if x divides both m and n, then x divides d.
-theorem q3 : ∀ m n : ℕ, ∃! d : ℕ, ∀ x : ℤ, gcd m n = d → d ∣ m → d ∣ n → x ∣ m → x ∣ n → x ∣ d
-                                    := sorry
+--theorem q3 : ∀ m n : ℕ, ∃! d : ℕ, ∀ x : ℤ, gcd m n = d → d ∣ m → d ∣ n → x ∣ m → x ∣ n → x ∣ d
+                                    --:= sorry
 
 -- Let a and b be nonzero integers. Show that there is a unique positive integer m with the following two properties:
 --      - a and b divide m, and
@@ -212,47 +235,26 @@ apply exists_unique.intro m,
     }
   },
   {
+    have h3 : ¬coprime d a' ∧ ¬coprime d b', by rwa ← decidable.not_or_iff_and_not,
+    
     sorry,
   }
 },
 {
+  intros y h,
   sorry,
 }
 end 
 
-#print notation ∣
-#print has_dvd.dvd
-variables a b c : ℕ 
-
-
-
-variable gcd_dvd_b : (gcd a b) ∣ b
-variable b_diff_0 : (b≠0)
-#check  nat.div_mul_cancel gcd_dvd_b
-#check  nat.div_mul_cancel gcd_dvd_b
-
-variable a' : ℕ
-variable (adiff0: (a' > 0))
-variable (advdb: (a' ∣ a))
-variable (gcddivides : (gcd a b ∣ a))
-variable (eq:  a/(gcd a b) = a')
-#check nat.div_eq_iff_eq_mul_right adiff0 advdb 
-#check nat.eq_mul_of_div_eq_right advdb eq
-#check nat.eq_mul_of_div_eq_right gcddivides eq
-#print coprime
-#print notation ∣ 
-#check has_dvd.dvd 
-
-
 -- Show that the least common multiple of a and b is given by |ab|/(a,b)
 -- TODO: need to change ℕ to ℤ and use abs(a*b)
-theorem q4b : ∀ a b : ℕ, lcm a b = a*b/(gcd a b) := 
-begin
+theorem q4b : ∀ a b : ℕ, lcm a b = a*b/(gcd a b) := sorry
+/-begin
   intros a b,
   exact gcd_mul_lcm a b,
   sorry
 end
-
+-/
 
 -- Let m and n be positive integers, and let K be the kernel of the map:
 --      ℤ/mnℤ → ℤ/mℤ x ℤ/nℤ 
