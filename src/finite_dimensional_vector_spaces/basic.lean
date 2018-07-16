@@ -5,7 +5,7 @@ Author: Kevin Buzzard, Blair Shi
 
 This file is inspired by Johannes Hölzl's implementation of linear algebra in mathlib.
 
-The thing we improved is this file descripes finite dimentional vector spaces
+The thing we improved is this file describes finite dimentional vector spaces
 -/
 
 import algebra.module -- for definition of vector_space  

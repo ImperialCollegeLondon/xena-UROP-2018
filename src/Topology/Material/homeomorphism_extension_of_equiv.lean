@@ -4,8 +4,10 @@ import analysis.topology.infinite_sum
 import analysis.topology.topological_structures
 import analysis.topology.uniform_space
 
-import data.equiv.basic
+import data.equiv
+-- import data.equiv.basic
 
+local attribute [instance] classical.prop_decidable
 
 universes u v w
 
@@ -30,6 +32,98 @@ structure homeomorphism {α : Type*} {β : Type*} (X : topological_space α) (Y 
 
 definition is_homeomorphic_to {α : Type u} {β : Type v} (X :topological_space α) (Y : topological_space β) : Prop := nonempty (homeomorphism X Y)
 
+lemma id_map_continuous {α : Type u} {X : topological_space α} : continuous (@id α) :=
+begin
+  intros s H1,
+  exact H1,
+end
+
+lemma constant_map_is_continuous {α : Type u} {β : Type v} {X : topological_space α} {Y : topological_space β} {f : α → β} (H : (∃ (b : β), f = function.const α b)) : continuous f :=
+begin
+  unfold continuous,
+  cases H with b Hb,
+    rw Hb,
+    intros s Hs,
+    by_cases (b ∈ s),
+    unfold set.preimage,
+    unfold function.const,
+    have H : {x : α | b ∈ s} = univ,
+      apply set.ext,
+      simp,
+      intro,
+      assumption,
+    rw H,
+    exact X.is_open_univ,
+  unfold set.preimage,
+  unfold function.const,
+  have H : {x : α | b ∈ s} = ∅,
+    apply set.ext,
+    simp,
+    intro,
+    assumption,
+  rw H,
+  simp,
+end
+
+def indiscrete_topology (α : Type u) : topological_space α := {
+  is_open := λ y, y = ∅ ∨ y = univ,
+  is_open_univ := or.inr rfl,
+  is_open_inter := begin 
+    intros s t Hs Ht, 
+    cases Hs with Hsempty Hsuniv;
+      cases Ht with Htempty Htuniv,
+          rw Hsempty, 
+          simp, 
+        rw Hsempty, 
+        simp, 
+      rw Htempty,
+      simp, 
+    rw [Hsuniv, Htuniv], 
+    simp, 
+  end,
+  is_open_sUnion := begin 
+    intros I HI, 
+    by_cases ∃ t ∈ I, t = univ,
+      cases h with U HU,
+      cases HU with U_in_I U_is_univ, 
+      apply or.inr, 
+      rw U_is_univ at U_in_I, 
+      exact set.eq_of_subset_of_subset (set.subset_univ ⋃₀ I) (set.subset_sUnion_of_mem U_in_I), 
+      simp at h, 
+      apply or.inl, 
+      have HI2 : ∀ (t : set α), t ∈ I → t = ∅, 
+      intros t Ht, 
+      cases (HI t Ht), 
+        assumption, 
+      rw h_1 at Ht, 
+      cc, 
+    rw set.sUnion_eq_Union, 
+    apply set.ext, 
+    intro x, 
+    simp, 
+    intros t Ht, 
+    rw (HI2 t Ht), 
+    simp, 
+  end
+}
+
+def discrete_topology (α : Type u) : topological_space α := {
+  is_open := λ y, true,
+  is_open_univ := trivial,
+  is_open_inter := λ _ _ _ _, trivial,
+  is_open_sUnion := λ _ _, trivial,
+}
+
+lemma map_from_discrete_is_continuous {α : Type u} {β : Type v} [topological_space α] [Y : topological_space β] 
+(H : X = indiscrete_topology α) (f : α → β) : continuous f := 
+begin
+  admit,
+end
+
+theorem smap_from_discrete_is_continuous {α : Type u} {β : Type v} {X : topological_space α} {Y : topological_space β}
+{H : X = indiscrete_topology α} (f : α → β) : continuous f :=  map_from_discrete_is_continuous H f
+
+#print continuous
 
 definition id_is_homeomorphism {α : Type u} {X : topological_space α} : homeomorphism X X := {
   to_fun := id,
@@ -61,7 +155,6 @@ definition id_is_homeomorphism {α : Type u} {X : topological_space α} : homeom
       exact H1, 
     end,
 }
-
 theorem homeomorphism_is_reflexive : reflexive (λ X Y : Σ α, topological_space α, is_homeomorphic_to X.2 Y.2) :=
 begin 
   unfold reflexive,
@@ -140,10 +233,8 @@ theorem continuous_basis_to_continuous {α : Type*} {β : Type*} [X : topologica
 begin
   intros f Basis HBasis HBasisInverses U HU,
   have HU_union_basis : ∃ S ⊆ Basis, U = ⋃₀ S, by exact topological_space.sUnion_basis_of_is_open HBasis HU,
-  apply exists.elim HU_union_basis,
-  intros S HS,
-  apply exists.elim HS,
-  intros HS1 HS2,
+  cases HU_union_basis with S HS,
+  cases HS with HS1 HS2,
   rw HS2,
   rw set.preimage_sUnion,
   have f_inv_t_open : ∀ t : set β, t ∈ S → topological_space.is_open X (f ⁻¹' t),
@@ -157,8 +248,7 @@ begin
     have H3 : ∀ (t : set α), t ∈ set_of_preimages → topological_space.is_open X t,
       intros tinv Htinv,
       simp at Htinv,
-      apply exists.elim Htinv,
-      intros t Ht,
+      cases Htinv with t Ht,
       rw Ht.2,
       exact f_inv_t_open t Ht.1,
     exact X.is_open_sUnion set_of_preimages H3,  
@@ -170,9 +260,27 @@ begin
     split,
       intro Hx,
       simp,  
-    
-
-
+      simp at Hx,
+      cases Hx with f_inv_t Hf_inv_t,
+      cases Hf_inv_t.1 with t Ht,
+      existsi t,
+      split,
+        exact Ht.1,
+      rw ← set.mem_preimage_eq,
+      rw ← Ht.2,
+      exact Hf_inv_t.2,
+    intro Hx,
+    simp,
+    rw set.mem_Union_eq at Hx,
+    cases Hx with i Hi,
+    simp at Hi,
+    existsi (f ⁻¹' i),
+    split,
+      existsi i,
+      exact ⟨Hi.1, eq.refl (f ⁻¹' i)⟩,
+    simp,
+    exact Hi.2,
+  rw ← equal,
+  assumption,
 end
-#print notation 
-#print prefix set
+
