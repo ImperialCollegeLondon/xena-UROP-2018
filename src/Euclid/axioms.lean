@@ -10,7 +10,7 @@ class Euclidean_plane (point : Type) :=
 (seg_cons : ∀ a b c q, ∃ x, B q a x → eqd a x b c)
 (five_seg : ∀ a b c d a' b' c' d', a ≠ b → B a b c → B a' b' c' → eqd a b a' b' 
 → eqd b c b' c' → eqd a d a' d' → eqd b d b' d' → eqd c d c' d')
-(btw_same : ∀ a b, B a b a → a = b)
+(bet_same : ∀ a b, B a b a → a = b)
 (inner_pasch : ∀ a b c p q, B a p c → B b q c → ∃ x, B p x b → B q x a)
 (two_dimensions : ∃ a b c, ¬B a b c → ¬B b c a → ¬B c a b)
 (not_three_dimensions : ∀ a b c p₁ p₂, p₁ ≠ p₂ → eqd a p₁ a p₂ → eqd b p₁ b p₂ 
@@ -18,9 +18,9 @@ class Euclidean_plane (point : Type) :=
 (euclids : ∀ a b c d t, B a d t → B b d c → a ≠ d → ∃ x y, B a b x → B a c y → B y t x)
 (cont : ∀ X Y : set point, 
   (∃ a, ∀ x y, x ∈ X → y ∈ Y → B a x y) → (∃ b, ∀ x y, x ∈ X → y ∈ Y → B x b y))
-(refl_btw : ∀ a b, B a b b)
-(btw_itself : ∀ a b, a = b → B a b a)
-(btw_symm : ∀ a b c , B a b c → B c b a)
+(refl_bet : ∀ a b, B a b b)
+(bet_itself : ∀ a b, a = b → B a b a)
+(bet_symm : ∀ a b c , B a b c → B c b a)
 (in_trans : ∀ a b c d, B a b d → B b c d → B a b c)
 (out_trans : ∀ a b c d, B a b c → B b c d → b ≠ c → B a b d)
 (in_conn : ∀ a b c d, B a b d → B a c d → (B a b c ∨ B a c b))
@@ -30,7 +30,7 @@ class Euclidean_plane (point : Type) :=
 → B c d x → B c' d' x → d ≠ x → d' ≠ x → c = c')
 (existence_triangle : ∀ a b a' b' c' p, eqd a b a' b' → ∃ c x, eqd a c a' c' → eqd b c b' c' 
 → B c x p → (B a b x ∨ B b x a ∨ B x a b))
-(dens_btw : ∀ x z, x ≠ z → ∃ y, x ≠ y → z ≠ y → B x y z)
+(dens_bet : ∀ x z, x ≠ z → ∃ y, x ≠ y → z ≠ y → B x y z)
 (add_dist : ∀ x y z x' y' z', B x y z → B x' y' z' → eqd x y x' y' 
 → eqd y z y' z' → eqd x z x' z')
 (sub_dist : ∀ x y z x' y' z', B x y z → B x' y' z' → eqd x z x' z' 
@@ -41,7 +41,7 @@ open Euclidean_plane
 variables {point : Type} [Euclidean_plane point]
 
 example (a b : point) : eqd a a b b :=
-sub_dist a a b b b a (btw_symm b a a (refl_btw b a)) (btw_symm a b b (refl_btw a b)) (eqd_refl a b) (eqd_refl a b)
+sub_dist a a b b b a (bet_symm b a a (refl_bet b a)) (bet_symm a b b (refl_bet a b)) (eqd_refl a b) (eqd_refl a b)
 
 theorem dist_reflex (a b : point) : eqd a b a b :=
 eqd_trans b a a b a b (eqd_refl b a) (eqd_refl b a)
@@ -64,3 +64,7 @@ instance point_setoid : setoid (point × point) :=
 -- a good test to see if you've got the definitions right!
 definition distance_values (point : Type) [Euclidean_plane point] := 
 quotient (@point_setoid point _)
+
+def collinear (a b c : point) : Prop := B a b c ∨ B b c a ∨ B c a b
+
+def parallel (a b c d : point) (h1 : a ≠ b) (h2 : c ≠ d) : Prop := ∀ x, collinear a b x → ((collinear a b c ∧ collinear a b d) ∨ ¬collinear c d x) 
