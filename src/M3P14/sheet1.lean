@@ -9,6 +9,7 @@ open classical
 
 namespace nat
 
+
 -- Show that for a, b, d integers, we have (da, db) = d(a,b).
 --TODO: change ℕ to ℤ
 theorem q1a (a b d : ℤ) : int.gcd (d*a) (d*b) = d * (int.gcd a b) := gcd_mul_left d a b
@@ -108,26 +109,14 @@ end
 -- TODO: to find in mathlib
 --theorem gcd_eq_pair_number (a b : ℕ) : ∃ x y : ℤ,  gcd a b = x*a + b*y := sorry 
 -- theorem gcd_iff_pair_number (a b d : ℕ) : gcd a b = d ↔ ∃ x y : ℤ, x*a + b*y = d := sorry
-#eval (xgcd 5 3)
-
 theorem coprime_dvd_of_dvd_mul {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : coprime a b) : 
-    a*b ∣ c := 
-begin
-  have gcd_eq_one : gcd a b = 1, from coprime.gcd_eq_one h3,
-  have xy_equals_1 : ∃ x y : ℤ, x*a + b*y = 1, from (gcd_iff_pair_number a b 1).mp gcd_eq_one,
-   have xyc_equals_c : ∃ x y : ℤ, x*a*c + b*y*c = c, 
-   {
-    sorry,
-   },
-  sorry,
-end
+    a*b ∣ c := sorry
+
 
 theorem q4a : ∀ a b : ℕ, ∃! m : ℕ, ∀ n : ℕ, a ≠ 0 ∧ b ≠ 0 ∧   
                                 a ∣ m ∧ b ∣ m ∧ a ∣ n ∧ b ∣ n → m ∣ n
                                 := 
 begin 
---existence
---define m = ab/(a,b) , a=da', b=db' → d ∣ n, a'∣ n, b'∣ n → m= da'b' ∣n as d, a', b' is coprime 
 intro a, intro b,
 let m := a*b/(gcd a b),
 have m_def : m = a*b/(gcd a b), by simp,
@@ -145,32 +134,9 @@ apply exists_unique.intro m,
   have bp_eq : b' = b/(gcd a b), by simp,
   let d := gcd a b,
   have d_eq : d = gcd a b, by simp,
-
-  cases em (coprime d a' ∨ coprime d b') with h1 h2,
-  {
-      have eq_a_bis : a = gcd a b * a', from nat.eq_mul_of_div_eq_right gcd_dvd_a ap_eq,
-      have a'_dvd_a : a' ∣ a,
-      {
-        rw eq_a_bis,
-        exact dvd_mul_left _ _,
-      },
-      have eq_b_bis : b = gcd a b * b', from nat.eq_mul_of_div_eq_right gcd_dvd_b bp_eq,
-      have b'_dvd_b : b' ∣ b,
-      {
-        rw eq_b_bis,
-        exact dvd_mul_left _ _,
-      },
-      have a_dvd_n : a ∣ n, from h.right.right.right.right.left,
-      have a'_dvd_n : a' ∣ n, from gcd_dvd_trans a'_dvd_a a_dvd_n, 
-      have b'_dvd_n : b' ∣ n, from gcd_dvd_trans b'_dvd_b b_dvd_n, 
-      have eq2 : (b / (gcd a b)) * gcd a b = b, from nat.div_mul_cancel gcd_dvd_b,
-      --have eq2_bis : gcd a b * a / (gcd a b) = a, from  nat.mul_comm (nat.div_mul_cancel gcd_dvd_a),
-      have eq_b : d*b' = b, 
-      {
-        calc
-           d*b' =  b : by rw [nat.mul_comm,d_eq, bp_eq, eq2]
-      },
-       have eq_a : d*a' = a,
+  have eq2 : (b / (gcd a b)) * gcd a b = b, from nat.div_mul_cancel gcd_dvd_b,
+  
+  have eq_a : d*a' = a,
       {
         calc
            d*a' =  gcd a b * a' : by rw d_eq
@@ -178,90 +144,78 @@ apply exists_unique.intro m,
            ...  =   a / gcd a b * gcd a b  : by rw nat.mul_comm
            ...  =  a  : by rw nat.div_mul_cancel gcd_dvd_a
       },
-    cases h1 with cda' cdb',
-    {
-      have cdba : coprime (d*b') a', 
-      {
-          have cbpap : coprime b' a',
-          {
-              have b_gr_0 : b > 0, 
-              {
-                 rw pos_iff_ne_zero,
-                 exact h.right.left,
-              },
-              have gcd_gr_0 : gcd b a > 0, from nat.gcd_pos_of_pos_left a b_gr_0,
-              have cop_fractions : coprime (b /gcd b a) (a / gcd b a), from nat.coprime_div_gcd_div_gcd gcd_gr_0,
-              have cop_fractions_2 : coprime (b /gcd a b) (a / gcd a b), from eq.subst (gcd_comm b a) cop_fractions,
-              have cop_fractions_3 : coprime b' (a / gcd a b), from eq.subst bp_eq cop_fractions_2,
-              exact eq.subst ap_eq cop_fractions_3,
-          },
-          exact coprime.mul cda' cbpap,
-      },
-      have cba : coprime b a', from eq.subst eq_b cdba,
-      have ba'_dvd_n : b*a' ∣ n, from coprime_dvd_of_dvd_mul b_dvd_n a'_dvd_n cba,
-      have  eq3 : b*a' = m,
-      {
+  have eq_b : d*b' = b,
+   {
         calc
-           b*a'    =  b * (a / gcd a b) : by rw ap_eq
-               ... =  (b * a) / gcd a b :  by rw nat.mul_div_assoc b gcd_dvd_a 
-               ... =  a * b / gcd a b : by rw nat.mul_comm
-               ... = m : by rw m_def 
-      },
-      exact eq.subst eq3 ba'_dvd_n,
+           d*b' =  b : by rw [nat.mul_comm,d_eq, bp_eq, eq2]
+   },
+  have da'_dvd_n: d*a' ∣ n, from eq.subst (eq.symm eq_a) a_dvd_n,
+  have db'_dvd_n: d*b' ∣ n, from eq.subst (eq.symm eq_b) b_dvd_n,
+  have gcd_pos: gcd a b > 0, from gcd_pos_of_pos_left b ((nat.pos_iff_ne_zero).mpr h.left),
+  have middlestep: a' * gcd a b ∣ n / d * gcd a b, 
+  {
+    rw mul_comm,
+    rw ← d_eq,
+    have d_dvd_n: d ∣ n, from dvd_of_mul_right_dvd da'_dvd_n,
+    rwa nat.div_mul_cancel d_dvd_n, 
+
+  },
+  have a'_dvd_n_dvd_d: a' ∣ n/d, from dvd_of_mul_dvd_mul_right gcd_pos middlestep,
+  have middlestep2: b' * gcd a b ∣ n / d * gcd a b, 
+  {
+    rw mul_comm,
+    rw ← d_eq,
+    have d_dvd_n: d ∣ n, from dvd_of_mul_right_dvd db'_dvd_n,
+    rwa nat.div_mul_cancel d_dvd_n, 
+
+  },
+  have b'_dvd_n_dvd_d: b' ∣ n/d, from dvd_of_mul_dvd_mul_right gcd_pos middlestep2,
+  have capbp : coprime a' b',
+    {
+        have b_gr_0 : b > 0, 
+        {
+            rw pos_iff_ne_zero,
+            exact h.right.left,
+        },
+        have gcd_gr_0 : gcd a b > 0, from nat.gcd_pos_of_pos_right a b_gr_0,
+        have cop_fractions : coprime (a / gcd a b) (b /gcd a b), from nat.coprime_div_gcd_div_gcd gcd_gr_0,
+        have cop_fractions_2 : coprime a' (b / gcd a b), from eq.subst ap_eq cop_fractions,
+        exact eq.subst bp_eq cop_fractions_2,
 
     },
-    {
-     have cdba : coprime (d*a') b', 
-      {
-          have capbp : coprime a' b',
-          {
-              have b_gr_0 : b > 0, 
-              {
-                 rw pos_iff_ne_zero,
-                 exact h.right.left,
-              },
-              have gcd_gr_0 : gcd a b > 0, from nat.gcd_pos_of_pos_right a b_gr_0,
-              have cop_fractions : coprime (a / gcd a b) (b /gcd a b), from nat.coprime_div_gcd_div_gcd gcd_gr_0,
-              have cop_fractions_2 : coprime a' (b / gcd a b), from eq.subst ap_eq cop_fractions,
-              exact eq.subst bp_eq cop_fractions_2,
-
-          },
-          exact coprime.mul cdb' capbp,
-      },
-      have cba : coprime a b', from eq.subst eq_a cdba,
-      have ba'_dvd_n : a*b' ∣ n, from coprime_dvd_of_dvd_mul a_dvd_n b'_dvd_n cba,
-      have  eq3 : a*b' = m,
+  have apbp_dvd_n_dvd_d: a'*b' ∣ n/d, from coprime_dvd_of_dvd_mul a'_dvd_n_dvd_d b'_dvd_n_dvd_d capbp,
+  have : a'*b'*d ∣ n,
+  {
+    have d_gr_zero : d > 0, from (eq.subst (eq.symm d_eq) gcd_pos),
+    
+    rw ← nat.mul_div_cancel n d_gr_zero,
+    have : a' * b' * d ∣ (n / d) * d, from mul_dvd_mul_right apbp_dvd_n_dvd_d d,
+    have : a' * b' * d ∣ d * (n / d), from eq.subst (mul_comm (n / d) d) this, 
+    have d_dvd_n: d ∣ n, from dvd_of_mul_right_dvd da'_dvd_n,
+    have : a' * b' * d ∣ d * n / d, from  eq.subst (eq.symm (nat.mul_div_assoc d d_dvd_n)) this,
+    exact eq.subst (mul_comm d n) this,
+  },
+have  eq3 : a'*b'*d = m,
       {
         calc
-           a*b'    =  a * (b / gcd a b) : by rw bp_eq
-               ... =  (a * b) / gcd a b :  by rw nat.mul_div_assoc a gcd_dvd_b
-               ... = m : by rw m_def 
+           a'*b'*d    =  (a/gcd a b) * ((b/gcd a b) * gcd a b) : by rw [ap_eq, bp_eq, d_eq]
+               ... = (a/gcd a b) * (gcd a b * (b/gcd a b)) : by rw nat.mul_comm 
+               ... = (a/gcd a b) * (gcd a b * b/gcd a b) : by rw ←nat.mul_div_assoc (gcd a b) gcd_dvd_b
+               ... =  (a/gcd a b) * (b * gcd a b /gcd a b) :  by rw nat.mul_comm (gcd a b) b 
+               ... = (a/gcd a b) * b : by rw nat.mul_div_cancel b gcd_pos 
+               ... =  b * (a / gcd a b) : by rw nat.mul_comm 
+               ... =  b * a / gcd a b : by rw nat.mul_div_assoc b gcd_dvd_a 
+               ... = m : by rw [mul_comm,m_def] 
       },
-      exact eq.subst eq3 ba'_dvd_n,
-    }
-  },
-  {
-    have h3 : ¬coprime d a' ∧ ¬coprime d b', by rwa ← decidable.not_or_iff_and_not,
-    
-    sorry,
-    
-  }
+  rwa ←eq3,
 },
 {
-  intros y h,
-
-  sorry,
+let p := lcm a b,
+let q := lcm a b,
+-- p divides q and q divides p => p = q
 }
-end 
-
-theorem q4a_bis : ∀ a b : ℕ, ∃! m : ℕ, ∀ n : ℕ, a ≠ 0 ∧ b ≠ 0 ∧   
-                                a ∣ m ∧ b ∣ m ∧ a ∣ n ∧ b ∣ n → m ∣ n
-                                := 
-begin 
-  
-
 end
-
+#check lcm 
 -- Show that the least common multiple of a and b is given by |ab|/(a,b)
 -- TODO: need to change ℕ to ℤ and use abs(a*b)
 theorem q4b : ∀ a b : ℕ, lcm a b = a*b/(gcd a b) := sorry
