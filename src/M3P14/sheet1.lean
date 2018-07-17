@@ -3,16 +3,20 @@ import data.nat.modeq
 import data.nat.prime
 import tactic.norm_num
 import data.nat.gcd
+--import data.set 
+
 open classical 
 
 namespace nat
 
--- TODO : change ℕ to ℤ, but before that need to extend gcd to integers.
+def gcd_int (x y : ℤ ) : ℕ := gcd (int.nat_abs x) (int.nat_abs y)
 
 -- Show that for a, b, d integers, we have (da, db) = d(a,b).
+--TODO: change ℕ to ℤ
 theorem q1a (a b d : ℕ) : gcd (d*a) (d*b) = d * (gcd a b) := gcd_mul_left d a b
 
 -- Let a, b, n integers, and suppose that n|ab. Show that n/(a,b) divides b.
+--TODO: change ℕ to ℤ
 theorem q1b (a b n : ℕ) (ha : a > 0) (hn : n > 0) : n ∣ (a*b) → (n / gcd a n) ∣ b := λ h,
 have n / gcd n a ∣ b * (a / gcd n a) := dvd_of_mul_dvd_mul_right (gcd_pos_of_pos_left a hn) 
 begin
@@ -33,10 +37,23 @@ theorem q2a : ∃ x y : ℤ, 18 = 327*x + 120*y :=
     ⟨-66, 180, by norm_num⟩
 
 -- Find, with proof, all solutions to the linear diophantine equation 100x + 68y = 14.
-theorem q2b : ∀ x y : ℤ, 100*x + 68*y = 14 := sorry
+theorem q2b : ∃ A : set (ℤ×ℤ), ∀ x y : ℤ, (100*x + 68*y = 14 ↔ (x,y) ∈ A ):= 
+begin
+apply exists.intro ∅,
+assume x y,
+apply iff.intro,
+{
+
+    sorry,
+},
+{
+  intro h,
+  exact false.elim ‹(x, y) ∈ (∅ : set (ℤ×ℤ))›,
+}
+end
+
 
 -- Find a multiplicative inverse of 31 modulo 132.
---theorem q2c :
 theorem q2c : ∃ x : ℤ, 31*x % 132 = 1 := 
     ⟨115, by norm_num⟩
 
@@ -44,23 +61,22 @@ theorem q2c : ∃ x : ℤ, 31*x % 132 = 1 :=
 theorem q2d : ∃ x : ℤ, x % 9 = 3 → x % 49 = 1 :=  
     ⟨-195, by norm_num⟩
 
-theorem extended_chinese_remainder 
-{p q r : ℕ}
-(co : coprime p q ∧ coprime q r ∧ coprime r p) (a b c: ℕ) : {k // k ≡ a [MOD p] ∧ k ≡ b [MOD q] ∧ k ≡ c[MOD r]} :=sorry 
-
 
 -- Find, with proof, the smallest nonnegative integer n such that n = 1 (mod 3), n = 4 (mod 5), and n = 3 (mod 7).
+theorem extended_chinese_remainder {p q r : ℕ} (co : coprime p q ∧ coprime q r ∧ coprime r p) (a b c: ℕ) :
+    {k // k ≡ a [MOD p] ∧ k ≡ b [MOD q] ∧ k ≡ c[MOD r]} := sorry 
+
 theorem q2e : ∃ n : ℕ, ∀ n₂ : ℕ, n % 3 = 1 ∧ n % 5 = 4 ∧ n % 7 = 3
                             → n₂ % 3 = 1 ∧ n₂ % 5 = 4 ∧ n₂ % 7 = 3 → n ≤ n₂ 
                             := 
 begin
---@extended_chinese_remainder 3 5 7 dec_trivial 1 4 3
-let n := 94,
-let p := λ n, n % 3 = 1 ∧ n % 5 = 4 ∧ n % 7 = 3,
-have h : ∃ n : ℕ, p n, from  ⟨94, dec_trivial⟩,
-apply exists.intro (nat.find h),
-assume n₂ hn hn₂,
-exact nat.find_min' h hn₂,
+  --@extended_chinese_remainder 3 5 7 dec_trivial 1 4 3
+  let n := 94,
+  let p := λ n, n % 3 = 1 ∧ n % 5 = 4 ∧ n % 7 = 3,
+  have h : ∃ n : ℕ, p n, from  ⟨94, dec_trivial⟩,
+  apply exists.intro (nat.find h),
+  assume n₂ hn hn₂,
+  exact nat.find_min' h hn₂,
 end 
 
 
@@ -69,15 +85,16 @@ end
 -- Let m and n be integers. Show that the greatest common divisor of m and n is the unique positive integer d such that:
 --      - d divides both m and n, and
 --      - if x divides both m and n, then x divides d.
+--TODO: change ℕ to ℤ
 theorem q3 : ∀ m n : ℕ, ∃! d : ℕ, ∀ x : ℤ, gcd m n = d → d ∣ m → d ∣ n → x ∣ m → x ∣ n → x ∣ d
                                     := sorry
+
 
 -- Let a and b be nonzero integers. Show that there is a unique positive integer m with the following two properties:
 --      - a and b divide m, and
 --      - if n is any number divisible by both a and b, then m|n.
 -- The number m is called the least common multiple of a and b.  
- 
- 
+ --TODO: change ℕ to ℤ
 theorem gcd_dvd_trans {a b c : ℕ} : a ∣ b → b ∣ c → a ∣ c := 
 begin 
   intro Hab, 
@@ -91,7 +108,32 @@ begin
 end  
 
 -- TODO: to find in mathlib
-theorem coprime_dvd_of_dvd_mul {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : coprime a b) : a*b ∣ c := sorry 
+--theorem gcd_eq_pair_number (a b : ℕ) : ∃ x y : ℤ,  gcd a b = x*a + b*y := sorry 
+theorem gcd_iff_pair_number (a b d : ℕ) : gcd a b = d ↔ ∃ x y : ℤ, x*a + b*y = d := sorry
+
+theorem coprime_dvd_of_dvd_mul {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : coprime a b) : 
+    a*b ∣ c := 
+begin
+  have gcd_eq_one : gcd a b = 1, from coprime.gcd_eq_one h3,
+  have xy_equals_1 : ∃ x y : ℤ, x*a + b*y = 1, from (gcd_iff_pair_number a b 1).mp gcd_eq_one,
+   have xyc_equals_c : ∃ x y : ℤ, x*a*c + b*y*c = c, 
+   {
+     apply exists.intro,
+    {
+      apply exists.intro,
+      {
+        sorry,
+      },
+      {
+        sorry,
+      }
+    },
+    {
+      sorry,
+    }
+   },
+  sorry,
+end
 
 theorem q4a : ∀ a b : ℕ, ∃! m : ℕ, ∀ n : ℕ, a ≠ 0 ∧ b ≠ 0 ∧   
                                 a ∣ m ∧ b ∣ m ∧ a ∣ n ∧ b ∣ n → m ∣ n
@@ -212,47 +254,28 @@ apply exists_unique.intro m,
     }
   },
   {
+    have h3 : ¬coprime d a' ∧ ¬coprime d b', by rwa ← decidable.not_or_iff_and_not,
+    
     sorry,
+    
   }
 },
 {
+  intros y h,
+
   sorry,
 }
 end 
 
-#print notation ∣
-#print has_dvd.dvd
-variables a b c : ℕ 
-
-
-
-variable gcd_dvd_b : (gcd a b) ∣ b
-variable b_diff_0 : (b≠0)
-#check  nat.div_mul_cancel gcd_dvd_b
-#check  nat.div_mul_cancel gcd_dvd_b
-
-variable a' : ℕ
-variable (adiff0: (a' > 0))
-variable (advdb: (a' ∣ a))
-variable (gcddivides : (gcd a b ∣ a))
-variable (eq:  a/(gcd a b) = a')
-#check nat.div_eq_iff_eq_mul_right adiff0 advdb 
-#check nat.eq_mul_of_div_eq_right advdb eq
-#check nat.eq_mul_of_div_eq_right gcddivides eq
-#print coprime
-#print notation ∣ 
-#check has_dvd.dvd 
-
-
 -- Show that the least common multiple of a and b is given by |ab|/(a,b)
 -- TODO: need to change ℕ to ℤ and use abs(a*b)
-theorem q4b : ∀ a b : ℕ, lcm a b = a*b/(gcd a b) := 
-begin
+theorem q4b : ∀ a b : ℕ, lcm a b = a*b/(gcd a b) := sorry
+/-begin
   intros a b,
   exact gcd_mul_lcm a b,
   sorry
 end
-
+-/
 
 -- Let m and n be positive integers, and let K be the kernel of the map:
 --      ℤ/mnℤ → ℤ/mℤ x ℤ/nℤ 
