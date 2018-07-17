@@ -9,11 +9,9 @@ open classical
 
 namespace nat
 
-def gcd_int (x y : ℤ ) : ℕ := gcd (int.nat_abs x) (int.nat_abs y)
-
 -- Show that for a, b, d integers, we have (da, db) = d(a,b).
 --TODO: change ℕ to ℤ
-theorem q1a (a b d : ℕ) : gcd (d*a) (d*b) = d * (gcd a b) := gcd_mul_left d a b
+theorem q1a (a b d : ℤ) : int.gcd (d*a) (d*b) = d * (int.gcd a b) := gcd_mul_left d a b
 
 -- Let a, b, n integers, and suppose that n|ab. Show that n/(a,b) divides b.
 --TODO: change ℕ to ℤ
@@ -36,10 +34,10 @@ end
 theorem q2a : ∃ x y : ℤ, 18 = 327*x + 120*y := 
     ⟨-66, 180, by norm_num⟩
 
--- Find, with proof, all solutions to the linear diophantine equation 100x + 68y = 14.
-theorem q2b : ∃ A : set (ℤ×ℤ), ∀ x y : ℤ, (100*x + 68*y = 14 ↔ (x,y) ∈ A ):= 
+-- Find, with proof, all solutions to the linear diophantine equation 110x + 68y = 14.
+theorem q2b : ∃ A : set (ℤ×ℤ), ∀ x y : ℤ, (110*x + 68*y = 14 ↔ (x,y) ∈ A ):= 
 begin
-apply exists.intro ∅,
+apply exists.intro ∅,  --the answer is not ∅ 
 assume x y,
 apply iff.intro,
 {
@@ -109,7 +107,8 @@ end
 
 -- TODO: to find in mathlib
 --theorem gcd_eq_pair_number (a b : ℕ) : ∃ x y : ℤ,  gcd a b = x*a + b*y := sorry 
-theorem gcd_iff_pair_number (a b d : ℕ) : gcd a b = d ↔ ∃ x y : ℤ, x*a + b*y = d := sorry
+-- theorem gcd_iff_pair_number (a b d : ℕ) : gcd a b = d ↔ ∃ x y : ℤ, x*a + b*y = d := sorry
+#eval (xgcd 5 3)
 
 theorem coprime_dvd_of_dvd_mul {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : coprime a b) : 
     a*b ∣ c := 
@@ -118,19 +117,7 @@ begin
   have xy_equals_1 : ∃ x y : ℤ, x*a + b*y = 1, from (gcd_iff_pair_number a b 1).mp gcd_eq_one,
    have xyc_equals_c : ∃ x y : ℤ, x*a*c + b*y*c = c, 
    {
-     apply exists.intro,
-    {
-      apply exists.intro,
-      {
-        sorry,
-      },
-      {
-        sorry,
-      }
-    },
-    {
-      sorry,
-    }
+    sorry,
    },
   sorry,
 end
@@ -266,6 +253,14 @@ apply exists_unique.intro m,
   sorry,
 }
 end 
+
+theorem q4a_bis : ∀ a b : ℕ, ∃! m : ℕ, ∀ n : ℕ, a ≠ 0 ∧ b ≠ 0 ∧   
+                                a ∣ m ∧ b ∣ m ∧ a ∣ n ∧ b ∣ n → m ∣ n
+                                := 
+begin 
+  
+
+end
 
 -- Show that the least common multiple of a and b is given by |ab|/(a,b)
 -- TODO: need to change ℕ to ℤ and use abs(a*b)
