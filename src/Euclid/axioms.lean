@@ -13,9 +13,9 @@ class Euclidean_plane (point : Type) :=
 (bet_same : ∀ a b, B a b a → a = b)
 (inner_pasch : ∀ a b c p q, B a p c → B b q c → ∃ x, B p x b → B q x a)
 (two_dimensions : ∃ a b c, ¬B a b c → ¬B b c a → ¬B c a b)
-(not_three_dimensions : ∀ a b c p₁ p₂, p₁ ≠ p₂ → eqd a p₁ a p₂ → eqd b p₁ b p₂ 
-→ eqd c p₁ c p₂ → (B a b c ∨ B b c a ∨ B c a b))
-(euclids : ∀ a b c d t, B a d t → B b d c → a ≠ d → ∃ x y, B a b x → B a c y → B y t x)
+(not_three_dimensions : ∀ a b c p q, p ≠ q → eqd a p a q → eqd b p b q 
+→ eqd c p c q → (B a b c ∨ B b c a ∨ B c a b))
+(euclids : ∀ a b c d t, B a d t → B b d c → a ≠ d → ∃ x y, B a b x → B a c y → B x t y)
 (cont : ∀ X Y : set point, 
   (∃ a, ∀ x y, x ∈ X → y ∈ Y → B a x y) → (∃ b, ∀ x y, x ∈ X → y ∈ Y → B x b y))
 (refl_bet : ∀ a b, B a b b)
@@ -35,6 +35,8 @@ class Euclidean_plane (point : Type) :=
 → eqd y z y' z' → eqd x z x' z')
 (sub_dist : ∀ x y z x' y' z', B x y z → B x' y' z' → eqd x z x' z' 
 → eqd y z y' z' → eqd x y x' y')
+
+
 
 open Euclidean_plane 
 
@@ -70,3 +72,8 @@ def collinear (a b c : point) : Prop := B a b c ∨ B b c a ∨ B c a b
 def parallel (a b c d : point) (h1 : a ≠ b) (h2 : c ≠ d) : Prop := ∀ x, collinear a b x → ((collinear a b c ∧ collinear a b d) ∨ ¬collinear c d x) 
 
 def circle (a b :point) : set point := {x : point | eqd a b a x}
+
+theorem intersect_circle (a b c q p r : point) : B a q p → B c p r → eqd c b c r 
+→ ∃ x, eqd c x c p → B a x b := sorry
+
+
