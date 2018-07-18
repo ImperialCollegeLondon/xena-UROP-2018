@@ -1,4 +1,4 @@
-import algebra.group algebra.group_power init.algebra data.real.basic group_theory.subgroup data.complex.basic group_theory.coset
+import xenalib.Ellen_Arlt_matrix_rings algebra.group algebra.group_power init.algebra data.real.basic group_theory.subgroup data.complex.basic group_theory.coset
 
 definition is_subgroup' {G : Type} [group G] (H : set G) := (1 : G) ∈ H ∧ (∀ g1 g2 : G, g1 ∈ H → g2 ∈ H → g1 * g2 ∈ H) ∧ 
 ∀ g : G, g ∈ H → g⁻¹ ∈ H 
