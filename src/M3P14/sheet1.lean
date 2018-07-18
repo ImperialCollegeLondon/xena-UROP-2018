@@ -112,6 +112,10 @@ end
 theorem coprime_dvd_of_dvd_mul {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : coprime a b) : 
     a*b ∣ c := sorry
 
+theorem lcm_def (m : ℕ) : ∀ a b : ℕ, (∀ n : ℕ, a ≠ 0 ∧ b ≠ 0 ∧   
+                                a ∣ m ∧ b ∣ m ∧ a ∣ n ∧ b ∣ n → m ∣ n) → m = lcm a b
+                                :=
+                                sorry
 
 theorem q4a : ∀ a b : ℕ, ∃! m : ℕ, ∀ n : ℕ, a ≠ 0 ∧ b ≠ 0 ∧   
                                 a ∣ m ∧ b ∣ m ∧ a ∣ n ∧ b ∣ n → m ∣ n
@@ -212,21 +216,10 @@ have  eq3 : a'*b'*d = m,
 
 },
 {
---let p := lcm a b,
---let q := lcm a b,
-intros y hn,
-have m_lcm : m = lcm a b, by unfold lcm,
-have m_dvd_y : m ∣ y, sorry,--from hn m,
-
-have y_dvd_m : y ∣ m,
-{
-  --exact hn m,
-  sorry, 
-}
-
-
-
--- p divides q and q divides p => p = q
+  intros y hn,
+  have m_lcm : m = lcm a b, by unfold lcm,
+  have y_lcm : y = lcm a b, from lcm_def y a b hn,
+  exact by rw  [m_lcm, y_lcm],
 }
 end
 
@@ -249,7 +242,6 @@ end
 -- -- Show that the equation ax = b (mod n) has no solutions if b is not divisible by (a, n), and exactly (a, n) solutions in ℤ/n otherwise.
 -- theorem q6 :
 -- Show that the equation ax = b (mod n) has no solutions if b is not divisible by (a, n), and exactly (a, n) solutions in ℤ/n otherwise.
--- TODO: how to specify "there are exactly n solutions to an equation"?
 --theorem q6 :  ¬(gcd a n ∣ b) → ¬(∃ x, a*x ≡ b [MOD n])
 
 -- -- For n a positive integer, let σ(n) denote the sum Σ d for d∣n and d>0, of the positive divisors of n.
