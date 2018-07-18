@@ -74,7 +74,47 @@ def parallel (a b c d : point) (h1 : a ≠ b) (h2 : c ≠ d) : Prop := ∀ x, co
 
 def circle (a b :point) : set point := {x : point | eqd a b a x}
 
-theorem intersect_circle (a b c q p r : point) : B a q p → B c p r → eqd c b c r 
-→ ∃ x, eqd c x c p → B a x b := sorry
+#check @cont 
+/-
+cont :
+  ∀ {point : Type} [c : Euclidean_plane point] (X Y : set point),
+    (∃ (a : point), ∀ (x y : point), x ∈ X → y ∈ Y → B a x y) →
+    (∃ (b : point), ∀ (x y : point), x ∈ X → y ∈ Y → B x b y)
+-/
+
+theorem intersect_circle (a b c q p r : point) : B c q p → B c p r → eqd c a c q → eqd c b c r 
+→ ∃ x, B a x b ∧ eqd c x c p := begin
+  intro Baqp,
+  intro Bcpr,
+  intro Ecacq,
+  intro Ecbcr,
+  let X := { x : point | B a x b ∧ ∃ x' : point, B c x' p ∧ eqd c x c x'},
+  let Y := { y : point | B a y b ∧ ∃ y' : point, B p y' r ∧ eqd c y c y'},
+  have H : ∃ a : point, ∀ x y, x ∈ X → y ∈ Y → B a x y,
+    sorry,
+  have H₂ := cont X Y H,
+  cases H₂ with z Hz,
+  existsi z,
+  split,
+  { apply Hz a b,
+    { show B a a b ∧ ∃ (x' : point), B c x' p ∧ eqd c a c x',
+      split,
+        apply bet_symm,
+        exact refl_bet _ _,
+    existsi q,
+      split,
+        assumption,
+        assumption
+    },
+    show B a b b ∧ ∃ (y' : point), B p y' r ∧ eqd c b c y',
+    split,
+      apply refl_bet,  
+    existsi r,
+    split,
+      apply refl_bet,
+      assumption
+  },
+  sorry 
+  end 
 
 

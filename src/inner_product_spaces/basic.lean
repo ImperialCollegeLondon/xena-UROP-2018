@@ -65,6 +65,12 @@ end
 @[simp] lemma inprod_zero {V: Type u} [herm_inner_product_space V] (x : V) :
 x ∘ 0 = 0 := by rw [is_conj_sym, conj_eq_zero, zero_inprod]  
 
+lemma neg_smul_left_linear {V : Type u} [herm_inner_product_space V] (x y : V) : 
+-x ∘ y = -(x ∘ y) := by rw [←neg_one_smul, mul_lin_left, neg_one_mul]
+
+lemma neg_smul_right_antilinear {V : Type u} [herm_inner_product_space V] (x y : V) : 
+x ∘ -y = -(x ∘ y) := by rw [←neg_one_smul, mul_antilin_right, conj_neg, conj_one, neg_one_mul]
+
 
 lemma im_re_eq_imp_eq {x y : ℂ} (H1 : x.re = y.re) (H2: x.im = y.im) :
 x = y :=
@@ -144,28 +150,36 @@ cases ho,
     dunfold herm_norm,
     simp,
 
-    have H : 0 ≤ |x - ((x ∘ y)/(↑(|y|*|y|))) • y| * |x - ((x ∘ y)/(↑|y|^2)) • y| ,
+    have H : 0 ≤ |x - ((x ∘ y)/(↑( |y|*|y| ))) • y| * |x - ((x ∘ y)/(↑( |y|*|y| ))) • y| ,
         dunfold herm_norm, 
-        exact mul_nonneg (sqrt_nonneg ((x - (x ∘ y / ↑(sqrt((y ∘ y).re))^2) • y) ∘ (x - (x ∘ y / ↑(sqrt((y ∘ y).re))^2) • y)).re) (sqrt_nonneg ((x - (x ∘ y / ↑(sqrt((y ∘ y).re))^2) • y) ∘ (x - (x ∘ y / ↑(sqrt((y ∘ y).re))^2) • y)).re), 
+        apply mul_nonneg (sqrt_nonneg (((x - (x ∘ y / ↑(sqrt ((y ∘ y).re) * sqrt ((y ∘ y).re))) • y) ∘ (x - (x ∘ y / ↑(sqrt ((y ∘ y).re) * sqrt ((y ∘ y).re))) • y)).re)) (sqrt_nonneg (((x - (x ∘ y / ↑(sqrt ((y ∘ y).re) * sqrt ((y ∘ y).re))) • y) ∘ (x - (x ∘ y / ↑(sqrt ((y ∘ y).re) * sqrt ((y ∘ y).re))) • y)).re)), 
     simp at H,
     dunfold herm_norm at H,
-    rw mul_self_sqrt (is_pos_def (x + -((x ∘ y / ↑(sqrt ((y ∘ y).re)) ^ 2) • y))).left at H, 
-    --rw of_real_inj.mpr (sqrt_sqr (is_pos_def y).left) at H, 
+    rw mul_self_sqrt (is_pos_def ((x + -((x ∘ y / (↑(sqrt ((y ∘ y).re)) * ↑(sqrt ((y ∘ y).re)))) • y)))).left at H, 
+    rw ←of_real_mul at H,
+    rw of_real_inj.mpr (mul_self_sqrt (is_pos_def y).left) at H, 
     simp at H, 
-    rw is_conj_sym (-((x ∘ y / ↑(sqrt ((y ∘ y).re)) ^ 2) • y)) at H,
+    rw is_conj_sym (-((x ∘ y / ↑((y ∘ y).re)) • y)) at H,
     rw conj_re at H, 
-    have he : (-(x ∘ -((x ∘ y / ↑(sqrt ((y ∘ y).re)) ^ 2) • y)).re = (-((x ∘ y / ↑(sqrt ((y ∘ y).re)) ^ 2) • y) ∘ -((x ∘ y / ↑(sqrt ((y ∘ y).re)) ^ 2) • y)).re),
+    have he : (-((x ∘ y / ↑((y ∘ y).re)) • y) ∘ -((x ∘ y / ↑((y ∘ y).re)) • y)).re = -(x ∘ -((x ∘ y / ↑((y ∘ y).re)) • y)).re,
         admit,
-    rw ←he at H,
-    simp at H,
+    rw he at H,
+    rw add_neg_self at H,
+    rw field.add_zero at H,
+    rw neg_smul_right_antilinear at H,
+    rw mul_antilin_right at H,
+    rw conj_div at H,
+    rw conj_of_real at H,
     dunfold herm_norm,
     dunfold complex.abs, 
     dunfold norm_sq,
     rw ←sqrt_mul,
     rw sqrt_le, 
     rw ←sub_le_iff_le_add' at H,
-
-    simp at H, 
+    rw sub_eq_neg_add at H,
+    rw field.add_zero at H,
+    rw div_mul_eq_mul_div at H,
+     
 end
 
 class norm_space (V: Type u) extends vector_space ℂ V :=
