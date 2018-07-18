@@ -230,8 +230,6 @@ have y_dvd_m : y ∣ m,
 }
 end
 
-#check mul_assoc
-
 -- Show that the least common multiple of a and b is given by |ab|/(a,b)
 -- TODO: need to change ℕ to ℤ and use abs(a*b)
 theorem q4b : ∀ a b : ℕ, lcm a b = a*b/(gcd a b) := sorry
