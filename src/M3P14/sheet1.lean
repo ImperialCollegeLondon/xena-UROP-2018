@@ -3,16 +3,19 @@ import data.nat.modeq
 import data.nat.prime
 import tactic.norm_num
 import data.nat.gcd
+--import data.set 
+
 open classical 
 
 namespace nat
 
--- TODO : change ℕ to ℤ, but before that need to extend gcd to integers.
 
 -- Show that for a, b, d integers, we have (da, db) = d(a,b).
-theorem q1a (a b d : ℕ) : gcd (d*a) (d*b) = d * (gcd a b) := gcd_mul_left d a b
+--TODO: change ℕ to ℤ
+theorem q1a (a b d : ℤ) : int.gcd (d*a) (d*b) = d * (int.gcd a b) := gcd_mul_left d a b
 
 -- Let a, b, n integers, and suppose that n|ab. Show that n/(a,b) divides b.
+--TODO: change ℕ to ℤ
 theorem q1b (a b n : ℕ) (ha : a > 0) (hn : n > 0) : n ∣ (a*b) → (n / gcd a n) ∣ b := λ h,
 have n / gcd n a ∣ b * (a / gcd n a) := dvd_of_mul_dvd_mul_right (gcd_pos_of_pos_left a hn) 
 begin
@@ -32,11 +35,24 @@ end
 theorem q2a : ∃ x y : ℤ, 18 = 327*x + 120*y := 
     ⟨-66, 180, by norm_num⟩
 
--- Find, with proof, all solutions to the linear diophantine equation 100x + 68y = 14.
-theorem q2b : ∀ x y : ℤ, 100*x + 68*y = 14 := sorry
+-- Find, with proof, all solutions to the linear diophantine equation 110x + 68y = 14.
+theorem q2b : ∃ A : set (ℤ×ℤ), ∀ x y : ℤ, (110*x + 68*y = 14 ↔ (x,y) ∈ A ):= 
+begin
+apply exists.intro ∅,  --the answer is not ∅ 
+assume x y,
+apply iff.intro,
+{
+
+    sorry,
+},
+{
+  intro h,
+  exact false.elim ‹(x, y) ∈ (∅ : set (ℤ×ℤ))›,
+}
+end
+
 
 -- Find a multiplicative inverse of 31 modulo 132.
---theorem q2c :
 theorem q2c : ∃ x : ℤ, 31*x % 132 = 1 := 
     ⟨115, by norm_num⟩
 
@@ -44,23 +60,22 @@ theorem q2c : ∃ x : ℤ, 31*x % 132 = 1 :=
 theorem q2d : ∃ x : ℤ, x % 9 = 3 → x % 49 = 1 :=  
     ⟨-195, by norm_num⟩
 
-theorem extended_chinese_remainder 
-{p q r : ℕ}
-(co : coprime p q ∧ coprime q r ∧ coprime r p) (a b c: ℕ) : {k // k ≡ a [MOD p] ∧ k ≡ b [MOD q] ∧ k ≡ c[MOD r]} :=sorry 
-
 
 -- Find, with proof, the smallest nonnegative integer n such that n = 1 (mod 3), n = 4 (mod 5), and n = 3 (mod 7).
+theorem extended_chinese_remainder {p q r : ℕ} (co : coprime p q ∧ coprime q r ∧ coprime r p) (a b c: ℕ) :
+    {k // k ≡ a [MOD p] ∧ k ≡ b [MOD q] ∧ k ≡ c[MOD r]} := sorry 
+
 theorem q2e : ∃ n : ℕ, ∀ n₂ : ℕ, n % 3 = 1 ∧ n % 5 = 4 ∧ n % 7 = 3
                             → n₂ % 3 = 1 ∧ n₂ % 5 = 4 ∧ n₂ % 7 = 3 → n ≤ n₂ 
                             := 
 begin
---@extended_chinese_remainder 3 5 7 dec_trivial 1 4 3
-let n := 94,
-let p := λ n, n % 3 = 1 ∧ n % 5 = 4 ∧ n % 7 = 3,
-have h : ∃ n : ℕ, p n, from  ⟨94, dec_trivial⟩,
-apply exists.intro (nat.find h),
-assume n₂ hn hn₂,
-exact nat.find_min' h hn₂,
+  --@extended_chinese_remainder 3 5 7 dec_trivial 1 4 3
+  let n := 94,
+  let p := λ n, n % 3 = 1 ∧ n % 5 = 4 ∧ n % 7 = 3,
+  have h : ∃ n : ℕ, p n, from  ⟨94, dec_trivial⟩,
+  apply exists.intro (nat.find h),
+  assume n₂ hn hn₂,
+  exact nat.find_min' h hn₂,
 end 
 
 
@@ -69,15 +84,16 @@ end
 -- Let m and n be integers. Show that the greatest common divisor of m and n is the unique positive integer d such that:
 --      - d divides both m and n, and
 --      - if x divides both m and n, then x divides d.
+--TODO: change ℕ to ℤ
 theorem q3 : ∀ m n : ℕ, ∃! d : ℕ, ∀ x : ℤ, gcd m n = d → d ∣ m → d ∣ n → x ∣ m → x ∣ n → x ∣ d
                                     := sorry
+
 
 -- Let a and b be nonzero integers. Show that there is a unique positive integer m with the following two properties:
 --      - a and b divide m, and
 --      - if n is any number divisible by both a and b, then m|n.
 -- The number m is called the least common multiple of a and b.  
- 
- 
+ --TODO: change ℕ to ℤ
 theorem gcd_dvd_trans {a b c : ℕ} : a ∣ b → b ∣ c → a ∣ c := 
 begin 
   intro Hab, 
@@ -90,58 +106,125 @@ begin
   exact mul_assoc _ _ _, 
 end  
 
-variables a b c : ℕ 
-variables (h1 : (a ∣ b)) (h2 : (b ∣ c))
+-- TODO: to find in mathlib
+--theorem gcd_eq_pair_number (a b : ℕ) : ∃ x y : ℤ,  gcd a b = x*a + b*y := sorry 
+-- theorem gcd_iff_pair_number (a b d : ℕ) : gcd a b = d ↔ ∃ x y : ℤ, x*a + b*y = d := sorry
+theorem coprime_dvd_of_dvd_mul {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : coprime a b) : 
+    a*b ∣ c := sorry
+
 
 theorem q4a : ∀ a b : ℕ, ∃! m : ℕ, ∀ n : ℕ, a ≠ 0 ∧ b ≠ 0 ∧   
                                 a ∣ m ∧ b ∣ m ∧ a ∣ n ∧ b ∣ n → m ∣ n
                                 := 
 begin 
---existence
---define m = ab/(a,b) , a=da', b=db' → d ∣ n, a'∣ n, b'∣ n → m= da'b' ∣n as d, a', b' is coprime 
 intro a, intro b,
 let m := a*b/(gcd a b),
+have m_def : m = a*b/(gcd a b), by simp,
 apply exists_unique.intro m,
 {
   assume n,
   assume h,
+  have a_dvd_n : a ∣ n, from h.right.right.right.right.left,
+  have b_dvd_n : b ∣ n, from h.right.right.right.right.right,
   let a' := a/(gcd a b), 
+  have ap_eq : a/(gcd a b) = a', by simp,
+  have gcd_dvd_a : (gcd a b) ∣ a, from gcd_dvd_left _ _,
+  have gcd_dvd_b : (gcd a b) ∣ b, from gcd_dvd_right _ _,
   let b':= b/(gcd a b),
-  let d:= gcd a b,
-  cases em (coprime d a' ∨ coprime d b') with h1 h2,
+  have bp_eq : b' = b/(gcd a b), by simp,
+  let d := gcd a b,
+  have d_eq : d = gcd a b, by simp,
+  have eq2 : (b / (gcd a b)) * gcd a b = b, from nat.div_mul_cancel gcd_dvd_b,
+  
+  have eq_a : d*a' = a,
+      {
+        calc
+           d*a' =  gcd a b * a' : by rw d_eq
+           ...  =  gcd a b * (a / (gcd a b))  : by rw ap_eq
+           ...  =   a / gcd a b * gcd a b  : by rw nat.mul_comm
+           ...  =  a  : by rw nat.div_mul_cancel gcd_dvd_a
+      },
+  have eq_b : d*b' = b,
+   {
+        calc
+           d*b' =  b : by rw [nat.mul_comm,d_eq, bp_eq, eq2]
+   },
+  have da'_dvd_n: d*a' ∣ n, from eq.subst (eq.symm eq_a) a_dvd_n,
+  have db'_dvd_n: d*b' ∣ n, from eq.subst (eq.symm eq_b) b_dvd_n,
+  have gcd_pos: gcd a b > 0, from gcd_pos_of_pos_left b ((nat.pos_iff_ne_zero).mpr h.left),
+  have middlestep: a' * gcd a b ∣ n / d * gcd a b, 
   {
-    cases h1 with cda' cdb',
-    {
-      have a'_dvd_a : a' ∣ a, sorry,
-      have a_dvd_n : a ∣ n, sorry,
-      have a'_dvd_n : a' ∣ n, from gcd_dvd_trans a'_dvd_a a_dvd_n,  
-      have cba' : coprime b a', sorry, --coprime.coprime_mul_left_right a (d * b'),
-      sorry,
-    },
-    {
-      sorry, 
-    }
+    rw mul_comm,
+    rw ← d_eq,
+    have d_dvd_n: d ∣ n, from dvd_of_mul_right_dvd da'_dvd_n,
+    rwa nat.div_mul_cancel d_dvd_n, 
+
   },
+  have a'_dvd_n_dvd_d: a' ∣ n/d, from dvd_of_mul_dvd_mul_right gcd_pos middlestep,
+  have middlestep2: b' * gcd a b ∣ n / d * gcd a b, 
   {
-    sorry,
-  }
+    rw mul_comm,
+    rw ← d_eq,
+    have d_dvd_n: d ∣ n, from dvd_of_mul_right_dvd db'_dvd_n,
+    rwa nat.div_mul_cancel d_dvd_n, 
+
+  },
+  have b'_dvd_n_dvd_d: b' ∣ n/d, from dvd_of_mul_dvd_mul_right gcd_pos middlestep2,
+  have capbp : coprime a' b',
+    {
+        have b_gr_0 : b > 0, 
+        {
+            rw pos_iff_ne_zero,
+            exact h.right.left,
+        },
+        have gcd_gr_0 : gcd a b > 0, from nat.gcd_pos_of_pos_right a b_gr_0,
+        have cop_fractions : coprime (a / gcd a b) (b /gcd a b), from nat.coprime_div_gcd_div_gcd gcd_gr_0,
+        have cop_fractions_2 : coprime a' (b / gcd a b), from eq.subst ap_eq cop_fractions,
+        exact eq.subst bp_eq cop_fractions_2,
+
+    },
+  have apbp_dvd_n_dvd_d: a'*b' ∣ n/d, from coprime_dvd_of_dvd_mul a'_dvd_n_dvd_d b'_dvd_n_dvd_d capbp,
+  have : a'*b'*d ∣ n,
+  {
+    have d_gr_zero : d > 0, from (eq.subst (eq.symm d_eq) gcd_pos),
+    
+    rw ← nat.mul_div_cancel n d_gr_zero,
+    have : a' * b' * d ∣ (n / d) * d, from mul_dvd_mul_right apbp_dvd_n_dvd_d d,
+    have : a' * b' * d ∣ d * (n / d), from eq.subst (mul_comm (n / d) d) this, 
+    have d_dvd_n: d ∣ n, from dvd_of_mul_right_dvd da'_dvd_n,
+    have : a' * b' * d ∣ d * n / d, from  eq.subst (eq.symm (nat.mul_div_assoc d d_dvd_n)) this,
+    exact eq.subst (mul_comm d n) this,
+  },
+have  eq3 : a'*b'*d = m,
+      {
+        calc
+           a'*b'*d    =  (a/gcd a b) * ((b/gcd a b) * gcd a b) : by rw [ap_eq, bp_eq, d_eq]
+               ... = (a/gcd a b) * (gcd a b * (b/gcd a b)) : by rw nat.mul_comm 
+               ... = (a/gcd a b) * (gcd a b * b/gcd a b) : by rw ←nat.mul_div_assoc (gcd a b) gcd_dvd_b
+               ... =  (a/gcd a b) * (b * gcd a b /gcd a b) :  by rw nat.mul_comm (gcd a b) b 
+               ... = (a/gcd a b) * b : by rw nat.mul_div_cancel b gcd_pos 
+               ... =  b * (a / gcd a b) : by rw nat.mul_comm 
+               ... =  b * a / gcd a b : by rw nat.mul_div_assoc b gcd_dvd_a 
+               ... = m : by rw [mul_comm,m_def] 
+      },
+  rwa ←eq3,
 },
 {
-  sorry,
+let p := lcm a b,
+let q := lcm a b,
+-- p divides q and q divides p => p = q
 }
-end 
-
-#print coprime
-
+end
+#check lcm 
 -- Show that the least common multiple of a and b is given by |ab|/(a,b)
 -- TODO: need to change ℕ to ℤ and use abs(a*b)
-theorem q4b : ∀ a b : ℕ, lcm a b = a*b/(gcd a b) := 
-begin
+theorem q4b : ∀ a b : ℕ, lcm a b = a*b/(gcd a b) := sorry
+/-begin
   intros a b,
   exact gcd_mul_lcm a b,
   sorry
 end
-
+-/
 
 -- Let m and n be positive integers, and let K be the kernel of the map:
 --      ℤ/mnℤ → ℤ/mℤ x ℤ/nℤ 

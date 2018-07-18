@@ -1,0 +1,34 @@
+-- M1P2 Algebra I, Problem Sheet 3
+-- *1. Suppose v1, v2, v3 is a basis for R3. Explain why there is a unique 3 × 3 matrix A with Av1 =v2, Av2 =v3 andAv3 =v1.
+-- Prove that A3 = I3 (the identity matrix). Find such a matrix when
+-- 1 1 0 v1 =1, v2 =0, v3 =0.
+-- 011
+-- Check your answer by computing A3. [Hint: Use 3.9–3.11 in the notes.]
+-- 2. LetT :R4 −→R4 begivenbyT(v)=Av,where
+--  1 0 −1 2  A=−2 1 1 3.
+--  3 − 1 0 0  −2 1 −1 2
+-- Calculate the rank and the nullity of T , and find bases for Im T and Ker T .
+-- 3. LetU,VandWbevectorspaces,andletS:U−→VandT:V−→Wbelinear transformations. The composition of T with S is the transformation T ◦ S : U −→ W given by T ◦ S(u) = T(S(u)).
+-- (a) Show that T ◦ S is a linear transformation.
+-- (b) Suppose that S(u) = Au and T(v) = Bv, where A and B are matrices. How can T ◦S
+-- be written as a matrix transformation?
+-- (c) Suppose that U = W = R2, and V = R3, and that S and T are given by
+-- Find T ◦ S.
+-- 􏰂u1 􏰃  u1−u2  v1  􏰂v1+v3 􏰃 Su=2u1 ,Tv2=v−v.
+-- 2 u+2u v 23 123
+-- 4. Let T : R2 −→ R2 be the linear transformation T(x1,x2)=(x1 +2x2,3x1 +2x2).
+-- Let B1 and B2 be the following bases for R2.
+-- B1 = {(1,0),(0,1)} B2 = {(1,3),(2,5)}
+-- (a) Find the matrices [T]B1 and [T]B2.
+-- (b) If v = (1, 1), calculate the column vector [T (v)]B2 .
+-- (c) Find a basis B3 such that [T ]B3 is a diagonal matrix.
+-- (d) Find an invertible 2×2 matrix P such that P−1[T]B1P is diagonal.
+-- 􏰂 1 2 􏰃n
+-- (e) Using your answer to (d), write down a formula for 3 2 for any n ∈ N.
+-- 5. Let V be the vector space of polynomials of degree at most 2 over R, and let B be the basis{1,x,x2}ofV. DefinealineartransformationT :V −→V byT(p(x))=p(1−x).
+-- (a) Find [T]B.
+-- (b) Is T diagonalizable? Justify your answer.
+-- Now define another linear transformation S : V −→ V by S(a+bx+cx2)=(a+2c)x+(b+c)x2, fora,b,c∈R.
+-- (c) Find [S]B.
+-- (d) Find the eigenvalues of S. Find a basis of V whose elements are eigenvectors of S.
+-- (e) Hence calculate S100(1 + x).
