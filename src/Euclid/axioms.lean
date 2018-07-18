@@ -68,3 +68,5 @@ quotient (@point_setoid point _)
 def collinear (a b c : point) : Prop := B a b c ∨ B b c a ∨ B c a b
 
 def parallel (a b c d : point) (h1 : a ≠ b) (h2 : c ≠ d) : Prop := ∀ x, collinear a b x → ((collinear a b c ∧ collinear a b d) ∨ ¬collinear c d x) 
+
+def circle (a b :point) : set point := {x : point | eqd a b a x}
