@@ -22,6 +22,16 @@ theorem sheet04_q05 (z z₁ z₂ : ℂ) : z * z₁ * z₂ = z * (z₁ * z₂) :=
 
 -- Let S be the set of all real numbers except −1. For a, b ∈ S define a ∗ b = ab + a + b. Show that (S, ∗) is a group. 
 def s := {x : ℝ | x ≠ -1}
+
+def op (m n : s) [has_add s] [has_mul s] : s := ⟨m * n + m + n, sorry⟩ -- want to prove that this operation is from s to s to s rather than s to s to ℝ 
+
+local notation m ~ n := op m n 
+
+--def Is_group {G:Type} (g:set G) (op: g → g → g): Prop := (∀ (x y z ∈ g), op (op x y) z = op x (op y z)) ∧ 
+--(∃ i ∈ g , (∀x ∈ g,op x i = x ∧ op i x = x) ∧ (∀ x ∈ g, ∃ xin:G, op x xin =i ∧ op xin x =i))
+
+--theorem q7: Is_group s ~ := sorry 
+
 --theorem q7 (a b : set s) 
 
 -- 8. Let G be a group, and let a, b, c ∈ G. Prove the following facts.
