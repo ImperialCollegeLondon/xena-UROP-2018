@@ -12,7 +12,7 @@ namespace nat
 
 -- Show that for a, b, d integers, we have (da, db) = d(a,b).
 --TODO: change ℕ to ℤ
-theorem q1a (a b d : ℤ) : int.gcd (d*a) (d*b) = d * (int.gcd a b) := gcd_mul_left d a b
+theorem q1a (a b d : ℕ) : gcd (d*a) (d*b) = d * (gcd a b) := gcd_mul_left d a b
 
 -- Let a, b, n integers, and suppose that n|ab. Show that n/(a,b) divides b.
 --TODO: change ℕ to ℤ
@@ -107,7 +107,7 @@ begin
 end  
 
 -- TODO: to find in mathlib
---theorem gcd_eq_pair_number (a b : ℕ) : ∃ x y : ℤ,  gcd a b = x*a + b*y := sorry 
+-- theorem gcd_eq_pair_number (a b : ℕ) : ∃ x y : ℤ,  gcd a b = x*a + b*y := sorry 
 -- theorem gcd_iff_pair_number (a b d : ℕ) : gcd a b = d ↔ ∃ x y : ℤ, x*a + b*y = d := sorry
 theorem coprime_dvd_of_dvd_mul {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : coprime a b) : 
     a*b ∣ c := sorry
@@ -122,6 +122,7 @@ let m := a*b/(gcd a b),
 have m_def : m = a*b/(gcd a b), by simp,
 apply exists_unique.intro m,
 {
+
   assume n,
   assume h,
   have a_dvd_n : a ∣ n, from h.right.right.right.right.left,
@@ -198,8 +199,8 @@ apply exists_unique.intro m,
 have  eq3 : a'*b'*d = m,
       {
         calc
-           a'*b'*d    =  (a/gcd a b) * ((b/gcd a b) * gcd a b) : by rw [ap_eq, bp_eq, d_eq]
-               ... = (a/gcd a b) * (gcd a b * (b/gcd a b)) : by rw nat.mul_comm 
+           a'*b'*d    =  (a/gcd a b) * ((b/gcd a b) * gcd a b) : by rw [mul_assoc,ap_eq, bp_eq, d_eq]
+               ... = (a/gcd a b) * (gcd a b * (b/gcd a b)) : by rw nat.mul_comm (gcd a b) (b/gcd a b)
                ... = (a/gcd a b) * (gcd a b * b/gcd a b) : by rw ←nat.mul_div_assoc (gcd a b) gcd_dvd_b
                ... =  (a/gcd a b) * (b * gcd a b /gcd a b) :  by rw nat.mul_comm (gcd a b) b 
                ... = (a/gcd a b) * b : by rw nat.mul_div_cancel b gcd_pos 
@@ -208,14 +209,29 @@ have  eq3 : a'*b'*d = m,
                ... = m : by rw [mul_comm,m_def] 
       },
   rwa ←eq3,
+
 },
 {
-let p := lcm a b,
-let q := lcm a b,
+--let p := lcm a b,
+--let q := lcm a b,
+intros y hn,
+have m_lcm : m = lcm a b, by unfold lcm,
+have m_dvd_y : m ∣ y, sorry,--from hn m,
+
+have y_dvd_m : y ∣ m,
+{
+  --exact hn m,
+  sorry, 
+}
+
+
+
 -- p divides q and q divides p => p = q
 }
 end
-#check lcm 
+
+#check mul_assoc
+
 -- Show that the least common multiple of a and b is given by |ab|/(a,b)
 -- TODO: need to change ℕ to ℤ and use abs(a*b)
 theorem q4b : ∀ a b : ℕ, lcm a b = a*b/(gcd a b) := sorry
