@@ -7,15 +7,15 @@ class Euclidean_plane (point : Type) :=
 (eqd_refl : ∀ a b : point, eqd a b b a)
 (eqd_trans : ∀ a b p q r s, eqd a b p q → eqd a b r s → eqd p q r s)
 (id_eqd : ∀ a b c, eqd a b c c → a = b)
-(seg_cons : ∀ a b c q, ∃ x, B q a x → eqd a x b c)
+(seg_cons : ∀ a b c q, ∃ x, B q a x ∧ eqd a x b c)
 (five_seg : ∀ a b c d a' b' c' d', a ≠ b → B a b c → B a' b' c' → eqd a b a' b' 
 → eqd b c b' c' → eqd a d a' d' → eqd b d b' d' → eqd c d c' d')
 (bet_same : ∀ a b, B a b a → a = b)
-(pasch : ∀ a b c p q, B a p c → B b q c → ∃ x, B p x b → B q x a)
-(two_dimensions : ∃ a b c, ¬B a b c → ¬B b c a → ¬B c a b)
+(pasch : ∀ a b c p q, B a p c → B b q c → ∃ x, B p x b ∧ B q x a)
+(two_dimensions : ∃ a b c, ¬B a b c ∧ ¬B b c a ∧ ¬B c a b)
 (not_three_dimensions : ∀ a b c p q, p ≠ q → eqd a p a q → eqd b p b q 
 → eqd c p c q → (B a b c ∨ B b c a ∨ B c a b))
-(euclids : ∀ a b c d t, B a d t → B b d c → a ≠ d → ∃ x y, B a b x → B a c y → B x t y)
+(euclids : ∀ a b c d t, B a d t → B b d c → a ≠ d → ∃ x y, B a b x ∧ B a c y ∧ B x t y)
 (cont : ∀ X Y : set point, 
   (∃ a, ∀ x y, x ∈ X → y ∈ Y → B a x y) → (∃ b, ∀ x y, x ∈ X → y ∈ Y → B x b y))
 /-
@@ -42,10 +42,7 @@ class Euclidean_plane (point : Type) :=
 open Euclidean_plane 
 
 variables {point : Type} [Euclidean_plane point]
-
-example (a b : point) : eqd a a b b :=
-sub_dist a a b b b a (bet_symm b a a (refl_bet b a)) (bet_symm a b b (refl_bet a b)) (eqd_refl a b) (eqd_refl a b)
-
+/-
 theorem dist_reflex (a b : point) : eqd a b a b :=
 eqd_trans b a a b a b (eqd_refl b a) (eqd_refl b a)
 
@@ -67,20 +64,19 @@ instance point_setoid : setoid (point × point) :=
 -- a good test to see if you've got the definitions right!
 definition distance_values (point : Type) [Euclidean_plane point] := 
 quotient (@point_setoid point _)
-
+-/
 def collinear (a b c : point) : Prop := B a b c ∨ B b c a ∨ B c a b
 
 def parallel (a b c d : point) (h1 : a ≠ b) (h2 : c ≠ d) : Prop := ∀ x, collinear a b x → ((collinear a b c ∧ collinear a b d) ∨ ¬collinear c d x) 
 
 def circle (a b :point) : set point := {x : point | eqd a b a x}
 
-#check @cont 
 /-
 cont :
   ∀ {point : Type} [c : Euclidean_plane point] (X Y : set point),
     (∃ (a : point), ∀ (x y : point), x ∈ X → y ∈ Y → B a x y) →
     (∃ (b : point), ∀ (x y : point), x ∈ X → y ∈ Y → B x b y)
--/
+
 
 theorem intersect_circle (a b c q p r : point) : B c q p → B c p r → eqd c a c q → eqd c b c r 
 → ∃ x, B a x b ∧ eqd c x c p := begin
@@ -116,5 +112,5 @@ theorem intersect_circle (a b c q p r : point) : B c q p → B c p r → eqd c a
   },
   sorry 
   end 
-
+-/
 
