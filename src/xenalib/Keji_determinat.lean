@@ -17,4 +17,11 @@ if m=1 ∧  n=0 then 3 else
  4 
 
 
-#eval det (A)
+#eval det (1 : matrix ℤ 8 8)
+
+example (p q : ℕ → Prop) : (∃ x, p x) → ∃ x, p x ∨ q x :=
+begin
+  intro h,
+  cases h with x px,
+  constructor, left, exact px
+end
