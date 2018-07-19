@@ -4,8 +4,7 @@ import analysis.topology.infinite_sum
 import analysis.topology.topological_structures
 import analysis.topology.uniform_space
 
-import data.equiv
--- import data.equiv.basic
+import data.equiv.basic
 
 local attribute [instance] classical.prop_decidable
 
@@ -32,12 +31,14 @@ structure homeomorphism {α : Type*} {β : Type*} (X : topological_space α) (Y 
 
 definition is_homeomorphic_to {α : Type u} {β : Type v} (X :topological_space α) (Y : topological_space β) : Prop := nonempty (homeomorphism X Y)
 
+--Proposition 8.6a
 lemma id_map_continuous {α : Type u} {X : topological_space α} : continuous (@id α) :=
 begin
   intros s H1,
   exact H1,
 end
 
+--Proposition 8.6b
 lemma constant_map_is_continuous {α : Type u} {β : Type v} {X : topological_space α} {Y : topological_space β} {f : α → β} (H : (∃ (b : β), f = function.const α b)) : continuous f :=
 begin
   unfold continuous,
@@ -114,17 +115,34 @@ def discrete_topology (α : Type u) : topological_space α := {
   is_open_sUnion := λ _ _, trivial,
 }
 
---get rid of mention of X??
-lemma map_from_discrete_is_continuous {α : Type u} {β : Type v} [X : topological_space α] [Y : topological_space β] 
-(H : X = indiscrete_topology α) (f : α → β) : continuous f := 
+--Proposition 8.6c
+lemma maps_from_discrete_are_continuous {α : Type u} {β : Type v} [X : topological_space α] [Y : topological_space β] 
+(H : X = discrete_topology α)(f : α → β) : continuous f := 
 begin
-  admit,
+  unfold continuous,
+  unfold is_open,
+  intros s Hs,
+  rw H,
+  trivial,
 end
 
-theorem smap_from_discrete_is_continuous {α : Type u} {β : Type v} {X : topological_space α} {Y : topological_space β}
-{H : X = indiscrete_topology α} (f : α → β) : continuous f :=  map_from_discrete_is_continuous H f
-
-#print continuous
+--Proposition 8.6d
+lemma maps_to_indiscrete_are_continuous {α : Type u} {β : Type v} [X : topological_space α] [Y : topological_space β] 
+(H : Y = indiscrete_topology β)(f : α → β) : continuous f := 
+begin
+  unfold continuous,
+  unfold is_open,
+  intros s Hs,
+  rw H at Hs,
+  cases Hs,
+    rw Hs,
+    simp,
+    rw ←set.sUnion_empty,
+  exact X.is_open_sUnion ∅ (λ t Ht, false.elim Ht),
+  rw Hs,
+  simp,
+  exact X.is_open_univ,
+end
 
 definition id_is_homeomorphism {α : Type u} {X : topological_space α} : homeomorphism X X := {
   to_fun := id,
@@ -228,8 +246,10 @@ begin
   exact nonempty.intro homxz,
 end
 
+--Exercise 8.4
 theorem homeomorphism_is_equivalence : equivalence (λ X Y : Σ α, topological_space α, is_homeomorphic_to X.2 Y.2) := ⟨homeomorphism_is_reflexive, homeomorphism_is_symmetric, homeomorphism_is_transitive⟩ 
 
+--Proposition 8.12
 theorem continuous_basis_to_continuous {α : Type*} {β : Type*} [X : topological_space α] [Y : topological_space β] : ∀ f : α → β, (∀ B : set (set β), topological_space.is_topological_basis B → (∀ b : B, is_open (f ⁻¹' b)) → continuous f) :=
 begin
   intros f Basis HBasis HBasisInverses U HU,
@@ -284,4 +304,3 @@ begin
   rw ← equal,
   assumption,
 end
-
