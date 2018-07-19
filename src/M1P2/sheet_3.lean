@@ -1,4 +1,4 @@
--- M1P2 Algebra I, Problem Sheet 3
+import linear_algebra.dimension
 -- *1. Suppose v1, v2, v3 is a basis for R3. Explain why there is a unique 3 × 3 matrix A with Av1 =v2, Av2 =v3 andAv3 =v1.
 -- Prove that A3 = I3 (the identity matrix). Find such a matrix when
 -- 1 1 0 v1 =1, v2 =0, v3 =0.
@@ -8,7 +8,7 @@
 --  1 0 −1 2  A=−2 1 1 3.
 --  3 − 1 0 0  −2 1 −1 2
 -- Calculate the rank and the nullity of T , and find bases for Im T and Ker T .
--- 3. LetU,VandWbevectorspaces,andletS:U−→VandT:V−→Wbelinear transformations. The composition of T with S is the transformation T ◦ S : U −→ W given by T ◦ S(u) = T(S(u)).
+-- 3. Let U,V and W be vector spaces, and let S:U→V and T:V→W be linear transformations. The composition of T with S is the transformation T ◦ S : U −→ W given by T ◦ S(u) = T(S(u)).
 -- (a) Show that T ◦ S is a linear transformation.
 -- (b) Suppose that S(u) = Au and T(v) = Bv, where A and B are matrices. How can T ◦S
 -- be written as a matrix transformation?

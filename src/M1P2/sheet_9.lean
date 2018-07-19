@@ -3,7 +3,7 @@ open nat
 -- 1. Let d ∈ Z be such that ℤ ∌ √d ,and let x,y ∈ Z[√d]. Verify the identity N(xy) = N(x)N(y), where N(r+s√d)=r^2−ds^2.
 --theorem sheet9_q1 (d : ℤ) : (d ≡ 2 [ZMOD 4] ∨ d ≡ 3 [ZMOD 4]) → N(x)*N(y) = N(x*y) := sorry
 
--- 2. Let R bearing with unity, and let u be a unit in R. Show that u√n us a unit  for any n ∈ Z. Hence or otherwise, show that the the ring Z[√2] has infinitely many units.
+-- 2. Let R be a ring with unity, and let u be a unit in R. Show that u√n us a unit for any n ∈ Z. Hence or otherwise, show that the the ring Z[√2] has infinitely many units.
 -- 3∗. Suppose R is a finite integral domain. Prove that R is a field. Look carefully at your proof. To what extent does your proof make full use of the hypotheses? Formulate and prove a more general result about finite commutative rings with unity.
 -- 4. Which of the following elements are irreducible in the rings specified?
 -- (a) 2 ∈ Z[i]. 

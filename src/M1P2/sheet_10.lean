@@ -28,11 +28,10 @@ set.range (λ x : ℤ × ℤ, x.1 + x.2 * nat.sqrt n.nat_abs)
 --3. Show that R = ℤ[√3] is a Euclidean domain with Euclidean function If a=1+3 3,b=3−4 3inZ[√3],find d=hcf(a,b), and calculate δ(a) = |N(a)|, where N is the norm map.s, t ∈ R such that as + bt = d.
 def R' := ints_adj_sqrt 3
 -- def euc_func () := 
-
-
 --theorem sheet10_q3 
 
 --4. Let ω=e^2πi/3 ∈ C, and let Z[ω] be the set {x + yω | x, y ∈ Z} ⊆ C. 
+-- cannot, as i don't have e, or pi 
 
 --(a) Show that Z[ω] is a ring under the usual operations + and · on C. 
 

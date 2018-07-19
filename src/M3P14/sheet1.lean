@@ -3,19 +3,32 @@ import data.nat.modeq
 import data.nat.prime
 import tactic.norm_num
 import data.nat.gcd
---import data.set 
 
+--import data.set 
 open classical 
+
+
+namespace int
+/- 
+  Mathlib work in progress
+-/
+
+theorem gcd_mul_left_mine (i j k : ℤ) : gcd (i * j) (i * k) = nat_abs i * gcd j k :=
+begin
+  unfold gcd,
+  rw [nat_abs_mul, nat_abs_mul],
+  exact nat.gcd_mul_left (nat_abs i) (nat_abs j) (nat_abs k),
+end
+
+end int
 
 namespace nat
 
 
 -- Show that for a, b, d integers, we have (da, db) = d(a,b).
---TODO: change ℕ to ℤ
-theorem q1a (a b d : ℕ) : gcd (d*a) (d*b) = d * (gcd a b) := gcd_mul_left d a b
+theorem q1a (a b d : ℤ) : int.gcd (d*a) (d*b) = int.nat_abs d * int.gcd a b := int.gcd_mul_left_mine d a b
 
 -- Let a, b, n integers, and suppose that n|ab. Show that n/(a,b) divides b.
---TODO: change ℕ to ℤ
 theorem q1b (a b n : ℕ) (ha : a > 0) (hn : n > 0) : n ∣ (a*b) → (n / gcd a n) ∣ b := λ h,
 have n / gcd n a ∣ b * (a / gcd n a) := dvd_of_mul_dvd_mul_right (gcd_pos_of_pos_left a hn) 
 begin
@@ -42,7 +55,6 @@ apply exists.intro ∅,  --the answer is not ∅
 assume x y,
 apply iff.intro,
 {
-
     sorry,
 },
 {
@@ -84,8 +96,7 @@ end
 -- Let m and n be integers. Show that the greatest common divisor of m and n is the unique positive integer d such that:
 --      - d divides both m and n, and
 --      - if x divides both m and n, then x divides d.
---TODO: change ℕ to ℤ
-theorem q3 : ∀ m n : ℕ, ∃! d : ℕ, ∀ x : ℤ, gcd m n = d → d ∣ m → d ∣ n → x ∣ m → x ∣ n → x ∣ d
+theorem q3 : ∀ m n : ℕ, ∃! d : ℕ, ∀ x : ℕ, gcd m n = d → d ∣ m → d ∣ n → x ∣ m → x ∣ n → x ∣ d
                                     := sorry
 
 
@@ -93,8 +104,7 @@ theorem q3 : ∀ m n : ℕ, ∃! d : ℕ, ∀ x : ℤ, gcd m n = d → d ∣ m �
 --      - a and b divide m, and
 --      - if n is any number divisible by both a and b, then m|n.
 -- The number m is called the least common multiple of a and b.  
- --TODO: change ℕ to ℤ
-theorem gcd_dvd_trans {a b c : ℕ} : a ∣ b → b ∣ c → a ∣ c := 
+theorem gcd_dvd_trans {a b c : ℤ} : a ∣ b → b ∣ c → a ∣ c := 
 begin 
   intro Hab, 
   intro Hbc, 
@@ -112,6 +122,29 @@ end
 theorem coprime_dvd_of_dvd_mul {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : coprime a b) : 
     a*b ∣ c := sorry
 
+theorem lcm_def (m : ℕ) : ∀ a b : ℕ, (∀ n : ℕ, a ≠ 0 ∧ b ≠ 0 ∧   
+                                a ∣ m ∧ b ∣ m ∧ a ∣ n ∧ b ∣ n → m ∣ n) → m = lcm a b
+                                :=
+begin
+  intros ha hb h,
+  unfold lcm,
+  let p := ha ≠ 0 ∧ hb ≠ 0 ∧ ha ∣ m ∧ hb ∣ m ∧ ha ∣ ha * hb / gcd ha hb ∧ hb ∣ ha * hb / gcd ha hb,
+  have h2 :  p → m ∣ ha * hb / gcd ha hb, from h (ha*hb/gcd ha hb),
+  have m_dvd_def : m ∣ ha*hb/gcd ha hb,
+  {
+    /-
+    by_cases
+      (assume h3 : p, h2 h3)
+      (assume h3 : ¬p, sorry)
+    -/
+    sorry,
+  },
+  have def_dvd_m : (ha*hb/gcd ha hb) ∣ m,
+  {
+    sorry,
+  },
+  exact dvd_antisymm m_dvd_def def_dvd_m,
+end
 
 theorem q4a : ∀ a b : ℕ, ∃! m : ℕ, ∀ n : ℕ, a ≠ 0 ∧ b ≠ 0 ∧   
                                 a ∣ m ∧ b ∣ m ∧ a ∣ n ∧ b ∣ n → m ∣ n
@@ -212,27 +245,17 @@ have  eq3 : a'*b'*d = m,
 
 },
 {
---let p := lcm a b,
---let q := lcm a b,
-intros y hn,
-have m_lcm : m = lcm a b, by unfold lcm,
-have m_dvd_y : m ∣ y, sorry,--from hn m,
-
-have y_dvd_m : y ∣ m,
-{
-  --exact hn m,
-  sorry, 
-}
-
-
-
--- p divides q and q divides p => p = q
+  intros y hn,
+  have m_lcm : m = lcm a b, by unfold lcm,
+  have y_lcm : y = lcm a b, from lcm_def y a b hn ,
+  exact by rw  [m_lcm, y_lcm],
 }
 end
 
+def lcm_mathlib (i j : ℤ) : ℕ := int.nat_abs(i * j) / (int.gcd i j)
+
 -- Show that the least common multiple of a and b is given by |ab|/(a,b)
--- TODO: need to change ℕ to ℤ and use abs(a*b)
-theorem q4b : ∀ a b : ℕ, lcm a b = a*b/(gcd a b) := sorry
+theorem q4b : ∀ a b : ℤ, lcm_mathlib a b = int.nat_abs (a*b) /(int.gcd a b) := sorry
 /-begin
   intros a b,
   exact gcd_mul_lcm a b,
@@ -249,7 +272,6 @@ end
 -- -- Show that the equation ax = b (mod n) has no solutions if b is not divisible by (a, n), and exactly (a, n) solutions in ℤ/n otherwise.
 -- theorem q6 :
 -- Show that the equation ax = b (mod n) has no solutions if b is not divisible by (a, n), and exactly (a, n) solutions in ℤ/n otherwise.
--- TODO: how to specify "there are exactly n solutions to an equation"?
 --theorem q6 :  ¬(gcd a n ∣ b) → ¬(∃ x, a*x ≡ b [MOD n])
 
 -- -- For n a positive integer, let σ(n) denote the sum Σ d for d∣n and d>0, of the positive divisors of n.
