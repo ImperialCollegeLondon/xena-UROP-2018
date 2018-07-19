@@ -12,8 +12,8 @@ class Euclidean_plane (point : Type) :=
 → eqd b c b' c' → eqd a d a' d' → eqd b d b' d' → eqd c d c' d')
 (bet_same : ∀ a b, B a b a → a = b)
 (pasch : ∀ a b c p q, B a p c → B b q c → ∃ x, B p x b ∧ B q x a)
-(two_dimensions : ∃ a b c, ¬B a b c ∧ ¬B b c a ∧ ¬B c a b)
-(not_three_dimensions : ∀ a b c p q, p ≠ q → eqd a p a q → eqd b p b q 
+(two_dim : ∃ a b c, ¬B a b c ∧ ¬B b c a ∧ ¬B c a b)
+(not_3dim : ∀ a b c p q, p ≠ q → eqd a p a q → eqd b p b q 
 → eqd c p c q → (B a b c ∨ B b c a ∨ B c a b))
 (euclids : ∀ a b c d t, B a d t → B b d c → a ≠ d → ∃ x y, B a b x ∧ B a c y ∧ B x t y)
 (cont : ∀ X Y : set point, 
