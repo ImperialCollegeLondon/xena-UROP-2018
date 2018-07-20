@@ -25,9 +25,10 @@ definition is_to_top {α : Type u} (is_open : set α → Prop) (H : is_open_sets
 definition top_to_is {α : Type u} (T : topological_space α) : is_open_sets (T.is_open) :=
 ⟨T.is_open_univ,T.is_open_inter,T.is_open_sUnion⟩
 
-
--- Do this the sutherland way, then make a proof that it is equivalent to the lean way 
---Proof 3?? What on earth, subtype.val_injective????
+-- Below is the definition of the subspace_topology
+-- I think we should actually use the subspace topology already in lean 
+-- It is the one induced by the inclusion map, subspace.val
+-- It is called subtype.topological_space
 def subspace_topology {α : Type u} [X : topological_space α] (A : set α) : topological_space A := {
   is_open := λ I, ∃ U : set α, X.is_open U ∧ subtype.val '' I = U ∩ A, 
   is_open_univ := begin existsi univ, split, exact X.is_open_univ, rw univ_inter, unfold set.image, simp, end,
@@ -98,6 +99,34 @@ def subspace_topology {α : Type u} [X : topological_space α] (A : set α) : to
   end,
 }
 
+
+--Proof of equivalence of definitions??
+theorem subspace_top_eq_inclusion_induced_top {α : Type u} [X : topological_space α] (A : set α) :
+(λ I, ∃ U : set α, X.is_open U ∧ (@subtype.val α A) '' I = U ∩ A) = (subtype.topological_space).is_open :=
+begin
+dunfold subtype.topological_space,
+unfold topological_space.induced,
+simp,
+funext V,
+sorry,
+end
+
+
+--Prop 10.4
+theorem inclusion_cont {α : Type u} [X : topological_space α] (A : set α) : @continuous _ _ (subspace_topology A) _ (λ (a : A), (a : α)) := 
+begin
+unfold continuous,
+unfold is_open,
+intros s Hs,
+sorry,
+
+end
+
+
+#print topological_space.induced
+#print subtype
+#print prefix topological_space
+-- look for topological space
 #print Union
 #print prefix set
 variable α : Type u
