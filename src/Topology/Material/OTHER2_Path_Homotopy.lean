@@ -85,14 +85,13 @@ variable l : I01 → α
 -- for later paths homotopy -- checking ending points  
 def equal_of_pts (f g : I01 → α ) : Prop := f 0 = g 0 ∧ f 1 = g 1
 
-def equal_of_pts_path : Prop := equal_of_pts g1.to_fun g2.to_fun
+def equal_of_pts_path : Prop := equal_of_pts g1 g2
 
 def check_pts ( x y : α ) ( g : I01 → α ) := g 0 = x ∧ g 1 = y
 
 def check_pts_of_path ( x y : α ) ( h : path z w ) := check_pts x y h.to_fun
 
-
-def equal_of_path  : Prop := g1.to_fun == g2.to_fun  -- == ? 
+def equal_of_path  : Prop := g1.to_fun = g2.to_fun  -- == ? 
 
 /- path.mk : Π {α : Type u_2} [_inst_2 : topological_space α] {x y : α} (to_fun : I01 → α),
   to_fun 0 = x → to_fun 1 = y → continuous to_fun → path x y -/
@@ -160,15 +159,22 @@ variable Hab : a.val < b.val
  
 
 --definition S (a b : I01 ) : set ℝ := {x : ℝ | a.val ≤ x ∧ x ≤ b.val} 
-definition S (a b : ℝ  ) : set ℝ := {x : ℝ | a ≤ x ∧ x ≤ b} 
+definition S (a b : ℝ) : set ℝ := {x : ℝ | a ≤ x ∧ x ≤ b} 
 
 --definition T (a b : I01 ) : set ℝ := {x : ℝ | 0 ≤ x ∧ x ≤ b.val - a.val}
 --definition S (a b : ℝ ) : subtype (p) := {x : p // a ≤ x ∧ x ≤ b}
 
 ---lemma top_spa : topological_space (↑S ):= sorry
 --- want/need {Hab : a.val < b.val }? 
-lemma lemma1 (a : I01) {b : I01} :  a.val ∈ (S a.val b.val) := begin unfold S, simp, sorry end
-lemma lemma2 {a : I01} (b : I01) :  b.val ∈ (S a.val b.val) := begin unfold S, simp, sorry end
+lemma lemma1 {a : I01} {b : I01} (Hab : a.val < b.val) :  a.val ∈ (S a.val b.val) := 
+begin 
+  unfold S,
+  show a.val ≤ a.val ∧ a.val ≤ b.val,
+  split,
+    exact le_of_eq rfl,
+    exact le_of_lt Hab,
+end
+lemma lemma2 {a : I01} {b : I01} (Hab : a.val < b.val) :  b.val ∈ (S a.val b.val) := begin unfold S, simp, sorry end
 lemma Sab_bound {a : I01} {b : I01} {Hab : a.val < b.val } (x : S a.val b.val) : 
 a.val ≤ x.val ∧ x.val ≤ b.val :=  begin unfold S at x,   sorry end 
 lemma I01_bound {a : I01} {b : I01}{Hab : a.val < b.val } (x : S a.val b.val) : 
