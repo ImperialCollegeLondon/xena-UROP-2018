@@ -1,10 +1,7 @@
-import linear_algebra.basic algebra.field data.complex.basic data.real.basic analysis.metric_space
+import linear_algebra.basic algebra.field data.complex.basic data.real.basic analysis.metric_space analysis.topology.uniform_space
 
 open vector_space field set complex real
 universes u v w
-variables (V : Type u)
-
-#print notation • 
 
 class herm_inner_product_space (V : Type u) extends vector_space ℂ V :=
 (inprod : V → V → ℂ) 
@@ -103,7 +100,35 @@ split,
     exact iff.elim_left add_self_eq_zero hie,
 end
 
-theorem eq_imp_real {V : Type u} [herm_inner_product_space V] :
+lemma ne_zero_im_zero_imp_re_ne_zero {x : ℂ} : x ≠  0 → x.im = 0 → x.re ≠ 0 :=
+begin
+intros H1 H2,
+have Hx : x = ↑x.re,
+    rw [←re_add_im x, H2, of_real_zero, zero_mul, field.add_zero, of_real_re],
+rw Hx at H1,
+exact of_real_ne_zero.mp H1,
+end
+
+lemma re_of_real (x : ℂ) : x.im = 0 → ↑(x.re) = x :=
+begin
+intros H,
+rw [←re_add_im x, H, of_real_zero, zero_mul, field.add_zero, of_real_inj, of_real_re],
+end
+
+lemma ne_comm {α : Type u} (a b : α) : a ≠ b ↔ b ≠ a :=
+begin
+dunfold ne,
+split,
+    intros H,
+    rw eq_comm,
+    exact H,
+
+    intros H,
+    rw eq_comm,
+    exact H, 
+end
+
+theorem in_self_real {V : Type u} [herm_inner_product_space V] :
 ∀ (x : V), (x ∘ x).im = 0 := 
 begin
 intros,
@@ -111,6 +136,17 @@ have H : conj(x ∘ x) = x ∘ x,
     rw ←is_conj_sym,
 rw conj_eq_real (x ∘ x),
 exact H, 
+end
+
+lemma ne_zero_iff_inprod_ne_zero {V : Type u} [herm_inner_product_space V] (x : V) : 
+(x ∘ x) ≠ 0 ↔ x ≠ 0 :=
+begin
+split,
+    intros H,
+    exact (iff_false_left H).mp (is_pos_def x).right, 
+
+    intros H,
+    exact (iff_false_right H).mp (is_pos_def x).right,
 end
 
 noncomputable def herm_norm {V: Type u} [herm_inner_product_space V] (x : V) : ℝ := sqrt((x ∘ x).re)
@@ -122,26 +158,6 @@ open classical
 theorem cauchy_schwarz_innequality {V : Type u} [herm_inner_product_space V] :
 ∀ (x y : V), abs((x ∘ y)) ≤ |x|*|y| := 
 begin
-/-
-intros,
-have H : |(↑|x| • y - ↑|y| • x)| ≥ 0,
-    dunfold herm_norm,
-    exact sqrt_nonneg ((↑|x| • y - ↑|y| • x) ∘ (↑|x| • y - ↑|y| • x)).re,
-dunfold herm_norm at H,
-simp [is_sesquilinear] at H,
-rw add_lin_left at H,
-rw add_lin_right at H,
-rw add_lin_right at H,
-rw mul_lin_left at H,
-rw mul_lin_left at H,
-rw mul_antilin_right at H,
-rw mul_antilin_right at H,
-rw ←field.mul_assoc at H,
-rw conj_of_real at H, 
-rw ←of_real_neg at H, 
-
-rw mul_antilin_right (-(↑(sqrt ((y ∘ y).re)))) at H,
--/
 intros,
 have ho : y = 0 ∨ y ≠ 0,
     apply em,
@@ -162,7 +178,23 @@ cases ho,
     rw is_conj_sym (-((x ∘ y / ↑((y ∘ y).re)) • y)) at H,
     rw conj_re at H, 
     have he : (-((x ∘ y / ↑((y ∘ y).re)) • y) ∘ -((x ∘ y / ↑((y ∘ y).re)) • y)).re = -(x ∘ -((x ∘ y / ↑((y ∘ y).re)) • y)).re,
-        admit,
+        rw neg_smul_right_antilinear,
+        rw neg_smul_right_antilinear,
+        rw neg_smul_left_linear,
+        rw neg_neg,
+        rw mul_lin_left,
+        rw mul_antilin_right,
+        rw mul_antilin_right,
+        have hr : y ∘ y = ↑((y ∘ y).re),
+            rw re_of_real (y ∘ y) (in_self_real y),
+        rw conj_div,
+        rw conj_of_real,
+        rw ←hr,
+        rw div_mul_cancel (conj(x ∘ y)) ((iff_false_right ho).mp (is_pos_def y).right),
+        rw div_mul_eq_mul_div,
+        rw div_mul_eq_mul_div,
+        simp,
+        rw field.mul_comm, 
     rw he at H,
     rw add_neg_self at H,
     rw field.add_zero at H,
@@ -172,14 +204,20 @@ cases ho,
     rw conj_of_real at H,
     dunfold herm_norm,
     dunfold complex.abs, 
-    dunfold norm_sq,
-    rw ←sqrt_mul,
-    rw sqrt_le, 
+    rw ←sqrt_mul (is_pos_def x).left,
+    rw sqrt_le (norm_sq_nonneg (x ∘ y)) (mul_nonneg (is_pos_def x).left (is_pos_def y).left), 
     rw ←sub_le_iff_le_add' at H,
     rw sub_eq_neg_add at H,
     rw field.add_zero at H,
     rw div_mul_eq_mul_div at H,
-     
+    rw neg_re at H,
+    rw neg_le_neg_iff at H,
+    rw field.mul_comm at H,
+    rw mul_conj at H,
+    rw ←of_real_div at H,
+    rw of_real_re at H,
+    rw div_le_iff (lt_of_le_of_ne (is_pos_def y).left ((ne_comm ((y ∘ y).re) 0).mp (ne_zero_im_zero_imp_re_ne_zero  ((ne_zero_iff_inprod_ne_zero y).mpr ho) (in_self_real y)))) at H,
+    exact H,
 end
 
 class norm_space (V: Type u) extends vector_space ℂ V :=
@@ -268,7 +306,7 @@ norm_pos_def :=
     intros,
     dunfold herm_norm,
     have ho : (x ∘ x).im = 0,
-        exact eq_imp_real x,
+        exact in_self_real x,
     split,
         intros H,
         rw ←sqrt_zero at H,
@@ -288,9 +326,6 @@ norm_pos_def :=
         rw hpo,
     end,
 } 
-
-variables (W : Type u) [herm_inner_product_space W] (w : W) (h : w = 0)
-
 
 def is_ortho {V : Type u} [herm_inner_product_space V] (x y : V) : Prop :=
 x ∘ y = 0
@@ -383,7 +418,7 @@ eq_of_dist_eq_zero :=
     rw sqrt_eq_zero (is_pos_def (x - y)).left at H,
     rw ←zero_re at H,
     have H1 : (x - y) ∘ (x - y) = 0,
-        exact im_re_eq_imp_eq H (eq_imp_real (x - y)),
+        exact im_re_eq_imp_eq H (in_self_real (x - y)),
     rw (is_pos_def (x - y)).right at H1,
     exact sub_eq_zero.mp H1,
     end,
@@ -413,4 +448,5 @@ dist_triangle :=
     end,
 }
 
- 
+class hilbert_space (V : Type u) extends herm_inner_product_space V :=
+(is_complete : complete_space V) 

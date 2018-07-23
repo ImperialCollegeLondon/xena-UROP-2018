@@ -23,11 +23,6 @@ variables {α  : Type*} [topological_space α ] ( x y : α )
 
 def I01 := {x : ℝ // 0 ≤ x ∧ x ≤ 1}
 
-#check I01 
-
-#check topological_space
--- noncomputable def h : ℝ := 0.5 
-
 -- Has euclidean subspace topology/computability?? 
 instance : topological_space I01 := by unfold I01; apply_instance
 instance : has_zero I01 := ⟨⟨0, le_refl _, zero_le_one⟩⟩
@@ -132,17 +127,198 @@ theorem pasting_two_closed {α  : Type*} {β   : Type*} [X : topological_space �
 ( CU :  continuous  ((@subtype.map _ _  U _ f ) ImU ) ) ( CV :  continuous  ((@subtype.map _ _  V _ f ) ImV ) ) 
 : continuous f := begin sorry end  -/ 
 
--- REPARAMATERISATION of PATHS 
-/-  1 cts fun [0,1] to [a, b] 
-    2 special path maker  $$ evaluating 2*1/2 -/  
+/- Lean: Server has stopped due to signal SIGSEGV. 
+The lean.executablePath may be incorrect, make sure it is a 
+valid Lean executable-/
+
+
+-- REPARAMETRISATION of PATHS 
+/-  1 Par function [a, b] to [0,1]  
+       - Any f x = c * x + d cts
+       - Resemble to par_path
+    2 Define "special path" maker employing par_path (eg defined on [0, 1/2] )  
+    
+    3 Define comp of path ( f ∙ g ) by pasting_lemma; i.e. 
+        fun_composer f'.to_fun g'.to_fun (where f', g' are the  "special path"s 
+        of f and g respectively)  -/  
 
  
 
 
 
 
-
 --- COMPOSITION OF PATHS
+
+/- variable A_r : set ℝ 
+variable A : subtype A_r 
+-/
+
+variable A : set ℝ 
+variables a b : I01
+variable Hab : a.val < b.val  
+ 
+
+definition S (a b : I01 ) : set ℝ := {x : ℝ | a.val ≤ x ∧ x ≤ b.val} 
+--definition S (a b : ℝ ) : subtype (p) := {x : p // a ≤ x ∧ x ≤ b}
+
+---lemma top_spa : topological_space (↑S ):= sorry
+/- lemma lemma1 :  a ∈ (S a b) := begin unfold S, simp, sorry end
+lemma lemma2 :  b ∈ (S a b) := begin unfold S, sorry end-/
+lemma lemma1 (a : I01) {b : I01} :  a.val ∈ (S a b) := begin unfold S, simp, sorry end
+lemma lemma2 {a : I01} (b : I01) :  b.val ∈ (S a b) := begin unfold S, simp, sorry end
+lemma Sab_bound {a : I01} {b : I01} {Hab : a.val < b.val } (x : S a b) : 
+a.val ≤ x.val ∧ x.val ≤ b.val :=  begin unfold S at x,  sorry end 
+lemma I01_bound {a : I01} {b : I01}{Hab : a.val < b.val } (x : S a b) : 
+0 ≤ x.val ∧ x.val ≤ 1 := begin sorry end
+lemma lemma_sub_ba (a b : I01) {Hab : a.val < b.val }: b.val - a.val ∈ S 0 ⟨ (b.val - a.val), begin 
+split, 
+    exact sub_nonneg.2 (le_of_lt Hab), 
+    have H1 : b.val ≤ 1, 
+        exact (@I01_bound a b Hab ( ⟨ b.val, lemma2 b⟩ : S a b)  ).2,
+    have H2 : 0 ≤ a.val, 
+        exact (@I01_bound a b Hab ( ⟨ a.val, lemma1 a⟩ : S a b)  ).1, 
+    exact sub_le_sub H1 H2, 
+end ⟩ := 
+begin split, exact sub_nonneg.2 (le_of_lt Hab), trivial, end   
+
+#check add_lt_add
+#check sub_pos
+#check inv_neg'
+#check add_le_add
+#check le_of_lt
+#check mul_nonneg
+#check div_le_one_iff_le
+#check @div_le_iff
+#check @div_le_div_of_le_of_pos
+#check @div_self 
+#check @ne_of_lt
+#check @add_lt_add
+#check inv_pos
+#check sub_nonneg
+--#check @sub_le_sub
+--- 
+ 
+--#check ring.com
+-- @div_le_div_of_le_of_pos _ _ (x.val - a.val) (b.val - a.val) (b.val - a.val) N2 H1
+ 
+
+definition par ( a b : I01 ) {Hab : a.val < b.val } : S a b → I01 :=  
+λ x, ⟨ (x.val - a.val)/(b.val - a.val) , begin 
+have D1 : 0 < (b.val - a.val) , 
+    apply sub_pos.2 Hab, 
+have D2 : 0 < (b.val - a.val)⁻¹, 
+    exact inv_pos D1,   
+have N1 : 0 ≤ (x.val - a.val), 
+    exact sub_nonneg.2 ((@Sab_bound a b Hab x).1), 
+have N2 : x.val - a.val ≤ b.val - a.val,
+    have this : -a.val ≤ -a.val, trivial, 
+    show x.val + - a.val ≤ b.val + - a.val,
+    exact add_le_add (@Sab_bound a b Hab x).2 this,  
+split, 
+    show  0 ≤ (x.val - a.val) * (b.val - a.val)⁻¹, 
+        exact mul_nonneg N1 (le_of_lt D2),  
+    have H1 : 0 < (b.val - a.val), 
+        exact sub_pos.2 Hab,
+    have H2 : (x.val - a.val) / (b.val - a.val) ≤ (b.val - a.val) / (b.val - a.val),
+    exact @div_le_div_of_le_of_pos _ _ (x.val - a.val) (b.val - a.val) (b.val - a.val) N2 H1,
+    rwa [@div_self _ _ (b.val - a.val) (ne.symm ( @ne_of_lt _ _ 0 (b.val - a.val) H1) ) ] at H2
+
+end ⟩    
+
+#check @lemma_sub_ba 
+-- Need tp define S 0 (b-a) separately!! 
+
+-- Wrong, need S 0 (b-a) 
+lemma continuous_par [topological_space ℝ ] (a b : I01) {Hab : a.val < b.val } : continuous ( @par a b Hab ) := begin 
+unfold par, 
+    let f1 : S a b → ℝ  := λ (x: S a b ), x.val - a.val  , 
+    let f2 : ℝ → I01 := λ x, ⟨ x / (b.val - a.val) , begin sorry end ⟩ , 
+    have H1 : continuous f1, 
+        --have H1U: uniform_continuous (λ ) real.uniform_continuous_add --real.comm_ring 
+        sorry,
+    have H2 : continuous f2, 
+    sorry, 
+    let h : S a b → I01 := λ (x : (S a b)), ⟨(x.val - a.val) / (b.val - a.val), _⟩, 
+    have hc : continuous h, 
+        exact continuous.comp  H1 H2 , 
+    exact hc,  
+
+
+end 
+
+
+
+lemma continuous_par_WiP [topological_space ℝ ] (a b : I01) {Hab : a.val < b.val } : continuous ( @par a b Hab ) := begin 
+unfold par, 
+/-    let f1 : S a b → S 0 ( ⟨ (b.val-a.val), _ ⟩ : I01)  := λ (x: S a b ), ⟨ x.val - a.val , _ ⟩ , 
+    
+    --- Strange a not in I01!!!
+    ---let f1 : S a b → S 0 ( ⟨ (b.val-a.val), @lemma_sub_ba a b Hab ⟩ : I01)  := λ (x: S a b ), ⟨ x.val - a.val , begin sorry end ⟩ , 
+    
+    
+    let f2 : S 0 (⟨ (b.val-a.val), _⟩ : I01) → I01 := λ (x: S 0 (⟨ (b.val-a.val), _⟩ : I01)  ), ⟨ x.val / (b.val - a.val) , _ ⟩ , 
+-/ sorry
+/-
+    have H1 : continuous f1, 
+        --have H1U: uniform_continuous (λ ) real.uniform_continuous_add --real.comm_ring 
+        sorry,
+    have H2 : continuous f2, 
+    sorry, 
+    let h : S a b → I01 := λ (x : (S a b)), ⟨(x.val - a.val) / (b.val - a.val), _⟩, 
+    have hc : continuous h, 
+        exact continuous.comp  H1 H2 , 
+    exact hc,  
+-/ 
+end 
+
+/-lemma continuous_par [topological_space ℝ ] (a b : I01) {Hab : a.val < b.val } : continuous ( @par a b Hab ) := begin 
+unfold par, 
+    let f1 : S a b → S 0 (⟨ (b.val-a.val), lemma_sub_ba⟩ : I01)  := λ (x: S a b ), ⟨ x.val - a.val , begin sorry end ⟩ , 
+    let f2 : S 0 (⟨ (b.val-a.val), lemma_sub_ba⟩ : I01) → I01 := λ (x: S 0 (⟨ (b.val-a.val), lemma_sub_ba⟩ : I01)  ), ⟨ x.val / (b.val - a.val) , begin sorry end ⟩ , 
+
+-/
+
+
+#check real.uniform_continuous_add
+
+lemma ending_pts [topological_space ℝ ] (a b : I01 ) {Hab : a.val < b.val }: ( @par a b Hab  )⟨ a.val , lemma1 a⟩ = 0 ∧ ( @par a b Hab  )⟨ b.val , lemma2 b ⟩ = 1 := sorry 
+
+structure path_a_b_repar {α} [topological_space α] {x y : α} ( a b : I01) (f : path x y )   := 
+(to_fun : (S a b) → α )
+(start_pt : to_fun ⟨ a.val , lemma1 a⟩  = x ) -- f.at_zero
+(fin_pt :  to_fun  ⟨ b.val , lemma2  b⟩ = y )  -- f.at_one
+(cont : continuous to_fun )
+
+-- Function to obtain path on [a, b] (S a b) to α 
+-- def to_a_b_rep {α} [topological_space α] {x y : α} ( a b : ℝ) (f : path x y ) : path_a_b_repar a b f := 
+def to_a_b_rep {α} [topological_space α] {x y : α} ( a b : I01)  {Hab : a.val < b.val }(f : path x y ) : path_a_b_repar a b f := 
+{   to_fun := λ t, f.to_fun ((@par a b Hab ) t ), 
+    
+    start_pt := begin 
+    have H1 : par a b ⟨a.val, _⟩ = 0, 
+        exact (ending_pts a b).1, exact Hab, 
+    rw H1, exact f.at_zero end,
+    
+    fin_pt := begin 
+    have H1 : par a b ⟨b.val, _⟩ = 1, 
+        exact (ending_pts a b).2, exact Hab, 
+    rw H1, exact f.at_one 
+    end,
+    
+    cont := begin 
+    let h := λ t , f.to_fun ((par a b )t), 
+    have hc : continuous h, 
+        exact continuous.comp  (@continuous_par _ a b Hab) f.cont , 
+    exact hc,  
+    end 
+}
+
+
+#check continuous
+
+
+
+
 
 
 noncomputable def h : I01 := ⟨ 1/2,  by norm_num ⟩ 
@@ -375,13 +551,21 @@ definition is_homotopic_to { x y : β } (f : path x y) ( g : path x y) : Prop :=
 
 
 -- Equivalence of Homotopy 
+#check @continuous.comp 
+
+
 def path_homotopy_id { x y : β} (f : path x y) : path_homotopy f f := 
-{   to_fun :=  λ pair  , f.to_fun pair.2 ,  
+{   to_fun :=  λ st  , f.to_fun (prod.snd st) ,  
     path_s := begin  intro s, unfold is_path, 
     exact ⟨ f.at_zero,  f.at_one, f.cont ⟩ end, 
     at_zero := by simp , 
     at_one := by simp ,  
-    cont := begin unfold continuous, intro U,  sorry 
+    cont := begin 
+    let h := λ st, f.to_fun ( @prod.snd I01 I01 st ) , 
+    have hc : continuous h, 
+        exact continuous.comp  continuous_snd f.cont, 
+    exact hc
+    --exact continuous.comp f.cont continuous_snd, 
     /-
     --have H1 :  ((λ (pair : I01 × I01), f.to_fun (pair.snd)) ⁻¹' U ) =  ( (univ : I01) × (f.to_fun ⁻¹' U) ), -- f.to_fun ⁻¹' U ,
     let I : set I01 := univ, 
@@ -390,7 +574,7 @@ def path_homotopy_id { x y : β} (f : path x y) : path_homotopy f f :=
 
     --have H2: ((λ (pair : I01 × I01), f.to_fun (pair.snd)) ⁻¹' U) = prod {s : I01 | s ∈ I } (f.to_fun ⁻¹' U), 
      end , --begin unfold continuous,   -/
-     end  
+    end  
 } 
 
 def path_homotopy_inverse { x y : β} (f : path x y) (g : path x y) ( F : path_homotopy f g) : path_homotopy g f := 
@@ -470,36 +654,3 @@ i.e. path.to_fun (2t), homotopy.to_fun (1 - s, t) cts,
 well-define and ending pts conditions-/
 
 
------------------------ Errors / Other attempts 
--- Path Homotopy
-/-
-structure path_homotopy2 {β} [topological_space β] { x y z w : β } ( f : path x y) ( g : path z w) := 
-(to_fun : I01 × I01 →  β ) -- for product topology 
-(at_zero : (function.curry to_fun) 0 = f.to_fun ) 
-(at_one : (function.curry to_fun) 1 = g.to_fun )
-(cont :  continuous to_fun ) 
-(eq_pts : ∀ s : I01, equal_of_pts f.to_fun ((function.curry to_fun) s) ) 
---(eq_pts : ∀ s : I01, equal_of_pts_path f ((function.curry to_fun) s) ) -- check that F(s, 0)=x and F(s,1)= y
--- Type errors? 
-
-structure path_homotopy3 {β} [topological_space β] { x y z w : β } ( f : path x y) ( g : path z w) := 
-(to_fun : I01 → I01 →  β ) -- for product topology 
-(at_zero : to_fun 0 = f.to_fun ) 
-(at_one :  to_fun 1 = g.to_fun )
-(cont :  continuous to_fun ) 
-(eq_pts : ∀ s : I01, equal_of_pts f.to_fun (to_fun s) )
---(eq_pts : ∀ s : I01, equal_of_pts_path f (to_fun s) ) -/
-
-/- 
-lemma hom_is_path { f g : path x y } ( F : path_homotopy f g ) : 
-∀s : I01, is_path ( f.to_fun 0) ( f.to_fun 1) ( λ t , F.to_fun (s, t) )  :=
-begin 
-intro s,
-unfold is_path,
-split,  
---rw (F s).at_zero, 
-sorry ,sorry
-
-
-end
-#check hom_is_path -/

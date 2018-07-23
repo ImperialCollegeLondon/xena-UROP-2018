@@ -51,39 +51,38 @@ begin
 end
 
 --Prooposition 9.13
-lemma closure_sInter {α : Type u} [topological_space α] {I : set (set α)} : 
-closure (sInter I) ⊆ (⋂ (i : I), closure i) := 
-begin
-  have H0 : ⋂₀ I = ⋂ (i : I), i := set.ext (λ x,
-   begin simp [set.sInter, set.Inter, lift_t, has_lift_t.lift, coe_t, has_coe_t.coe, coe_b, has_coe.coe],
-   
-     end),
-  have H1 : ⋂₀ I ⊆ ⋂ (i : I), closure ↑i,
-  rw H0,
-  
-
-  sorry,
-  have H2 : is_closed (⋂ (i : I), closure ↑i) := @is_closed_Inter α _ _ _ (λ (i : I), @is_closed_closure _ _ ↑i),
-
-  have H3 : closure ⋂₀ I ⊆ closure ⋂ (i : I), closure ↑i := closure_mono H1,
-
-  have H4 : @closure α _ (⋂ (i : I), closure ↑i) = ⋂ (i : I), closure ↑i,
-    apply closure_eq_of_is_closed,
-    exact H2,
-  rw H4 at H3,
-  exact H3,
-end
--- ALl these up arrows are really annoying, whats going on, help!
-
 lemma closure_sInter' {α : Type u} [topological_space α] {I : set (set α)} : 
 closure (sInter I) ⊆ (⋂ (i ∈ I), closure i) := 
 begin
   have H1 : ⋂₀ I ⊆ ⋂ (i ∈ I), closure i,
-  sorry,sorry,
+    apply subset_bInter,
+    intros x Hx,
+    exact subset.trans (sInter_subset_of_mem Hx) subset_closure,
+  have H2 : is_closed (⋂ (i : set α) (H : i ∈ I), closure i),
+    have H6 : (⋂ (i : set α) (H : i ∈ I), closure i) = ⋂ (i : I), closure i,
+      apply set.ext,
+      intro x, simp,
+      split, intro Hx,
+      intros i Hi,
+      exact Hx i Hi,
+      intro Hx,
+      intros x_1 Hx_1,
+      exact Hx x_1 Hx_1,
 
-  --have H2 :  is_closed (⋂ (i ∈ I), closure i) := @is_closed_Inter α _ _ _ (λ (i : set α), @is_closed_closure _ _ i),
-  
+
+  have H7 : is_closed (⋂ (i : I), closure ↑i) := @is_closed_Inter α _ _ _ (λ (i : I), @is_closed_closure _ _ ↑i),
+  rw ←H6 at H7,
+  assumption,
+    have H3 : closure ⋂₀ I ⊆ closure ⋂ (i ∈ I), closure i := closure_mono H1,
+
+    have H4 : @closure α _ (⋂ (i ∈ I), closure i) = ⋂ (i ∈ I), closure i,
+      apply closure_eq_of_is_closed,
+      exact H2,
+    rw H4 at H3,
+    exact H3,  
 end
+
+#print Inter
 
 
 --Corollary 9.21
