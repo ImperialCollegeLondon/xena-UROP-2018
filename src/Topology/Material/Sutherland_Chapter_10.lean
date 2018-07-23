@@ -102,15 +102,54 @@ def subspace_topology {α : Type u} [X : topological_space α] (A : set α) : to
 
 --Proof of equivalence of definitions??
 theorem subspace_top_eq_inclusion_induced_top {α : Type u} [X : topological_space α] (A : set α) :
-(λ I, ∃ U : set α, X.is_open U ∧ (@subtype.val α A) '' I = U ∩ A) = (subtype.topological_space).is_open :=
+(subspace_topology A).is_open = (subtype.topological_space).is_open :=
 begin
-dunfold subtype.topological_space,
-unfold topological_space.induced,
-simp,
-funext V,
-sorry,
+  dunfold subtype.topological_space,
+  unfold topological_space.induced,
+  simp,
+  funext V,
+  apply propext,
+  split,
+    intro HU,
+    cases HU with U HU,
+    existsi U,
+    apply and.intro HU.1,
+    have H0 : subtype.val ⁻¹' (subtype.val '' V) = subtype.val ⁻¹' (A ∩ U),
+      rw HU.2,
+      simp,
+      apply inter_comm,
+    have H1 : V = subtype.val ⁻¹' (A ∩ U),
+      rw ← H0,
+      rw preimage_image_eq,
+      exact subtype.val_injective,
+    rw H1,
+    simp,
+    have preimage_A_eq_univ : subtype.val ⁻¹' A = @univ (subtype A),
+      apply set.ext,
+      intro x,
+      simp,
+      exact x.2,
+    rw preimage_A_eq_univ,
+    apply univ_inter,
+  intro HU,
+  cases HU with U HU,
+  existsi U,
+  apply and.intro HU.1,
+  have H0 :  subtype.val '' V = subtype.val '' (subtype.val ⁻¹' U), by rw HU.2,
+  rw H0,
+  apply set.ext,
+  intro x,
+  simp,
+  split,
+    intro Hx,
+    cases Hx with a Ha,
+    rw ← Ha.2.2,
+    apply and.intro Ha.2.1,
+    exact Ha.1,
+  intro Hx,
+  existsi x,
+  exact ⟨Hx.2, Hx.1, refl x⟩, 
 end
-
 
 --Prop 10.4
 theorem inclusion_cont {α : Type u} [X : topological_space α] (A : set α) : @continuous _ _ (subspace_topology A) _ (λ (a : A), (a : α)) := 
@@ -118,18 +157,20 @@ begin
 unfold continuous,
 unfold is_open,
 intros s Hs,
-sorry,
-
+rw subspace_top_eq_inclusion_induced_top,
+simp,
+unfold subtype.topological_space,
+unfold topological_space.induced,
+simp,
+existsi s,
+apply and.intro Hs,
+unfold coe,
+unfold lift_t,
+unfold has_lift_t.lift,
+unfold coe_t,
+unfold has_coe_t.coe,
+unfold coe_b,
+unfold has_coe.coe,
 end
+--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-
-#print topological_space.induced
-#print subtype
-#print prefix topological_space
--- look for topological space
-#print Union
-#print prefix set
-variable α : Type u
-#check (set α)
-#print set 
-#print subtype.val
