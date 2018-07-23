@@ -2,8 +2,8 @@ import euclid.axioms
 open Euclidean_plane
 open classical
 
-
 variables {point : Type} [Euclidean_plane point]
+
 --Conclusions from the first 5 axioms
 theorem refl_eqd (a b : point) : eqd a b a b :=
 eqd_trans b a a b a b (eqd_refl b a) (eqd_refl b a)
@@ -22,18 +22,13 @@ theorem two5 {a b c d : point} : eqd a b c d → eqd a b d c := assume h, trans_
 
 theorem eqdflip {a b c d : point} : eqd a b c d → eqd b a d c := assume h, two4 (two5 h)
 
--- a "setoid" is just a silly computer science name for a type with an equiv reln
 instance point_setoid : setoid (point × point) :=
 { r := λ ⟨a,b⟩ ⟨c,d⟩, eqd a b c d,
   iseqv := ⟨ λ ⟨a,b⟩, refl_eqd a b, λ ⟨a,b⟩ ⟨c,d⟩, symm_eqd, λ ⟨a,b⟩ ⟨c,d⟩ ⟨e,f⟩, trans_eqd⟩
 }
 
--- this type denotes the equiv classes. You may never need it but it's
--- a good test to see if you've got the definitions right!
 definition distance_values (point : Type) [Euclidean_plane point] := 
 quotient (@point_setoid point _)
-
-
 
 theorem refl_dist (a b : point) : (a,b) ≈ (b,a) := eqd_refl a b
 
@@ -50,7 +45,7 @@ a ≠ b → eqd c d c' d' :=
 begin
 intros h h1,
 apply five_seg a b c d a' b' c' d' h1,
-repeat {cases h with h2 h},
+  repeat {cases h with h2 h},
 all_goals {assumption}
 end
 
@@ -137,7 +132,6 @@ apply iff.intro,
 intro h,
 exact betswap h
 end
-
 
 theorem three3 (a b : point) : B a a b := 
 begin
@@ -513,7 +507,7 @@ have : col a b c,
 exact four18 h4 this h1 h2
 end
 
--- Relationship between B and distance comparison
+-- Ordering collinear points & Comparing distances
 
 theorem five1 {a b c d : point} : a ≠ b → B a b c → B a b d → B a c d ∨ B a d c :=
 begin
@@ -677,5 +671,226 @@ have : d' = d,
   exact id_eqd d' d q h_13,
 rw this at *,
 left,
-exact hd.1    
+exact hd.1
 end
+
+theorem five2 {a b c d : point} : a ≠ b → B a b c → B a b d → B b c d ∨ B b d c :=
+begin
+intros h h1 h2,
+cases five1 h h1 h2,
+  left,
+  exact three6a h1 h_1,
+right,
+exact three6a h2 h_1
+end
+
+theorem five3 {a b c d : point} : B a b d → B a c d → B a b c ∨ B a c b :=
+begin
+intros h h1,
+cases three14 d a with p hp,
+have h2 : B p a b,
+  exact three5a (betswap hp.1) h,
+have h3 : B p a c,
+  exact three5a (betswap hp.1) h1,
+cases five1 (ne.symm hp.2) h2 h3 with hb hc,
+  left,
+  exact three6a h2 hb,
+right,
+exact three6a h3 hc
+end
+
+def distle (a b c d : point) : Prop := ∃ y, B c y d ∧ eqd a b c y
+
+def distge (a b c d : point) : Prop := distle c d a b
+
+theorem five5 {a b c d : point} : distle a b c d ↔ ∃ x, B a b x ∧ eqd a x c d :=
+begin
+apply iff.intro,
+  intro h,
+  cases h with y hy,
+  have : col c y d,
+    left,
+    exact hy.1,
+  cases four14 this (symm_eqd hy.2) with x hx,
+  constructor,
+    split,
+    exact four6 hy.1 hx,
+    exact symm_eqd hx.2.2,
+intro h,
+cases h with x hx,
+unfold distle,
+have : col a x b,
+  right, left,
+  exact (betswap hx.1),
+cases four14 this hx.2 with y hy,
+constructor,
+  split,
+    exact betswap (four6 (betswap hx.1) (four4 hy)),
+exact hy.2.2
+end
+
+theorem five6 {a b c d a' b' c' d' : point} : distle a b c d → eqd a b a' b' →
+eqd c d c' d' → distle a' b' c' d' :=
+begin
+intros h h1 h2,
+cases h with x hx,
+cases four5 hx.1 h2 with y hy,
+constructor,
+  split,
+  exact hy.1,
+exact trans_eqd (symm_eqd h1) (trans_eqd hx.2 hy.2.1)
+end
+
+theorem five7 (a b : point) : distle a b a b :=
+begin
+constructor,
+  split,
+    exact three1 a b,
+exact refl_eqd a b
+end
+
+theorem five8 {a b c d e f : point} : distle a b c d → distle c d e f → distle a b e f :=
+begin
+intros h h1,
+cases h with x hx,
+cases h1 with y hy,
+cases four5 hx.1 hy.2 with z hz,
+constructor,
+  split,
+    exact three6b hz.1 hy.1,
+exact trans_eqd hx.2 hz.2.1
+end
+
+theorem five9 {a b c d : point} : distle a b c d → distle c d a b → eqd a b c d :=
+begin
+intros h h1,
+cases h1 with x hx,
+cases five5.mp h with z hz,
+cases three14 b a with p hp,
+cases hp with h1 h2,
+rw three2 at h1,
+cases em (a = b),
+  rw h_1 at *,
+  have : b = x,
+    exact bet_same b x hx.1,
+  rw this at *,
+  exact symm_eqd hx.2,
+have h2 : p ≠ a,
+  exact ne.symm h2,
+have : x = z,
+  apply unique_of_exists_unique (two12 a c d p h2),
+    split,
+    exact three5a h1 hx.1,
+    exact symm_eqd hx.2,
+  split,
+    exact three7b h1 hz.1 h_1,
+  exact hz.2,
+rw this at *,
+have : b = z,
+  exact three4 (betswap hx.1) (betswap hz.1),
+rw this at *,
+exact hz.2
+end
+
+theorem five10 (a b c d : point) : distle a b c d ∨ distle c d a b :=
+begin
+cases three14 b a with p hp,
+cases seg_cons a c d p with x hx,
+cases five1 (ne.symm hp.2) (betswap hp.1) hx.1,
+  have : B a b x,
+    exact three6a (betswap hp.1) h,
+  left,
+  apply five5.mpr,
+  constructor,
+    split,
+      exact this,
+  exact hx.2,
+  have : B a x b,
+    exact three6a hx.1 h,
+  right,
+  constructor,
+    split,
+      exact this,
+  exact symm_eqd hx.2
+end
+
+theorem five11 (a b c : point) : distle a a b c :=
+begin
+cases five10 a a b c with h,
+  assumption,
+cases h with x hx,
+have : a = x ,
+  exact bet_same a x hx.1,
+rw this at *,
+have : b = c,
+  exact id_eqd b c x hx.2,
+rw this at *,
+existsi c,
+split,
+  exact three1 c c,
+exact symm_eqd hx.2
+end
+
+theorem five12 {a b c : point} : col a b c → (B a b c ↔ distle a b a c ∧ distle b c a c) :=
+begin
+intro h,
+apply iff.intro,
+  intro h1,
+  split,
+    constructor,
+      split,
+        exact h1,
+    exact refl_eqd a b,
+    have h2 : distle c b c a,
+      constructor,
+        split,
+          exact betswap h1,
+    exact refl_eqd c b,
+  apply five6 h2,
+    exact two5 (refl_eqd c b),
+  exact two5 (refl_eqd c a),
+intro h1,
+cases h1 with h1 h2,
+cases h1 with x hx,
+have : distle c b c a,
+  exact five6 h2 (two5 (refl_eqd b c)) (two5 (refl_eqd a c)),
+cases this with y hy,
+cases h with h,
+  assumption,
+cases h with h3 h4,
+  rw three2 at h3,
+  cases three14 b a with p hp,
+  have : B p a c,
+    exact three5a (betswap hp.1) h3,
+  have : B p a x,
+    exact three5a this hx.1,
+  have : b = x,  
+    apply unique_of_exists_unique (two12 a a b p (ne.symm hp.2)),
+      split,
+        exact betswap hp.1,
+      exact refl_eqd a b,
+    split,
+      exact this,
+    exact symm_eqd hx.2,
+  rw ←this at *,
+  exact hx.1,
+rw three2 at h4,
+cases three14 b c with q hq,
+have : B q c a,
+  exact three5a (betswap hq.1) (betswap h4),
+have : B q c y,
+  exact three5a this hy.1,
+ have : b = y,
+  apply unique_of_exists_unique (two12 c c b q (ne.symm hq.2)),
+    split,
+      exact betswap hq.1,
+    exact refl_eqd c b,
+  split,
+    exact this,
+  exact symm_eqd hy.2,
+rw ←this at *,
+exact betswap hy.1
+end
+
+-- Rays and Lines
+
