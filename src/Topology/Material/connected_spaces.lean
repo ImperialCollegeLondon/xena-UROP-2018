@@ -28,11 +28,10 @@ def is_separated [topological_space α] (s t : set α) : Prop := (closure s) ∩
 class connected_space (α : Type u) extends topological_space α :=
     (clopen_trivial : (∀ s : set α, is_clopen s → (s = univ ∨ s = ∅)))
 
-/- This is me cheating and defining a two point discrete space using the bools,
-but without any clever coercion since I have no idea how to do this yet. -/
-
 class discrete_space α extends topological_space α :=
 (discreteness : ∀ U : set α, is_open U)
+
+def X : topological_space bool := by apply_instance
 
 class indiscrete_space α extends topological_space α :=
 (indiscreteness : ∀ U : set α, ¬is_open U)
@@ -48,19 +47,9 @@ class indiscrete_connected_space α extends connected_space α :=
 /- TODO: make this an instance/def coming from the 
 discrete_space class -/
 
-class discrete_two_point_space extends topological_space bool :=
-(discreteness : ∀ U : set bool, is_open U)
+--class discrete_two_point_space extends topological_space bool :=
+--(discreteness : ∀ U : set bool, is_open U)
 
-
------------------------------------------------------------------
-
-theorem open_imp_inter_open_in_subspace [topological_space α] {s t v : set α} :
-is_open t → is_open_in_subspace s (t ∩ s) :=
-begin
-  intro h1,
-  show is_open_in_subspace s (t ∩ s), 
-    {rw is_open_in_subspace, by exact exists.intro t ⟨inter_comm t s, h1⟩},
-end
 
 -----------------------------------------------------------------
 -- Some useful lemmas
@@ -112,6 +101,15 @@ begin
 end
 
 -----------------------------------------------------------------
+theorem open_imp_inter_open_in_subspace [topological_space α] {s t v : set α} :
+is_open t → is_open_in_subspace s (t ∩ s) :=
+begin
+  intro h1,
+  show is_open_in_subspace s (t ∩ s), 
+    {rw is_open_in_subspace, by exact exists.intro t ⟨inter_comm t s, h1⟩},
+end
+
+
 
 lemma closure_eq_interior_iff_clopen [topological_space α] :
 (∀ s : set α, closure s = interior s ↔ is_clopen s) := 
@@ -434,16 +432,18 @@ begin
 end
 
 -- (5) → (6)
-lemma five_implies_six [topological_space α] [discrete_two_point_space] : (∀ U V : set α, is_separated U V → 
+lemma five_implies_six [topological_space α] : (∀ U V : set α, is_separated U V → 
 ¬(U ∪ V = univ ∧ U ∩ V = ∅ ∧ U ≠ ∅ ∧ V ≠ ∅)) → (∀ f : α → bool, continuous f → ¬function.surjective f) :=
 begin
   intros H1 f cf, by_contradiction h,
   rw function.surjective at h, rw continuous at cf,
 
+  have h1 : X.is_open {ff}, {unfold X},
+
   have hff' : is_open (f ⁻¹' {ff}), 
-    from cf {ff} (discrete_two_point_space.discreteness {ff}),
+    from cf {ff} (show X.is_open {ff}, {unfold X}),
   have htt' : is_open (f ⁻¹' {tt}), 
-    from cf {tt} (discrete_two_point_space.discreteness {tt}),
+    from cf {tt} (show X.is_open {tt}, {unfold X}),
 
   have hs : (f ⁻¹' {ff}) ∪ (f ⁻¹' {tt}) = @univ α,
     begin
@@ -507,7 +507,7 @@ def char_map (A : set α) (x : α) : Prop := x ∈ A
 
 noncomputable def char_map_to_bool (A : set α) (x : α) : bool := to_bool (char_map A x) 
 
-lemma six_implies_one [topological_space α] [discrete_two_point_space] : (∀ f : α → bool, 
+lemma six_implies_one [topological_space α] : (∀ f : α → bool, 
 continuous f → ¬function.surjective f) → (∀ U V : set α, is_open U ∧ is_open V → 
 ¬(U ∪ V = univ ∧ U ∩ V = ∅ ∧ U ≠ ∅ ∧ V ≠ ∅)) := 
 begin
@@ -806,7 +806,7 @@ begin
 
 end
 
-theorem separated_sets_to_connected [topological_space α] [discrete_two_point_space]
+theorem separated_sets_to_connected [topological_space α]
 (H : ∀ U V : set α, is_separated U V → ¬(U ∪ V = univ ∧ U ∩ V = ∅ ∧ U ≠ ∅ ∧ V ≠ ∅)) : 
 connected_space α :=
 begin
@@ -817,17 +817,19 @@ end
 
 
 
--- 6. (TODO: use coercion rather than using bool itself?)
-theorem connected_def_cts_to_discrete [connected_space α] [discrete_two_point_space] :
+-- 6. 
+theorem connected_def_cts_to_discrete [connected_space α] :
 ∀ f : α → bool, continuous f → ¬function.surjective f :=
 begin
   intros f cf, by_contradiction h,
   rw function.surjective at h, rw continuous at cf,
 
+  have s1 : X.is_open {ff}, {unfold X},
+
   have hff' : is_open (f ⁻¹' {ff}), 
-    from cf {ff} (discrete_two_point_space.discreteness {ff}),
+    from cf {ff} (show X.is_open {ff}, {unfold X}),
   have htt' : is_open (f ⁻¹' {tt}), 
-    from cf {tt} (discrete_two_point_space.discreteness {tt}),
+    from cf {tt} (show X.is_open {tt}, {unfold X}),
 
   have hs : (f ⁻¹' {ff}) ∪ (f ⁻¹' {tt}) = @univ α,
     begin
@@ -886,7 +888,7 @@ begin
     (assume a2, by exact P tt a2),
 end
 
-theorem cts_to_discrete_to_connected [topological_space α] [discrete_two_point_space]
+theorem cts_to_discrete_to_connected [topological_space α] 
 (H : ∀ f : α → bool, continuous f → ¬function.surjective f) : connected_space α :=
 begin
   by exact empty_frontier_iff_trivial_to_connected 
@@ -1243,4 +1245,3 @@ end
 
 
  ------------------------------------------------------------
-
