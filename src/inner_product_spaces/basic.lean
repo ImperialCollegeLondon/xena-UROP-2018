@@ -1,4 +1,4 @@
-import linear_algebra.basic algebra.field data.complex.basic data.real.basic analysis.metric_space
+import linear_algebra.basic algebra.field data.complex.basic data.real.basic analysis.metric_space analysis.topology.uniform_space
 
 open vector_space field set complex real
 universes u v w
@@ -128,7 +128,7 @@ split,
     exact H, 
 end
 
-theorem eq_imp_real {V : Type u} [herm_inner_product_space V] :
+theorem in_self_real {V : Type u} [herm_inner_product_space V] :
 ∀ (x : V), (x ∘ x).im = 0 := 
 begin
 intros,
@@ -186,7 +186,7 @@ cases ho,
         rw mul_antilin_right,
         rw mul_antilin_right,
         have hr : y ∘ y = ↑((y ∘ y).re),
-            rw re_of_real (y ∘ y) (eq_imp_real y),
+            rw re_of_real (y ∘ y) (in_self_real y),
         rw conj_div,
         rw conj_of_real,
         rw ←hr,
@@ -216,7 +216,7 @@ cases ho,
     rw mul_conj at H,
     rw ←of_real_div at H,
     rw of_real_re at H,
-    rw div_le_iff (lt_of_le_of_ne (is_pos_def y).left ((ne_comm ((y ∘ y).re) 0).mp (ne_zero_im_zero_imp_re_ne_zero  ((ne_zero_iff_inprod_ne_zero y).mpr ho) (eq_imp_real y)))) at H,
+    rw div_le_iff (lt_of_le_of_ne (is_pos_def y).left ((ne_comm ((y ∘ y).re) 0).mp (ne_zero_im_zero_imp_re_ne_zero  ((ne_zero_iff_inprod_ne_zero y).mpr ho) (in_self_real y)))) at H,
     exact H,
 end
 
@@ -306,7 +306,7 @@ norm_pos_def :=
     intros,
     dunfold herm_norm,
     have ho : (x ∘ x).im = 0,
-        exact eq_imp_real x,
+        exact in_self_real x,
     split,
         intros H,
         rw ←sqrt_zero at H,
@@ -418,7 +418,7 @@ eq_of_dist_eq_zero :=
     rw sqrt_eq_zero (is_pos_def (x - y)).left at H,
     rw ←zero_re at H,
     have H1 : (x - y) ∘ (x - y) = 0,
-        exact im_re_eq_imp_eq H (eq_imp_real (x - y)),
+        exact im_re_eq_imp_eq H (in_self_real (x - y)),
     rw (is_pos_def (x - y)).right at H1,
     exact sub_eq_zero.mp H1,
     end,
@@ -448,4 +448,5 @@ dist_triangle :=
     end,
 }
 
- 
+class hilbert_space (V : Type u) extends herm_inner_product_space V :=
+(is_complete : complete_space V) 
