@@ -1,4 +1,4 @@
-mport analysis.topology.continuity
+import analysis.topology.continuity
 import analysis.topology.topological_space
 import analysis.topology.infinite_sum
 import analysis.topology.topological_structures
