@@ -168,42 +168,53 @@ definition S (a b : ℝ) : set ℝ := {x : ℝ | a ≤ x ∧ x ≤ b}
 --- want/need {Hab : a.val < b.val }? 
 lemma lemma1 {a : I01} {b : I01} (Hab : a.val < b.val) :  a.val ∈ (S a.val b.val) := 
 begin 
-  unfold S,
   show a.val ≤ a.val ∧ a.val ≤ b.val,
   split,
     exact le_of_eq rfl,
     exact le_of_lt Hab,
 end
-lemma lemma2 {a : I01} {b : I01} (Hab : a.val < b.val) :  b.val ∈ (S a.val b.val) := begin unfold S, simp, sorry end
-lemma Sab_bound {a : I01} {b : I01} {Hab : a.val < b.val } (x : S a.val b.val) : 
-a.val ≤ x.val ∧ x.val ≤ b.val :=  begin unfold S at x,   sorry end 
-lemma I01_bound {a : I01} {b : I01}{Hab : a.val < b.val } (x : S a.val b.val) : 
-0 ≤ x.val ∧ x.val ≤ 1 := begin sorry end
+lemma lemma2 {a : I01} {b : I01} (Hab : a.val < b.val) :  b.val ∈ (S a.val b.val) := 
+begin 
+  show a.val ≤ b.val ∧ b.val ≤ b.val,
+  split,
+    exact le_of_lt Hab,
+    exact le_of_eq rfl,
+end 
+
+lemma I01_bound (a : I01) (b : I01) (x : S a.val b.val) : 
+0 ≤ x.val ∧ x.val ≤ 1 := 
+begin 
+  have H := x.property,
+  split,
+    exact le_trans (a.property.1 : 0 ≤ a.val) (x.property.1 : a.val ≤ x.val),
+    exact le_trans (x.property.2 : x.val ≤ b.val) (b.property.2)
+end
+
 lemma lemma_sub_ba (a b : I01) {Hab : a.val < b.val } : b.val - a.val ∈ S 0 (b.val - a.val) :=  
 begin split, exact sub_nonneg.2 (le_of_lt Hab), trivial end   
 
 -- or define as inductive type??
 
-definition par ( a b : I01 ) {Hab : a.val < b.val } : S a.val b.val → I01 :=  
-λ x, ⟨ (x.val - a.val)/(b.val - a.val) , begin 
-have D1 : 0 < (b.val - a.val) , 
-    apply sub_pos.2 Hab, 
-have D2 : 0 < (b.val - a.val)⁻¹, 
+definition par {r s : ℝ} (Hrs : r < s) : S r s → I01 :=  
+λ x, ⟨ (x.val - r)/(s - r) , begin 
+have D1 : 0 < (s - r) , 
+    apply sub_pos.2 Hrs, 
+have D2 : 0 < (s - r)⁻¹, 
     exact inv_pos D1,   
-have N1 : 0 ≤ (x.val - a.val), 
-    exact sub_nonneg.2 ((@Sab_bound a b Hab x).1), 
-have N2 : x.val - a.val ≤ b.val - a.val,
-    have this : -a.val ≤ -a.val, trivial, 
-    show x.val + - a.val ≤ b.val + - a.val,
-    exact add_le_add (@Sab_bound a b Hab x).2 this,  
+have N1 : 0 ≤ (x.val - r), 
+    exact sub_nonneg.2 (x.property.1), 
+have N2 : x.val - r ≤ s - r,
+    have this : -r ≤ -r, trivial, 
+    show x.val + - r ≤ s + - r,
+    exact add_le_add (x.property.2) this,  
 split, 
-    show  0 ≤ (x.val - a.val) * (b.val - a.val)⁻¹, 
+    show  0 ≤ (x.val - r) * (s - r)⁻¹, 
         exact mul_nonneg N1 (le_of_lt D2),  
-    have H1 : 0 < (b.val - a.val), 
-        exact sub_pos.2 Hab,
-    have H2 : (x.val - a.val) / (b.val - a.val) ≤ (b.val - a.val) / (b.val - a.val),
-    exact @div_le_div_of_le_of_pos _ _ (x.val - a.val) (b.val - a.val) (b.val - a.val) N2 H1,
-    rwa [@div_self _ _ (b.val - a.val) (ne.symm ( @ne_of_lt _ _ 0 (b.val - a.val) H1) ) ] at H2
+    have H1 : 0 < (s - r), 
+        exact sub_pos.2 Hrs,
+    have H2 : (x.val - r) / (s - r) ≤ (s - r) / (s - r),
+    exact @div_le_div_of_le_of_pos _ _ (x.val - r) (s - r) (s - r) N2 H1,
+    rwa [@div_self _ _ (s - r) (ne.symm ( @ne_of_lt _ _ 0 (s - r) H1) ) ] at H2
 
 end ⟩  
 -- this is positive repar. (but also need f(s) = 1-s for inverse homotopy/path!! )
@@ -211,30 +222,61 @@ end ⟩
 variable ( f : path x y) 
 #check f.4
 
-lemma par_right_values {a b : I01} {Hab : a.val < b.val } { f : S a.val b.val → I01 } ( H : f = @par a b Hab ) : 
-f ⟨ a.val , lemma1 a ⟩ = 0 ∧ f ⟨ b.val , lemma2 b⟩ = 1 := 
-begin   sorry end 
-
-
-lemma continuous_par [topological_space ℝ ] (a b : I01) {Hab : a.val < b.val } : continuous ( @par a b Hab ) := 
-begin 
-unfold par,
-    let f1  := λ (x : S a.val b.val), (⟨ x.val - a.val , begin sorry end  ⟩ : S 0 (b.val - a.val) ), 
-    --- this syntax otherwise Error 20_07
-    let f2 : S 0 (b.val-a.val) → I01 := λ (x: S 0 (b.val-a.val) ) , ⟨ x.val / (b.val - a.val) , begin sorry end  ⟩ , 
-
-    have H1 : continuous f1, 
-        --have H1U: uniform_continuous (λ ) real.uniform_continuous_add --real.comm_ring 
-        sorry,
-    have H2 : continuous f2, 
-    sorry, 
-    let h : S a.val b.val → I01 := λ (x : (S a.val b.val)), ⟨(x.val - a.val) / (b.val - a.val), _⟩, 
-    have hc : continuous h, 
-        exact continuous.comp  H1 H2 , 
-    exact hc,  
-
+lemma par_right_values {a b : I01} {Hab : a.val < b.val } { f : S a.val b.val → I01 } ( H : f = @par a.val b.val Hab ) : 
+f ⟨ a.val , lemma1 Hab ⟩ = 0 ∧ f ⟨ b.val , lemma2 Hab⟩ = 1 := 
+begin
+  split,
+  { rw H,
+    apply subtype.eq,
+    unfold par,
+    show (a.val + -a.val) / (b.val + -a.val) = 0,
+    rw add_neg_self,
+    exact zero_div _
+  },
+  { rw H,
+    apply subtype.eq,
+    unfold par,
+    show (b.val + -a.val) / (b.val + -a.val) = 1,
+    refine div_self _,
+    rw ←sub_eq_add_neg,
+    intro H2,
+    rw sub_eq_zero at H2,
+    rw H2 at Hab,
+    exact lt_irrefl a.val Hab,
+  }
 end 
 
+theorem real.continuous_add_const (r : ℝ) : continuous (λ x : ℝ, x + r) :=
+begin
+  have H₁ : continuous (λ x, (x,r) : ℝ → ℝ × ℝ),
+    exact continuous.prod_mk continuous_id continuous_const,
+  exact continuous.comp H₁ continuous_add', 
+end 
+
+theorem real.continuous_div_const (r : ℝ) : continuous (λ x : ℝ, x / r) :=
+begin
+  conv in (_ / r) begin
+    rw div_eq_mul_inv,
+  end,
+  have H₁ : continuous (λ x, (x,r⁻¹) : ℝ → ℝ × ℝ),
+    exact continuous.prod_mk continuous_id continuous_const,
+  exact continuous.comp H₁ continuous_mul', 
+end 
+
+theorem real.continuous_scale (a b : ℝ) : continuous (λ x : ℝ, (x + a) / b) := 
+continuous.comp (real.continuous_add_const a) (real.continuous_div_const b)
+
+#check continuous_subtype_val
+#check continuous_subtype_mk
+
+lemma continuous_par {r s : ℝ} (Hrs : r < s) : continuous ( @par r s Hrs ) := 
+begin unfold par,
+  apply continuous_subtype_mk,
+  show continuous (λ (x : ↥(S r s)), (x.val - r) / (s - r)),
+  show continuous ((λ y, (y - r) / (s - r)) ∘ (λ (x : ↥(S r s)), subtype.val x)),
+  refine continuous.comp continuous_subtype_val _, 
+  exact real.continuous_scale (-r) (s-r),
+end 
 
 #check real.uniform_continuous_add
 
