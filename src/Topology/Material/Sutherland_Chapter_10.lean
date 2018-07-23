@@ -100,8 +100,8 @@ def subspace_topology {α : Type u} [X : topological_space α] (A : set α) : to
 }
 
 
---Proof of equivalence of definitions??
-theorem subspace_top_eq_inclusion_induced_top {α : Type u} [X : topological_space α] (A : set α) :
+--Proof of equivalence of definitions
+theorem subspace_top_eq_subtype_top {α : Type u} [X : topological_space α] (A : set α) :
 (subspace_topology A).is_open = (subtype.topological_space).is_open :=
 begin
   dunfold subtype.topological_space,
@@ -152,12 +152,11 @@ begin
 end
 
 --Prop 10.4
-theorem inclusion_cont {α : Type u} [X : topological_space α] (A : set α) : @continuous _ _ (subspace_topology A) _ (λ (a : A), (a : α)) := 
+theorem inclusion_cont_subtype_top {α : Type u} [X : topological_space α] (A : set α) : @continuous _ _ (subtype.topological_space) _ (λ (a : A), (a : α)) := 
 begin
 unfold continuous,
 unfold is_open,
 intros s Hs,
-rw subspace_top_eq_inclusion_induced_top,
 simp,
 unfold subtype.topological_space,
 unfold topological_space.induced,
@@ -173,4 +172,53 @@ unfold coe_b,
 unfold has_coe.coe,
 end
 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+--Prop 10.4 but with subspace topology (I won't do any more with the subspace topology)
+theorem inclusion_cont_subspace_top {α : Type u} [X : topological_space α] (A : set α) : @continuous _ _ (subspace_topology A) _ (λ (a : A), (a : α)) := 
+begin
+unfold continuous,
+unfold is_open,
+rw subspace_top_eq_subtype_top,
+exact inclusion_cont_subtype_top A,
+end
+
+--Corollary 10.5
+theorem restriction_cont {α : Type u} [X : topological_space α] {β : Type v} [Y : topological_space β]
+(f : α → β) (H : continuous f) (A : set α) : continuous (λ (x : A), f x) := 
+begin
+  have H0 : (λ (x : A), f ↑x) = f ∘ (λ (a : A), (a : α)), by simp,
+  rw H0,
+  exact (continuous.comp (inclusion_cont_subtype_top A) H), 
+end
+
+--Proposition 10.6
+theorem inclusion_comp_cont_iff_cont {α : Type u} [X : topological_space α] {A : set α} {γ : Type v} [Z : topological_space γ]
+(g : γ → A) : continuous g ↔ continuous ((λ (a : A), (a : α)) ∘ g) :=
+begin
+  split,
+    intro Hg,
+    exact continuous.comp Hg (inclusion_cont_subtype_top A),
+  simp,
+  unfold continuous,
+  unfold is_open,
+  intro H_i_comp_g,
+  intros V HV,
+  unfold subtype.topological_space at HV,
+  unfold topological_space.induced at HV,
+  simp at HV,
+  cases HV with U HU,
+  have H1 := H_i_comp_g U HU.1,
+  rw HU.2,
+  exact H1,
+end
+
+--Proposition 10.8
+theorem inclusion_comp_cont_iff_cont_to_subtype_top {α : Type u} [X : topological_space α] {A : set α} [TOP : topological_space A] : 
+(∀ (β : Type*) (Z : topological_space β) (g : β → A), 
+(@continuous _ _ Z TOP g ↔ @continuous _ _ Z X ((λ (a : A), (a : α)) ∘ g)))
+→ TOP.is_open = subtype.topological_space.is_open :=
+begin
+  intro H,
+  have H1 := H A TOP 
+end
 
