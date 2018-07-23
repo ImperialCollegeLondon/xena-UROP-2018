@@ -9,7 +9,6 @@ open classical
 
 namespace nat
 
-
 -- Show that for a, b, d integers, we have (da, db) = d(a,b).
 --TODO: change ℕ to ℤ
 theorem q1a (a b d : ℕ) : gcd (d*a) (d*b) = d * (gcd a b) := gcd_mul_left d a b
@@ -112,10 +111,10 @@ end
 theorem coprime_dvd_of_dvd_mul {a b c : ℕ} (h1 : a ∣ c) (h2 : b ∣ c) (h3 : coprime a b) : 
     a*b ∣ c := sorry
 
-theorem lcm_def (m : ℕ) : ∀ a b : ℕ, (∀ n : ℕ, a ≠ 0 ∧ b ≠ 0 ∧   
-                                a ∣ m ∧ b ∣ m ∧ a ∣ n ∧ b ∣ n → m ∣ n) → m = lcm a b
-                                :=
-                                sorry
+
+theorem lcm_def : ∀ a b : ℕ, ∃! m : ℕ, ∀ n : ℕ, a ≠ 0 ∧ b ≠ 0 ∧   
+                                a ∣ m ∧ b ∣ m ∧ a ∣ n ∧ b ∣ n → m ∣ n → m = lcm a b
+                                := sorry 
 
 theorem q4a : ∀ a b : ℕ, ∃! m : ℕ, ∀ n : ℕ, a ≠ 0 ∧ b ≠ 0 ∧   
                                 a ∣ m ∧ b ∣ m ∧ a ∣ n ∧ b ∣ n → m ∣ n
@@ -216,10 +215,7 @@ have  eq3 : a'*b'*d = m,
 
 },
 {
-  intros y hn,
-  have m_lcm : m = lcm a b, by unfold lcm,
-  have y_lcm : y = lcm a b, from lcm_def y a b hn,
-  exact by rw  [m_lcm, y_lcm],
+
 }
 end
 
@@ -242,6 +238,7 @@ end
 -- -- Show that the equation ax = b (mod n) has no solutions if b is not divisible by (a, n), and exactly (a, n) solutions in ℤ/n otherwise.
 -- theorem q6 :
 -- Show that the equation ax = b (mod n) has no solutions if b is not divisible by (a, n), and exactly (a, n) solutions in ℤ/n otherwise.
+-- TODO: how to specify "there are exactly n solutions to an equation"?
 --theorem q6 :  ¬(gcd a n ∣ b) → ¬(∃ x, a*x ≡ b [MOD n])
 
 -- -- For n a positive integer, let σ(n) denote the sum Σ d for d∣n and d>0, of the positive divisors of n.
@@ -287,12 +284,25 @@ end
 -- Let n be a squarefree positive integer, and suppose that for all primes p dividing n, we have (p-1)∣(n - 1).
 -- Show that for all integers a with (a, n) = 1, we have a^n = a (mod n).
 
-def square_free_int (a : ℕ) := ∀ n : ℕ, (n*n) ∣ a → n = 1
+def square_free_int (n : ℕ) := ∀ p : ℕ, prime p ∧ p ∣ n → ¬ (p^2 ∣ n)
+theorem fermat_little_theorem_extension:  ∀ a p : ℕ, prime p → a ^ (p-1) ≡ 1 [MOD p] := sorry
 
-theorem q9 : ∀ n p a, square_free_int n ∧ prime p ∧ p ∣ n → (p-1)∣(n - 1) → gcd a n = 1 → a^n ≡ a [MOD n] := sorry
+theorem q9 : ∀ n p a : ℕ , n ≠ 0 ∧ square_free_int n ∧ prime p ∧ p ∣ n → (p-1)∣(n - 1) → gcd a n = 1 → a^n ≡ a [MOD n] := 
+begin
+intros n p a,
+intro hn,
+intro hp,
+let l:= factors n, 
+have n_gr_0: n > 0, from pos_iff_ne_zero.mpr hn.left,
+have p_in_list: p ∈ l, from mem_factors_of_dvd n_gr_0 hn.right.right.left hn.right.right.right,
+let d := l.count p,
+have d_eq_1: d=1, sorry
+
+
+
+end 
 
 -- Let n be a positive integer. Show that Σ Φ(d) for d∣n and d>0 = n.
 -- [Hint: First show that the number of integers a with a ≤ 0 < n and (a, n) = n/d is equal to Φ(d).] 
 --theorem q10 :
-
-end nat
+end nat 
