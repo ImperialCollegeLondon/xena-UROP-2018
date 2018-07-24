@@ -317,23 +317,103 @@ end
 -- Let n be a squarefree positive integer, and suppose that for all primes p dividing n, we have (p-1)∣(n - 1).
 -- Show that for all integers a with (a, n) = 1, we have a^n = a (mod n).
 
-def square_free_int (n : ℕ) := ∀ p : ℕ, prime p ∧ p ∣ n → ¬ (p^2 ∣ n)
+def square_free_int (n : ℕ) := ∀ p : ℕ, prime p ∧ (p ∣ n → ¬ (p^2 ∣ n))
 theorem fermat_little_theorem_extension:  ∀ a p : ℕ, prime p → a ^ (p-1) ≡ 1 [MOD p] := sorry
 
 theorem q9 : ∀ n p a : ℕ , n ≠ 0 ∧ square_free_int n ∧ prime p ∧ p ∣ n → (p-1)∣(n - 1) → gcd a n = 1 → a^n ≡ a [MOD n] := 
-begin
-intros n p a,
-intro hn,
-intro hp,
-let l:= factors n, 
-have n_gr_0: n > 0, from pos_iff_ne_zero.mpr hn.left,
-have p_in_list: p ∈ l, from mem_factors_of_dvd n_gr_0 hn.right.right.left hn.right.right.right,
-let d := l.count p,
-have d_eq_1: d=1, sorry
+--begin
+--intros n p a,
+--intro hn,
+--intro hp,
+--let l:= factors n, 
+--have n_gr_0: n > 0, from pos_iff_ne_zero.mpr hn.left,
+--have p_in_list: p ∈ l, from mem_factors_of_dvd n_gr_0 hn.right.right.left hn.right.right.right,
+--let d := l.count p,
+--have d_eq_1: d=1, sorry 
 
-
-
-end 
+--end 
+ 
+ --def square_free (n : ℕ) := ∀ p : ℕ, prime p → (p ∣ n → ¬ (p ^ 2 ∣ n)) 
+ 
+ 
+lemma pos_of_square_free (n : ℕ) : square_free_int n → n > 0 := 
+begin 
+  intro H, 
+  apply nat.pos_of_ne_zero, 
+  intro Hn, 
+  refine H 2 _ _ _, 
+  exact prime_two, 
+  { rw Hn, 
+    exact dec_trivial, 
+  }, 
+  rw Hn, 
+  exact dec_trivial 
+end  
+ 
+ 
+#check list.prod  
+ 
+ 
+set_option trace.simplify.rewrite true  
+lemma list.div_prod_of_mem (l : list ℕ) (d : ℕ) (Hd : d ∈ l) : d ∣ list.prod l :=  
+begin 
+  induction l with a m IH, 
+    cases Hd, 
+    rw list.prod_cons, 
+  cases ((list.mem_cons_iff _ _ _).1 Hd) with H H, 
+    rw H, 
+    apply dvd_mul_right, 
+  exact dvd_mul_of_dvd_right (IH H) _,     
+end  
+ 
+ 
+lemma prod_list_count_2 (l : list ℕ) (d : ℕ) : list.count d l ≥ 2 → d * d ∣ list.prod l := 
+begin 
+  intro Hdl, 
+  induction l with a m IH, 
+    cases Hdl, 
+  by_cases (d = a), 
+  { rw list.prod_cons, 
+    rw h, 
+    apply mul_dvd_mul (dvd_refl a), 
+    apply list.div_prod_of_mem, 
+    rw ←h, 
+    rw ←list.count_pos, 
+    apply nat.pos_of_ne_zero, 
+    intro H0, 
+    rw list.count_cons at Hdl, 
+    rw if_pos h at Hdl, 
+    rw H0 at Hdl, 
+    revert Hdl, 
+    exact dec_trivial 
+  }, 
+  { rw list.count_cons at Hdl, 
+    rw if_neg h at Hdl, 
+    have H := IH Hdl,      rw list.prod_cons, 
+    exact dvd_mul_of_dvd_right H _, 
+  } 
+end  
+ 
+ 
+lemma nat.prime_mul (n : ℕ) (p : ℕ) (Hp : prime p) (Hs : square_free_int n) : p ∈ factors n → (factors n).count p = 1 :=  
+begin 
+  intro Hpn, 
+  have Hge1 : list.count p (factors n) ≥ 1, 
+    exact list.count_pos.2 Hpn, 
+  cases (le_iff_lt_or_eq.1 Hge1) with H2 H2, 
+  { exfalso, 
+    apply Hs p Hp, 
+    { rw ←(nat.prod_factors (pos_of_square_free n Hs)), 
+      apply list.div_prod_of_mem, 
+      assumption 
+    }, 
+    show (1 * p) * p ∣ n, 
+    rw one_mul, 
+    rw ←(nat.prod_factors (pos_of_square_free n Hs)), 
+    exact prod_list_count_2 (factors n) p H2, 
+  }, 
+  exact H2.symm 
+end  
 
 -- Let n be a positive integer. Show that Σ Φ(d) for d∣n and d>0 = n.
 -- [Hint: First show that the number of integers a with a ≤ 0 < n and (a, n) = n/d is equal to Φ(d).] 

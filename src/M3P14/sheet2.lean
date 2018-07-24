@@ -1,11 +1,27 @@
+import data.nat.prime
+import data.nat.modeq
 import analysis.real
+
+
+
+namespace nat 
+
+definition quadratic_res (a n: ℕ) := ∃ x: ℕ, a ≡ x^2 [MOD n]
+
+local attribute [instance] classical.prop_decidable
+noncomputable definition legendre_sym (a: ℕ) (p:ℕ) (H: prime p ∧ ¬ p = 2) : ℤ := 
+if quadratic_res a p ∧ ¬ p ∣ a then 1 else 
+if ¬ quadratic_res a p then -1 
+else 0
+
+theorem law_of_quadratic_reciprocity (p q : ℕ)(H1: prime p ∧ ¬ p=2)(H2: prime q ∧ ¬ q=2) : (legendre_sym p q H2)*(legendre_sym q p H1)=(-1)^(((p-1)/2)*((q-1)/2)) := sorry 
 
 -- Questions:
 
 -- Compute 210/449 and 605/617 using quadratic reciprocity.
 -- (449 and 617 are both prime).
 -- TODO: how to prove it using quadratic reciprocity?
-theorem q1 : ∃ x y : ℝ, 
+theorem q1 : ∃ x y : ℝ
 
 -- Find all 6 primitive roots modulo 19.
 theorem q2a :
