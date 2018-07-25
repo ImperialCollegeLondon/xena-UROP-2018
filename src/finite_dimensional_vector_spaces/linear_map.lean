@@ -2,7 +2,6 @@ import xenalib.Ellen_Arlt_matrix_rings
 import algebra.big_operators
 import data.set.finite
 import algebra.module 
-import data.finsupp
 import algebra.group
 
 -- reserve infix ` ^ `: 50
@@ -40,12 +39,7 @@ instance comp {γ} [add_comm_group γ] (g : β → γ) [is_add_group_hom g] :
 end is_add_group_hom
 
 definition has_space (R : Type) (n : nat) [ring R] := (fin n) → R
-
-def add (R : Type) (n : nat) [ring R] := 
-λ (a b :has_space R n), (λ i, (a i) +(b i))
-
-def smul {R : Type} {n : nat} [ring R] (s : R) (rn : has_space R n) : 
-has_space R n := λ I, s * (rn I)
+def add (R : Type) (n : nat) [ring R] := λ (a b :has_space R n), (λ i, (a i) +(b i))
 
 theorem add__assoc {R : Type} {n : nat} [ring R] (a b c :(fin n) → R):add R n (add R n a b) c = add R n a (add R n b c):=
 begin 
@@ -98,64 +92,8 @@ add_zero:= add__zero ,
 add_comm:= add__comm,
 }
 
-namespace R_module
-variables (R : Type) (n : nat)
-variables [ring R] --[module R (has_space R n)]
+instance (R : Type) [ring R] (n : nat) : module R (has_space R n) := sorry
 
-theorem smul_add (s : R) (rn rm : has_space R n) : 
-    smul s (add R n rn rm) = add R n (smul s rn) (smul s rm) := 
--- s • (rn + rm) = s • rn + s • rm 
-    begin
-      apply funext,
-      intro,
-      unfold smul add,
-      apply mul_add,
-    end 
-
-theorem add_smul (s t : R) (rn: has_space R n): 
-    smul (s + t) rn = add R n (smul s rn) (smul t rn) := 
-    begin
-      apply funext,
-      intro,
-      unfold smul add,
-      apply add_mul,
-    end
-
-theorem mul_smul (s t : R) (rn : has_space R n): 
-    smul (s * t) rn = smul s (smul t rn) :=
-    begin
-      apply funext,
-      intro,
-      unfold smul,
-      apply mul_assoc,
-    end
-
-theorem one_smul (rn : has_space R n): 
-    smul (1 : R) rn = rn :=
-    begin
-      apply funext,
-      intro,
-      unfold smul,
-      apply one_mul,
-    end
-end R_module
-
-#check has_scalar
-
-instance (R : Type) [ring R] (n : nat) : has_scalar R (has_space R n) :=
-{ 
-    smul := smul
-}
-
-
-instance (R : Type) (n : nat) [ring R] {s t : R} {rn rm : has_space R n} 
-: module R (has_space R n) :=
-{   
-    smul_add := R_module.smul_add R n,
-    add_smul := R_module.add_smul R n,
-    mul_smul := R_module.mul_smul R n,
-    one_smul := R_module.one_smul R n,
-}
 
 namespace map_matrix
 
@@ -163,15 +101,27 @@ definition matrix_to_map {R : Type} [ring R] {a b : nat} (M : matrix R a b) :
 (has_space R b) → (has_space R a) := λ v ,(λ i,finset.sum finset.univ (λ K, M i K * (v K)) )
 
 
-instance {R : Type} [ring R] {a b : nat} (M : matrix R a b) : is_add_group_hom (matrix_to_map M) := 
+instance hg {R : Type} [ring R] {a b : nat} (M : matrix R a b) : is_add_group_hom (matrix_to_map M) := 
 ⟨begin
 intros,
 funext,
 unfold matrix_to_map,
 
+show (finset.sum finset.univ (λ (K : fin b), M i K * (a_1 K + b_1 K)) = _),
+conv in (M i _ * (a_1 _ + b_1 _))
+  begin
+    rw [mul_add],
+  end,
+
+rw finset.sum_add_distrib,
+refl,
 end ⟩ 
 
-def {R : Type} [ring R] {a b : nat} (M : matrix R a b) : is_linear_map (matrix_to_map M) := sorry 
+def module_hom {R: Type} [ring R] {a b : nat} (M : matrix R a b) : 
+  is_linear_map (matrix_to_map M) := 
+{
+  ..map_matrix.hg M
+} 
 
 
 definition map_to_matrix {R : Type} [ring R] {a b : nat} 
@@ -193,8 +143,7 @@ theorem equiv_one (R : Type) [ring R] {a b : nat} (f : (has_space R b) → (has_
     simp,
     have h₀ : has_space R a, from fM x,
     have h₁ : has_space R b, from f h₀,
-    unfold fM,
-    sorry
+    unfold fM
    end
 
 theorem equiv_two (R : Type) [ring R] {a b : nat} (M : matrix R a b):
@@ -205,8 +154,7 @@ theorem equiv_two (R : Type) [ring R] {a b : nat} (M : matrix R a b):
     simp,
     have h₀ : has_space R a, from fM x,
     have h₁ : has_space R b, from f h₀,
-    unfold fM,
-    sorry
+    unfold fM
    end
 
 end map_matrix
