@@ -1,4 +1,4 @@
-import xenalib.Ellen_Arlt_matrix_rings algebra.big_operators data.set.finite analysis.real data.complex.basic algebra.ring 
+import xenalib.Ellen_Arlt_matrix_rings algebra.module algebra.big_operators data.set.finite analysis.real data.complex.basic algebra.ring 
 variable (n:ℕ)
 open complex matrix
 
@@ -35,9 +35,9 @@ def transpose ( R : Type) [ring R] {n:ℕ  }(A:matrix R n n):  matrix R n n:=
 def Hermitian_conjugate  [ring ℂ ] {n:ℕ  }(A:matrix ℂ n n):  matrix ℂ n n:=
 λ i j, conj (A j i)
 def GL (n:ℕ) ( R : Type) [ring R]:= units (matrix R n n)
-def Orthogornal: Type:= {A :GL n ℝ   // A.2 = transpose ℝ A.1 }
-def Hermitian : Type:= {A :matrix ℂ n n  //  mul ℂ A (Hermitian_conjugate A)= (1 : matrix ℂ n n)}
-theorem transpose_of_product ( R : Type) [comm_ring R] {n:ℕ  }(A B:matrix R n n): transpose R (mul R A B) = mul R (transpose R B) (transpose R A) := 
+def Orthogornal: Type:= {A :GL n ℝ   // mul ℝ  A.1 (transpose ℝ A.1)= identity_matrix ℝ  ∧ mul ℝ (transpose ℝ A.1) A.1 = identity_matrix ℝ  }
+def Hermitian : Type:= {A :matrix ℂ n n //  mul ℂ A (Hermitian_conjugate A)= (1 : matrix ℂ n n)}
+theorem transpose_of_product ( R : Type) [comm_ring R] {n:ℕ}(A B:matrix R n n): transpose R (mul R A B) = mul R (transpose R B) (transpose R A) := 
 begin
 unfold mul,
 unfold transpose,
@@ -47,18 +47,12 @@ instance GL_group (n:ℕ ) ( R : Type) [ring R]:group (GL n R):=
 begin
 unfold GL,
 apply_instance,
-
 end 
 
 
 
---def O: group (Orthogornal (n:ℕ)):= 
---{mul :=  λ (A B : Orthogornal (n:ℕ) ), ⟨ matrix.mul ℝ A.1 B.1,
---begin 
-
---end
 
 
 
 
---}
+

@@ -32,7 +32,7 @@ begin
   { have h : (nat.succ n : ℤ) ≠ 0 := dec_trivial,
     rw [← int.coe_nat_lt, nat_mod, to_nat_of_nonneg (int.mod_nonneg _ h)],
     exact int.mod_lt _ h }
-end⟩⟩
+end⟩⟩ 
 
 instance (n : ℕ) : add_comm_semigroup (zmod n) :=
 { add := @has_add.add (fin n) fin.has_add,

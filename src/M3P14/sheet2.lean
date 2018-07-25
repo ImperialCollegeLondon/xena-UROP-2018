@@ -1,6 +1,7 @@
 import data.nat.prime
 import data.nat.modeq data.int.modeq
 import analysis.real
+import algebra.group_power
 
 
 open nat 
@@ -19,6 +20,8 @@ theorem legendre_sym_mul (a b p: ℕ) : legendre_sym (a*b) p = (legendre_sym a p
 
 theorem legendre_sym_refl (a b p: ℕ) : prime p ∧ ¬ p=2 → (a≡ b [MOD p] → legendre_sym a p = legendre_sym b p) :=sorry
 
+theorem euler_criterion (p : ℕ) (a: ℕ) (hp : prime p ∧ ¬ p=2) (ha : ¬ p ∣ a) :
+  (a^((p - 1) / 2) : ℤ) ≡ legendre_sym a p [ZMOD p] := sorry 
 
 -- Questions:
 -- Compute 210/449 and 605/617 using quadratic reciprocity.
