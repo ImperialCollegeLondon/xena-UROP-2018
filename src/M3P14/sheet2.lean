@@ -1,6 +1,7 @@
 import data.nat.prime
 import data.nat.modeq data.int.modeq
 import analysis.real
+import tactic.norm_num
 
 
 open nat 
@@ -17,7 +18,9 @@ theorem law_of_quadratic_reciprocity (p q : ℕ) : (legendre_sym p q)*(legendre_
 
 theorem legendre_sym_mul (a b p: ℕ) : legendre_sym (a*b) p = (legendre_sym a p)*(legendre_sym b p) := sorry
 
-theorem legendre_sym_refl (a b p: ℕ) : prime p ∧ ¬ p=2 → (a≡ b [MOD p] → legendre_sym a p = legendre_sym b p) :=sorry
+theorem legendre_sym_refl (a b p: ℕ) :  (a≡ b [MOD p] → legendre_sym a p = legendre_sym b p) :=sorry
+
+theorem legendre_sym_supplementary_laws (p: ℕ): legendre_sym 2 p = (-1:ℤ)^((p^2-1)/8) := sorry 
 
 
 -- Questions:
@@ -27,9 +30,51 @@ theorem legendre_sym_refl (a b p: ℕ) : prime p ∧ ¬ p=2 → (a≡ b [MOD p] 
 theorem q1 : ((legendre_sym 210 449) = (-1: ℤ)) ∧ ((legendre_sym 605 617) = (-1: ℤ) ) :=
 begin
 split,
-have h: 210 = 2*105, refl,
-have legendre_sym 210 449 = (legendre_sym 2 449)*(legendre_sym 105 449), from legendre_sym_mul 2 105 449,
+have h1: 210 = 2*105, refl,
+have h2: legendre_sym 210 449 = legendre_sym 210 449, refl, 
+have h3: legendre_sym 210 449 = legendre_sym (2*105) 449, from eq.subst h1 h2, 
+have h4: legendre_sym (2*105) 449 = (legendre_sym 2 449)*(legendre_sym 105 449), from legendre_sym_mul 2 105 449,
+have h5: 105 = 3*35, refl,
+have h6: legendre_sym 105 449 = legendre_sym 105 449, refl,
+have h7: legendre_sym 105 449 = legendre_sym (3*35) 449, from eq.subst h5 h6, 
+have h8: legendre_sym (3*35) 449 = (legendre_sym 3 449)*(legendre_sym 35 449), from legendre_sym_mul 3 35 449,
+have h9: 35 = 5*7, refl,
+have h10: legendre_sym 35 449 = legendre_sym 35 449, refl,
+have h11: legendre_sym 35 449 = legendre_sym (5*7) 449, from eq.subst h9 h10,
+have h12: legendre_sym (5*7) 449 = (legendre_sym 5 449)*(legendre_sym 7 449), from legendre_sym_mul 5 7 449,
+
+have h:(-1: ℤ)^((449^2 -1)/8)= 1, by norm_num,
+
+have h13: legendre_sym 2 449 = (-1:ℤ)^((449^2-1)/8), from legendre_sym_supplementary_laws 449, 
+have a: legendre_sym 2 449 = 1, from eq.trans h13 h,  
+
+have h14: (legendre_sym 3 449)*(legendre_sym 449 3) = (-1: ℤ)^(((3-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity 3 449,
+have h15: (-1: ℤ)^(((3-1)/2)*((449-1)/2)) = 1, by norm_num,
+
+have h16: 449-2 = 3*149, by norm_num,s
+have h17: 3 ∣ 3*149, from dvd_mul_right 3 149,
+have h18: 3 ∣ (449-2), from eq.subst h16 h17,
+have h19: 449 ≡ 2 [MOD 3], from modeq_of_dvd h18,
+--have h16: legendre_sym 449 3 = legendre_sym 2 3, from legendre_sym_refl 449 2 3,
+calc 
+ legendre_sym 210 449 = (legendre_sym 2 449)*(legendre_sym 105 449) : by rw eq.trans h3 h4
+            ... = (legendre_sym 2 449)*(legendre_sym (3*35) 449) : by rw h7 
+            ... = (legendre_sym 2 449)*((legendre_sym 3 449)*(legendre_sym 35 449)) : by rw legendre_sym_mul 3 35 449
+            ... = (legendre_sym 2 449)*(legendre_sym 3 449)*(legendre_sym 35 449) : by mul_assoc 
+            ... = (legendre_sym 2 449)*(legendre_sym 3 449)*(legendre_sym (5*7) 449) : by rw h11
+            ... = (legendre_sym 2 449)*(legendre_sym 3 449)*((legendre_sym 5 449)*(legendre_sym 7 449)) : by rw h12
+            ... = (legendre_sym 2 449)*(legendre_sym 3 449)*(legendre_sym 5 449)*(legendre_sym 7 449) : by rw ←mul_assoc
+            ... = -1 : sorry, 
+
+
+
+sorry,
+
+--have (legendre_sym 2 449)*(legendre_sym 105 449), from legendre_sym_mul 2 105 449,
 end 
+
+#reduce 2* 655
+ 
 -- Find all 6 primitive roots modulo 19.
 --theorem q2a :
 
