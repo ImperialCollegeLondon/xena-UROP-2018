@@ -15,7 +15,7 @@ else 0
 
 theorem law_of_quadratic_reciprocity (p q : ℕ) : (legendre_sym p q)*(legendre_sym q p)=(-1)^(((p-1)/2)*((q-1)/2)) := sorry 
 
-theorem legendre_sym_mul (a b p: ℕ) : prime p ∧ ¬ p=2 → legendre_sym (a*b) p = (legendre_sym a p)*(legendre_sym b p) := sorry
+theorem legendre_sym_mul (a b p: ℕ) : legendre_sym (a*b) p = (legendre_sym a p)*(legendre_sym b p) := sorry
 
 theorem legendre_sym_refl (a b p: ℕ) : prime p ∧ ¬ p=2 → (a≡ b [MOD p] → legendre_sym a p = legendre_sym b p) :=sorry
 
@@ -24,7 +24,12 @@ theorem legendre_sym_refl (a b p: ℕ) : prime p ∧ ¬ p=2 → (a≡ b [MOD p] 
 -- Compute 210/449 and 605/617 using quadratic reciprocity.
 -- (449 and 617 are both prime).
 -- TODO: how to prove it using quadratic reciprocity?
-theorem q1 : ((legendre_sym 210 449) = -1) ∧ ((legendre_sym 605 617) = -1) := sorry  
+theorem q1 : ((legendre_sym 210 449) = (-1: ℤ)) ∧ ((legendre_sym 605 617) = (-1: ℤ) ) :=
+begin
+split,
+have h: 210 = 2*105, refl,
+have legendre_sym 210 449 = (legendre_sym 2 449)*(legendre_sym 105 449), from legendre_sym_mul 2 105 449,
+end 
 -- Find all 6 primitive roots modulo 19.
 --theorem q2a :
 
