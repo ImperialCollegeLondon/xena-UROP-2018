@@ -181,6 +181,15 @@ conv in ( (a_1 _ + b_1 _) * M _ i)
 rw finset.sum_add_distrib,
 refl,
 end⟩ 
+theorem smul_ {R: Type} [ring R] {a b : nat} (M : matrix R a b): ∀ (c : R) (x : has_space R a), matrix_to_map M (smul c x) = smul c  (matrix_to_map M x):=
+begin 
+intros,
+unfold matrix_to_map,
+funext,
+unfold smul,
+rw [finset.mul_sum],
+simp[mul_assoc],
+end
 
 def module_hom {R: Type} [ring R] {a b : nat} (M : matrix R a b) : 
   @is_linear_map R _ _ _ _ _ (matrix_to_map M) :=
@@ -188,39 +197,23 @@ def module_hom {R: Type} [ring R] {a b : nat} (M : matrix R a b) :
  begin 
 exact is_add_group_hom.add _,
  end,
- smul:= 
- begin 
-intros c x',
-unfold matrix_to_map,
-funext j,
-show _ = (c • λ (i : fin b), finset.sum (@finset.univ (fin a) _ (λ (K : fin a), x' K * M K i))) j,
-show _ = (λ (i : fin b), finset.sum finset.univ (λ (K : fin a),(c • x') K * M K i)) i,
-conv in ((c • x') _ * M _ _)
-  begin
-  
-  end,
+ smul:= smul_ _,
+}
 
- end
- 
+def e (R : Type) [ring R] {a: nat} (i: fin a): has_space R a:= λ j, if i =j then 1 else 0
+definition map_to_matrix {R : Type} [ring R] {a b : nat} 
+(f : (has_space R a) → (has_space R b)) [@is_linear_map R _ _ _ _ _ f] : matrix R a b :=
+    λ i j, f(e R i) j
 
-
-
- }
-
-
--- definition map_to_matrix {R : Type} [ring R] {a b : nat} 
--- (f : (has_space R b) → (has_space R a)) [is_module_hom f] : matrix R a b :=
---     λ i j, sorry
-
--- instance (R : Type) [ring R] (a b : nat) : is_add_group_hom (@matrix_to_map R _ a b)
+ --instance {R : Type} [ring R] {a b : nat} (f : (has_space R a) → (has_space R b)) [@is_linear_map R _ _ _ _ _ f] : is_add_group_hom (map_to_matrix f):=
 
 -- instance is_add_group_hom map_to_matrix -- needs fixing like above
 
 -- #print matrix_to_map
 -- #print map_to_matrix
 
--- theorem equiv_one (R : Type) [ring R] {a b : nat} (f : (has_space R b) → (has_space R a)):
---    matrix_to_map (map_to_matrix f) = f := 
+ --theorem equiv_one (R : Type) [ring R] {a b : nat} (f : (has_space R a) → (has_space R b)) [@is_linear_map R _ _ _ _ _ f]:
+    --matrix_to_map (map_to_matrix f ) = f := 
 --    begin
 --     apply funext,
 --     intro x,
@@ -230,8 +223,8 @@ conv in ((c • x') _ * M _ _)
 --     unfold fM
 --    end
 
--- theorem equiv_two (R : Type) [ring R] {a b : nat} (M : matrix R a b):
---     map_to_matrix (matrix_to_map M) = M := 
+ theorem equiv_two (R : Type) [ring R] {a b : nat} (M : matrix R a b):
+     map_to_matrix ( matrix_to_map M) = M := 
 --    begin
 --     apply funext,
 --     intro x,
