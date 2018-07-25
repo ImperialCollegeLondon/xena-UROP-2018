@@ -59,7 +59,7 @@ is_subgroup (H1 ∩ H2) :=
 
 definition Q0 : add_group ℤ := by apply_instance
 
-definition D : group ℤ :=
+definition D : group ℤ := 
 { mul := λ x y, x + y,
   mul_assoc := add_assoc,
   one := 0,
