@@ -57,7 +57,9 @@ theorem sheet05_q4b (n : ℕ) (n < 3) : comm_group (gsymmetric n) → gsymmetric
 -- (a)
 theorem sheet05_q7a_is_T : gsymmetric 2 → is_cyclic G := sorry
 theorem sheet05_q7a_is_F : ¬ (gsymmetric 2 → is_cyclic G) := sorry
--- (b) GL(2,R).􏰄􏰂a 0􏰃
+-- (b) 
+theorem sheet05_q7b_is_T : group (GL 2 R) → is_cyclic G := sorry
+theorem sheet05_q7b_is_F : group (GL 2 R) → ¬ (is_cyclic G) := sorry􏰃
 -- (c) 0 b |
 -- (d) (Q,+). a, b ∈ {1, −1}
 -- under matrix multiplication.
