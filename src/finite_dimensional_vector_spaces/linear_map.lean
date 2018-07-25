@@ -2,6 +2,7 @@ import xenalib.Ellen_Arlt_matrix_rings
 import algebra.big_operators
 import data.set.finite
 import algebra.module 
+import data.finsupp
 import algebra.group
 
 -- reserve infix ` ^ `: 50
@@ -39,7 +40,12 @@ instance comp {γ} [add_comm_group γ] (g : β → γ) [is_add_group_hom g] :
 end is_add_group_hom
 
 definition has_space (R : Type) (n : nat) [ring R] := (fin n) → R
-def add (R : Type) (n : nat) [ring R] := λ (a b :has_space R n), (λ i, (a i) +(b i))
+
+def add (R : Type) (n : nat) [ring R] := 
+λ (a b :has_space R n), (λ i, (a i) +(b i))
+
+def smul {R : Type} {n : nat} [ring R] (s : R) (rn : has_space R n) : 
+has_space R n := λ I, s * (rn I)
 
 theorem add__assoc {R : Type} {n : nat} [ring R] (a b c :(fin n) → R):add R n (add R n a b) c = add R n a (add R n b c):=
 begin 
@@ -92,7 +98,65 @@ add_zero:= add__zero ,
 add_comm:= add__comm,
 }
 
-instance (R : Type) [ring R] (n : nat) : module R (has_space R n) := sorry
+namespace R_module
+variables (R : Type) (n : nat)
+variables [ring R] --[module R (has_space R n)]
+
+theorem smul_add (s : R) (rn rm : has_space R n) : 
+    smul s (add R n rn rm) = add R n (smul s rn) (smul s rm) := 
+-- s • (rn + rm) = s • rn + s • rm 
+    begin
+      apply funext,
+      intro,
+      unfold smul add,
+      apply mul_add,
+    end 
+
+theorem add_smul (s t : R) (rn: has_space R n): 
+    smul (s + t) rn = add R n (smul s rn) (smul t rn) := 
+    begin
+      apply funext,
+      intro,
+      unfold smul add,
+      apply add_mul,
+    end
+
+theorem mul_smul (s t : R) (rn : has_space R n): 
+    smul (s * t) rn = smul s (smul t rn) :=
+    begin
+      apply funext,
+      intro,
+      unfold smul,
+      apply mul_assoc,
+    end
+
+theorem one_smul (rn : has_space R n): 
+    smul (1 : R) rn = rn :=
+    begin
+      apply funext,
+      intro,
+      unfold smul,
+      apply one_mul,
+    end
+end R_module
+
+#check has_scalar
+
+instance (R : Type) [ring R] (n : nat) : has_scalar R (has_space R n) :=
+{ 
+    smul := smul
+}
+
+
+instance (R : Type) (n : nat) [ring R] {s t : R} {rn rm : has_space R n} 
+: module R (has_space R n) :=
+{   
+    smul_add := R_module.smul_add R n,
+    add_smul := R_module.add_smul R n,
+    mul_smul := R_module.mul_smul R n,
+    one_smul := R_module.one_smul R n,
+}
+
 
 
 namespace map_matrix
