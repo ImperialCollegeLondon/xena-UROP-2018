@@ -4,6 +4,7 @@ import data.set.finite
 import algebra.module 
 import data.finsupp
 import algebra.group
+import linear_algebra.basic
 
 -- reserve infix ` ^ `: 50
 
@@ -148,7 +149,7 @@ instance (R : Type) [ring R] (n : nat) : has_scalar R (has_space R n) :=
 }
 
 
-instance (R : Type) (n : nat) [ring R] {s t : R} {rn rm : has_space R n} 
+instance {R : Type} {n : nat} [ring R] 
 : module R (has_space R n) :=
 {   
     smul_add := R_module.smul_add R n,
@@ -162,7 +163,7 @@ instance (R : Type) (n : nat) [ring R] {s t : R} {rn rm : has_space R n}
 namespace map_matrix
 
 definition matrix_to_map {R : Type} [ring R] {a b : nat} (M : matrix R a b) :
-(has_space R b) → (has_space R a) := λ v ,(λ i,finset.sum finset.univ (λ K, M i K * (v K)) )
+(has_space R a) → (has_space R b) := λ v ,(λ i,finset.sum finset.univ (λ K, (v K) *M K i ) )
 
 
 instance hg {R : Type} [ring R] {a b : nat} (M : matrix R a b) : is_add_group_hom (matrix_to_map M) := 
@@ -171,54 +172,73 @@ intros,
 funext,
 unfold matrix_to_map,
 
-show (finset.sum finset.univ (λ (K : fin b), M i K * (a_1 K + b_1 K)) = _),
-conv in (M i _ * (a_1 _ + b_1 _))
+show (finset.sum finset.univ (λ (K : fin a), (a_1 K + b_1 K)  * M K i) =_),
+conv in ( (a_1 _ + b_1 _) * M _ i)
   begin
-    rw [mul_add],
+    rw [add_mul],
   end,
 
 rw finset.sum_add_distrib,
 refl,
-end ⟩ 
+end⟩ 
 
 def module_hom {R: Type} [ring R] {a b : nat} (M : matrix R a b) : 
-  is_linear_map (matrix_to_map M) := 
-{
-  ..map_matrix.hg M
-} 
+  @is_linear_map R _ _ _ _ _ (matrix_to_map M) :=
+ { add:= 
+ begin 
+exact is_add_group_hom.add _,
+ end,
+ smul:= 
+ begin 
+intros c x',
+unfold matrix_to_map,
+funext j,
+show _ = (c • λ (i : fin b), finset.sum (@finset.univ (fin a) _ (λ (K : fin a), x' K * M K i))) j,
+show _ = (λ (i : fin b), finset.sum finset.univ (λ (K : fin a),(c • x') K * M K i)) i,
+conv in ((c • x') _ * M _ _)
+  begin
+  
+  end,
+
+ end
+ 
 
 
-definition map_to_matrix {R : Type} [ring R] {a b : nat} 
-(f : (has_space R b) → (has_space R a)) [is_module_hom f] : matrix R a b :=
-    λ i j, sorry
 
-instance (R : Type) [ring R] (a b : nat) : is_add_group_hom (@matrix_to_map R _ a b)
+ }
 
-instance is_add_group_hom map_to_matrix -- needs fixing like above
 
-#print matrix_to_map
-#print map_to_matrix
+-- definition map_to_matrix {R : Type} [ring R] {a b : nat} 
+-- (f : (has_space R b) → (has_space R a)) [is_module_hom f] : matrix R a b :=
+--     λ i j, sorry
 
-theorem equiv_one (R : Type) [ring R] {a b : nat} (f : (has_space R b) → (has_space R a)):
-   matrix_to_map (map_to_matrix f) = f := 
-   begin
-    apply funext,
-    intro x,
-    simp,
-    have h₀ : has_space R a, from fM x,
-    have h₁ : has_space R b, from f h₀,
-    unfold fM
-   end
+-- instance (R : Type) [ring R] (a b : nat) : is_add_group_hom (@matrix_to_map R _ a b)
 
-theorem equiv_two (R : Type) [ring R] {a b : nat} (M : matrix R a b):
-    map_to_matrix (matrix_to_map M) = M := 
-   begin
-    apply funext,
-    intro x,
-    simp,
-    have h₀ : has_space R a, from fM x,
-    have h₁ : has_space R b, from f h₀,
-    unfold fM
-   end
+-- instance is_add_group_hom map_to_matrix -- needs fixing like above
+
+-- #print matrix_to_map
+-- #print map_to_matrix
+
+-- theorem equiv_one (R : Type) [ring R] {a b : nat} (f : (has_space R b) → (has_space R a)):
+--    matrix_to_map (map_to_matrix f) = f := 
+--    begin
+--     apply funext,
+--     intro x,
+--     simp,
+--     have h₀ : has_space R a, from fM x,
+--     have h₁ : has_space R b, from f h₀,
+--     unfold fM
+--    end
+
+-- theorem equiv_two (R : Type) [ring R] {a b : nat} (M : matrix R a b):
+--     map_to_matrix (matrix_to_map M) = M := 
+--    begin
+--     apply funext,
+--     intro x,
+--     simp,
+--     have h₀ : has_space R a, from fM x,
+--     have h₁ : has_space R b, from f h₀,
+--     unfold fM
+--    end
 
 end map_matrix
