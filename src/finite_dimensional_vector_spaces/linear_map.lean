@@ -100,7 +100,7 @@ add_comm:= add__comm,
 
 namespace R_module
 variables (R : Type) (n : nat)
-variables [ring R] [module R (has_space R n)]
+variables [ring R] --[module R (has_space R n)]
 
 theorem smul_add (s : R) (rn rm : has_space R n) : 
     smul s (add R n rn rm) = add R n (smul s rn) (smul s rm) := 
@@ -140,15 +140,21 @@ theorem one_smul (rn : has_space R n):
     end
 end R_module
 
+#check has_scalar
+
+instance (R : Type) [ring R] (n : nat) : has_scalar R (has_space R n) :=
+{ 
+    smul := smul
+}
 
 
 instance (R : Type) (n : nat) [ring R] {s t : R} {rn rm : has_space R n} 
 : module R (has_space R n) :=
 {   
     smul_add := R_module.smul_add R n,
-    add_smul := R_module.add_smul,
-    mul_smul := R_module.mul_smul,
-    one_smul := R_module.one_smul,
+    add_smul := R_module.add_smul R n,
+    mul_smul := R_module.mul_smul R n,
+    one_smul := R_module.one_smul R n,
 }
 
 namespace map_matrix
