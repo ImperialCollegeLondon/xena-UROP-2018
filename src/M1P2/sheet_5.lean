@@ -52,8 +52,10 @@ theorem sheet05_q4b (n : ℕ) (n < 3) : comm_group (gsymmetric n) → gsymmetric
 -- (b) What are the possible orders of a cyclic subgroup of G?
 -- (c) Find a proper subgroup of G which is not cyclic.
 
--- 7. Which of the following groups are cyclic?
--- (a) S2.
+-- 7. Which of the following groups are cyclic? Prove one statement, delete the other.
+-- (a)
+theorem sheet05_q7a_is_T : gsymmetric 2 → is_cyclic G := sorry
+theorem sheet05_q7a_is_F : ¬ (gsymmetric 2 → is_cyclic G) := sorry
 -- (b) GL(2,R).􏰄􏰂a 0􏰃
 -- (c) 0 b |
 -- (d) (Q,+). a, b ∈ {1, −1}
