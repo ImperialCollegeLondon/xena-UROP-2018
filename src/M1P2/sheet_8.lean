@@ -1,6 +1,7 @@
 import algebra.ring algebra.group_power data.nat.prime data.nat.prime data.nat.basic data.int.modeq algebra.group_power group_theory.subgroup algebra.group data.set.basic
 open nat
 
+variables {R : Type*} [ring R]
 -- 1. (a) Suppose n > 1 is a power of a prime number. Give a formula for the number of elements in the group (Z×n ; ·), explaining your answer.
 -- euler totient function
 --ef euler_tot (n : ℕ)

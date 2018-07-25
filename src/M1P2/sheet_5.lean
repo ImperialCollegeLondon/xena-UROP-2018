@@ -1,4 +1,5 @@
 import group_theory.subgroup data.set.basic algebra.group data.equiv
+import xenalib.Ellen_Arlt_matrix_rings
 
 -- sheet 5
 variables {G : Type*} [group G]
@@ -52,9 +53,13 @@ theorem sheet05_q4b (n : ℕ) (n < 3) : comm_group (gsymmetric n) → gsymmetric
 -- (b) What are the possible orders of a cyclic subgroup of G?
 -- (c) Find a proper subgroup of G which is not cyclic.
 
--- 7. Which of the following groups are cyclic?
--- (a) S2.
--- (b) GL(2,R).􏰄􏰂a 0􏰃
+-- 7. Which of the following groups are cyclic? Prove one statement, delete the other.
+-- (a)
+theorem sheet05_q7a_is_T : gsymmetric 2 → is_cyclic G := sorry
+theorem sheet05_q7a_is_F : ¬ (gsymmetric 2 → is_cyclic G) := sorry
+-- (b) 
+theorem sheet05_q7b_is_T : group (GL 2 R) → is_cyclic G := sorry
+theorem sheet05_q7b_is_F : group (GL 2 R) → ¬ (is_cyclic G) := sorry􏰃
 -- (c) 0 b |
 -- (d) (Q,+). a, b ∈ {1, −1}
 -- under matrix multiplication.
