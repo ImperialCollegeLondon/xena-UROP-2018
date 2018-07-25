@@ -1,10 +1,9 @@
 import data.nat.prime
-import data.nat.modeq
+import data.nat.modeq data.int.modeq
 import analysis.real
 
 
-
-namespace nat 
+open nat 
 
 definition quadratic_res (a n: ℕ) := ∃ x: ℕ, a ≡ x^2 [MOD n]
 
@@ -16,8 +15,8 @@ else 0
 
 theorem law_of_quadratic_reciprocity (p q : ℕ)(H1: prime p ∧ ¬ p=2)(H2: prime q ∧ ¬ q=2) : (legendre_sym p q H2)*(legendre_sym q p H1)=(-1)^(((p-1)/2)*((q-1)/2)) := sorry 
 
+
 -- Questions:
---def euler_phi (n : ℕ) : 
 -- Compute 210/449 and 605/617 using quadratic reciprocity.
 -- (449 and 617 are both prime).
 -- TODO: how to prove it using quadratic reciprocity?
