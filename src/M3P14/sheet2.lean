@@ -3,6 +3,7 @@ import data.nat.modeq data.int.modeq
 import analysis.real
 import tactic.norm_num
 import algebra.group_power
+import data.int.basic
 import M3P14.order
 import chris_hughes_various.zmod
 
@@ -24,6 +25,7 @@ theorem legendre_sym_mul (a b p: ℕ) : legendre_sym (a*b) p = (legendre_sym a p
 theorem legendre_sym_refl (a b p: ℕ) :  (a≡ b [MOD p] → legendre_sym a p = legendre_sym b p) :=sorry
 
 theorem legendre_sym_supplementary_laws (p: ℕ): legendre_sym 2 p = (-1:ℤ)^((p^2-1)/8) := sorry 
+set_option pp.all true
 
 theorem euler_criterion (p : ℕ) (a: ℕ) (hp : prime p ∧ p ≠ 2) (ha : ¬ p ∣ a) :
   (a^((p - 1) / 2) : ℤ) ≡ legendre_sym a p [ZMOD p] := sorry 
@@ -51,15 +53,36 @@ have h12: legendre_sym (5*7) 449 = (legendre_sym 5 449)*(legendre_sym 7 449), fr
 have h:(-1: ℤ)^((449^2 -1)/8)= 1, by norm_num,
 
 have h13: legendre_sym 2 449 = (-1:ℤ)^((449^2-1)/8), from legendre_sym_supplementary_laws 449, 
-have a: legendre_sym 2 449 = 1, from eq.trans h13 h,  
+have a1: legendre_sym 2 449 = 1, from eq.trans h13 h,  
 
 have h14: (legendre_sym 3 449)*(legendre_sym 449 3) = (-1: ℤ)^(((3-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity 3 449,
 have h15: (-1: ℤ)^(((3-1)/2)*((449-1)/2)) = 1, by norm_num,
 
+<<<<<<< HEAD
 have h16: 449-2 = 3*149, by sorry,
+=======
+have h16: 449-2 = 3*149, by norm_num,
+>>>>>>> 07fc45396cb8e1d3972770d46448db0bee134d20
 have h17: 3 ∣ 3*149, from dvd_mul_right 3 149,
 have h18: 3 ∣ (449-2), from eq.subst h16 h17,
-have h19: 449 ≡ 2 [MOD 3], from modeq_of_dvd h18,
+have h19: (3:ℤ) ∣ (449-2), sorry,
+have h20: 2≡ 449 [MOD 3], from nat.modeq.modeq_of_dvd h19,
+have h21: 449 ≡ 2 [MOD 3], from nat.modeq.symm h20,
+have h22: legendre_sym 449 3 = legendre_sym 2 3, from legendre_sym_refl 449 2 3 h21,
+have h23: (-1: ℤ)^((3^2-1)/8)=-1, by norm_num,
+have h24: legendre_sym 2 3 = (-1: ℤ)^((3^2-1)/8), from legendre_sym_supplementary_laws 3,
+have h25: legendre_sym 2 3 = -1, from eq.trans h24 h23,
+have h26: legendre_sym 449 3 = -1, from eq.trans h22 h25, 
+
+have h27: (legendre_sym 3 449)*(legendre_sym 449 3)= 1, from eq.trans h14 h15,
+have h28: (legendre_sym 3 449)*(-1) =1, from eq.subst h26 h27,
+have h29: 1=(legendre_sym 3 449)*(-1), from eq.symm h28,
+have h30: (-1:ℤ) ≠ (0:ℤ) := by exact dec_trivial,
+
+--have h30 : (-1:ℤ) ≠ 0 := by simp,
+have h31: 1/(-1) = legendre_sym 3 449, from div_eq_of_eq_mul_left 
+--have a2: legendre_sym 3 449 = -1, div_eq_of_eq_mul_left 
+
 --have h16: legendre_sym 449 3 = legendre_sym 2 3, from legendre_sym_refl 449 2 3,
 calc 
  legendre_sym 210 449 = (legendre_sym 2 449)*(legendre_sym 105 449) : by rw eq.trans h3 h4
