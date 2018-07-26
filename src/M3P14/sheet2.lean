@@ -56,7 +56,7 @@ have a: legendre_sym 2 449 = 1, from eq.trans h13 h,
 have h14: (legendre_sym 3 449)*(legendre_sym 449 3) = (-1: ℤ)^(((3-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity 3 449,
 have h15: (-1: ℤ)^(((3-1)/2)*((449-1)/2)) = 1, by norm_num,
 
-have h16: 449-2 = 3*149, by norm_num,s
+have h16: 449-2 = 3*149, by sorry,
 have h17: 3 ∣ 3*149, from dvd_mul_right 3 149,
 have h18: 3 ∣ (449-2), from eq.subst h16 h17,
 have h19: 449 ≡ 2 [MOD 3], from modeq_of_dvd h18,
@@ -81,7 +81,7 @@ end
 -- Find all 6 primitive roots modulo 19.
 theorem q2a : ∃ A : set ℕ, ∀ x : ℕ, primitive_root x 19 ↔ x ∈ A := sorry
 
--- Show that if n is odd and a is a primitive root mod n, then a is aprimitive root mod 2n if a is odd, and a + n is a primitive root mod 2n if a is even. 
+-- Show that if n is odd and a is a primitive root mod n, then a is a primitive root mod 2n if a is odd, and a + n is a primitive root mod 2n if a is even. 
 -- [HINT: Φ(2n) = Φ(n) when n is odd.]
 theorem q2b {a n : ℕ} (h_odd : gcd 2 n = 1) (hp : primitive_root a n) : (gcd 2 a = 1 → primitive_root a (2*n)) ∧ (gcd 2 a = 0 → primitive_root (a + n) (2*n)) := sorry
 
