@@ -4,6 +4,9 @@ import analysis.real
 import tactic.norm_num
 import algebra.group_power
 import data.int.basic
+import M3P14.order
+import chris_hughes_various.zmod
+
 
 open nat 
 
@@ -93,26 +96,24 @@ sorry,
 
 --have (legendre_sym 2 449)*(legendre_sym 105 449), from legendre_sym_mul 2 105 449,
 end 
-
-#reduce 2* 655
  
 -- Find all 6 primitive roots modulo 19.
---theorem q2a :
+theorem q2a : ∃ A : set ℕ, ∀ x : ℕ, primitive_root x 19 ↔ x ∈ A := sorry
 
 -- Show that if n is odd and a is a primitive root mod n, then a is aprimitive root mod 2n if a is odd, and a + n is a primitive root mod 2n if a is even. 
 -- [HINT: Φ(2n) = Φ(n) when n is odd.]
---theorem q2b :
+theorem q2b {a n : ℕ} (h_odd : gcd 2 n = 1) (hp : primitive_root a n) : (gcd 2 a = 1 → primitive_root a (2*n)) ∧ (gcd 2 a = 0 → primitive_root (a + n) (2*n)) := sorry
 
 -- Let p be a prime and let a be a primitive root mod p. 
 -- Show that a is also a primitive root mod p² if, and only if, a^p−1 is not congruent to 1 mod p².
 -- [HINT: what is the order of a mod p? What does this say about the order of a mod p²?]
---theorem q3 :
+theorem q3 {a p : ℕ} (hp : prime p) (hq : primitive_root a p) : primitive_root a (p*p) ↔ ¬(a^(p-1) ≡ 1 [MOD (p*p)]) := sorry
 
 -- Let p be a prime, and let a be an integer not divisible by p. 
 -- Show that the equation x^d ≡ a (mod p) has a solution if, and only if, a^(p−1/(d,p−1)) ≡ 1 (mod p). 
 -- Show further that if this is the case then this equation has (d, p − 1) solutions mod p.
 -- [HINT: what happens when you fix a primitive root g mod p, and take the discrete log of the equation x^d ≡ a (mod p)?]
-theorem q4 (p a x d: ℕ) (hp : prime p) : x^d ≡ a [MOD p] ↔ a^(p-1/(gcd d (p-1))) ≡ 1 [MOD p] := sorry
+theorem q4 (p a x d : ℕ) (hp : prime p) : x^d ≡ a [MOD p] ↔ a^(p-1/(gcd d (p-1))) ≡ 1 [MOD p] := sorry
 
 -- Let p be an odd prime different from 7. 
 -- Show that 7 is a square mod p if, and only if, p is congruent to 1, 3, 9, 19, 25 or 27 modulo 28.
@@ -120,7 +121,7 @@ theorem q4 (p a x d: ℕ) (hp : prime p) : x^d ≡ a [MOD p] ↔ a^(p-1/(gcd d (
 theorem q5 (p x : ℕ) (hp: prime p) (hq: p ≠ 7) : x^2 ≡ 7 [MOD p] ↔ (p ≡ 1 [MOD 28] ∨ p ≡ 3 [MOD 28] ∨  p ≡ 9 [MOD 28] ∨ p ≡ 19 [MOD 28] ∨  p ≡ 25 [MOD 28] ∨ p ≡ 25 [MOD 28]) := sorry
 
 -- Let n and m be relatively prime. Show that every element of (ℤ/nmℤ)^x has order dividing the least common multiple of Φ(n) and Φ(m).
---theorem q6a (n m : ℕ) (hp : gcd m n = 1): := sorry  
+--theorem q6a {n m : ℕ} (hp : gcd m n = 1) : := sorry  
 
 -- Show that if n and m are relatively prime, then ℤ/nmℤ has a primitive root if, and only if, both ℤ/nℤ and ℤ/mℤ have primitive roots, and (Φ(n), Φ(m)) = 1.
 -- When can this happen?
@@ -128,7 +129,7 @@ theorem q5 (p x : ℕ) (hp: prime p) (hq: p ≠ 7) : x^2 ≡ 7 [MOD p] ↔ (p �
 
 -- Suppose a is a primitive root modulo n. Show that a^d is also a primitive root modulo n for all d such that (d, Φ(n)) = 1.
 -- [Hint: show that there exists k such that (a^d)^k is equal to a.]
---theorem q7 :
+theorem q7 {a n : ℕ} (hp : primitive_root a n) : ∀ d : ℕ, gcd d (phi n) = 1 → primitive_root (a^d) n := sorry 
 
 -- Show that if p is a prime congruent to ±1 mod 24 then none of 2, 3, 4, 6is a primitive root modulo p.
 -- [Hint: show that 2 and 3 are squares mod p.]
