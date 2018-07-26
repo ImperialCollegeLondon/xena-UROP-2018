@@ -4,25 +4,20 @@ open nat
 open fintype
 
 
---adding phi function and lemmas
+--defining the phi function
 
 def phi (n : ℕ) := ((finset.range n).filter (nat.coprime n)).card
 local notation `φ`  := phi 
-
+#reduce φ 18
 instance {α : Type*} [fintype α] [monoid α] : fintype (units α) := sorry
+
+--lemmas
 
 lemma phi_n (n : ℕ) [pos_nat n] : phi n = card (units (zmod n)) := sorry
 
 lemma phi_p (p : ℕ) (hp: prime p) : φ p = p-1 := sorry
--- begin
--- rw phi_n p,
--- sorry,
--- end
 
 lemma strong_mul (m n : ℕ) : φ(m*n) = (φ m) * (φ n) * (gcd m n / φ (gcd m n)) := sorry
-
-variables m n : nat
-
 
 lemma phi_mul (n m : ℕ) (hp: gcd n m = 1) : φ (n*m) = (φ n) * (φ m) := 
 begin
@@ -62,7 +57,6 @@ rwa ← dvd_prime (prime_two),
 end
 
 lemma power_p_phi (p k : ℕ) (hp: prime p) : φ p^k = (p^k)*(1-1/p) := sorry
---induction?
 
 lemma dvd_phi (m n : ℕ) (hp : m > 0) : (m ∣ n) → (φ m ∣ φ n) := 
 begin
@@ -86,12 +80,10 @@ lemma dvd_a_power (a n : ℕ) : n ∣ φ (a^n - 1) := sorry
 lemma gcd_phi_eq_lcm_phi (m n d l : ℕ) (hp : d = gcd m n) (hq : l = lcm m n)  : φ l * φ d = φ m * φ n := 
 sorry
 
---theorem phi_prod_p (n : ℕ) : φ n = 
+theorem euler_phi_thm (a n : ℕ) (hp: gcd a n = 1) : a^(φ n) ≡ 1 [MOD n] := sorry
 
---lemma exists_k (a : ℤ) (n k : ℕ) (hp : gcd a n = 1) : ∃ k, a^k ≡ 1 [MOD n] := sorry
+theorem flittlet (a p : ℕ) (hp : prime p) : a^(p-1) ≡ 1 [MOD p] := sorry
 
---lemma ord_modeq (a : ℤ) (n k : ℕ) (hp : gcd a n = 1) (hq: a^k ≡ 1 [MOD n]) := sorry
+-- conjectures
 
---theorem euler_phi_thm (a n : ℕ) (hp: gcd a n = 1) : a^(phi n) ≡ 1 [MOD n] := sorry
-
---theorem flittlet (a p : ℕ) (hp : prime p) : a^(p-1) ≡ 1 [MOD p] := sorry
+theorem lehmers_conj (n : ℕ) (hp: ¬ (prime n)) : φ n ∣ n := sorry
