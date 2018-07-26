@@ -12,9 +12,9 @@ open nat
 
 definition quadratic_res (a n: ℕ) := ∃ x: ℕ, a ≡ x^2 [MOD n]
 
-local attribute [instance] classical.prop_decidable
+local attribute [instance, priority 0] classical.prop_decidable
 noncomputable definition legendre_sym (a: ℕ) (p:ℕ): ℤ := 
-if quadratic_res a p ∧ ¬ p ∣ a then 1 else 
+if quadratic_res a p ∧ ¬ (p ∣ a) then 1 else 
 if ¬ quadratic_res a p then -1 
 else 0
 
@@ -25,7 +25,6 @@ theorem legendre_sym_mul (a b p: ℕ) : legendre_sym (a*b) p = (legendre_sym a p
 theorem legendre_sym_refl (a b p: ℕ) :  (a≡ b [MOD p] → legendre_sym a p = legendre_sym b p) :=sorry
 
 theorem legendre_sym_supplementary_laws (p: ℕ): legendre_sym 2 p = (-1:ℤ)^((p^2-1)/8) := sorry 
-set_option pp.all true
 
 theorem euler_criterion (p : ℕ) (a: ℕ) (hp : prime p ∧ p ≠ 2) (ha : ¬ p ∣ a) :
   (a^((p - 1) / 2) : ℤ) ≡ legendre_sym a p [ZMOD p] := sorry 
@@ -69,26 +68,123 @@ have h23: (-1: ℤ)^((3^2-1)/8)=-1, by norm_num,
 have h24: legendre_sym 2 3 = (-1: ℤ)^((3^2-1)/8), from legendre_sym_supplementary_laws 3,
 have h25: legendre_sym 2 3 = -1, from eq.trans h24 h23,
 have h26: legendre_sym 449 3 = -1, from eq.trans h22 h25, 
-
 have h27: (legendre_sym 3 449)*(legendre_sym 449 3)= 1, from eq.trans h14 h15,
 have h28: (legendre_sym 3 449)*(-1) =1, from eq.subst h26 h27,
 have h29: 1=(legendre_sym 3 449)*(-1), from eq.symm h28,
-have h30: (-1:ℤ) ≠ (0:ℤ) := by exact dec_trivial,
+have h30: (-1:ℤ) ≠ (0:ℤ) := dec_trivial,
+have h31: 1/(-1 : ℤ) = legendre_sym 3 449, sorry, --from int.basic.div_eq_of_eq_mul_left h30 h29,
+have h32: -1 = 1/(-1:ℤ), by norm_num,
+have h33: -1 = legendre_sym 3 449, from eq.trans h32 h31,
+have a2: legendre_sym 3 449 = -1, from eq.symm h33,
 
---have h30 : (-1:ℤ) ≠ 0 := by simp,
-have h31: 1/(-1) = legendre_sym 3 449, from div_eq_of_eq_mul_left 
---have a2: legendre_sym 3 449 = -1, div_eq_of_eq_mul_left 
 
---have h16: legendre_sym 449 3 = legendre_sym 2 3, from legendre_sym_refl 449 2 3,
-calc 
+------
+
+
+have h34: (legendre_sym 5 449)*(legendre_sym 449 5) = (-1: ℤ)^(((5-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity 5 449,
+have h35: (-1: ℤ)^(((5-1)/2)*((449-1)/2)) = 1, by norm_num,
+
+have h36: 449-4 = 5*89, by norm_num,
+have h37: 5 ∣ 5*89, from dvd_mul_right 5 89,
+have h38: 5 ∣ (449-4), from eq.subst h36 h37,
+have h39: (5:ℤ) ∣ (449-4), sorry,
+have h40: 4≡ 449 [MOD 5], from nat.modeq.modeq_of_dvd h39,
+have h41: 449 ≡ 4 [MOD 5], from nat.modeq.symm h40,
+have h42: legendre_sym 449 5 = legendre_sym 4 5, from legendre_sym_refl 449 4 5 h41,
+have h43: 4-2^2=5*0, by norm_num,
+have h44: 5 ∣ 5*0, from dvd_mul_right 5 0,
+have h45: 5 ∣ 4-2^2, from eq.subst h43 h44,
+have h46: (5:ℤ) ∣ 4-2^2, sorry,
+have h47: 4 ≡ 2^2 [MOD 5], from nat.modeq.modeq_of_dvd h46,
+have : quadratic_res 4 5, 
+begin 
+unfold quadratic_res,
+existsi 2,
+exact h47,
+end,
+
+have h49: legendre_sym 4 5 = 1,
+begin
+unfold legendre_sym,
+split_ifs,
+refl,
+exfalso,
+apply h_1,
+split,
+exact this,
+exact dec_trivial,
+end,
+
+have g27: (legendre_sym 5 449)*(legendre_sym 449 5)= 1, from eq.trans h34 h35,
+have g28: (legendre_sym 5 449)*(legendre_sym 4 5) =1, from eq.subst h42 g27,
+have g29: (legendre_sym 5 449)*1 =1, sorry,
+have g30: 1*(legendre_sym 5 449) = legendre_sym 5 449, from one_mul (legendre_sym 5 449),
+have g31: (legendre_sym 5 449)*1 = 1*(legendre_sym 5 449), from mul_comm (legendre_sym 5 449) 1,  
+have g32: (legendre_sym 5 449)*1=(legendre_sym 5 449), from eq.trans g31 g30,
+have g33: (legendre_sym 5 449)=(legendre_sym 5 449)*1, from eq.symm g32,
+have a3: legendre_sym 5 449 = 1, from eq.trans g33 g29,
+
+-----
+
+
+have h50: (legendre_sym 7 449)*(legendre_sym 449 7) = (-1: ℤ)^(((7-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity 7 449,
+have h51: (-1: ℤ)^(((7-1)/2)*((449-1)/2)) = 1, by norm_num,
+
+have h52: 449-1 = 7*64, by norm_num,
+have h53: 7 ∣ 7*64, from dvd_mul_right 7 64,
+have h54: 7 ∣ (449-1), from eq.subst h52 h53,
+have h55: (7:ℤ) ∣ (449-1), sorry,
+have h56: 1≡ 449 [MOD 7], from nat.modeq.modeq_of_dvd h55,
+have h57: 449 ≡ 1 [MOD 7], from nat.modeq.symm h56,
+have h58: legendre_sym 449 7 = legendre_sym 1 7, from legendre_sym_refl 449 1 7 h57,
+have h59: 1-1^2=7*0, by norm_num,
+have h60: 7 ∣ 7*0, from dvd_mul_right 7 0,
+have h61: 7 ∣ 1-1^2, from eq.subst h59 h60,
+have h62: (7:ℤ) ∣ 1-1^2, sorry,
+have h63: 1 ≡ 1^2 [MOD 7], from nat.modeq.modeq_of_dvd h62,
+
+have : quadratic_res 1 7, 
+begin 
+unfold quadratic_res,
+existsi 1,
+exact h63,
+end,
+
+have h64: legendre_sym 1 7 = 1,
+begin
+unfold legendre_sym,
+split_ifs,
+refl,
+exfalso,
+apply h_1,
+split,
+exact this,
+exact dec_trivial,
+end,
+
+have j27: (legendre_sym 7 449)*(legendre_sym 449 7)= 1, from eq.trans h50 h51,
+have j28: (legendre_sym 7 449)*(legendre_sym 1 7) =1, from eq.subst h58 j27,
+have j29: (legendre_sym 7 449)*1 =1, sorry,
+have j30: 1*(legendre_sym 7 449) = legendre_sym 7 449, from one_mul (legendre_sym 7 449),
+have j31: (legendre_sym 7 449)*1 = 1*(legendre_sym 7 449), from mul_comm (legendre_sym 7 449) 1,  
+have j32: (legendre_sym 7 449)*1=(legendre_sym 7 449), from eq.trans j31 j30,
+have j33: (legendre_sym 7 449)=(legendre_sym 7 449)*1, from eq.symm j32,
+have a4: legendre_sym 7 449 = 1, from eq.trans j33 j29,
+
+
+exact calc 
  legendre_sym 210 449 = (legendre_sym 2 449)*(legendre_sym 105 449) : by rw eq.trans h3 h4
             ... = (legendre_sym 2 449)*(legendre_sym (3*35) 449) : by rw h7 
             ... = (legendre_sym 2 449)*((legendre_sym 3 449)*(legendre_sym 35 449)) : by rw legendre_sym_mul 3 35 449
-            ... = (legendre_sym 2 449)*(legendre_sym 3 449)*(legendre_sym 35 449) : by mul_assoc 
+            ... = (legendre_sym 2 449)*(legendre_sym 3 449)*(legendre_sym 35 449) : by rw mul_assoc 
             ... = (legendre_sym 2 449)*(legendre_sym 3 449)*(legendre_sym (5*7) 449) : by rw h11
             ... = (legendre_sym 2 449)*(legendre_sym 3 449)*((legendre_sym 5 449)*(legendre_sym 7 449)) : by rw h12
             ... = (legendre_sym 2 449)*(legendre_sym 3 449)*(legendre_sym 5 449)*(legendre_sym 7 449) : by rw ←mul_assoc
-            ... = -1 : sorry, 
+            ... = 1*(legendre_sym 3 449)*(legendre_sym 5 449)*(legendre_sym 7 449) : by rw a1
+            ... = 1*(-1)*(legendre_sym 5 449)*(legendre_sym 7 449) : by rw a2
+            ... = 1*(-1)*1*(legendre_sym 7 449) : by rw a3
+            ... = 1*(-1)*1*1 : by rw a4
+            ... = -1 : by norm_num,
 
 
 
