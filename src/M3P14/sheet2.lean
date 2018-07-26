@@ -57,7 +57,11 @@ have a1: legendre_sym 2 449 = 1, from eq.trans h13 h,
 have h14: (legendre_sym 3 449)*(legendre_sym 449 3) = (-1: ℤ)^(((3-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity 3 449,
 have h15: (-1: ℤ)^(((3-1)/2)*((449-1)/2)) = 1, by norm_num,
 
+<<<<<<< HEAD
+have h16: 449-2 = 3*149, by sorry,
+=======
 have h16: 449-2 = 3*149, by norm_num,
+>>>>>>> 07fc45396cb8e1d3972770d46448db0bee134d20
 have h17: 3 ∣ 3*149, from dvd_mul_right 3 149,
 have h18: 3 ∣ (449-2), from eq.subst h16 h17,
 have h19: (3:ℤ) ∣ (449-2), sorry,
