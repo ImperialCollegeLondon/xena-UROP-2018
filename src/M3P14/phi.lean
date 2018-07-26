@@ -81,26 +81,10 @@ have h8 : φ m ∣ φ (m * (n / m)), from eq.subst (strong_mul m (n/m)).symm h7,
 exact eq.subst eq_n_m.symm h8,
 end
 
-#check strong_mul m (n/m)
-
 lemma dvd_a_power (a n : ℕ) : n ∣ φ (a^n - 1) := sorry
 
 lemma gcd_phi_eq_lcm_phi (m n d l : ℕ) (hp : d = gcd m n) (hq : l = lcm m n)  : φ l * φ d = φ m * φ n := 
-begin 
-rw [hp, hq, lcm],
-calc  
-    φ (m * n / gcd m n) * φ (gcd m n) =  φ (m * n / gcd m n * gcd m n) : by rw 
-    ... = φ m * φ n
-
-
-end
--- begin
--- intros,
--- rw ← phi_mul l d,
--- rw [hp, hq],
--- rw [mul_comm, gcd_mul_lcm],
--- rw phi_mul,
--- end
+sorry
 
 --theorem phi_prod_p (n : ℕ) : φ n = 
 
