@@ -63,23 +63,22 @@ end
 
 lemma power_p_phi (p k : ℕ) (hp: prime p) : φ p^k = (p^k)*(1-1/p) := sorry
 --induction?
+
 lemma dvd_phi (m n : ℕ) (hp : m > 0) : (m ∣ n) → (φ m ∣ φ n) := 
 begin
 intros,
-have eq_n_m : (n = n * m/m), from eq.symm (nat.mul_div_cancel n hp),
-have eq_2: φ m * φ (n / m) * (gcd m (n / m) / φ (gcd m (n / m))) = φ (m * (n / m)), from eq.symm (strong_mul m (n/m)),
-have h5 : φ m ∣ φ m * (φ (n/m) * gcd m (n/m) / φ (gcd m (n/m))), from dvd_mul_right _ _,
-have h6 : φ m ∣ φ m * φ (n / m) * (gcd m (n / m) / φ (gcd m (n / m))),
+have eq_n_m : n = m * (n / m), 
 {
-    rw mul_assoc,
-    
-}
-
-
---have h6 : φ m * φ (n / m) * (gcd m (n / m) / φ (gcd m (n / m))) = φ m * (φ (n/m) * gcd m (n/m) / φ (gcd m (n/m))), by rw (mul_assoc (φ m) (φ (n / m)) ((gcd m (n / m) / φ (gcd m (n / m))))),
-
-
-sorry,
+    rw ←nat.mul_div_assoc m a,
+    rw mul_comm,
+    rwa nat.mul_div_cancel,
+},
+have eq_2: φ m * φ (n / m) * (gcd m (n / m) / φ (gcd m (n / m))) = φ (m * (n / m)), from eq.symm (strong_mul m (n/m)),
+have h5 : φ m ∣ φ m * (φ (n/m) * (gcd m (n/m) / φ (gcd m (n/m)))), from dvd_mul_right _ _,
+have h6 : φ m * (φ (n/m) * (gcd m (n/m) / φ (gcd m (n/m)))) = φ m * φ (n / m) * (gcd m (n / m) / φ (gcd m (n / m))), by rw mul_assoc,
+have h7 : φ m ∣ φ m * φ (n / m) * (gcd m (n / m) / φ (gcd m (n / m))), from eq.subst h6 h5,
+have h8 : φ m ∣ φ (m * (n / m)), from eq.subst (strong_mul m (n/m)).symm h7,
+exact eq.subst eq_n_m.symm h8,
 end
 
 #check strong_mul m (n/m)
