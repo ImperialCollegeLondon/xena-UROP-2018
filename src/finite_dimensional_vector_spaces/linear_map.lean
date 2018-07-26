@@ -207,9 +207,19 @@ definition map_to_matrix {R : Type} [ring R] {a b : nat}
 (f : (has_space R a) → (has_space R b)) (h:@is_linear_map R _ _ _ _ _ f) : matrix R a b :=
     λ i j, f(e R a i) j
 
-theorem finset.sum_single {α : Type*} [fintype α] {β : Type*} [add_comm_monoid β] (f : α → β) {i : α}
-  (h : ∀ (j : α), i ≠ j → f j = 0): 
-f i = finset.sum finset.univ (λ (K : α), f K) := sorry 
+
+theorem finset.sum_single {α : Type*} [fintype α]
+  {β : Type*} [add_comm_monoid β]
+  (f : α → β) {i : α}
+  (h : ∀ (j : α), i ≠ j → f j = 0) :
+f i = finset.sum finset.univ (λ (K : α), f K) :=
+begin
+  have H : finset.sum (finset.singleton i) (λ (K : α), f K)
+    = finset.sum finset.univ (λ (K : α), f K),
+  from finset.sum_subset (λ _ _, finset.mem_univ _)
+    (λ _ _ H, h _ $ mt (λ h, finset.mem_singleton.2 h.symm) H),
+  rw [← H, finset.sum_singleton]
+end 
 theorem apply_function_to_sum {R : Type}[ring R] {n p : nat} (f: fin n → has_space R p ) (i : fin p ): 
 (finset.sum finset.univ (λ (K : fin n),f K)) i = finset.sum finset.univ (λ (K : fin n), f K i):=
 begin
