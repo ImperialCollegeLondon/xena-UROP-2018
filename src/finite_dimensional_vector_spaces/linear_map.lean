@@ -5,6 +5,8 @@ import algebra.module
 import data.finsupp
 import algebra.group
 import linear_algebra.basic
+import data.fintype
+import data.equiv
 
 -- reserve infix ` ^ `: 50
 
@@ -200,38 +202,112 @@ exact is_add_group_hom.add _,
  smul:= smul_ _,
 }
 
-def e (R : Type) [ring R] {a: nat} (i: fin a): has_space R a:= λ j, if i =j then 1 else 0
+def e (R : Type) [ring R] (a: nat) (i: fin a): has_space R a:= λ j, if i =j then 1 else 0
 definition map_to_matrix {R : Type} [ring R] {a b : nat} 
-(f : (has_space R a) → (has_space R b)) [@is_linear_map R _ _ _ _ _ f] : matrix R a b :=
-    λ i j, f(e R i) j
+(f : (has_space R a) → (has_space R b)) (h:@is_linear_map R _ _ _ _ _ f) : matrix R a b :=
+    λ i j, f(e R a i) j
 
- --instance {R : Type} [ring R] {a b : nat} (f : (has_space R a) → (has_space R b)) [@is_linear_map R _ _ _ _ _ f] : is_add_group_hom (map_to_matrix f):=
+theorem finset.sum_single {α : Type*} [fintype α] {β : Type*} [add_comm_monoid β] (f : α → β) {i : α}
+  (h : ∀ (j : α), i ≠ j → f j = 0): 
+f i = finset.sum finset.univ (λ (K : α), f K) := sorry 
+theorem apply_function_to_sum {R : Type}[ring R] {n p : nat} (f: fin n → has_space R p ) (i : fin p ): 
+(finset.sum finset.univ (λ (K : fin n),f K)) i = finset.sum finset.univ (λ (K : fin n), f K i):=
+begin
+rw finset.sum_hom (λ (v: has_space R p), v i ) _,
+intros,
+simp,
+refl,
+refl,
+end
 
--- instance is_add_group_hom map_to_matrix -- needs fixing like above
+theorem span {R : Type} {n : nat} [ring R] (v : has_space R n): 
+v  = finset.sum finset.univ (λ K, smul (v K) (e R n K)):=
+begin 
+funext,
+rw [apply_function_to_sum (λ i, smul (v i) (e R n i))],
+simp,
+unfold smul,
+  have H1 : ∀ (j : fin n), x ≠ j → v j * (e R n j) x = 0,
+    intros,
+    unfold e,
+    split_ifs,
+      exact false.elim (a h.symm),
+    simp,
+  have H2: finset.sum finset.univ (λ (K : fin n), v K * e R n K x) = v x * e R n x x,
+    have Htemp := finset.sum_single (λ (K:fin n), v K * e R n K x ) H1,
+    rw ←Htemp,
+  rw H2,
+  unfold e,
+  split_ifs,
+  simp,
+  simp,  
+end 
 
--- #print matrix_to_map
--- #print map_to_matrix
+theorem equiv_one {R : Type} [ring R] {a b : nat} (f : (has_space R a) → (has_space R b)) (h:@is_linear_map R _ _ _ _ _ f):
+    matrix_to_map (map_to_matrix f h) = f := 
+begin
+funext,
+unfold map_to_matrix,
+unfold matrix_to_map,
+conv begin
+to_rhs,
+rw [span v],
+end,
+rw [← finset.sum_hom f _],
+swap 3,
+rw[is_linear_map.zero h],
+swap 2,
+exact h.add,
+rw[apply_function_to_sum (λ j,f (smul (v j) (e R a j)))],
+simp,
+show _ = finset.sum finset.univ (λ (K : fin a), f ((v K) • (e R a K)) i),
+congr,
+funext,
+rw[h.smul],
+refl,
+end 
+#check is_linear_map
+  theorem equiv_two {R : Type} [ring R] {p b : nat} (M : matrix R p b):
+   map_to_matrix ( matrix_to_map M) (module_hom M) = M := 
+   begin
+   funext,
+   unfold map_to_matrix,
+   unfold matrix_to_map,
+    have H1: ∀ (K : fin p), i ≠ K →  e R p i K * M K j = 0,
+    intros,
+    unfold e,
+    split_ifs,
+    exact false.elim (a h),
+    simp,
+    have H2: finset.sum finset.univ (λ (K : fin p), e R p i K * M K j) = e R p i i * M i j,
+       have Htemp := finset.sum_single (λ (K : fin p), e R p i K * M K j) H1,
+    rw ← Htemp,
+    rw H2,
+    unfold e,
+    split_ifs,
+    simp,
+    simp,
+   end
+  def matrix_to_map_equiv {R : Type} [ring R] {a b : nat} :
+   equiv  (matrix R a b) {f : (has_space R a) → (has_space R b) // @is_linear_map R _ _ _ _ _ f} := 
 
- --theorem equiv_one (R : Type) [ring R] {a b : nat} (f : (has_space R a) → (has_space R b)) [@is_linear_map R _ _ _ _ _ f]:
-    --matrix_to_map (map_to_matrix f ) = f := 
---    begin
---     apply funext,
---     intro x,
---     simp,
---     have h₀ : has_space R a, from fM x,
---     have h₁ : has_space R b, from f h₀,
---     unfold fM
---    end
-
- theorem equiv_two (R : Type) [ring R] {a b : nat} (M : matrix R a b):
-     map_to_matrix ( matrix_to_map M) = M := 
---    begin
---     apply funext,
---     intro x,
---     simp,
---     have h₀ : has_space R a, from fM x,
---     have h₁ : has_space R b, from f h₀,
---     unfold fM
---    end
-
+   {to_fun := λ M, ⟨ matrix_to_map M, module_hom M⟩ ,
+    inv_fun := λ f, map_to_matrix f.1 f.2,
+    right_inv:= 
+    begin 
+     unfold function.right_inverse,
+     unfold function.left_inverse,
+     intros,
+    apply subtype.eq,
+    dsimp,
+    exact equiv_one x.1 x.2, 
+    end,
+    left_inv:= 
+    begin 
+    unfold function.left_inverse,
+    intros,
+    dsimp,
+    exact equiv_two x,
+    end  
+   }
 end map_matrix

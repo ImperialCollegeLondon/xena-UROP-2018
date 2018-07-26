@@ -1,4 +1,4 @@
-
+-- copyright 2017/18 Ellen Arlt
 
 import algebra.big_operators data.set.finite
 
