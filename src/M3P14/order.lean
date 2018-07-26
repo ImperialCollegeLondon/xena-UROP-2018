@@ -5,6 +5,6 @@ open nat
 def order (a n k : ℕ) := ∀m : ℕ, coprime a n ∧ (a^k) ≡ 1 [MOD n]
                                           ∧ (a^m) ≡ 1 [MOD n] → k ≤ m
 
-def primitive_root (a n k : ℕ) := coprime a n ∧ order a n k → k = phi n 
+def primitive_root (a n : ℕ) := ∃ k : ℕ, coprime a n ∧ order a n k → k = phi n 
 
-theorem primitive_root_prime {p : ℕ} (h : prime p) : ∃ a k : ℕ, (primitive_root a p k) := sorry
+theorem primitive_root_prime {p : ℕ} (h : prime p) : ∃ a : ℕ, (primitive_root a p) := sorry

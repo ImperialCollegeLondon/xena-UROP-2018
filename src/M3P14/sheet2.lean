@@ -75,8 +75,6 @@ sorry,
 
 --have (legendre_sym 2 449)*(legendre_sym 105 449), from legendre_sym_mul 2 105 449,
 end 
-
-#reduce 2* 655
  
 -- Find all 6 primitive roots modulo 19.
 --theorem q2a :
