@@ -3,6 +3,7 @@ import chris_hughes_various.zmod data.fintype data.nat.prime data.nat.gcd data.n
 open nat 
 open fintype
 
+
 --adding phi function and lemmas
 
 def phi (n : ℕ) := ((finset.range n).filter (nat.coprime n)).card
@@ -18,13 +19,24 @@ lemma phi_p (p : ℕ) (hp: prime p) : φ p = p-1 := sorry
 -- sorry,
 -- end
 
-lemma strong_mult (m n : ℕ) : φ(m*n) = (φ m) * (φ n) * (gcd m n / φ (gcd m n)) := sorry
+lemma strong_mul (m n : ℕ) : φ(m*n) = (φ m) * (φ n) * (gcd m n / φ (gcd m n)) := sorry
 
-lemma phi_mult (n m : ℕ) (hp: gcd n m = 1) : φ (n*m) = (φ n) * (φ m) := sorry
+variables m n : nat
+
+
+lemma phi_mul (n m : ℕ) (hp: gcd n m = 1) : φ (n*m) = (φ n) * (φ m) := 
+begin
+    rw [nat.mul_comm, strong_mul],
+    rw [nat.gcd_comm, hp],
+    have h : φ 1 = 1, from dec_trivial,
+    rw h,
+    simp,
+    rwa mul_comm,
+end
 
 lemma phi_odd_twice_eq_n (n : ℕ) (hp : gcd 2 n = 1) : φ (2*n) = φ n := 
 begin 
-rw phi_mult 2 n,
+rw phi_mul 2 n,
 rw phi_p 2,
 simp,
 unfold prime,
@@ -37,7 +49,7 @@ end
 
 lemma phi_even_twice_eq_twice_n (n : ℕ) (hp : gcd 2 n = 2) : φ (2*n) = 2 * φ n := 
 begin 
-rw strong_mult 2 n,
+rw strong_mul 2 n,
 rw hp,
 rw phi_p 2,
 simp,
@@ -51,21 +63,44 @@ end
 
 lemma power_p_phi (p k : ℕ) (hp: prime p) : φ p^k = (p^k)*(1-1/p) := sorry
 --induction?
-lemma dvd_phi (m n : ℕ) : (m ∣ n) → (φ m ∣ φ n) := 
+lemma dvd_phi (m n : ℕ) (hp : m > 0) : (m ∣ n) → (φ m ∣ φ n) := 
 begin
 intros,
-sorry,--assume (n = m * (n/m)),
+have eq_n_m : (n = n * m/m), from eq.symm (nat.mul_div_cancel n hp),
+have eq_2: φ m * φ (n / m) * (gcd m (n / m) / φ (gcd m (n / m))) = φ (m * (n / m)), from eq.symm (strong_mul m (n/m)),
+have h5 : φ m ∣ φ m * (φ (n/m) * gcd m (n/m) / φ (gcd m (n/m))), from dvd_mul_right _ _,
+have h6 : φ m ∣ φ m * φ (n / m) * (gcd m (n / m) / φ (gcd m (n / m))),
+{
+    rw mul_assoc,
+    
+}
+
+
+--have h6 : φ m * φ (n / m) * (gcd m (n / m) / φ (gcd m (n / m))) = φ m * (φ (n/m) * gcd m (n/m) / φ (gcd m (n/m))), by rw (mul_assoc (φ m) (φ (n / m)) ((gcd m (n / m) / φ (gcd m (n / m))))),
+
+
+sorry,
 end
+
+#check strong_mul m (n/m)
 
 lemma dvd_a_power (a n : ℕ) : n ∣ φ (a^n - 1) := sorry
 
-lemma gcd_phi_eq_lcm_phi (m n d l : ℕ) (hp : d = gcd m n) (hq : l = lcm m n)  : φ l * φ d = φ m * φ n := sorry
+lemma gcd_phi_eq_lcm_phi (m n d l : ℕ) (hp : d = gcd m n) (hq : l = lcm m n)  : φ l * φ d = φ m * φ n := 
+begin 
+rw [hp, hq, lcm],
+calc  
+    φ (m * n / gcd m n) * φ (gcd m n) =  φ (m * n / gcd m n * gcd m n) : by rw 
+    ... = φ m * φ n
+
+
+end
 -- begin
 -- intros,
--- rw ← phi_mult l d,
+-- rw ← phi_mul l d,
 -- rw [hp, hq],
 -- rw [mul_comm, gcd_mul_lcm],
--- rw phi_mult,
+-- rw phi_mul,
 -- end
 
 --theorem phi_prod_p (n : ℕ) : φ n = 
