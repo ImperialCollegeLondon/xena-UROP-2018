@@ -7,6 +7,8 @@ import algebra.group
 import linear_algebra.basic
 import data.fintype
 import data.equiv
+import linear_algebra.linear_map_module
+import algebra.pi_instances
 
 -- reserve infix ` ^ `: 50
 
@@ -227,7 +229,6 @@ rw finset.sum_hom (λ (v: has_space R p), v i ) _,
 intros,
 simp,
 refl,
-refl,
 end
 
 theorem span {R : Type} {n : nat} [ring R] (v : has_space R n): 
@@ -299,9 +300,8 @@ end
     simp,
    end
   def matrix_to_map_equiv {R : Type} [ring R] {a b : nat} :
-   equiv  (matrix R a b) {f : (has_space R a) → (has_space R b) // @is_linear_map R _ _ _ _ _ f} := 
-
-   {to_fun := λ M, ⟨ matrix_to_map M, module_hom M⟩ ,
+   equiv  (matrix R a b)  (@linear_map R (has_space R a)  (has_space R b) _ _ _):= 
+    {to_fun := λ M, ⟨ matrix_to_map M, module_hom M⟩ ,
     inv_fun := λ f, map_to_matrix f.1 f.2,
     right_inv:= 
     begin 
@@ -319,5 +319,27 @@ end
     dsimp,
     exact equiv_two x,
     end  
+
    }
+  instance  {R : Type} [ring R] {a b : nat}:  is_add_group_hom (@matrix_to_map R _ a b):=
+  { add:= 
+  begin 
+  intros,
+  unfold matrix_to_map,
+  funext,
+  show finset.sum finset.univ (λ (K : fin a), v K * (a_1 K i + b_1 K i)) = _,
+  
+
+  conv in (v _ * (a_1 _ i + b_1 _ i)),
+  begin
+  end 
+
+  end,
+
+  }
+--   show (finset.sum finset.univ (λ (K : fin a), (a_1 K + b_1 K)  * M K i) =_),
+-- conv in ( (a_1 _ + b_1 _) * M _ i)
+--   begin
+--     rw [add_mul],
+--   end,
 end map_matrix
