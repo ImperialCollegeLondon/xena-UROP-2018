@@ -1,4 +1,4 @@
-import algebra.group algebra.group_power init.algebra data.real.basic group_theory.subgroup data.complex.basic group_theory.coset
+import algebra.group_power data.complex.basic group_theory.coset
 
 universes u v w x
 variables {G : Type u} {G₂ : Type v} {G₃ : Type w} {G₄ : Type x}

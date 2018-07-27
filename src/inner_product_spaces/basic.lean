@@ -68,12 +68,6 @@ x ∘ 0 = 0 := by rw [is_conj_sym, conj_eq_zero, zero_inprod]
 @[simp] lemma neg_smul_right_antilinear {V : Type u} [herm_inner_product_space V] (x y : V) : 
 x ∘ -y = -(x ∘ y) := by rw [←neg_one_smul, mul_antilin_right, conj_neg, conj_one, neg_one_mul]     
 
-lemma im_re_eq_imp_eq {x y : ℂ} (H1 : x.re = y.re) (H2: x.im = y.im) :
-x = y :=
-begin
-rw [←re_add_im x, ←re_add_im y, H1, H2], 
-end
-
 lemma conj_eq_real (x : ℂ) : x.im = 0 ↔ conj(x) = x :=
 begin
 split,
@@ -87,7 +81,7 @@ split,
     have hre : x.re = (conj(x)).re,
         simp, 
     rw eq_comm,
-    apply im_re_eq_imp_eq hre hie, 
+    apply complex.ext hre hie, 
     
     intros H,
     have hie : (conj(x)).im = x.im,
@@ -242,6 +236,17 @@ class norm_space (V : Type u) extends vector_space ℂ V :=
 
 open norm_space
 
+lemma norm_ne_zero_iff_ne_zero {V : Type u} [norm_space V] (x : V) :
+N(x) ≠ 0 ↔ x ≠ 0 :=
+begin
+split,
+    intros H,
+    exact (iff_false_left H).mp (norm_pos_def x), 
+
+    intros H,
+    exact (iff_false_right H).mp (norm_pos_def x),
+end
+
 noncomputable instance herm_space_is_norm_space {V : Type u} [herm_inner_product_space V] :
 norm_space V := 
 { 
@@ -327,7 +332,7 @@ norm_pos_def :=
         rw ←zero_im at ho,
         rw ←zero_re at H,
         have hpo : x ∘ x = 0,
-            exact im_re_eq_imp_eq H ho,
+            exact complex.ext H ho,
         exact ((is_pos_def x).right).mp hpo,
 
         intros hz,
@@ -339,6 +344,25 @@ norm_pos_def :=
         rw hpo,
     end,
 } 
+
+@[simp] lemma herm_norm_smul {V : Type u} [herm_inner_product_space V] (x : V) (a : ℂ) : 
+|a • x| = abs(a)*|x| := norm_abs_hom x a
+
+@[simp] lemma of_real_herm_norm_sqr {V : Type u} [herm_inner_product_space V] (x : V) : 
+↑( |x|^2 ) = x ∘ x :=
+begin
+dunfold herm_norm,
+rw sqr_sqrt (is_pos_def x).left,
+rw re_of_real (x ∘ x) (in_self_real x),
+end
+
+@[simp] lemma of_real_herm_norm_mul_self {V : Type u} [herm_inner_product_space V] (x : V) : 
+↑( |x|*|x| ) = x ∘ x :=
+begin
+dunfold herm_norm,
+rw mul_self_sqrt (is_pos_def x).left,
+rw re_of_real (x ∘ x) (in_self_real x),
+end
 
 def is_normalised {V : Type u} [herm_inner_product_space V] (x : V) := |x| = 1 
 
@@ -360,13 +384,65 @@ rw field.inv_mul_cancel,
     exact (ne_zero_im_zero_imp_re_ne_zero ((ne_zero_iff_inprod_ne_zero x).mpr ho) (in_self_real x)),
 end
 
+def normalise_set {V : Type u} [herm_inner_product_space V] :
+set V → set V := image(normalise)
+
+lemma normalise_set_normalises {V : Type u} [herm_inner_product_space V] 
+(A : set V) (Ho : (0 : V) ∉ A) : 
+∀ x ∈ normalise_set(A), is_normalised x :=
+begin
+dunfold normalise_set,
+dunfold image, 
+intros,
+have Ha : ∃ (a : V), a ∈ A ∧ normalise a = x,
+    rw mem_set_of_eq at H, 
+    exact H,
+apply (exists.elim Ha),
+intros a Hl,
+rw ←Hl.right,
+have ho : a ≠ 0,
+    intros h,
+    rw h at Hl,
+    exact Ho Hl.left,
+exact normalise_normalises a ho,
+end
+
+lemma normalised_linear_indep {V : Type u} [herm_inner_product_space V] (s : set V) :
+linear_independent s → linear_independent (normalise_set s) :=
+begin
+dunfold linear_independent,
+intros H1 l H3 H4,
+
+end
+
+lemma normalised_basis_is_basis {V : Type u} [herm_inner_product_space V] (b : set V) :
+is_basis b →  
+
+theorem exists_normalised_basis {V : Type u} [herm_inner_product_space V] : 
+∃ (b : set V), is_basis b ∧ ∀ (x : V), x ∈ b → is_normalised x :=
+begin
+have H1 : ∃ (b : set V), is_basis b,
+    exact exists_is_basis V,
+apply exists.elim H1,
+intros b1 Hb1,
+have H2 : ∃ (b1 : set V), ∀ (x : V), x ∈ b1 → is_normalised x,
+    exact exists.intro (normalise_set b1) (normalise_set_normalises b1 (zero_not_mem_of_linear_independent (zero_ne_one) (Hb.left))),
+apply exists.elim H2,
+intros b2 Hb2,
+apply exists.intro b2, 
+
+end
+
+variables (V : Type u) [herm_inner_product_space V] (A : set V)
+#print ∉ 
+
 def is_ortho {V : Type u} [herm_inner_product_space V] (x y : V) : Prop :=
 x ∘ y = 0
 
 notation a ⊥ b := is_ortho a b 
 
 theorem ortho_refl_iff_zero {V : Type u} [herm_inner_product_space V] (x : V) : 
-(x ⊥ x) ↔ x = 0 := by exact (is_pos_def x).right
+(x ⊥ x) ↔ x = 0 := (is_pos_def x).right
 
 theorem ortho_mul_left {V : Type u} [herm_inner_product_space V] (x y : V) (a : ℂ) (ha : a ≠ 0) : 
 (x ⊥ y) ↔ ((a • x) ⊥ y) :=
@@ -442,10 +518,93 @@ simp,
 end
 
 def is_ortho_set {V : Type u} [herm_inner_product_space V] (s : set V) :=
-∀ x y ∈ s, x ∘ y = 0 ↔ x ≠ y 
+∀ x y ∈ s, (x ⊥ y) ↔ x ≠ y 
 
 def is_orthonormal_set {V : Type u} [herm_inner_product_space V] (s : set V) :=
 is_ortho_set s ∧ ∀ x ∈ s, is_normalised x
+
+noncomputable def proj {V : Type u} [herm_inner_product_space V] (x y : V) :=
+((x ∘ y)/( ↑|y|*|y| )) • y
+
+lemma zero_proj {V : Type u} [herm_inner_product_space V] (x : V) :
+proj 0 x = 0 := by dunfold proj; simp
+
+lemma proj_zero {V : Type u} [herm_inner_product_space V] (x : V) :
+proj x 0 = 0 := by dunfold proj; simp
+
+lemma proj_self_eq_self {V : Type u} [herm_inner_product_space V] (x : V) :
+proj x x = x :=
+begin
+have ho : x = 0 ∨ x ≠ 0,
+    apply em,
+dunfold proj,
+cases ho,
+    rw ho,
+    simp,
+
+    rw ←of_real_mul,
+    simp,
+    rw div_self ((ne_zero_iff_inprod_ne_zero x).mpr ho),
+    rw one_smul,
+end
+
+lemma smul_proj {V : Type u} [herm_inner_product_space V] (x y : V) {a : ℂ} : 
+proj (a • x) y = a • (proj x y) :=
+begin
+dunfold proj,
+simp,
+rw smul_smul,
+ring,
+end
+
+lemma proj_smul {V : Type u} [herm_inner_product_space V] (x y : V) {a : ℂ} (ha : a ≠ 0) :
+proj x (a • y) = proj x y := 
+begin
+have Hy : y = 0 ∨ y ≠ 0,
+    apply em,
+cases Hy,
+    rw Hy,
+    rw smul_zero,
+
+    dunfold proj,
+    simp,
+    rw smul_smul,
+    ring,
+    rw field.mul_assoc,
+    rw ←field.mul_comm a,
+    rw mul_conj, 
+    rw ←field.mul_assoc ( ↑(abs a) * ↑|y| ),
+    rw field.mul_comm (↑(abs a)),
+    rw field.mul_assoc ( ↑|y| ),
+    rw ←of_real_mul,
+    rw mul_self_abs,
+    rw field.mul_comm ( ↑|y| ),
+    rw field.mul_comm,
+    rw field.mul_assoc,
+    rw mul_inv_eq, 
+    rw field.mul_comm,
+    rw field.mul_assoc ((↑|y| * ↑|y| )⁻¹),
+    rw field.mul_comm (↑(norm_sq a))⁻¹,
+    rw field.mul_assoc,
+    rw field.mul_assoc (x ∘ y),
+    rw field.inv_mul_cancel,
+    rw field.mul_one,
+    refl,
+    
+    exact of_real_ne_zero.mpr ((iff_false_right ha).mp (norm_sq_eq_zero)),
+    exact (mul_ne_zero (of_real_ne_zero.mpr ((norm_ne_zero_iff_ne_zero y).mpr Hy)) (of_real_ne_zero.mpr ((norm_ne_zero_iff_ne_zero y).mpr Hy))),
+    exact of_real_ne_zero.mpr ((iff_false_right ha).mp (norm_sq_eq_zero)),
+end
+
+theorem exists_ortho_basis {V :Type u} [herm_inner_product_space V] :
+∃ S : set V, is_basis S ∧ is_orthonormal_set S := 
+begin
+have H : ∃ S : set V, is_basis S,
+    exact exists_is_basis V,
+apply exists.elim H,
+intros A H, 
+admit,
+end
 
 noncomputable def herm_dist {V : Type u} [herm_inner_product_space V] (x y : V) : ℝ := |x - y|
 
@@ -470,7 +629,7 @@ eq_of_dist_eq_zero :=
     rw sqrt_eq_zero (is_pos_def (x - y)).left at H,
     rw ←zero_re at H,
     have H1 : (x - y) ∘ (x - y) = 0,
-        exact im_re_eq_imp_eq H (in_self_real (x - y)),
+        exact complex.ext H (in_self_real (x - y)),
     rw (is_pos_def (x - y)).right at H1,
     exact sub_eq_zero.mp H1,
     end,
@@ -493,5 +652,4 @@ dist_triangle :=
     end,
 }
 
-class hilbert_space (V : Type u) extends herm_inner_product_space V :=
-(is_complete : complete_space V) 
+class hilbert_space (V : Type u) extends herm_inner_product_space V, complete_space V

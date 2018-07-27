@@ -11,6 +11,7 @@ The thing we improved is this file describes finite dimentional vector spaces
 import algebra.module -- for definition of vector_space  
 import linear_algebra.basic -- for definition of is_basis 
 import data.list.basic
+import analysis.real
 universes u v 
 
 class finite_dimensional_vector_space (k : Type u) (V : Type v) [field k] 
@@ -18,12 +19,12 @@ class finite_dimensional_vector_space (k : Type u) (V : Type v) [field k]
 (ordered_basis : list V)
 (is_ordered_basis : is_basis {v : V | v ∈ ordered_basis})
 
--- Now all we need is some theorems!
 
 variables {k : Type u} {V : Type v}
 variable [field k]
-variables [ring k] [module k V]
-variables (a : k) (b : V)
+-- variable [ring k] 
+variable [module k V]
+variables {a : k} {b : V}
 include k 
 
 definition f_dimention
@@ -36,69 +37,80 @@ span {vc : V | vc ∈ l}
 def f_linear_independent (l : list V) : Prop := 
 linear_independent {vc : V | vc ∈ l}
 
-
 -- helper function to check whether two basis are equal
-def are_basis_equal (l₀ : list V) (l₁ : list V) : Prop := 
+def are_span_the_same (l₀ : list V) (l₁ : list V) : Prop := 
 ∀vc : V, vc ∈ (f_span l₀) ∧ vc ∈ (f_span l₁) 
 
 def is_basis_of_vecsp (l : list V) (fvs : finite_dimensional_vector_space k V) : Prop := 
-(are_basis_equal l fvs.ordered_basis) ∧ (f_linear_independent l)
+(f_span l = f_span fvs.ordered_basis) ∧ (f_linear_independent l)
 
 def is_in_vecsp (v : V) (fvs : finite_dimensional_vector_space k V) : Prop :=
 v ∈ span {v₁ : V | v₁ ∈ fvs.ordered_basis}
 
-section span_liid
+section basic_property
+variables (x y : V)
+variable (fvs : finite_dimensional_vector_space k V)
 
+lemma add_closed : is_in_vecsp x fvs ∧ is_in_vecsp y fvs → is_in_vecsp (x + y) fvs :=
+begin
+intro h₀,
+cases h₀ with le ri,
+have h₁ : ∃(lc₁ : lc k V), (∀x∉fvs.ordered_basis, lc₁ x = 0) 
+  ∧ x = lc₁.sum (λb a, a • b), from le,
+have h₂  : ∃ lc₂ : lc k V, (∀x∉fvs.ordered_basis, lc₂ x = 0) 
+  ∧ y = lc₂.sum (λb a, a • b), from ri,
+apply exists.elim h₁,
+apply exists.elim h₂,
+intros lc₁ h₃ lc₂ h₄,
+
+
+
+-- def span (s : set β) : set β := { x | ∃(v : lc α β),  (∀x∉s, v x = 0) ∧ x = v.sum (λb a, a • b) }
+end
+
+-- lemma add_closed : is_in_vecsp x fvs ∧ is_in_vecsp y fvs → is_in_vecsp (x + y) fvs :=
+-- by {
+--   unfold is_in_vecsp span at *,
+--   intros h, cases h with h1 h2,
+--   cases h1 with a ha,
+--   cases h2 with b hb,
+--   cases ha with ha1 ha2,
+--   cases hb with hb1 hb2,
+--   existsi (a+b), split,
+--     { intros v hv, have := exact @ha1 hv,  }
+-- }
+
+
+
+
+
+end basic_property
+
+
+section span_liid
 variables (v₀ v₁ v₂ vc: V)
 variables (l₀ l₁: list V)
 variables (h₀ h₁ res₀ res₁ : Prop)
 variable (fvs : finite_dimensional_vector_space k V)
+
 -- 2.4
 theorem linear_dependence_th (l : list V)
   (h₀ : ¬ (f_linear_independent l)) 
   (h₁ : (vc ∈ l) ∧ (vc ≠ (0:V))) 
-  (h₂ : v₀ ∈ l ∧ v₀ ≠ vc)
-  : (v₀ ∈ span {vr : V | vr ∈ l ∧ vr ≠ v₀}) 
-  ∧ (span {vr : V | vr ∈ l ∧ vr ≠ v₀} = f_span l) := 
-  begin
-    let s : set V := {vr : V | vr ∈ l ∧ vr ≠ vc},
-    split,
-    sorry
-
-  end
-    -- apply exists.elim h₁,
-    -- cases h₁ with vc hvc,
-    -- cases hvc with hl hnz,
-    -- let s : set V := {vr : V | vr ∈ l ∧ vr ≠ vc},
-    --   have h₂ : vc ∈ span s,
-    --       from 
-    --       begin 
-    --       apply exists.intro,
-          -- apply and.intro,
-          --   intro,
-          --   intro h,
-            -- def span (s : set β) : set β := { x | ∃(v : lc α β), (∀x∉s, v x = 0) ∧ x = v.sum (λb a, a • b) }
-            -- lienar inde: ∀l : lc α β, (∀x∉s, l x = 0) → l.sum (λv c, c • v) = 0 → l = 0
-  --         end,
-            
-            
-  --     have h₃ : span s = f_span l,
-  --       from 
-  --         begin
-  --           have h₅ : span s ⊆ f_span l, from sorry,
-
-  --           have h₆ : f_span l ⊆ span s, from sorry,
-  --           exact span s = f_span l, from h₅ h₆,
-
-  --         end,
-  --   intro,
-  --   assume vc,
+  : ∃ v₀, (v₀ ∈ l) ∧ (v₀ ≠ vc) ∧ (v₀ ∈ span {vr : V | vr ∈ l ∧ vr ≠ v₀}) 
+  ∧ (span {vr : V | vr ∈ l ∧ vr ≠ v₀} = f_span l) :=
+  sorry
+  -- begin
   --   apply exists.intro,
-  --   apply and.intro,
-  --   exact hl,
-  --   apply and.intro,
-  --   exact h₂,
-  --   exact h₃,
+  --   split,
+  --   intro v₀,
+  --   assume h₂ : v₀ ∈ l ∧ v₀ ≠ vc,    
+    
+
+    
+  --   -- ⟨finsupp.single v₀ 1, by simp [finsupp.sum_single_index, this] {contextual := tt}⟩
+  --   sorry
+    
   -- end
   
   
@@ -108,13 +120,29 @@ theorem linear_dependence_th (l : list V)
 -- every linearly independent list of vectors is less 
 -- than or equal to the length of every spanning list of vectors.
 theorem len_of_lide_le_dimention (fvs : finite_dimensional_vector_space k V) (l : list V) 
-  (h₀ : f_linear_independent l)
-  (h₁ : are_basis_equal l₀ fvs.ordered_basis)
-  : l.length <= l₀.length := sorry
+  (h₀ : f_linear_independent l ∧ f_span l ⊆ f_span fvs.ordered_basis)
+  (h₁ : f_span l₀ = f_span fvs.ordered_basis)
+  : l.length <= l₀.length := 
+  -- begin
+  sorry
+  -- end
 
 -- 2.8
 theorem is_f_basis (l : list V) (fvs : finite_dimensional_vector_space k V):
-  (∀ v₀, (is_in_vecsp v₀ fvs) ∧  (v₀ ∈ f_span l)) ↔ (is_basis_of_vecsp l fvs) := sorry 
+  (∀ v₀, (is_in_vecsp v₀ fvs) ∧  (v₀ ∈ f_span l)) ↔ (is_basis_of_vecsp l fvs) := 
+  sorry
+  -- begin
+  -- apply iff.intro,
+  -- -- A -> B
+  -- intro h,
+  -- split,
+  
+
+  -- -- B -> A
+
+
+
+  -- end 
 
 -- 2.10 Every spanning list in a vector space can be reduced to a basis of the vector space.
 theorem span_set_can_be_basis (fvs : finite_dimensional_vector_space k V) : 
@@ -135,7 +163,7 @@ theorem any_basis_have_len:
 
 -- If V is finite dimensional, then every spanning list of vectors in V with length dim V is a basis of V.
 theorem span_with_dim_is_basis:
-  ∀l₀ , (are_basis_equal l₀ fvs.ordered_basis ∧ l₀.length = f_dimention k V fvs) 
+  ∀l₀ , (are_span_the_same l₀ fvs.ordered_basis ∧ l₀.length = f_dimention k V fvs) 
   → is_basis_of_vecsp l₀ fvs := sorry
 
 theorem liide_list_with_dim_is_basis:
@@ -161,3 +189,15 @@ end span_liid
 -- 2.21 dimV =dimU1 +···+dimUm. Then V = U1 ⊕ · · · ⊕ Um.
 
 -- define linear map 
+
+
+-- ∀l : lc α β, (∀x∉s, l x = 0) → l.sum (λv c, c • v) = 0 → l = 0
+-- variable α : Type
+-- variable i : α 
+-- theorem not_for_all (p q: α → Prop) (h : ¬ (∀x : α, p x → q x)) : 
+-- ∃x : α, p x ∧ ¬ (q x) :=
+-- begin
+-- apply exists.intro,
+-- split,
+-- apply exists.elim ((p i) ∨ ¬ (p i)) 
+-- end
