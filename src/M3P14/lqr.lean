@@ -1,4 +1,34 @@
 import tactic.ring 
+import data.nat.prime
+import data.nat.modeq data.int.modeq
+import analysis.real
+import tactic.norm_num
+import algebra.group_power
+import M3P14.order
+import chris_hughes_various.zmod
+
+open nat 
+
+definition quadratic_res (a n: ℕ) := ∃ x: ℕ, a ≡ x^2 [MOD n]
+
+local attribute [instance, priority 0] classical.prop_decidable
+noncomputable definition legendre_sym (a: ℕ) (p:ℕ): ℤ := 
+if quadratic_res a p ∧ ¬ (p ∣ a) then 1 else 
+if ¬ quadratic_res a p then -1 
+else 0
+
+theorem law_of_quadratic_reciprocity (p q : ℕ) : (legendre_sym p q)*(legendre_sym q p) = (-1)^(((p-1)/2)*((q-1)/2)) := sorry 
+
+theorem legendre_sym_mul (a b p: ℕ) : legendre_sym (a*b) p = (legendre_sym a p)*(legendre_sym b p) := sorry
+
+theorem legendre_sym_refl (a b p: ℕ) :  (a≡ b [MOD p] → legendre_sym a p = legendre_sym b p) :=sorry
+
+theorem legendre_sym_supplementary_laws (p: ℕ): legendre_sym 2 p = (-1:ℤ)^((p^2-1)/8) := sorry 
+
+theorem euler_criterion (p : ℕ) (a: ℕ) (hp : prime p ∧ p ≠ 2) (ha : ¬ p ∣ a) :
+  (a^((p - 1) / 2) : ℤ) ≡ legendre_sym a p [ZMOD p] := sorry 
+
+
 
 lemma quad_res_two (n : ℕ) : n % 8 = 1 ∨ n % 8 = 7 → ((n ^ 2 - 1) / 8 % 2 = 0) :=
 begin
