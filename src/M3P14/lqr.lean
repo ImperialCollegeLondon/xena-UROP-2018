@@ -11,22 +11,22 @@ open nat
 
 definition quadratic_res (a n: ℕ) := ∃ x: ℕ, a ≡ x^2 [MOD n]
 
-local attribute [instance, priority 0] classical.prop_decidable
-noncomputable definition legendre_sym (a: ℕ) (p:ℕ): ℤ := 
+attribute [instance, priority 0] classical.prop_decidable
+noncomputable definition legendre_sym {p : ℕ} (a : ℕ) (H : prime p): ℤ := 
 if quadratic_res a p ∧ ¬ (p ∣ a) then 1 else 
 if ¬ quadratic_res a p then -1 
 else 0
 
-theorem law_of_quadratic_reciprocity (p q : ℕ) : (legendre_sym p q)*(legendre_sym q p) = (-1)^(((p-1)/2)*((q-1)/2)) := sorry 
+theorem law_of_quadratic_reciprocity {p q : ℕ} (hp : prime p) (hq : prime q) : (legendre_sym p hq)*(legendre_sym q hp) = (-1)^(((p-1)/2)*((q-1)/2)) := sorry 
 
-theorem legendre_sym_mul (a b p: ℕ) : legendre_sym (a*b) p = (legendre_sym a p)*(legendre_sym b p) := sorry
+theorem legendre_sym_mul {p : ℕ} (a b : ℕ) (hp : prime p): legendre_sym (a*b) hp = (legendre_sym a hp)*(legendre_sym b hp) := sorry
 
-theorem legendre_sym_refl (a b p: ℕ) :  (a≡ b [MOD p] → legendre_sym a p = legendre_sym b p) :=sorry
+theorem legendre_sym_refl {p : ℕ} (a b : ℕ) (hp : prime p):  (a ≡ b [MOD p] → legendre_sym a hp = legendre_sym b hp) :=sorry
 
-theorem legendre_sym_supplementary_laws (p: ℕ): legendre_sym 2 p = (-1:ℤ)^((p^2-1)/8) := sorry 
+theorem legendre_sym_supplementary_laws {p : ℕ} (hp : prime p): legendre_sym 2 hp = (-1:ℤ)^((p^2-1)/8) := sorry 
 
 theorem euler_criterion (p : ℕ) (a: ℕ) (hp : prime p ∧ p ≠ 2) (ha : ¬ p ∣ a) :
-  (a^((p - 1) / 2) : ℤ) ≡ legendre_sym a p [ZMOD p] := sorry 
+  (a^((p - 1) / 2) : ℤ) ≡ legendre_sym a hp.left [ZMOD p] := sorry 
 
 
 
