@@ -1,15 +1,16 @@
+/- 
+Copyright (c) 2018 Morenikeji Neri, Blair Shi. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Author: Morenikeji Neri, Blair Shi
+
+-/
+
 import xenalib.Ellen_Arlt_matrix_rings 
 import algebra.big_operators
 import data.set.finite
 import algebra.module 
 import data.finsupp
 import algebra.group
-
--- reserve infix ` ^ `: 50
-
-
--- class has_map (R : Type) (n : nat) [ring R] := (char : nat → fin n → R)
--- infix ^ := has_map.char
 
 -- R^n
 universe u
@@ -176,10 +177,10 @@ conv in (M i _ * (a_1 _ + b_1 _))
   begin
     rw [mul_add],
   end,
-
 rw finset.sum_add_distrib,
 refl,
 end ⟩ 
+
 
 def module_hom {R: Type} [ring R] {a b : nat} (M : matrix R a b) : 
   is_linear_map (matrix_to_map M) := 
