@@ -225,7 +225,7 @@ constructor, exact ⟨b, this⟩
 end
 
 theorem three14 (a b : point) : ∃ c, B a b c ∧ b ≠ c := 
-let ⟨(x : point), (y : point), hp⟩ := three13 in
+let ⟨(x : point), y, hp⟩ := three13 in
 begin
 cases seg_cons b x y a with c h,
 cases h with h1 h2,
@@ -493,18 +493,18 @@ have : eqd c c c c',
 exact id_eqd c c' c this.symm
 end
 
-theorem four19 {a b c c' : point} : B a c b → eqd a c a c' → eqd b c b c' → c = c' :=
+theorem four19 {a b c b' : point} : B a b c → eqd a b a b' → eqd b c b' c → b = b' :=
 begin
 intros h h1 h2,
-cases em (a = b) with h3 h4,
+cases em (a = c) with h3 h4,
   rw ←h3 at *,
-  have : a = c, exact bet_same a c h,
+  have : a = b, exact bet_same a b h,
   rw this at *,
-  exact id_eqd c c' c h1.symm,
-have : col a b c,
+  exact id_eqd b b' b h1.symm,
+have : col a c b,
   right, left,
   exact h.symm,
-exact four18 h4 this h1 h2
+exact four18 h4 this h1 h2.flip
 end
 
 -- Ordering collinear points & Comparing distances
@@ -975,7 +975,7 @@ cases h2 with c h2,
 exact five2 h2.1 h2.2.1.symm h2.2.2.symm
 end
 
-theorem six4 {a b p : point} : sided p a b ↔ col a p b ∧ ¬ B a p b :=
+theorem six4 {a b p : point} : sided p a b ↔ col a p b ∧ ¬B a p b :=
 begin
 apply iff.intro,
   intro h,
