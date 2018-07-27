@@ -13,9 +13,9 @@ import data.finsupp
 import algebra.group
 import linear_algebra.basic
 import data.fintype
-import data.equiv
 import linear_algebra.linear_map_module
 import algebra.pi_instances
+import data.equiv.basic
 
 -- R^n
 universe u
@@ -59,6 +59,7 @@ unfold add,
 funext,
 simp,
 end
+
 theorem add__comm {R : Type} {n : nat} [ring R] (a b :(fin n) → R):
  add R n a b =add R n b a :=
 begin 
@@ -66,6 +67,7 @@ unfold add,
 funext,
 exact add_comm (a i) (b i),
 end
+
 def zero (R : Type) (n : nat) [ring R]: has_space R n := λ (i:fin n),(0 :R)
 #check zero
 theorem zero__add {R : Type} {n : nat} [ring R] (a:has_space R n): add R n (zero R n) a = a:=
@@ -170,7 +172,6 @@ namespace map_matrix
 definition matrix_to_map {R : Type} [ring R] {a b : nat} (M : matrix R a b) :
 (has_space R a) → (has_space R b) := λ v ,(λ i,finset.sum finset.univ (λ K, (v K) *M K i ) )
 
-
 instance hg {R : Type} [ring R] {a b : nat} (M : matrix R a b) : is_add_group_hom (matrix_to_map M) := 
 ⟨begin
 intros,
@@ -185,7 +186,9 @@ conv in ( (a_1 _ + b_1 _) * M _ i)
 rw finset.sum_add_distrib,
 refl,
 end⟩ 
-theorem smul_ {R: Type} [ring R] {a b : nat} (M : matrix R a b): ∀ (c : R) (x : has_space R a), matrix_to_map M (smul c x) = smul c  (matrix_to_map M x):=
+
+theorem smul_ {R: Type} [ring R] {a b : nat} (M : matrix R a b):
+ ∀ (c : R) (x : has_space R a), matrix_to_map M (smul c x) = smul c (matrix_to_map M x):=
 begin 
 intros,
 unfold matrix_to_map,
@@ -206,10 +209,10 @@ exact is_add_group_hom.add _,
 }
 
 def e (R : Type) [ring R] (a: nat) (i: fin a): has_space R a:= λ j, if i =j then 1 else 0
+
 definition map_to_matrix {R : Type} [ring R] {a b : nat} 
 (f : (has_space R a) → (has_space R b)) (h:@is_linear_map R _ _ _ _ _ f) : matrix R a b :=
     λ i j, f(e R a i) j
-
 
 theorem finset.sum_single {α : Type*} [fintype α]
   {β : Type*} [add_comm_monoid β]
@@ -223,6 +226,7 @@ begin
     (λ _ _ H, h _ $ mt (λ h, finset.mem_singleton.2 h.symm) H),
   rw [← H, finset.sum_singleton]
 end 
+
 theorem apply_function_to_sum {R : Type}[ring R] {n p : nat} (f: fin n → has_space R p ) (i : fin p ): 
 (finset.sum finset.univ (λ (K : fin n),f K)) i = finset.sum finset.univ (λ (K : fin n), f K i):=
 begin
@@ -300,6 +304,7 @@ end
     simp,
     simp,
    end
+
   def matrix_to_map_equiv {R : Type} [ring R] {a b : nat} :
    equiv  (matrix R a b)  (@linear_map R (has_space R a)  (has_space R b) _ _ _):= 
     {to_fun := λ M, ⟨ matrix_to_map M, module_hom M⟩ ,
@@ -322,7 +327,8 @@ end
     end  
 
    }
-  instance  {R : Type} [ring R] {a b : nat}:  is_add_group_hom (@matrix_to_map R _ a b):=
+
+  instance  {R : Type} [ring R] {a b : nat}: is_add_group_hom (@matrix_to_map R _ a b):=
   { add:= 
   begin 
   intros,
@@ -343,4 +349,67 @@ end
 --   begin
 --     rw [add_mul],
 --   end,
+
+-- definition map_to_matrix {R : Type} [ring R] {a b : nat} 
+-- (f : (has_space R a) → (has_space R b)) (h:@is_linear_map R _ _ _ _ _ f) : matrix R a b :=
+--     λ i j, f(e R a i) j
+#check @matrix_to_map
+#check @map_to_matrix _ _ _ _ 
+#check @apply_function_to_sum
+
+theorem comp_equal_product_one {R : Type} [ring R] {a b c : nat} (f : has_space R b → has_space R a) (g : has_space R c → has_space R b) 
+(fl : @is_linear_map R _ _ _ _ _ f) (gl : @is_linear_map R _ _ _ _ _ g) (fgl : @is_linear_map R _ _ _ _ _ (f ∘ g)):
+@map_to_matrix R _ c a (f ∘ g) fgl = @matrix.mul _ _ b c a (@map_to_matrix R _ c b g gl) (@map_to_matrix R _ b a f fl) :=
+begin
+  unfold map_to_matrix,
+  unfold matrix.mul,
+  funext,
+  simp,
+  conv
+  begin
+    to_lhs,
+    rw [span (g (e R c i))],
+  end,
+  rw [is_linear_map.sum fl],
+  rw [apply_function_to_sum ],
+  congr,
+  funext,
+  show  f((g (e R c i) K) • (e R b K)) j = _,
+  rw [is_linear_map.smul fl],
+  refl,
+end
+
+#check matrix.mul
+theorem comp_equal_product_two {R : Type} [ring R] {a b c : nat} 
+(M : matrix R b a) (N : matrix R c b):
+@matrix_to_map _ _ _ _ (@matrix.mul _ _ b c a N M) = (@matrix_to_map _ _ _ _ M) ∘ (@matrix_to_map _ _ _ _ N) :=
+begin
+  unfold matrix_to_map,
+  funext,
+  simp,
+  unfold matrix.mul,
+  conv in (v _ * finset.sum _ _)
+  begin 
+  rw [finset.mul_sum],
+  end,
+  simp only [ finset.sum_mul],
+  conv
+  begin
+    to_lhs,
+    rw [finset.sum_comm],
+  end,
+  congr,
+  funext,
+  congr,
+  funext,
+  rw [mul_assoc],
+  end
+
+-- R-module structure on Hom(R^b, R^a)  
 end map_matrix
+
+-- namespace vector_space
+-- universes u v 
+
+
+-- end vector_space
