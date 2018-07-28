@@ -127,12 +127,22 @@ let h7 := afive_seg h6 (ne.symm h_1),
 exact eqd.trans h1.2.2.symm (eqd.trans h h7.flip)
 end
 
-def Perp (x : point) (A A' : set point) : line A ∧ line A' ∧ x ∈ A ∧ x ∈ A'
+def perpx (x : point) (A A' : set point) : Prop := line A ∧ line A' ∧ x ∈ A ∧ x ∈ A' ∧
+∀ u v, u ∈ A → v ∈ A' → R u x v
 
+def perpx1 (x a b : point) (A : set point) : Prop := a ≠ b ∧ perpx x A (l a b)
 
+def perpx2 (x a b c d : point) : Prop := a ≠ b ∧ c ≠ d ∧ perpx x (l a b) (l c d)
 
+def perp (A A' : set point) : Prop := ∃ x, perpx x A A'
 
+def perp1 (a b : point) (A : set point) : Prop := a ≠ b ∧ perp A (l a b)
 
+def perp2 (a b c d : point) : Prop := a ≠ b ∧ c ≠ d ∧ perp (l a b) (l c d)
+
+notation A ⊥ B  := perp A B
+
+notation A ⊥ B % x  := perpx x A B
 
 end Euclidean_plane
 

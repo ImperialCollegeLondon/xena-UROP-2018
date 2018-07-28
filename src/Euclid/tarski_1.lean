@@ -1,9 +1,9 @@
 import euclid.axioms
-
 open classical
+namespace Euclidean_plane
 
 variables {point : Type} [Euclidean_plane point]
-namespace Euclidean_plane
+
 --Conclusions from the first 5 axioms
 theorem eqd.refl (a b : point) : eqd a b a b :=
 eqd_trans b a a b a b (eqd_refl b a) (eqd_refl b a)
