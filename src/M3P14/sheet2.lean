@@ -14,7 +14,24 @@ open nat
 -- Compute 210 449 and 605/617 using quadratic reciprocity.
 --  449 and 617 are both prime).
 -- TODO: how to prove it using quadratic reciprocity?
-theorem q1 (H1 : prime 449 ∧ 449 ≠ 2) (H2 : prime 617 ∧ 617 ≠ 2) : ((legendre_sym 210 H1) = (-1 : ℤ)) ∧ ((legendre_sym 605 H2) = (-1: ℤ) ) :=
+
+lemma LQR_1 {p q : ℕ} (hp : (prime p ∧ p ≠ 2)) (hq : (prime q ∧ q ≠ 2)) : (legendre_sym p hq) = (legendre_sym q hp) * (-1)^(((p-1)/2)*((q-1)/2)):= sorry 
+
+
+lemma aux2 (oddprime_449 : (prime 449 ∧ 449 ≠ 2)) : legendre_sym 3 oddprime_449 = -1 :=
+begin
+have oddprime_3 : prime 3 ∧ 3 ≠ 2, sorry,
+
+have b1: (legendre_sym 3 oddprime_449) = (legendre_sym 449 oddprime_3) * (-1)^(((3-1)/2)*((449-1)/2)), from LQR_1 oddprime_3 oddprime_449,
+have b2: (legendre_sym 3 oddprime_449) = (legendre_sym 449 oddprime_3) * 1, from eq.subst (show (-1:ℤ)^(((3-1)/2)*((449-1)/2)) = 1, by norm_num) b1,
+rw b2,
+simp, 
+rw legendre_sym_refl 449 2 oddprime_3 (show 449 ≡ 2 [MOD 3], by norm_num),
+sorry
+end
+
+
+theorem q1 (H1 : prime 449) (H2 : prime 617) : ((legendre_sym 210 H1) = (-1 : ℤ)) ∧ ((legendre_sym 605 H2) = (-1: ℤ) ) :=
 begin
 split,
 have h1: 210 = 2*105, refl,
@@ -35,14 +52,14 @@ have h : (-1: ℤ)^((449^2 -1)/8) = 1, by norm_num,
 have h13: legendre_sym 2 H1 = (-1:ℤ)^((449^2-1)/8), from legendre_sym_supplementary_laws H1, 
 have a1: legendre_sym 2 H1 = 1, from eq.trans h13 h,  
 
-have prime_3 : prime 3 ∧ 3 ≠ 2, sorry,
+have prime_3 : prime 3, sorry,
 have h14: (legendre_sym 3 H1)*(legendre_sym 449 prime_3) = (-1: ℤ)^(((3-1)/2)*((449-1)/2)), from (law_of_quadratic_reciprocity prime_3 H1),
 have h15: (-1: ℤ)^(((3-1)/2)*((449-1)/2)) = 1, by norm_num,
 
 have h16: 449-2 = 3*149, by norm_num,
 have h17: 3 ∣ 3*149, from dvd_mul_right 3 149,
-have h18: 3 ∣ (449-2), from eq.subst h16 h17,
-have h19: (3:ℤ) ∣ (449-2), sorry,
+have h18: 3 ∣  (449-2), from eq.subst h16 h17,
+have h19: (3:ℤ) ∣  (449-2), sorry,
 have h20: 2 ≡ 449 [MOD 3], from nat.modeq.modeq_of_dvd h19,
 have h21: 449 ≡ 2 [MOD 3], from nat.modeq.symm h20,
 have h22: legendre_sym 449 prime_3 = legendre_sym 2 prime_3, from legendre_sym_refl 449 2 prime_3 h21,
@@ -51,7 +68,7 @@ have h24: legendre_sym 2 prime_3 = (-1: ℤ)^((3^2-1)/8), from legendre_sym_supp
 have h25: legendre_sym 2 prime_3 = -1, from eq.trans h24 h23,
 have h26: legendre_sym 449 prime_3 = -1, from eq.trans h22 h25, 
 have h27: (legendre_sym 3 H1)*(legendre_sym 449 prime_3) = 1, from eq.trans h14 h15,
-have h28: (legendre_sym 3 H1)*(-1) = 1, from eq.subst h26 h27,
+have h28: (legendre_sym 3 H1)*(-1) =1, from eq.subst h26 h27,
 have h29: 1=(legendre_sym 3 H1)*(-1), from eq.symm h28,
 have h30: (-1:ℤ) ≠ (0:ℤ) := dec_trivial,
 have h31: 1/(-1 : ℤ) = legendre_sym 3 H1, sorry, --from int.basic.div_eq_of_eq_mul_left h30 h29,
@@ -62,7 +79,7 @@ have a2: legendre_sym 3 H1 = -1, from eq.symm h33,
 
 ------
 
-have prime_5 : prime 5 ∧ 5 ≠ 2, sorry,
+have prime_5 : prime 5, sorry,
 
 have h34: (legendre_sym 5 H1)*(legendre_sym 449 prime_5) = (-1: ℤ)^(((5-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity prime_5 H1,
 have h35: (-1: ℤ)^(((5-1)/2)*((449 -1)/2)) = 1, by norm_num,
@@ -83,7 +100,7 @@ have : quadratic_res 4 5,
 begin 
 unfold quadratic_res,
 existsi 2,
-exact (int.modeq.coe_nat_modeq_iff _ _ _).mpr h47,
+exact h47,
 end,
 
 have h49: legendre_sym 4 prime_5 = 1,
@@ -101,16 +118,15 @@ end,
 have g27: (legendre_sym 5 H1)*(legendre_sym 449 prime_5)= 1, from eq.trans h34 h35,
 have g28: (legendre_sym 5 H1)*(legendre_sym 4 prime_5) =1, from eq.subst h42 g27,
 have g29: (legendre_sym 5 H1)*1 = 1, sorry,
---have g30: 1*(legendre_sym 5 H1) = legendre_sym 5 H1, from one_mul (legendre_sym 5 H1),
---have g31: (legendre_sym 5 H1)*1 = 1*(legendre_sym 5 H1), from mul_comm (legendre_sym 5 H1) 1,  
---have g32: (legendre_sym 5 H1)*1=(legendre_sym 5 H1), from eq.trans g31 g30,
---have g33: (legendre_sym 5 H1)=(legendre_sym 5 H1)*1, from eq.symm g32,
-have a3: legendre_sym 5 H1 = 1, from eq.subst (mul_one (legendre_sym 5 H1)) g29,
-
+have g30: 1*(legendre_sym 5 H1) = legendre_sym 5 H1, from one_mul (legendre_sym 5 H1),
+have g31: (legendre_sym 5 H1)*1 = 1*(legendre_sym 5 H1), from mul_comm (legendre_sym 5 H1) 1,  
+have g32: (legendre_sym 5 H1)*1=(legendre_sym 5 H1), from eq.trans g31 g30,
+have g33: (legendre_sym 5 H1)=(legendre_sym 5 H1)*1, from eq.symm g32,
+have a3: legendre_sym 5 H1 = 1, from eq.trans g33 g29,
 
 -----
 
-have prime_7 : prime 7 ∧ 7 ≠ 2, sorry,
+have prime_7 : prime 7, sorry,
 
 have h50: (legendre_sym 7 H1)*(legendre_sym 449 prime_7) = (-1: ℤ)^(((7-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity prime_7 H1,
 have h51: (-1: ℤ)^(((7-1)/2)*((449)-1)/2) = 1, by norm_num,
@@ -132,7 +148,7 @@ have : quadratic_res 1 7,
 begin 
 unfold quadratic_res,
 existsi 1,
-exact (int.modeq.coe_nat_modeq_iff _ _ _).mpr h63,
+exact h63,
 end,
 
 have h64: legendre_sym 1 prime_7 = 1,
@@ -148,11 +164,11 @@ exact dec_trivial,
 end,
 
 have j27: (legendre_sym 7 H1)*(legendre_sym 449 prime_7) = 1, from eq.trans h50 h51,
-have j28: (legendre_sym 7 H1)*(legendre_sym 1 prime_7) = 1, from eq.subst h58 j27,
+have j28: (legendre_sym 7 H1)*(legendre_sym 1 prime_7) =1, from eq.subst h58 j27,
 have j29: (legendre_sym 7 H1)*1 = 1, sorry,
---have j30: 1*(legendre_sym 7 H1) = legendre_sym 7 H1, from one_mul (legendre_sym 7 H1),
---have j31: (legendre_sym 7 H1)*1 = 1*(legendre_sym 7 H1), from mul_comm (legendre_sym 7 H1) 1,  
-have j32: (legendre_sym 7 H1)*1 = (legendre_sym 7 H1), from mul_one (legendre_sym 7 H1),
+have j30: 1*(legendre_sym 7 H1) = legendre_sym 7 H1, from one_mul (legendre_sym 7 H1),
+have j31: (legendre_sym 7 H1)*1 = 1*(legendre_sym 7 H1), from mul_comm (legendre_sym 7 H1) 1,  
+have j32: (legendre_sym 7 H1)*1 = (legendre_sym 7 H1), from eq.trans j31 j30,
 have j33: (legendre_sym 7 H1) = (legendre_sym 7 H1)*1, from eq.symm j32,
 have a4: legendre_sym 7 H1 = 1, from eq.trans j33 j29,
 
@@ -176,8 +192,8 @@ exact calc
 sorry,
 
 --have (legendre_sym 2 H1)*(legendre_sym 105 H1), from legendre_sym_mul 2 105 H1,
-end
-
+end 
+ 
 -- Find all 6 primitive roots modulo 19.
 theorem q2a : ∃ A : set ℕ, ∀ x : ℕ, primitive_root x 19 ↔ x ∈ A := sorry
 
