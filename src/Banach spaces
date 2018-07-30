@@ -8,6 +8,9 @@ section norm_space
 class banach_space (V : Type) extends norm_space V: Type :=
 (complete: complete_space ℝ)
 
+variables (v : Type) [norm_space V]
+def norm : V → ℝ := norm_space.N
+
 -- Incorrect, working on it atm
 lemma banach_is_metric [banach_space V] : metric_space V :=
 {
