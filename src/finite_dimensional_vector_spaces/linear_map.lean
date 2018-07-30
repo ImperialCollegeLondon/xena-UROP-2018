@@ -52,7 +52,8 @@ def add (R : Type) (n : nat) [ring R] :=
 def smul {R : Type} {n : nat} [ring R] (s : R) (rn : has_space R n) : 
 has_space R n := λ I, s * (rn I)
 
-theorem add__assoc {R : Type} {n : nat} [ring R] (a b c :(fin n) → R):add R n (add R n a b) c = add R n a (add R n b c):=
+theorem add__assoc {R : Type} {n : nat} [ring R] (a b c :(fin n) → R): 
+  add R n (add R n a b) c = add R n a (add R n b c):=
 begin 
 unfold add,
 funext,
@@ -76,7 +77,8 @@ simp,
 end
 
 def neg (R : Type) (n : nat) [ring R]:= λ (a:has_space R n),(λ i, -(a i))
-theorem add__left__neg {R : Type} {n : nat} [ring R] (a :has_space R n): add R n (neg R n a) a = zero R n:=
+theorem add__left__neg {R : Type} {n : nat} [ring R] (a :has_space R n): 
+  add R n (neg R n a) a = zero R n:=
 begin 
 unfold add,
 unfold zero,
@@ -187,7 +189,9 @@ rw finset.sum_add_distrib,
 refl,
 end⟩ 
 
-theorem smul_ {R: Type} [ring R] {a b : nat} (M : matrix R a b): ∀ (c : R) (x : has_space R a), matrix_to_map M (smul c x) = smul c  (matrix_to_map M x):=
+theorem smul_ {R: Type} [ring R] {a b : nat} (M : matrix R a b): 
+  ∀ (c : R) (x : has_space R a), matrix_to_map M (smul c x) = 
+  smul c  (matrix_to_map M x):=
 begin 
 intros,
 unfold matrix_to_map,
@@ -230,7 +234,8 @@ begin
   rw [← H, finset.sum_singleton]
 end 
 
-theorem apply_function_to_sum {R : Type}[ring R] {n p : nat} (f: fin n → has_space R p ) (i : fin p ): 
+theorem apply_function_to_sum {R : Type}[ring R] {n p : nat} 
+  (f: fin n → has_space R p ) (i : fin p ): 
 (finset.sum finset.univ (λ (K : fin n),f K)) i = finset.sum finset.univ (λ (K : fin n), f K i):=
 begin
 rw finset.sum_hom (λ (v: has_space R p), v i ) _,
@@ -356,7 +361,9 @@ instance  {R : Type} [ring R] {a b : nat}:  is_add_group_hom (@matrix_to_linear_
   end
 }
 
-theorem comp_is_linear_map {R : Type} [ring R] {a b c : nat} (f : (@linear_map R (has_space R b)  (has_space R a) _ _ _)) (g : (@linear_map R (has_space R c)  (has_space R b) _ _ _)):
+theorem comp_is_linear_map {R : Type} [ring R] {a b c : nat} 
+  (f : (@linear_map R (has_space R b)  (has_space R a) _ _ _)) 
+  (g : (@linear_map R (has_space R c)  (has_space R b) _ _ _)):
   @is_linear_map R _ _ _ _ _ (f.1 ∘ g.1):= 
 { add:= 
 begin 
