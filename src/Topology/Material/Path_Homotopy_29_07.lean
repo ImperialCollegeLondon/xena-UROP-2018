@@ -392,7 +392,21 @@ let R := {x : ↥I01 | r ≤ x.val }, let L := {x : ↥I01 |  x.val ≤ s } ,
 /- let u := if 1< s then 1 else if s < 0 then 0 else s,  let l := max (0:ℝ ) r, have H2:  L = {x : ↥I01 | x.val ≤ u}, 
 simp [u] at L, simp [l] at R, -/ 
 have C1 : is_closed L, 
- /-    {cases if s ∈ I01 then  (begin end)
+  rw is_closed_induced_iff,
+  existsi {x : ℝ | 0 ≤ x ∧ x ≤ (min 1 s)},
+  split,
+    exact is_closed_inter (is_closed_ge' 0)  (is_closed_le' _),
+    apply set.ext,intro x,
+    show x.val ≤ s ↔ 0 ≤ x.val ∧ x.val ≤ min 1 s,
+    split,
+      intro H,
+      split,
+        exact x.property.1,
+        apply le_min,exact x.property.2,assumption,
+      intro H,
+      exact le_trans H.2 (min_le_right _ _),
+    
+       /-    {cases if s ∈ I01 then  (begin end)
 
     else sorry}-/ 
     --have P1: partial_order I01, unfold I01, by apply_instance
