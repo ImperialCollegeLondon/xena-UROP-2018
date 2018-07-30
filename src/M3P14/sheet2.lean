@@ -41,8 +41,8 @@ have h15: (-1: ℤ)^(((3-1)/2)*((449-1)/2)) = 1, by norm_num,
 
 have h16: 449-2 = 3*149, by norm_num,
 have h17: 3 ∣ 3*149, from dvd_mul_right 3 149,
-have h18: 3 ∣  (449-2), from eq.subst h16 h17,
-have h19: (3:ℤ) ∣  (449-2), sorry,
+have h18: 3 ∣ (449-2), from eq.subst h16 h17,
+have h19: (3:ℤ) ∣ (449-2), sorry,
 have h20: 2 ≡ 449 [MOD 3], from nat.modeq.modeq_of_dvd h19,
 have h21: 449 ≡ 2 [MOD 3], from nat.modeq.symm h20,
 have h22: legendre_sym 449 prime_3 = legendre_sym 2 prime_3, from legendre_sym_refl 449 2 prime_3 h21,
@@ -51,7 +51,7 @@ have h24: legendre_sym 2 prime_3 = (-1: ℤ)^((3^2-1)/8), from legendre_sym_supp
 have h25: legendre_sym 2 prime_3 = -1, from eq.trans h24 h23,
 have h26: legendre_sym 449 prime_3 = -1, from eq.trans h22 h25, 
 have h27: (legendre_sym 3 H1)*(legendre_sym 449 prime_3) = 1, from eq.trans h14 h15,
-have h28: (legendre_sym 3 H1)*(-1) =1, from eq.subst h26 h27,
+have h28: (legendre_sym 3 H1)*(-1) = 1, from eq.subst h26 h27,
 have h29: 1=(legendre_sym 3 H1)*(-1), from eq.symm h28,
 have h30: (-1:ℤ) ≠ (0:ℤ) := dec_trivial,
 have h31: 1/(-1 : ℤ) = legendre_sym 3 H1, sorry, --from int.basic.div_eq_of_eq_mul_left h30 h29,
@@ -101,11 +101,12 @@ end,
 have g27: (legendre_sym 5 H1)*(legendre_sym 449 prime_5)= 1, from eq.trans h34 h35,
 have g28: (legendre_sym 5 H1)*(legendre_sym 4 prime_5) =1, from eq.subst h42 g27,
 have g29: (legendre_sym 5 H1)*1 = 1, sorry,
-have g30: 1*(legendre_sym 5 H1) = legendre_sym 5 H1, from one_mul (legendre_sym 5 H1),
-have g31: (legendre_sym 5 H1)*1 = 1*(legendre_sym 5 H1), from mul_comm (legendre_sym 5 H1) 1,  
-have g32: (legendre_sym 5 H1)*1=(legendre_sym 5 H1), from eq.trans g31 g30,
-have g33: (legendre_sym 5 H1)=(legendre_sym 5 H1)*1, from eq.symm g32,
-have a3: legendre_sym 5 H1 = 1, from eq.trans g33 g29,
+--have g30: 1*(legendre_sym 5 H1) = legendre_sym 5 H1, from one_mul (legendre_sym 5 H1),
+--have g31: (legendre_sym 5 H1)*1 = 1*(legendre_sym 5 H1), from mul_comm (legendre_sym 5 H1) 1,  
+--have g32: (legendre_sym 5 H1)*1=(legendre_sym 5 H1), from eq.trans g31 g30,
+--have g33: (legendre_sym 5 H1)=(legendre_sym 5 H1)*1, from eq.symm g32,
+have a3: legendre_sym 5 H1 = 1, from eq.subst (mul_one (legendre_sym 5 H1)) g29,
+
 
 -----
 
@@ -147,11 +148,11 @@ exact dec_trivial,
 end,
 
 have j27: (legendre_sym 7 H1)*(legendre_sym 449 prime_7) = 1, from eq.trans h50 h51,
-have j28: (legendre_sym 7 H1)*(legendre_sym 1 prime_7) =1, from eq.subst h58 j27,
+have j28: (legendre_sym 7 H1)*(legendre_sym 1 prime_7) = 1, from eq.subst h58 j27,
 have j29: (legendre_sym 7 H1)*1 = 1, sorry,
-have j30: 1*(legendre_sym 7 H1) = legendre_sym 7 H1, from one_mul (legendre_sym 7 H1),
-have j31: (legendre_sym 7 H1)*1 = 1*(legendre_sym 7 H1), from mul_comm (legendre_sym 7 H1) 1,  
-have j32: (legendre_sym 7 H1)*1 = (legendre_sym 7 H1), from eq.trans j31 j30,
+--have j30: 1*(legendre_sym 7 H1) = legendre_sym 7 H1, from one_mul (legendre_sym 7 H1),
+--have j31: (legendre_sym 7 H1)*1 = 1*(legendre_sym 7 H1), from mul_comm (legendre_sym 7 H1) 1,  
+have j32: (legendre_sym 7 H1)*1 = (legendre_sym 7 H1), from mul_one (legendre_sym 7 H1),
 have j33: (legendre_sym 7 H1) = (legendre_sym 7 H1)*1, from eq.symm j32,
 have a4: legendre_sym 7 H1 = 1, from eq.trans j33 j29,
 
@@ -175,8 +176,8 @@ exact calc
 sorry,
 
 --have (legendre_sym 2 H1)*(legendre_sym 105 H1), from legendre_sym_mul 2 105 H1,
-end 
- 
+end
+
 -- Find all 6 primitive roots modulo 19.
 theorem q2a : ∃ A : set ℕ, ∀ x : ℕ, primitive_root x 19 ↔ x ∈ A := sorry
 

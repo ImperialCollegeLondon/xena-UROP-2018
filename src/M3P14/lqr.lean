@@ -5,11 +5,12 @@ import analysis.real
 import tactic.norm_num
 import algebra.group_power
 import M3P14.order
+import data.nat.prime
 import chris_hughes_various.zmod
 
 open nat 
 
-definition quadratic_res (a n: ℕ) := ∃ x: ℕ, a ≡ x^2 [MOD n]
+definition quadratic_res (a n : ℕ) := ∃ x: ℕ, a ≡ x^2 [MOD n]
 
 attribute [instance, priority 0] classical.prop_decidable
 noncomputable definition legendre_sym {p : ℕ} (a : ℕ) (H : prime p): ℤ := 
@@ -19,25 +20,26 @@ else 0
 
 theorem law_of_quadratic_reciprocity {p q : ℕ} (hp : prime p) (hq : prime q) : (legendre_sym p hq)*(legendre_sym q hp) = (-1)^(((p-1)/2)*((q-1)/2)) := sorry 
 
-theorem legendre_sym_mul {p : ℕ} (a b : ℕ) (hp : prime p): legendre_sym (a*b) hp = (legendre_sym a hp)*(legendre_sym b hp) := sorry
+theorem legendre_sym_mul {p : ℕ} (a b : ℕ) (hp : prime p) : legendre_sym (a*b) hp = (legendre_sym a hp)*(legendre_sym b hp) := sorry
 
-theorem legendre_sym_refl {p : ℕ} (a b : ℕ) (hp : prime p):  (a ≡ b [MOD p] → legendre_sym a hp = legendre_sym b hp) :=sorry
+theorem legendre_sym_refl {p : ℕ} (a b : ℕ) (hp : prime p) :  (a ≡ b [MOD p] → legendre_sym a hp = legendre_sym b hp) :=sorry
 
-theorem legendre_sym_supplementary_laws {p : ℕ} (hp : prime p): legendre_sym 2 hp = (-1:ℤ)^((p^2-1)/8) := sorry 
+theorem legendre_sym_supplementary_laws {p : ℕ} (hp : prime p) : legendre_sym 2 hp = (-1:ℤ)^((p^2-1)/8) := sorry 
 
 theorem euler_criterion (p : ℕ) (a: ℕ) (hp : prime p ∧ p ≠ 2) (ha : ¬ p ∣ a) :
   (a^((p - 1) / 2) : ℤ) ≡ legendre_sym a hp.left [ZMOD p] := 
 begin 
-  have h1: a^(p-1) ≡ 1 [MOD p], sorry,
+  have h1 : a^(p-1) ≡ 1 [MOD p], sorry,
   have h2 : ↑(a ^ (p - 1)) ≡ ↑1 [ZMOD ↑p], from (int.modeq.coe_nat_modeq_iff (a^(p-1)) 1 p).mpr h1,
   have h3 : ↑1 ≡ ↑1 [ZMOD p], from int.modeq.refl 1,
-  have h4: ↑(a ^ (p - 1)) - 1 ≡ 1-1 [ZMOD ↑p], from int.modeq.modeq_sub h2 h3,
-  have h_eq : 1-1 = 0, refl,
-  --have h5 : (a ^ (p - 1)) -1 ≡ 0 [ZMOD p], by 
+  have h4 : ((a ^ (p - 1)) : ℕ) - 1 ≡ 0 [ZMOD p], from int.modeq.modeq_sub h2 h3,
+
   
-  --have : a^(p-1) - 1 ≡ 1 - 1 [ZMOD p], from 
   sorry,
 end
+
+--Let p be an odd prime. Then there are exactly (p - 1) /2 quadratic residues modulo p and exactly (p - 1) /2 nonresidues modulo p. 
+--theorem quad_res_sol {p : ℕ} (hp : prime p) : 
 
 lemma quad_res_two (n : ℕ) : n % 8 = 1 ∨ n % 8 = 7 → ((n ^ 2 - 1) / 8 % 2 = 0) :=
 begin
