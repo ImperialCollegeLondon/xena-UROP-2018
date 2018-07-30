@@ -14,7 +14,7 @@ open nat
 -- Compute 210 449 and 605/617 using quadratic reciprocity.
 --  449 and 617 are both prime).
 -- TODO: how to prove it using quadratic reciprocity?
-theorem q1 (H1 : prime 449) (H2 : prime 617) : ((legendre_sym 210 H1) = (-1 : ℤ)) ∧ ((legendre_sym 605 H2) = (-1: ℤ) ) :=
+theorem q1 (H1 : prime 449 ∧ 449 ≠ 2) (H2 : prime 617 ∧ 617 ≠ 2) : ((legendre_sym 210 H1) = (-1 : ℤ)) ∧ ((legendre_sym 605 H2) = (-1: ℤ) ) :=
 begin
 split,
 have h1: 210 = 2*105, refl,
@@ -35,7 +35,7 @@ have h : (-1: ℤ)^((449^2 -1)/8) = 1, by norm_num,
 have h13: legendre_sym 2 H1 = (-1:ℤ)^((449^2-1)/8), from legendre_sym_supplementary_laws H1, 
 have a1: legendre_sym 2 H1 = 1, from eq.trans h13 h,  
 
-have prime_3 : prime 3, sorry,
+have prime_3 : prime 3 ∧ 3 ≠ 2, sorry,
 have h14: (legendre_sym 3 H1)*(legendre_sym 449 prime_3) = (-1: ℤ)^(((3-1)/2)*((449-1)/2)), from (law_of_quadratic_reciprocity prime_3 H1),
 have h15: (-1: ℤ)^(((3-1)/2)*((449-1)/2)) = 1, by norm_num,
 
@@ -62,7 +62,7 @@ have a2: legendre_sym 3 H1 = -1, from eq.symm h33,
 
 ------
 
-have prime_5 : prime 5, sorry,
+have prime_5 : prime 5 ∧ 5 ≠ 2, sorry,
 
 have h34: (legendre_sym 5 H1)*(legendre_sym 449 prime_5) = (-1: ℤ)^(((5-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity prime_5 H1,
 have h35: (-1: ℤ)^(((5-1)/2)*((449 -1)/2)) = 1, by norm_num,
@@ -83,7 +83,7 @@ have : quadratic_res 4 5,
 begin 
 unfold quadratic_res,
 existsi 2,
-exact h47,
+exact (int.modeq.coe_nat_modeq_iff _ _ _).mpr h47,
 end,
 
 have h49: legendre_sym 4 prime_5 = 1,
@@ -110,7 +110,7 @@ have a3: legendre_sym 5 H1 = 1, from eq.subst (mul_one (legendre_sym 5 H1)) g29,
 
 -----
 
-have prime_7 : prime 7, sorry,
+have prime_7 : prime 7 ∧ 7 ≠ 2, sorry,
 
 have h50: (legendre_sym 7 H1)*(legendre_sym 449 prime_7) = (-1: ℤ)^(((7-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity prime_7 H1,
 have h51: (-1: ℤ)^(((7-1)/2)*((449)-1)/2) = 1, by norm_num,
@@ -132,7 +132,7 @@ have : quadratic_res 1 7,
 begin 
 unfold quadratic_res,
 existsi 1,
-exact h63,
+exact (int.modeq.coe_nat_modeq_iff _ _ _).mpr h63,
 end,
 
 have h64: legendre_sym 1 prime_7 = 1,
