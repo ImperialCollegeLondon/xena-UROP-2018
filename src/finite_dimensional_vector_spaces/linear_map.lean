@@ -6,7 +6,7 @@ import data.finsupp
 import algebra.group
 import linear_algebra.basic
 import data.fintype
-import data.equiv
+import data.equiv.basic
 import linear_algebra.linear_map_module
 import algebra.pi_instances
 
@@ -84,6 +84,7 @@ funext,
 unfold neg,
 simp,
 end 
+
 def add__zero {R : Type} {n : nat} [ring R] (a :has_space R n): add R n a (zero R n) =a:=
 begin
 unfold add,
@@ -185,6 +186,7 @@ conv in ( (a_1 _ + b_1 _) * M _ i)
 rw finset.sum_add_distrib,
 refl,
 end⟩ 
+
 theorem smul_ {R: Type} [ring R] {a b : nat} (M : matrix R a b): ∀ (c : R) (x : has_space R a), matrix_to_map M (smul c x) = smul c  (matrix_to_map M x):=
 begin 
 intros,
@@ -204,11 +206,14 @@ exact is_add_group_hom.add _,
  smul:= smul_ _,
 }
 
-def matrix_to_linear_map {R : Type} [ring R] {a b : nat} (M : matrix R a b):(@linear_map R (has_space R a)  (has_space R b) _ _ _):=
+def matrix_to_linear_map {R : Type} [ring R] {a b : nat} (M : matrix R a b) : 
+  (@linear_map R (has_space R a)  (has_space R b) _ _ _) :=
 ⟨matrix_to_map M, module_hom M⟩ 
 
 def e (R : Type) [ring R] (a: nat) (i: fin a): has_space R a:= λ j, if i =j then 1 else 0
-definition map_to_matrix {R : Type} [ring R] {a b : nat} (f: @linear_map R (has_space R a)  (has_space R b) _ _ _) : matrix R a b :=
+
+definition map_to_matrix {R : Type} [ring R] {a b : nat} (f: @linear_map R (has_space R a) 
+ (has_space R b) _ _ _) : matrix R a b :=
     λ i j, f.1 (e R a i) j
 
 
@@ -224,6 +229,7 @@ begin
     (λ _ _ H, h _ $ mt (λ h, finset.mem_singleton.2 h.symm) H),
   rw [← H, finset.sum_singleton]
 end 
+
 theorem apply_function_to_sum {R : Type}[ring R] {n p : nat} (f: fin n → has_space R p ) (i : fin p ): 
 (finset.sum finset.univ (λ (K : fin n),f K)) i = finset.sum finset.univ (λ (K : fin n), f K i):=
 begin
@@ -234,7 +240,7 @@ refl,
 end
 
 theorem span {R : Type} {n : nat} [ring R] (v : has_space R n): 
-v  = finset.sum finset.univ (λ K, smul (v K) (e R n K)):=
+  v = finset.sum finset.univ (λ K, smul (v K) (e R n K)):=
 begin 
 funext,
 rw [apply_function_to_sum (λ i, smul (v i) (e R n i))],
@@ -256,7 +262,8 @@ unfold smul,
   simp,  
 end 
 
-theorem equiv_one {R : Type} [ring R] {a b : nat} (f : (@linear_map R (has_space R a)  (has_space R b) _ _ _)) :
+theorem equiv_one {R : Type} [ring R] {a b : nat} (f : (@linear_map R (has_space R a) 
+  (has_space R b) _ _ _)) :
     matrix_to_map (map_to_matrix f ) = f := 
 begin
 funext,
@@ -279,10 +286,11 @@ funext,
 rw[( linear_map.is_linear_map_coe).smul],
 refl,
 end 
+
 #check is_linear_map
-  theorem equiv_two {R : Type} [ring R] {p b : nat} (M : matrix R p b):
-   map_to_matrix ⟨ matrix_to_map M, module_hom M⟩  = M := 
-   begin
+theorem equiv_two {R : Type} [ring R] {p b : nat} (M : matrix R p b):
+  map_to_matrix ⟨ matrix_to_map M, module_hom M⟩  = M := 
+  begin
    funext,
    unfold map_to_matrix,
    show (matrix_to_map M) (e R p i) j =_,
@@ -301,9 +309,10 @@ end
     split_ifs,
     simp,
     simp,
-   end
-  def matrix_to_linear_map_equiv {R : Type} [ring R] {a b : nat} :
-   equiv  (matrix R a b)  (@linear_map R (has_space R a)  (has_space R b) _ _ _):= 
+  end
+
+def matrix_to_linear_map_equiv {R : Type} [ring R] {a b : nat} :
+  equiv  (matrix R a b)  (@linear_map R (has_space R a)  (has_space R b) _ _ _):= 
     {to_fun := matrix_to_linear_map,
     inv_fun := map_to_matrix,
     right_inv:= 
@@ -322,7 +331,8 @@ end
     exact equiv_two x,
     end  
    }
-  instance  {R : Type} [ring R] {a b : nat}:  is_add_group_hom (@matrix_to_linear_map R _ a b):=
+
+instance  {R : Type} [ring R] {a b : nat}:  is_add_group_hom (@matrix_to_linear_map R _ a b):=
   { add:= 
   begin 
   intros,
@@ -345,8 +355,9 @@ end
   rw[mul_add],
   end
 }
+
 theorem comp_is_linear_map {R : Type} [ring R] {a b c : nat} (f : (@linear_map R (has_space R b)  (has_space R a) _ _ _)) (g : (@linear_map R (has_space R c)  (has_space R b) _ _ _)):
- @is_linear_map R _ _ _ _ _ (f.1 ∘ g.1):= 
+  @is_linear_map R _ _ _ _ _ (f.1 ∘ g.1):= 
 { add:= 
 begin 
 intros,
@@ -367,8 +378,11 @@ rw[f.2.smul],
 end 
 }
 
-theorem comp_equal_product_one {R : Type} [ring R] {a b c : nat} (f : (@linear_map R (has_space R b)  (has_space R a) _ _ _)) (g : (@linear_map R (has_space R c)  (has_space R b) _ _ _)):
-(@map_to_matrix R _ c a (⟨ f.1 ∘ g.1,  comp_is_linear_map f g⟩))  = @matrix.mul _ _ b c a (@map_to_matrix R _ c b g ) (@map_to_matrix R _ b a f) :=
+theorem comp_equal_product_one {R : Type} [ring R] {a b c : nat} 
+  (f : (@linear_map R (has_space R b)  (has_space R a) _ _ _)) 
+  (g : (@linear_map R (has_space R c)  (has_space R b) _ _ _)):
+(@map_to_matrix R _ c a (⟨ f.1 ∘ g.1,  comp_is_linear_map f g⟩)) 
+  = @matrix.mul _ _ b c a (@map_to_matrix R _ c b g ) (@map_to_matrix R _ b a f) :=
 begin
   unfold map_to_matrix,
   unfold matrix.mul,
@@ -387,11 +401,14 @@ begin
   rw [is_linear_map.smul f.2],
   refl,
 end
+
 #check subtype
 #check matrix.mul
 theorem comp_equal_product_two {R : Type} [ring R] {a b c : nat} 
 (M : matrix R b a) (N : matrix R c b):
-@matrix_to_linear_map _ _ _ _ (@matrix.mul _ _ b c a N M) = ⟨(@matrix_to_linear_map _ _ _ _ M).1 ∘ (@matrix_to_linear_map _ _ _ _ N).1,  comp_is_linear_map (@matrix_to_linear_map _ _ _ _ M) (@matrix_to_linear_map _ _ _ _ N)⟩  :=
+@matrix_to_linear_map _ _ _ _ (@matrix.mul _ _ b c a N M) = 
+⟨(@matrix_to_linear_map _ _ _ _ M).1 ∘ (@matrix_to_linear_map _ _ _ _ N).1, 
+comp_is_linear_map (@matrix_to_linear_map _ _ _ _ M) (@matrix_to_linear_map _ _ _ _ N)⟩ :=
 begin
   unfold matrix_to_linear_map,
   funext,
