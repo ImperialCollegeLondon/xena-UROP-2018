@@ -104,7 +104,7 @@ have : y = x,
 contradiction
 end
 
---Properties of Between
+-- Properties of B
 
 theorem three1 (a b : point) : B a b b := 
 begin
