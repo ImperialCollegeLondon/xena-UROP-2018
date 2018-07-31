@@ -1,4 +1,4 @@
-import xenalib.Ellen_Arlt_matrix_rings algebra.module algebra.big_operators data.set.finite analysis.real data.complex.basic algebra.ring 
+import xenalib.Ellen_Arlt_matrix_rings algebra.module algebra.big_operators data.set.finite analysis.real data.complex.basic algebra.ring xenalib.Keji_permutation_group
 variable (n:ℕ)
 open complex matrix
 
@@ -7,21 +7,23 @@ def Cross_out_column {R : Type} [ring R] {n : nat }
 λ i j,
 if j.1 < m.1 then  A (i.1+1) j.1 else 
   A (i.1+1) (j.1+1) 
-def det {R : Type} [ring R]: Π {n: nat},  matrix R (n+1) (n+1) →  R
+def det_laplace {R : Type} [ring R]: Π {n: nat},  matrix R (n+1) (n+1) →  R
 | 0 := λ A, A 0 0
 | (n + 1) := λ A, 
   finset.sum finset.univ (λ k : fin (n+2), (-1: R)^(k.1) *(A 0 k) *
- det (Cross_out_column A k))
+ det_laplace (Cross_out_column A k))
 -- def A : matrix ℤ 2 2:= 
 -- λ m n,
 -- if m=0 ∧ n=0 then 1 else 
 -- if m=0 ∧  n=1 then 2 else 
 -- if m=1 ∧  n=0 then 3 else
 --  4 
-#check units
+
+#check finset.sum 
+
+noncomputable def det {R : Type} [comm_ring R] (A: matrix R n n): R:= finset.sum (finset.univ : finset (S n)) (λ (σ :S n),e(σ ) * (finset.prod (finset.univ: finset (fin n)) (λ (i:fin n), A (σ i) i)))
 
 
-#eval det (1 : matrix ℤ 8 8)
 
 example (p q : ℕ → Prop) : (∃ x, p x) → ∃ x, p x ∨ q x :=
 begin
@@ -49,7 +51,10 @@ unfold GL,
 apply_instance,
 end 
 
+lemma L1  {R : Type} [comm_ring R] (A: matrix R n n) (σ ρ : S n) :  (finset.prod (finset.univ: finset (fin n)) (λ (i:fin n), A (σ i) i)) =  (finset.prod (finset.univ: finset (fin n)) (λ (i:fin n), A (ρ (σ i)) (ρ i) )):= 
+begin 
 
+end
 
 
 

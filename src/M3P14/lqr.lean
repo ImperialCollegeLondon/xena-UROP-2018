@@ -5,39 +5,67 @@ import analysis.real
 import tactic.norm_num
 import algebra.group_power
 import M3P14.order
+import data.nat.prime
 import chris_hughes_various.zmod
+import M3P14.sheet1
+import tactic.ring
 
 open nat 
 
-definition quadratic_res (a n: ℕ) := ∃ x: ℕ, a ≡ x^2 [MOD n]
+definition quadratic_res (a n : ℤ) := ∃ x : ℕ, a ≡ x^2 [ZMOD n]
 
 attribute [instance, priority 0] classical.prop_decidable
-noncomputable definition legendre_sym {p : ℕ} (a : ℕ) (H : prime p): ℤ := 
-if quadratic_res a p ∧ ¬ (p ∣ a) then 1 else 
+noncomputable definition legendre_sym {p : ℕ} (a : ℤ) (H1 : prime p ∧ p ≠ 2) : ℤ := 
+if quadratic_res a p ∧ ¬ ((p : ℤ) ∣ a) then 1 else 
 if ¬ quadratic_res a p then -1 
 else 0
 
-theorem law_of_quadratic_reciprocity {p q : ℕ} (hp : prime p) (hq : prime q) : (legendre_sym p hq)*(legendre_sym q hp) = (-1)^(((p-1)/2)*((q-1)/2)) := sorry 
+theorem law_of_quadratic_reciprocity {p q : ℕ} (hp : prime p ∧ p ≠ 2) (hq : prime q ∧ q ≠ 2) : (legendre_sym p hq)*(legendre_sym q hp) = (-1)^(((p-1)/2)*((q-1)/2)) := sorry 
 
-theorem legendre_sym_mul {p : ℕ} (a b : ℕ) (hp : prime p): legendre_sym (a*b) hp = (legendre_sym a hp)*(legendre_sym b hp) := sorry
+theorem legendre_sym_mul {p : ℕ} (a b : ℤ) (hp : prime p ∧ p ≠ 2) : legendre_sym (a*b) hp = (legendre_sym a hp)*(legendre_sym b hp) := sorry
 
-theorem legendre_sym_refl {p : ℕ} (a b : ℕ) (hp : prime p):  (a ≡ b [MOD p] → legendre_sym a hp = legendre_sym b hp) :=sorry
+theorem legendre_sym_refl {p : ℕ} (a b : ℤ) (hp : prime p ∧ p ≠ 2) :  (a ≡ b [ZMOD p] → legendre_sym a hp = legendre_sym b hp) := sorry
 
-theorem legendre_sym_supplementary_laws {p : ℕ} (hp : prime p): legendre_sym 2 hp = (-1:ℤ)^((p^2-1)/8) := sorry 
+theorem legendre_sym_supplementary_laws {p : ℕ} (hp : prime p ∧ p ≠ 2) : legendre_sym 2 hp = (-1:ℤ)^((p^2-1)/8) := sorry 
 
-theorem euler_criterion (p : ℕ) (a: ℕ) (hp : prime p ∧ p ≠ 2) (ha : ¬ p ∣ a) :
-  (a^((p - 1) / 2) : ℤ) ≡ legendre_sym a hp.left [ZMOD p] := 
-begin 
-  have h1: a^(p-1) ≡ 1 [MOD p], sorry,
-  have h2 : ↑(a ^ (p - 1)) ≡ ↑1 [ZMOD ↑p], from (int.modeq.coe_nat_modeq_iff (a^(p-1)) 1 p).mpr h1,
-  have h3 : ↑1 ≡ ↑1 [ZMOD p], from int.modeq.refl 1,
-  have h4: ↑(a ^ (p - 1)) - 1 ≡ 1-1 [ZMOD ↑p], from int.modeq.modeq_sub h2 h3,
-  have h_eq : 1-1 = 0, refl,
-  --have h5 : (a ^ (p - 1)) -1 ≡ 0 [ZMOD p], by 
-  
-  --have : a^(p-1) - 1 ≡ 1 - 1 [ZMOD p], from 
+lemma pow_two_eq_mul_self (x : ℕ) : x^2 = x * x := begin show 1*x*x=x*x,rw one_mul end
+
+lemma factorization_x_square_minus_one(x : ℕ) : x^2-1 = (x+1)*(x-1):= begin
+  rw pow_two_eq_mul_self,
+  cases x with t,
+  norm_num,
+  show (t+1) * (t+1) - 1 = (succ t + 1) * t,
+  ring,
+end
+
+lemma euler_c_1 (a p : ℕ) (hp : prime p ∧ p ≠ 2) (ha : ¬ p ∣ a) : quadratic_res a p → a^((p-1)/2)-1 ≡ 0 [ZMOD p] := 
+begin
+  intro Hqr,
+  cases Hqr with x hx,
   sorry,
 end
+
+
+theorem euler_criterion (p : ℕ) (a : ℕ) (hp : prime p ∧ p ≠ 2) (ha : ¬ p ∣ a) :
+  (a^((p - 1) / 2) : ℤ) ≡ legendre_sym a hp [ZMOD p] := 
+begin 
+  have h1 : a^(p-1) ≡ 1 [MOD p], from fermat_little_theorem_extension a p hp.left,
+  have h2 : ↑(a ^ (p - 1)) ≡ ↑1 [ZMOD ↑p], from (int.modeq.coe_nat_modeq_iff (a^(p-1)) 1 p).mpr h1,
+  have h3 : ↑1 ≡ ↑1 [ZMOD p], from int.modeq.refl 1,
+  have h4 : ((a ^ (p - 1)) : ℕ) - 1 ≡ 0 [ZMOD p], from int.modeq.modeq_sub h2 h3,
+  have h5 : (a ^ ((p - 1)/2))^2-1 = (a^((p-1)/2)+1)*(a^((p-1)/2)-1), from factorization_x_square_minus_one (a^((p-1)/2)),
+
+
+  
+  sorry,
+end
+
+
+
+--Let p be an odd prime. Then there are exactly (p - 1) /2 quadratic residues modulo p and exactly (p - 1) /2 nonresidues modulo p. 
+--theorem quad_res_sol {p : ℕ} (hp : prime p) : 
+
+theorem minus_one_quad_res_of_p {p : ℕ} (hp : prime p ∧ p ≠ 2) : (p ≡ 1 [MOD 4] ↔ legendre_sym (-1 : ℤ) hp = 1) ∧ (p ≡ 3 [MOD 4] ↔ legendre_sym (-1 : ℤ) hp = (-1 : ℤ)) := sorry
 
 lemma quad_res_two (n : ℕ) : n % 8 = 1 ∨ n % 8 = 7 → ((n ^ 2 - 1) / 8 % 2 = 0) :=
 begin
