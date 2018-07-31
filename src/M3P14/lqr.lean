@@ -24,7 +24,7 @@ theorem law_of_quadratic_reciprocity {p q : ℕ} (hp : prime p ∧ p ≠ 2) (hq 
 
 theorem legendre_sym_mul {p : ℕ} (a b : ℤ) (hp : prime p ∧ p ≠ 2) : legendre_sym (a*b) hp = (legendre_sym a hp)*(legendre_sym b hp) := sorry
 
-theorem legendre_sym_refl {p : ℕ} (a b : ℤ) (hp : prime p ∧ p ≠ 2) :  (a ≡ b [MOD p] → legendre_sym a hp = legendre_sym b hp) :=sorry
+theorem legendre_sym_refl {p : ℕ} (a b : ℤ) (hp : prime p ∧ p ≠ 2) :  (a ≡ b [ZMOD p] → legendre_sym a hp = legendre_sym b hp) := sorry
 
 theorem legendre_sym_supplementary_laws {p : ℕ} (hp : prime p ∧ p ≠ 2) : legendre_sym 2 hp = (-1:ℤ)^((p^2-1)/8) := sorry 
 
