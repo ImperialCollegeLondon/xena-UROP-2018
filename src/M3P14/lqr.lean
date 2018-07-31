@@ -38,14 +38,51 @@ show (t+1) * (t+1) - 1 = (succ t + 1) * t,
 ring,
 end
 
+@[simp] lemma int.cast_pow {α : Type*} [ring α] (a : ℤ) (n : ℕ): ((a ^ n : ℤ) : α) = a ^ n :=
+by induction n; simp [*, _root_.pow_succ]
+
+
 lemma euler_c_1 (a p : ℕ) (hp : prime p ∧ p ≠ 2) (ha : ¬ p ∣ a) : quadratic_res a p → a^((p-1)/2)-1 ≡ 0 [ZMOD p] := 
 begin
 intro Hqr,
 cases Hqr with x hx,
+haveI : prime p := hp.1,
+rw ← zmod.eq_iff_modeq_int,
+rw ← zmod.eq_iff_modeq_int at hx,
+have q: 2 ∣ (p-1):=
+begin
+  cases nat.mod_two_eq_zero_or_one p,
+  have : p % 2 ≡ p [MOD 2], from nat.modeq.mod_modeq p 2,
+  have : 0 ≡ p [MOD 2], from eq.subst h this,
+  have : p ≡ 0 [MOD 2], from modeq.symm this,
+  rw ← nat.modeq.modeq_zero_iff,
+  exfalso,
+  have h1 := hp.1.2 2 (nat.modeq.modeq_zero_iff.1 this),
+  cases h1 with h3 h4,
+  have h2: 2 ≠ 1, by norm_num,
+  exact h2 h3,
+  exact hp.2.symm h4,
+  rw ← nat.mod_add_div p 2,
+  rw h, rw nat.add_sub_cancel_left,
+  simp,
 
+  -- from false.elim (h2 h3), 
+  -- from false.elim (hp.2 h4.symm),
+  -- have h5: p % 2 ≡ p [MOD 2], from nat.modeq.mod_modeq p 2,
+  -- have h6: 1 ≡ p [MOD 2], from  
+  --have : 1 ≡ p [MOD 2], from eq.subst h (nat.modeq.mod_modeq p 2),
+  
 
-
-
+  --have p ≡ 0 [MOD 2]
+end,
+rw int.cast_sub, rw int.cast_pow, rw hx, rw int.cast_pow, rw ← pow_mul, rw nat.mul_div_cancel' q,
+--have hx_eq: ↑a = ↑(x^2) , from ← zmod.eq_iff_modeq_int,
+--↑a Mod p = ↑x^2 MOD p
+--have ↑a ^ ((p - 1) / 2) - 1 = x ^ (p-1), from 
+--{
+--  calc 
+--  ↑a ^ ((p - 1) / 2) - 1 = (x ^ 2) ^ ((p - 1) / 2) - 1  : by rw eq.subst 
+--},
 
 end
 
