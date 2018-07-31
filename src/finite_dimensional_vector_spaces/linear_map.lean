@@ -1,17 +1,8 @@
-import xenalib.Ellen_Arlt_matrix_rings 
-import algebra.big_operators
-import data.set.finite
-import algebra.module 
-import data.finsupp
-import algebra.group
-import linear_algebra.basic
-import data.fintype
-import data.equiv.basic
-import linear_algebra.linear_map_module
-import algebra.pi_instances
-import algebra.module
-import data.list.basic
-
+import xenalib.Ellen_Arlt_matrix_rings  algebra.big_operators
+import data.set.finite algebra.module  data.finsupp
+import algebra.group linear_algebra.basic data.fintype
+import data.equiv.basic linear_algebra.linear_map_module
+import algebra.pi_instances algebra.module data.list.basic
 
 open function  
 -- reserve infix ` ^ `: 50
@@ -576,10 +567,10 @@ simp,
 unfold simp_fun,
 unfold_coes,
 conv 
-begin
-to_rhs,
-rw[span sp],
-end,
+  begin
+    to_rhs,
+    rw[span sp],
+  end,
 rw [is_linear_map.sum lm.2],
 congr,
 funext,
