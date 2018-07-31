@@ -26,7 +26,7 @@ theorem legendre_sym_refl {p : ℕ} (a b : ℕ) (hp : prime p ∧ p ≠ 2) :  (a
 
 theorem legendre_sym_supplementary_laws {p : ℕ} (hp : prime p ∧ p ≠ 2) : legendre_sym 2 hp = (-1:ℤ)^((p^2-1)/8) := sorry 
 
-theorem euler_criterion (p : ℕ) (a : ℕ) (hp : prime p ∧ p ≠ 2) (ha : ¬ p ∣ a) :
+theorem euler_criterion {p : ℕ} (a : ℕ) (hp : prime p ∧ p ≠ 2) (ha : ¬ p ∣ a) :
   (a^((p - 1) / 2) : ℤ) ≡ legendre_sym a hp [ZMOD p] := 
 begin 
   have h1 : a^(p-1) ≡ 1 [MOD p], sorry,
