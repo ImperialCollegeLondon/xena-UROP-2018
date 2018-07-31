@@ -26,10 +26,10 @@ instance point_setoid : setoid (point × point) :=
 { r := λ ⟨a,b⟩ ⟨c,d⟩, eqd a b c d,
   iseqv := ⟨ λ ⟨a,b⟩, eqd.refl a b, λ ⟨a,b⟩ ⟨c,d⟩, eqd.symm, λ ⟨a,b⟩ ⟨c,d⟩ ⟨e,f⟩, eqd.trans⟩
 }
-/-
+
 definition distance_values (point : Type) [Euclidean_plane point] := 
-quotient (@point_setoid point _)
--/
+quotient (@Euclidean_plane.point_setoid point _)
+
 theorem refl_dist (a b : point) : (a,b) ≈ (b,a) := eqd_refl a b
 
 theorem two8 (a b : point) : (a,a) ≈ (b,b) := 
