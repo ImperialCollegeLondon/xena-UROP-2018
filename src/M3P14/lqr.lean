@@ -12,7 +12,7 @@ import tactic.ring
 
 open nat 
 
-definition quadratic_res (a n : ℤ) := ∃ x: ℕ, a ≡ x^2 [ZMOD n]
+definition quadratic_res (a n : ℤ) := ∃ x : ℕ, a ≡ x^2 [ZMOD n]
 
 attribute [instance, priority 0] classical.prop_decidable
 noncomputable definition legendre_sym {p : ℕ} (a : ℤ) (H1 : prime p ∧ p ≠ 2) : ℤ := 
@@ -22,20 +22,20 @@ else 0
 
 theorem law_of_quadratic_reciprocity {p q : ℕ} (hp : prime p ∧ p ≠ 2) (hq : prime q ∧ q ≠ 2) : (legendre_sym p hq)*(legendre_sym q hp) = (-1)^(((p-1)/2)*((q-1)/2)) := sorry 
 
-theorem legendre_sym_mul {p : ℕ} (a b : ℕ) (hp : prime p ∧ p ≠ 2) : legendre_sym (a*b) hp = (legendre_sym a hp)*(legendre_sym b hp) := sorry
+theorem legendre_sym_mul {p : ℕ} (a b : ℤ) (hp : prime p ∧ p ≠ 2) : legendre_sym (a*b) hp = (legendre_sym a hp)*(legendre_sym b hp) := sorry
 
-theorem legendre_sym_refl {p : ℕ} (a b : ℕ) (hp : prime p ∧ p ≠ 2) :  (a ≡ b [MOD p] → legendre_sym a hp = legendre_sym b hp) :=sorry
+theorem legendre_sym_refl {p : ℕ} (a b : ℤ) (hp : prime p ∧ p ≠ 2) :  (a ≡ b [ZMOD p] → legendre_sym a hp = legendre_sym b hp) := sorry
 
 theorem legendre_sym_supplementary_laws {p : ℕ} (hp : prime p ∧ p ≠ 2) : legendre_sym 2 hp = (-1:ℤ)^((p^2-1)/8) := sorry 
 
 lemma pow_two_eq_mul_self (x : ℕ) : x^2 = x * x := begin show 1*x*x=x*x,rw one_mul end
 
-lemma factorization_x_square_minus_one(x:ℕ) : x^2-1 = (x+1)*(x-1):= begin
-rw pow_two_eq_mul_self,
-cases x with t,
-norm_num,
-show (t+1) * (t+1) - 1 = (succ t + 1) * t,
-ring,
+lemma factorization_x_square_minus_one(x : ℕ) : x^2-1 = (x+1)*(x-1):= begin
+  rw pow_two_eq_mul_self,
+  cases x with t,
+  norm_num,
+  show (t+1) * (t+1) - 1 = (succ t + 1) * t,
+  ring,
 end
 
 @[simp] lemma int.cast_pow {α : Type*} [ring α] (a : ℤ) (n : ℕ): ((a ^ n : ℤ) : α) = a ^ n :=
@@ -44,6 +44,7 @@ by induction n; simp [*, _root_.pow_succ]
 
 lemma euler_c_1 (a p : ℕ) (hp : prime p ∧ p ≠ 2) (ha : ¬ p ∣ a) : quadratic_res a p → a^((p-1)/2)-1 ≡ 0 [ZMOD p] := 
 begin
+<<<<<<< HEAD
 intro Hqr,
 cases Hqr with x hx,
 haveI : prime p := hp.1,
@@ -84,6 +85,11 @@ rw int.cast_sub, rw int.cast_pow, rw hx, rw int.cast_pow, rw ← pow_mul, rw nat
 --  ↑a ^ ((p - 1) / 2) - 1 = (x ^ 2) ^ ((p - 1) / 2) - 1  : by rw eq.subst 
 --},
 
+=======
+  intro Hqr,
+  cases Hqr with x hx,
+  sorry,
+>>>>>>> e4eb39322d55329c976f6c56bb36b0e9538e6843
 end
 
 
