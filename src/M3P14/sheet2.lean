@@ -14,6 +14,23 @@ open nat
 -- Compute 210 449 and 605/617 using quadratic reciprocity.
 --  449 and 617 are both prime).
 -- TODO: how to prove it using quadratic reciprocity?
+
+lemma LQR_1 {p q : ℕ} (hp : (prime p ∧ p ≠ 2)) (hq : (prime q ∧ q ≠ 2)) : (legendre_sym p hq) = (legendre_sym q hp) * (-1)^(((p-1)/2)*((q-1)/2)):= sorry 
+
+
+lemma aux2 (oddprime_449 : (prime 449 ∧ 449 ≠ 2)) : legendre_sym 3 oddprime_449 = -1 :=
+begin
+have oddprime_3 : prime 3 ∧ 3 ≠ 2, sorry,
+
+have b1: (legendre_sym 3 oddprime_449) = (legendre_sym 449 oddprime_3) * (-1)^(((3-1)/2)*((449-1)/2)), from LQR_1 oddprime_3 oddprime_449,
+have b2: (legendre_sym 3 oddprime_449) = (legendre_sym 449 oddprime_3) * 1, from eq.subst (show (-1:ℤ)^(((3-1)/2)*((449-1)/2)) = 1, by norm_num) b1,
+rw b2,
+simp, 
+rw legendre_sym_refl 449 2 oddprime_3 (show 449 ≡ 2 [MOD 3], by norm_num),
+sorry
+end
+
+
 theorem q1 (H1 : prime 449) (H2 : prime 617) : ((legendre_sym 210 H1) = (-1 : ℤ)) ∧ ((legendre_sym 605 H2) = (-1: ℤ) ) :=
 begin
 split,

@@ -218,10 +218,11 @@ split,
     rwa [@div_self _ _ (s - r) (ne.symm ( @ne_of_lt _ _ 0 (s - r) H1) ) ] at H2
 
 end ⟩  
--- this is positive repar. (but also need f(s) = 1-s for inverse homotopy/path!! )
 
-variable ( f : path x y) 
-#check f.4
+#check sub_eq_add_neg
+set_option trace.simplify.rewrite true
+
+
 
 /-
 lemma par_right_values (r s : I01 ) (Hrs  : r.val < s.val ) : (par Hrs) r = 0 ∧ (par Hrs) ⟨ s , _ ⟩  = 1 := 
@@ -323,13 +324,22 @@ continuous.comp (real.continuous_add_const a) (real.continuous_div_const b)
 #check @continuous_subtype_mk
 #print prefix set.
 
-set_option trace.simplify.rewrite true
+variable o : T 0 (1/2:ℝ  ) (by norm_num) 
+
+--set_option trace.simplify.rewrite true
 --set_option pp.implicit true
 lemma continuous_par {r s : ℝ} (Hrs : r < s) : continuous ( par Hrs ) := 
 begin unfold par,
   apply continuous_subtype_mk,
-  show continuous (λ (x :  ↥(T r s Hrs)), ((x.val:ℝ ) - r) / (s - r)),
-  show continuous ((λ ( y: ℝ ), (y - r) / (s - r)) ∘ (λ (x : ↥(T r s Hrs)), x.val)), 
+  show continuous (λ (x :  ↥(T r s Hrs)), ((x.1:ℝ ) - r) / (s - r)),
+  show continuous ((λ ( y: ℝ ), (y - r) / (s - r)) ∘ (λ (x : ↥(T r s Hrs)), x.val.val)), 
+  have H : continuous (λ (x : ↥(T r s Hrs)), x.val.val), 
+    exact continuous.comp continuous_subtype_val continuous_subtype_val , 
+  exact continuous.comp H (real.continuous_scale (-r) (s-r)), 
+    
+  --show continuous ((λ ( y: ℝ ), (y - r) / (s - r)) ∘ ((λ (x : ↥I01), (x.val : ℝ ) ) ∘ (λ (x : ↥(T r s Hrs)), (x.val : ↥I01) ))), 
+  --have H : (λ (x : ↥(T r s Hrs)), x.val.val) = (λ (x : ↥I01), (x.val: ℝ ) )∘ (λ (x : ↥(T r s Hrs)), (x.val : ↥I01) ), 
+
   --show continuous ((λ ( y: ℝ ), (y - r) / (s - r)) ∘ ( (λ (x : ↥I01), x.val) ∘ (λ (x : ↥(T r s Hrs)), (⟨ x.val , _ ⟩   : I01) ) ), 
   --try to rewrite in terms of 2 lifts? 
   
@@ -337,9 +347,6 @@ begin unfold par,
   --refine continuous.comp continuous_subtype_val (real.continuous_scale (-r) (s-r)), 
     
   --problem of 2 lifts breaks down continuous.comp
-  /- refine continuous.comp continuous_subtype_val _, 
-  exact real.continuous_scale (-r) (s-r), -/ 
-  sorry,
 end 
 
 --definition T ( a b : ℝ ) ( Hab : a < b ) : set I01 :=  { x : I01 | a ≤ x.val ∧ x.val ≤ b }  
@@ -375,20 +382,44 @@ end
 lemma is_closed_I01 : is_closed I01 := 
 begin exact @is_closed_int_clos 0 1 (by norm_num) end 
 
-
+#print prefix min 
 ---------------------
-
+local attribute classical.prop_decidable 
 --{ S:  s ∈ I01 } {R : r ∈ I01}
 lemma T_is_closed  { r s : ℝ } ( Hrs : r < s )  : is_closed (T r s Hrs) := 
 begin 
 let R := {x : ↥I01 | r ≤ x.val }, let L := {x : ↥I01 |  x.val ≤ s } , 
-have C1 : is_closed L, simp [ L ], --exact @is_closed_le' ↥I01 (begin apply_instance end) (begin sorry end) (begin sorry end) ⟨ s , begin sorry end ⟩   , 
+/- let u := if 1< s then 1 else if s < 0 then 0 else s,  let l := max (0:ℝ ) r, have H2:  L = {x : ↥I01 | x.val ≤ u}, 
+simp [u] at L, simp [l] at R, -/ 
+have C1 : is_closed L, 
+  rw is_closed_induced_iff,
+  existsi {x : ℝ | 0 ≤ x ∧ x ≤ (min 1 s)},
+  split,
+    exact is_closed_inter (is_closed_ge' 0)  (is_closed_le' _),
+    apply set.ext,intro x,
+    show x.val ≤ s ↔ 0 ≤ x.val ∧ x.val ≤ min 1 s,
+    split,
+      intro H,
+      split,
+        exact x.property.1,
+        apply le_min,exact x.property.2,assumption,
+      intro H,
+      exact le_trans H.2 (min_le_right _ _),
+    
+       /-    {cases if s ∈ I01 then  (begin end)
+
+    else sorry}-/ 
+    --have P1: partial_order I01, unfold I01, by apply_instance
+    
+--exact @is_closed_le' ↥I01 (begin apply_instance end) (begin sorry end) (begin sorry end) ⟨ s , begin sorry end ⟩   , 
     --- @is_closed_le' ↥I01 _ _ ... may only get is_closed {b : ↥I01 | b ≤ ⟨s, ?m_1⟩} instead of is_closed {x : ↥I01 | x.val ≤ s}
-    sorry, 
-have C2 : is_closed R, sorry,  
+/-     sorry, 
+have C2 : is_closed R, 
+    sorry,  
 have Int : T r s Hrs = set.inter R L, unfold T set.inter, simp, 
 
-exact (is_closed_inter C2 C1), 
+exact (is_closed_inter C2 C1), -/ 
+sorry, sorry,
 end 
 
 lemma T_is_closed2  { r s : ℝ } ( Hrs : r < s ): is_closed (T r s Hrs) :=  
@@ -434,20 +465,27 @@ lemma help_01 : (1 / 2 :ℝ) ∈ I01 := begin unfold I01, rw mem_set_of_eq, norm
 
 lemma help_02 : (1:I01) ∉ T1 := begin unfold T1 T,rw mem_set_of_eq, show ¬(0 ≤ (1:ℝ ) ∧ (1:ℝ) ≤ 1 / 2) , norm_num,  end 
 
-
-
+#print prefix set
+--set_option pp.implicit true
 lemma help_half_T1 : ( ⟨ 1/2, help_01⟩  : I01) ∈ T 0 (1/2) T1._proof_1 := 
-begin unfold T,  sorry --- simp [mem_set_of_eq, subtype.eq, -one_div_eq_inv], 
+begin unfold T, exact set.mem_sep 
+    (begin simp [has_mem.mem, -one_div_eq_inv], unfold set.mem, norm_num, end ) 
+    (begin norm_num end ), 
 end 
 
+
+
 lemma help_half_T2 : ( ⟨ 1/2, help_01⟩  : I01) ∈ T (1/2) 1 T2._proof_1 := 
-begin unfold T, sorry --- simp [mem_set_of_eq, subtype.eq, -one_div_eq_inv], 
+begin unfold T, exact set.mem_sep 
+    (begin simp [has_mem.mem, -one_div_eq_inv], unfold set.mem, norm_num, end ) 
+    (begin norm_num end ), 
 end 
 
 lemma inter_T : set.inter T1 T2 = { x : I01 | x.val = 1/2 } 
 := 
 begin unfold T1 T2 T set.inter, simp [mem_set_of_eq, -one_div_eq_inv], apply set.ext, intro x, split, 
-    rw mem_set_of_eq , rw mem_set_of_eq, simp [-one_div_eq_inv], intros A B C D, have H : x.val < 1 / 2 ∨ x.val = 1/2, exact  lt_or_eq_of_le B,  sorry, 
+    rw mem_set_of_eq , rw mem_set_of_eq, simp [-one_div_eq_inv], intros A B C D, have H : x.val < 1 / 2 ∨ x.val = 1/2, 
+        exact  lt_or_eq_of_le B, exact le_antisymm  B C,    
     rw mem_set_of_eq , rw mem_set_of_eq, intro H, rw H, norm_num,
 end
 
@@ -464,21 +502,19 @@ lemma eqn_2 : par T2._proof_1 ⟨⟨1 / 2, help_01  ⟩, begin unfold T, rw mem_
 lemma eqn_end : par T2._proof_1 ⟨1, help_T2 ⟩ = 1 :=  
 begin unfold par, exact subtype.mk_eq_mk.2 ( begin show ( ( 1:ℝ ) - 1 / 2) / (1 - 1 / 2) = 1,  norm_num, end ),  end 
 
-#print notation ∈ 
+
+
 lemma cover_I01 : T1 ∪ T2 = set.univ := 
 begin 
 unfold univ, unfold has_union.union , unfold T1 T2 T, apply set.ext, intro x,unfold set.union,  simp [mem_set_of_eq , -one_div_eq_inv], 
     split, intro H, simp [has_mem.mem], 
-intro H, simp [has_mem.mem] at H, unfold set.mem at H, unfold I01 at x, cases x, rwa [mem_set_of_eq] at x_property, -- x.val = x_val 
-    /- exact or.intro_left (1 / 2 ≤ x.val ∧ x.val ≤ 1) 
-        (begin have H: x.val ≤ 1/2, have H2: x.val ≤ 1, --simp [x_property.2],   
-        sorry,  
-         end ), -/ 
-    sorry 
+intro B, simp [has_mem.mem] at B, unfold set.mem at B, --unfold I01 at x, 
+have H : 0≤ x.val ∧ x.val ≤ 1, exact x.property, simp [or_iff_not_imp_left, -one_div_eq_inv], 
+intro nL, have H2 : (1 / 2 :ℝ )< x.val, exact nL H.1, exact ⟨ le_of_lt H2, H.2 ⟩ ,
 end 
 
-#check or.intro_left
-#check le_trans
+#print prefix or
+#check le_of_lt
 
 def fgen_path {α } [topological_space α ] { x y : α }{r s : ℝ} (Hrs : r < s)(f : path x y ) : T r s Hrs  → α := λ t, f.to_fun ( par Hrs t)
 
@@ -515,7 +551,7 @@ path x z :=
 
     at_zero := 
     begin unfold paste, rw dif_pos,  
-    unfold fa_path,  --have H1 : (@par (0:ℝ ) (1/2:ℝ ) (by norm_num) )⟨0, _⟩ = ( 0:I01 ), exact eqn_start, 
+    unfold fa_path,   
     rw eqn_start, exact f.at_zero,      
     end, 
 
@@ -538,270 +574,40 @@ path x z :=
         unfold fa_path fb_path, simp [xeq, -one_div_eq_inv], 
         show f.to_fun (par T1._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T1⟩) = g.to_fun (par T2._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T2⟩),
         simp [eqn_1, eqn_2, -one_div_eq_inv], rw [f.at_one, g.at_zero], 
-        
+    -- Use pasting lemma via closed T1, T2    
     exact cont_of_paste T1_is_closed T2_is_closed HM (CA f) (CB g),  
     end
 }
 
+--- Inverse of path
+
+lemma inv_in_I01 (x : I01) : 1 - x.val ∈ I01 := 
+begin unfold I01, rw mem_set_of_eq, split, simp [-sub_eq_add_neg] , exact x.2.2, simp, exact x.2.1, end   
+
+definition par_inv : I01 → I01 :=  λ x, ⟨ 1 - x.val , inv_in_I01 x ⟩ 
 
 
 
-/- 
-definition comp_of_path2 {α} [topological_space α] { x y z : α } ( f : path x y )( g : path y z ) :
-path x z :=  
-{   to_fun := λ t, paste (begin sorry end ) (repar_left_half f).to_fun (repar_right_half g).to_fun t.val , 
+
+definition inv_of_path {α} [topological_space α] { x y : α } ( f : path x y ) : path y x :=  
+{   to_fun := λ t , f.to_fun ( par_inv t ) , -- f.to_fun ∘ par_inv
+
+    at_zero :=
+    begin 
     
-    -- PROBLEM 
-    -- univ should be I01 - but it's inferred to be ℝ (as S _ _ : set ℝ ) - 
-    -- as want to apply paste & cont_of_paste 
-
-    --lemmas needed S _ _ is closed in I01, and S 0 1/2 ∪ S 1/2 1 = I01  
-
-    ---
-    at_zero := 
-    begin unfold paste, rw dif_pos,  
-    let s :=  par 0 ⟨1 / 2, repar_left_half._proof_2⟩, 
-    have Hs : s = par 0 ⟨1 / 2, repar_left_half._proof_2⟩, trivial, 
-    have H1: par 0 ⟨1 / 2, repar_left_half._proof_2⟩ ⟨(0:I01).val,  _ ⟩ = 0, 
-        exact (par_right_values Hs ).1 , 
-    swap, rw H1, exact f.at_zero
+    
+    sorry,
     end, 
-    at_one := 
-    begin unfold paste, rw dif_neg, 
-    let s := par ⟨1 / 2, repar_right_half._proof_2⟩ 1, 
-    have Hs : s = par ⟨1 / 2, repar_right_half._proof_2⟩ 1, trivial, 
-    have H1 : par ⟨1 / 2, repar_right_half._proof_2⟩ 1 ⟨ (1:I01).val, _ ⟩ = 1, 
-        exact (par_right_values Hs ).2,
-    swap, rw H1, exact g.at_one, 
----------------- now need
-    unfold S, 
-    simp, intro P, 
-    show (2 : ℝ )⁻¹  < ( 1:ℝ ), norm_num
-    end,
-    cont := 
-    begin
-    let k := paste _
-         (λ (t : ↥(S ((0:I01).val) ((⟨1 / 2, repar_left_half._proof_2⟩:I01).val))),
-            f.to_fun (par 0 ⟨1 / 2, repar_left_half._proof_2⟩ t))
-         (λ (t : ↥(S ((⟨1 / 2, repar_left_half._proof_2⟩:I01).val) ((1:I01).val))),
-            g.to_fun (par ⟨1 / 2, repar_right_half._proof_2⟩ 1 t)), ---- h : ℝ → α ; but would need I01 → α (I01 should be univ of paste)
-    have Hk : k = paste _
-         (λ (t : ↥(S ((0:I01).val) ((⟨1 / 2, repar_left_half._proof_2⟩:I01).val))),
-            f.to_fun (par 0 ⟨1 / 2, repar_left_half._proof_2⟩ t))
-         (λ (t : ↥(S ((⟨1 / 2, repar_left_half._proof_2⟩:I01).val) ((1:I01).val))),
-            g.to_fun (par ⟨1 / 2, repar_right_half._proof_2⟩ 1 t)),
-        trivial, 
-    have H1 : continuous (λ (t : ↥(S ((0:I01).val) ((⟨1 / 2, repar_left_half._proof_2⟩:I01).val))),
-            f.to_fun (par 0 ⟨1 / 2, repar_left_half._proof_2⟩ t)), 
-            -- (path_a_b_repar 0 (1/2:I01) f ).cont    
-            sorry,
-    have H2 : continuous (λ (t : ↥(S ((⟨1 / 2, repar_left_half._proof_2⟩:I01).val) ((1:I01).val))),
-            g.to_fun (par ⟨1 / 2, repar_right_half._proof_2⟩ 1 t)), 
-            sorry, 
-    
-    --exact cont_of_paste Hk H1 H2, ---- h : ℝ → α 
-    
-    --have C : continuous h, 
-        
-    sorry, sorry, sorry, sorry  
-    end
-} -/ 
 
+    at_one := sorry, 
 
+    cont := sorry
 
-
-
-
-/-
-
-lemma ending_pts [topological_space ℝ ] (a b : I01 ) {Hab : a.val < b.val } : 
-( @par a b Hab  )⟨ a.val , lemma1 a⟩ = 0 ∧ ( @par a b Hab  )⟨ b.val , lemma2 b ⟩ = 1 := sorry 
-
--- only "positive repar" (need negative)
-structure path_a_b_repar {α} [topological_space α] {x y : α} ( a b : I01) (f : path x y )   := 
-(to_fun : (S a.val b.val) → α )
-(start_pt : to_fun ⟨ a.val , lemma1 a⟩  = x ) -- f.at_zero
-(fin_pt :  to_fun  ⟨ b.val , lemma2  b⟩ = y )  -- f.at_one
-(cont : continuous to_fun )
-
--- Function to obtain path on [a, b] (S a b) to α 
--- def to_a_b_rep {α} [topological_space α] {x y : α} ( a b : ℝ) (f : path x y ) : path_a_b_repar a b f := 
-def to_a_b_rep {α} [topological_space α] {x y : α} ( a b : I01)  (Hab : a.val < b.val )(f : path x y ) : path_a_b_repar a b f := 
-{   to_fun := λ t, f.to_fun ((@par a b Hab ) t ), 
-    
-    start_pt := begin 
-    have H1 : par a b ⟨a.val, _⟩ = 0, 
-        exact (ending_pts a b).1, exact Hab, 
-    rw H1, exact f.at_zero end,
-    
-    fin_pt := begin 
-    have H1 : par a b ⟨b.val, _⟩ = 1, 
-        exact (ending_pts a b).2, exact Hab, 
-    rw H1, exact f.at_one 
-    end,
-    
-    cont := begin 
-    let h := λ t , f.to_fun ((par a b )t), 
-    have hc : continuous h, 
-        exact continuous.comp  (@continuous_par _ a b Hab) f.cont , 
-    exact hc,  
-    end 
-}
-
--- noncomputable def h : I01 := ⟨ 1/2,  by norm_num ⟩ 
-lemma zero_lt_half : ( 0:ℝ ) < ( 1/2 : ℝ ) := by norm_num
-lemma half_lt_one : ( 1/2:ℝ ) < ( 1 : ℝ ) := by norm_num
-
-def repar_left_half {α} [topological_space α] {x y : α} (f : path x y ) : 
-path_a_b_repar 0 ⟨ 1/2,  by norm_num ⟩ f := 
---path_a_b_repar 0 h f :=
-begin 
-    have H1 : ( 0 : I01).val < (⟨1 / 2, by norm_num⟩: I01).val,
-        show ( 0:ℝ ) < ( 1/2 : ℝ ), exact zero_lt_half,  
-    exact to_a_b_rep 0 ⟨ 1/2,  by norm_num ⟩ H1 f   
-end 
-
-def repar_right_half {α} [topological_space α] {x y : α} (f : path x y ) : 
-path_a_b_repar ⟨ 1/2,  by norm_num ⟩ 1 f := 
-begin 
-    have H1 : ( ⟨1 / 2, by norm_num⟩ : I01).val < ( 1 : I01).val,
-        show ( 1/2 :ℝ ) < ( 1 : ℝ ), exact half_lt_one,  
-    exact to_a_b_rep ⟨ 1/2,  by norm_num ⟩ 1 H1 f 
-end 
--/
-
-
--- Should use I01 as set ℝ - but this results in code not finishing compiling 
---def Hunion : (S 0 (1/2:ℝ) ∪ S (1/2:ℝ) 1 ) = I01 := sorry 
-
-/- type mismatch at application
-  S 0 (1 / 2) ∪ S (1 / 2) 1 = I01
-term
-  I01
-has type
-  Type : Type 1
-but is expected to have type
-  set ℝ : Type -/
-
-
-
-
-----------------------------------------------------
-
-
-
-
-/- 
-noncomputable def h : I01 := ⟨ 1/2,  by norm_num ⟩ 
-lemma geq_half : (0 : ℝ) ≤ (1/2 : ℝ) := by norm_num
-lemma leq_half : (1/2 : ℝ) ≤ (1 : ℝ) := by norm_num
-
-lemma help_1 : 2 * ( 1 : ℝ ) - 1 = 1 := begin norm_num end  
-
-lemma geq_zero ( t : I01) : t.val ≥ (0:ℝ) := begin dunfold I01 at t, 
-sorry   
-end 
-lemma leq_one ( t : I01) : t.val ≤  (1:ℝ) := begin dunfold I01 at t, sorry end 
-
-
---- definition of to_fun in terms of restrictions 
-noncomputable def comp_of_path2 {α} [topological_space α] { x y z : α } ( f : path x y )( g : path y z ) : path x z := 
-{   to_fun := sorry, 
-    at_zero := sorry, 
-    at_one := sorry,
-    cont := sorry 
 }
 
 
-noncomputable def comp_of_path' {α} [topological_space α] { x y z : α } ( f : path x y )( g : path y z ) : path x z :=
-{  to_fun := λ t : I01, if H : t.val ≤ 1/2 ∧ t.val ≥ 0 then f.to_fun ⟨(2 : real)*t.val, begin 
-    have H2: t.val ≥ (0 : real), 
-        exact H.right,  
-    have nn2: (2:real) ≥ 0, 
-        by norm_num, 
-    have pos2: (2:real) > 0, 
-        by norm_num, 
-    split, 
-    exact ( mul_nonneg nn2 H2), 
-    have P:  t.val * 2 ≤ 1,
-    exact mul_le_of_le_div pos2 H.left, 
-    rwa mul_comm at P,        
-    end⟩ 
-    ----------
-else g.to_fun ⟨ (2:real)*t.val - 1 , begin 
-    rw not_and_distrib at H,  
-    have H2: t.val ≥ 0, 
-        exact geq_zero t, 
-    have HH : ¬t.val ≤ 1 / 2, 
-        have HF : ( ¬t.val ≥ 0 ) = false , simp *, 
-        --exact or_eq_of_eq_false_right HF, 
-        sorry, 
-        --show H :
-        --apply or_eq_of_eq_false_right HF at H, 
-    --exact or_eq_of_eq_false_right ⟨ H, H2⟩, 
-    --rw H with or_eq_of_eq_false_right (⟨ H.right, H2⟩)  ,  
-    split, rwa not_le at HH, norm_num, 
-        --show (1:ℝ ) ≤ (2:ℝ )*t.val ,   --show HH : ¬t.val  1 / 2
-        show 0 ≤ -1 + 2 * (t.val : ℝ ), 
-        --show 1 + 0 ≤ 1 +  -1 + 2 * (t.val : ℝ ),
-    sorry, 
-    have  TL : t.val ≤ 1, exact leq_one t, 
-    sorry 
-    end ⟩,  
-    ---------
-    at_zero := begin 
-    rw dif_pos, 
-        have H : 2*(0 : I01).val = 0, 
-            exact mul_zero 2, --show 2 * (0 : ℝ) = 0,
-        have H2 : (⟨2*(0:I01).val,_⟩ : I01) = ⟨0,_⟩,tactic.swap,
-        rw H2, exact f.at_zero, 
-        exact subtype.eq H, split, 
-            exact geq_half, 
-            show (0:ℝ) ≥ 0, norm_num
-        --swap, by norm_num, 
-        
-        --exact f.at_zero,  -- exact f.at_zero, 
-    end ,
-    at_one := begin 
-    rw dif_neg, 
-        have H : 2*(1 : I01).val - 1 = 1, 
-            show 2 * ( 1 : ℝ ) - 1 = 1, exact help_1, 
-            -- show 1 = 2 * ( 1 : ℝ ) - 1, 
-                --norm_num, 
-        have H2 : (⟨2 * (1:I01).val - 1, _⟩ : I01) = ⟨1,_⟩, 
-            tactic.swap, 
-        rw H2, exact g.at_one, 
-        exact subtype.eq H,
-        show ¬((1 : ℝ) ≤ 1/2 ∧ (1:ℝ ) ≥ 0), rw not_and_distrib ,
-            have F: ¬1 ≤ 1 / 2, norm_num
-        end ,
-    cont := begin unfold continuous,  --rw dif_neg,   
-    intro s, intro Hs, 
-    -- cases 
-    -- have H1: continuous (λ (t : I01), f.to_fun ⟨2 * t.val, _⟩ ) , 
-    have Hf: is_open ((λ (t : I01), f.to_fun ⟨2 * t.val, _⟩ ) ⁻¹' s) , 
-    --have Hg: is_open ((λ (t : I01),  g.to_fun ⟨2 * t.val - 1, _⟩)) ⁻¹' s) , 
-
-    -- Need cases 
-    sorry, sorry, sorry, 
-    end -- Pasting lemma
-
-} -/
-
--- use path from ℝ 
-
----
 #print prefix dif_ctx_congr
-#check mul_le_of_le_div
-#check add_eq_of_eq_add_neg
-#print prefix real.nonneg 
-#check not_and_distrib.1
-/- noncomputable def h : I01 :=  1 / 2 
-lemma geq_half : (0 : ℝ) ≤ (1/2 : ℝ) := by norm_num
-lemma leq_half : (1/2 : ℝ) ≤ (1 : ℝ) := by norm_num
-lemma geq_half2 : (0 : I01) ≤ (1/2 : I01) := by norm_num
-lemma leq_half2 : (1/2 : I01) ≤ (1 : I01) := by norm_num
-instance : ( h : I01 ) := ⟨⟨0, le_refl _, zero_le_one⟩⟩ -/
+
 
 
 
@@ -821,7 +627,7 @@ structure loop {α} [topological_space α] (x : α) { y : α } extends  path x y
 -/
 
 
-def is_loop ( g : path x y) : Prop := g.at_zero == g.at_one -- function to check loop
+def is_loop ( g : path x y) : Prop := x = y -- function to check loop
 
 
 structure loop {α} [topological_space α] (x : α) extends path x x := 
@@ -829,6 +635,9 @@ structure loop {α} [topological_space α] (x : α) extends path x x :=
 --(base_pt : is_loop )
 
 def loop3 {α} [topological_space α] (x0 : α) : Type* := path x0 x0 
+
+
+
 
 --#check loop    --- not quite 
 #check @loop
@@ -862,8 +671,7 @@ def P := topological_space (I01 × α )
 
 -- General Homotopy 
 structure homotopy {α} {β} [topological_space α] [topological_space β] (f : α → β)
-( hcf : continuous f) (g : α → β)
-( hcg : continuous g) :=
+( hcf : continuous f) (g : α → β) ( hcg : continuous g) :=
 (to_fun : I01 × α →  β ) -- for product topology 
 (at_zero : ( λ x, to_fun ( 0 , x) ) = f )
 (at_one : ( λ x, to_fun ( 1 , x) ) = g)
@@ -932,17 +740,11 @@ def path_homotopy_id { x y : β} (f : path x y) : path_homotopy f f :=
     let h := λ st, f.to_fun ( @prod.snd I01 I01 st ) , 
     have hc : continuous h, 
         exact continuous.comp  continuous_snd f.cont, 
-    exact hc
-    --exact continuous.comp f.cont continuous_snd, 
-    /-
-    --have H1 :  ((λ (pair : I01 × I01), f.to_fun (pair.snd)) ⁻¹' U ) =  ( (univ : I01) × (f.to_fun ⁻¹' U) ), -- f.to_fun ⁻¹' U ,
-    let I : set I01 := univ, 
-    have H3 : is_open (f.to_fun ⁻¹' U), 
-        exact ⟨ U, (unfold f.cont) U ⟩
-    --have H2: ((λ (pair : I01 × I01), f.to_fun (pair.snd)) ⁻¹' U) = prod {s : I01 | s ∈ I } (f.to_fun ⁻¹' U), 
-     end , --begin unfold continuous,   -/
+    exact hc,
     end  
 } 
+
+#print prefix equiv
 
 def path_homotopy_inverse { x y : β} (f : path x y) (g : path x y) ( F : path_homotopy f g) : path_homotopy g f := 
 {   to_fun := sorry,  ---λ st  , F.to_fun ( (1:ℝ ) - st.1 , st.2 ), --- F (1-s, t) 
@@ -1000,7 +802,29 @@ end
 theorem is_equivalence : @equivalence (path x y)  (is_homotopic_to) := 
 ⟨ is_reflexive, is_symmetric, is_transitive⟩ 
 
+--local notation `≈` := is_homotopic_to _ _ 
+
+def hom_eq_class {α : Type*} [topological_space α ] {x : α } ( f : loop3 x ) : set (path x x) := 
+{ g : path x x | is_homotopic_to f g }
+
+-- Ignore below
+
+/- def space_π_1 {α : Type*} [topological_space α ] {x : α } :=  --: set (hom_eq_class x)
+{ h : hom_eq_class ( path x x) } -/ 
+
+/- 
+def space_π_1 {α : Type*} [topological_space α ] {x : α } : set (set (path x x)) := 
+{ ∀ f : loop3 x,  hom_eq_class ( f)   } -/ 
+
+#print group 
+
+#check continuous
 #print prefix equiv
+#print prefix quotient 
+#print notation  ≈ 
+
+#print has_equiv.equiv 
+    
 
 #check @is_refl
 #check @reflexive 
