@@ -13,16 +13,18 @@ open nat
 
 -- Questions:
 -- Compute 210 449 and 605/617 using quadratic reciprocity.
--- (449 and 617 are both prime).
+--  449 and 617 are both prime).
 -- TODO: how to prove it using quadratic reciprocity?
+
 
 theorem ls_3_449 (oddprime_449 : (prime 449 ∧ 449 ≠ 2)) : legendre_sym 3 oddprime_449 = -1 :=
 begin
-    have oddprime_3 : prime 3 ∧ 3 ≠ 2, by norm_num,
+    have oddprime_3 : prime 3 ∧ 3 ≠ 2, sorry,
     have b2: (legendre_sym 3 oddprime_449) = (legendre_sym 449 oddprime_3) * 1, from eq.subst (show (-1:ℤ)^(((3-1)/2)*((449-1)/2)) = 1, by norm_num) (law_of_quadratic_reciprocity' oddprime_3 oddprime_449),
     rw b2,
     simp, 
-    rw [legendre_sym_refl 449 2 oddprime_3, legendre_sym_supplementary_laws],
+    rw legendre_sym_refl 449 2 oddprime_3, 
+    rw legendre_sym_supplementary_laws,
     norm_num,
     unfold int.modeq,
     norm_num,
@@ -30,7 +32,7 @@ end
 
 theorem ls_5_449 (H : prime 449 ∧ 449 ≠ 2) : legendre_sym 5 H = 1 := 
 begin 
-    have prime_5 : prime 5 ∧ 5 ≠ 2, by norm_num,
+    have prime_5 : prime 5 ∧ 5 ≠ 2, sorry,
     rw (show (legendre_sym 5 H) = (legendre_sym 449 prime_5) * (-1)^(((5-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity' _ _),
     norm_num,
     have : 449 ≡ -1 [ZMOD 5], by norm_num [int.modeq],
@@ -40,7 +42,7 @@ end
 
 theorem ls_7_449 (H : prime 449 ∧ 449 ≠ 2) : legendre_sym 7 H = 1 := 
 begin
-   have prime_7 : prime 7 ∧ 7 ≠ 2, by norm_num,
+   have prime_7 : prime 7 ∧ 7 ≠ 2, sorry,
     rw (show (legendre_sym 7 H) = (legendre_sym 449 prime_7) * (-1)^(((7-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity' _ _),
     norm_num,
     have : 449 ≡ 1 [ZMOD 7], by unfold int.modeq; norm_num, 
@@ -49,7 +51,7 @@ end
 
 theorem ls_5_617 (H : prime 617 ∧ 617 ≠ 2) : legendre_sym 5 H = -1 := 
 begin
-    have prime_5 : prime 5 ∧ 5 ≠ 2, by norm_num,
+    have prime_5 : prime 5 ∧ 5 ≠ 2, sorry,
     rw (show (legendre_sym 5 H) = (legendre_sym 617 prime_5) * (-1)^(((5-1)/2)*((617-1)/2)), from law_of_quadratic_reciprocity' _ _),
     norm_num,
     have : 617 ≡ 2 [ZMOD 5], by unfold int.modeq; norm_num, 
@@ -59,7 +61,7 @@ end
 
 theorem ls_11_617 (H : prime 617 ∧ 617 ≠ 2) : legendre_sym 11 H = 1 := 
 begin
-    have prime_11 : prime 11 ∧ 11 ≠ 2, by norm_num,
+    have prime_11 : prime 11 ∧ 11 ≠ 2, sorry,
     rw (show (legendre_sym 11 H) = (legendre_sym 617 prime_11) * (-1)^(((11-1)/2)*((617-1)/2)), from law_of_quadratic_reciprocity' _ _),
     norm_num,
     have : 617 ≡ 1 [ZMOD 11], by unfold int.modeq; norm_num, 
@@ -85,62 +87,31 @@ theorem q2a : ∃ A : set ℕ, ∀ x : ℕ, primitive_root x 19 ↔ x ∈ A := s
 
 -- Show that if n is odd and a is a primitive root mod n, then a is a primitive root mod 2n if a is odd, and a + n is a primitive root mod 2n if a is even. 
 -- [HINT: Φ(2n) = Φ(n) when n is odd.]
-theorem q2b {a n : ℕ} (h_odd : gcd 2 n = 1) (hp : primitive_root a n) : (gcd 2 a = 1 → primitive_root a (2*n)) ∧ (gcd 2 a = 0 → primitive_root (a + n) (2*n)) := 
-begin
-    split,
-    have phi1 : order_of a (phi n) = n, 
-    {
-        
-    },
-    {
-        intro h,
-        sorry,
-    },
-    {   intro h,
-        sorry,
-    }
-end
+theorem q2b {a n : ℕ} (h_odd : gcd 2 n = 1) (hp : primitive_root a n) : (gcd 2 a = 1 → primitive_root a (2*n)) ∧ (gcd 2 a = 0 → primitive_root (a + n) (2*n)) := sorry
 
 -- Let p be a prime and let a be a primitive root mod p. 
 -- Show that a is also a primitive root mod p² if, and only if, a^p−1 is not congruent to 1 mod p².
 -- [HINT: what is the order of a mod p? What does this say about the order of a mod p²?]
 --set_option pp.proofs true
-theorem q3 {a p : ℕ} (hp : prime p) (hq : prim_root a p) : 
-prim_root a (p^2) ↔ ¬(a^(p-1) ≡ 1 [MOD (p^2)]) :=
-begin
+theorem q3 {a p : ℕ} (hp : prime p) (h1: coprime a p) (h2 : coprime a (p^2)) (hq : primitive_root a p h1) :
+primitive_root a (p^2) h2 ↔ ¬(a^(p-1) ≡ 1 [MOD (p^2)]) :=
+    begin
     apply iff.intro,
     {
-        intro h1, unfold prim_root at hq h1,
+        intro h1, unfold primitive_root at hq h1,
         have h2: phi (p^2) = p^1*(p-1), from power_p_phi p 2 hp,
         have h3: p^1*(p-1) = p*(p-1), by simp,
         have h4: phi (p^2) = p*(p-1), from eq.subst h2.symm h3,
         have h5: order_of a (p^2) = p*(p-1), from eq.subst h1.symm h4,
         assume h6: a^(p-1) ≡ 1 [MOD (p^2)],
         have h7: p*(p-1) ∣ (p-1), from order_of_div a (p^2) (p*(p-1)) (p-1) h5 h6,
-        sorry,
+        have h8: ¬ p*(p-1) ∣ (p-1), from mt (le_of_dvd (nat.sub_pos_of_lt hp.gt_one)) 
+          (not_le_of_gt ((lt_mul_iff_one_lt_left (nat.sub_pos_of_lt hp.gt_one)).2 hp.gt_one)),
+        from absurd h7 h8,
     },
-    /-have h8: order_of a (p^2) = p-1,
+
     {
-    unfold order_of,
-    have p1: ∃i≠0, a ^ i ≡ 1 [MOD p^2], from exists_pow_eq_one_mod_n a (p^2),
-    from existsi p-1,  
-    },
-    have h9: p*(p-1) ≠ p-1,  
-    {assume j1: p*(p-1) = p-1,
-    have j2: 1*(p-1) = p-1, by rw one_mul,
-    have j3: p*(p-1) = 1*(p-1), from eq.subst j2.symm j1,
-    have j4: 0 < p-1,
-    {have k1: 1 < p, from prime.gt_one hp,
-    have k2: 1 + 0 = 1, from add_zero 1,
-    have k3: 1 + 0 < p, from eq.subst k2 k1,
-    from nat.lt_sub_left_of_add_lt k3,},
-    have j5: p = 1, from (nat.mul_right_inj j4).1 j3,
-    have j6: prime 1, from eq.subst j5 hp,
-    from absurd j6 not_prime_one,},
-    have h10: order_of a (p^2) ≠ p*(p-1), from eq.subst h8.symm h9.symm,
-    from false.elim (h10 h5),},-/
-    {
-        intro h,
+        intro h, unfold prim_root,
         have h1: phi (p^2) = p^1*(p-1), from power_p_phi p 2 hp,
         have h2: order_of a (p^2) ∣ phi (p^2), from order_of_div_phi_n a (p^2),
         have h3: order_of a (p^2) ∣ p^1*(p-1), from eq.subst h1 h2,
