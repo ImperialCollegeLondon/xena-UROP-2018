@@ -222,12 +222,14 @@ exact is_add_group_hom.add _,
  smul:= smul_ _,
 }
 
-def matrix_to_linear_map {R : Type} [ring R] {a b : nat} (M : matrix R a b):(@linear_map R (has_space R a)  (has_space R b) _ _ _):=
+def matrix_to_linear_map {R : Type} [ring R] {a b : nat} (M : matrix R a b) : 
+(@linear_map R (has_space R a)  (has_space R b) _ _ _) :=
 ⟨matrix_to_map M, module_hom M⟩ 
 
 def e (R : Type) [ring R] (a: nat) (i: fin a): has_space R a:= λ j, if i =j then 1 else 0
 
-definition linear_map_to_matrix {R : Type} [ring R] {a b : nat} (f: @linear_map R (has_space R a)  (has_space R b) _ _ _) : matrix R a b :=
+definition linear_map_to_matrix {R : Type} [ring R] {a b : nat} 
+(f: @linear_map R (has_space R a) (has_space R b) _ _ _) : matrix R a b :=
     λ i j, f.1 (e R a i) j
 
 theorem finset.sum_single {α : Type*} [fintype α]
