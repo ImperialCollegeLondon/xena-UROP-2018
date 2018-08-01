@@ -1,6 +1,6 @@
 import linear_algebra.basic algebra.field data.complex.basic data.real.basic analysis.metric_space analysis.topology.uniform_space
 
-set_option class.instance_max_depth 64
+set_option class.instance_max_depth 128
 
 open vector_space field set complex real
 universes u v w
@@ -12,9 +12,9 @@ def pres_mul (R : Type v) (F : Type w) [ring R] [ring F] (g : R → F) :=
 ∀ (x y : R), g(x * y) = g(x) * g(y)
 
 structure ring_isom (R : Type v) (F : Type w) [ring R] [ring F] extends equiv R F := 
-(hom_pres_add : pres_add R F (equiv.to_fun to_equiv))
-(hom_pres_mul : pres_mul R F (equiv.to_fun to_equiv))
-(hom_one : (equiv.to_fun to_equiv) 1 = 1)
+(isom_pres_add : pres_add R F (equiv.to_fun to_equiv))
+(isom_pres_mul : pres_mul R F (equiv.to_fun to_equiv))
+(isom_one : (equiv.to_fun to_equiv) 1 = 1)
 
 def ring_auto (R : Type v) [ring R] := ring_isom R R 
 
@@ -25,39 +25,39 @@ structure ring_invo (R : Type v) [ring R] extends ring_isom R R :=
 
 open ring_invo
 
-def invo {R : Type v} [ring R] [ring_invo R] := equiv.to_fun (ring_hom.to_equiv R R)
+def invo {R : Type v} [ring R] (Hi : ring_invo R) := equiv.to_fun(ring_isom.to_equiv (ring_invo.to_ring_isom Hi))
 
-lemma invo_pres_add {R : Type v} [ring R] [ring_invo R] (x y : R) :
-invo(x + y) = invo(x) + invo(y) := by apply ring_hom.hom_pres_add
+lemma invo_pres_add {R : Type v} [ring R] (Hi : ring_invo R) (x y : R) :
+invo Hi (x + y) = invo Hi (x) + invo Hi (y) := by apply ring_isom.isom_pres_add
 
-lemma invo_pres_mul {R : Type v} [ring R] [ring_invo R] (x y : R) :
-invo(x * y) = invo(x) * invo(y) := by apply ring_hom.hom_pres_mul
+lemma invo_pres_mul {R : Type v} [ring R] (Hi : ring_invo R) (x y : R) :
+invo Hi (x * y) = invo Hi (x) * invo Hi (y) := by apply ring_isom.isom_pres_mul
 
-lemma invo_invo {R : Type v} [ring R] [ring_invo R] (x : R) :
-invo(invo(x)) = x := 
+lemma invo_invo {R : Type v} [ring R] (Hi : ring_invo R) (x : R) :
+invo Hi (invo Hi (x)) = x := 
 begin 
 dunfold invo, 
-have H : comp_self_eq_id ((ring_hom.to_equiv R R).to_fun), 
-    exact invo_comp_self R,
+have H : comp_self_eq_id (((Hi.to_ring_isom).to_equiv).to_fun),
+    exact invo_comp_self Hi,
 dunfold comp_self_eq_id at H,
 dunfold function.comp at H,
-have He : (ring_hom.to_equiv R R).to_fun ((ring_hom.to_equiv R R).to_fun x) = (λ x, (ring_hom.to_equiv R R).to_fun ((ring_hom.to_equiv R R).to_fun x)) x,
+have He : (Hi.to_ring_isom.to_equiv).to_fun ((Hi.to_ring_isom.to_equiv).to_fun x) = (λ x, (Hi.to_ring_isom.to_equiv).to_fun ((Hi.to_ring_isom.to_equiv).to_fun x)) x,
     refl,
 rw He,
 rw H,
 refl,
 end 
 
-@[simp] lemma invo_one {R : Type v} [ring R] [ring_invo R] : 
-invo (1 : R) = 1 := by apply ring_hom.hom_one 
+@[simp] lemma invo_one {R : Type v} [ring R] (Hi : ring_invo R) : 
+invo Hi (1 : R) = 1 := by apply ring_isom.isom_one 
 
-@[simp] lemma invo_zero {R : Type v} [ring R] [ring_invo R] : 
-invo(0 : R) = 0 := 
+@[simp] lemma invo_zero {R : Type v} [ring R] (Hi : ring_invo R) : 
+invo Hi (0 : R) = 0 := 
 begin
-have H1 : ∃ (a : R), invo(a) = 0,
+have H1 : ∃ (a : R), invo Hi (a) = 0,
     admit,
 cases H1 with a H1,
-have He : invo(a)*invo(0) = 0,
+have He : invo Hi (a) * invo Hi (0) = 0,
     rw H1,
     simp,
 rw ←invo_pres_mul at He,
@@ -65,31 +65,30 @@ rw mul_zero at He,
 exact He,
 end
 
-#check function.left_inverse_surj_inv
-#print tactic.rewrite_core 
+lemma id_is_invo {R : Type v} [ring R] : ring_invo R := 
+begin
 
-class sesquilinear_form_space (F : Type v) (V : Type u) [ring F] [ring_invo F] extends module F V := 
+end
+
+class sesquilinear_form_space (F : Type v) (V : Type u) [ring F] (Hi : ring_invo F) extends module F V := 
 (sesq_form : V → V → F)
 (is_fst_lin : ∀ (a b : F), ∀ (x y z : V), sesq_form (a • x + b • y) z = a * (sesq_form x z) + b * (sesq_form y z))
-(is_conj_sym : ∀ (x y : V), sesq_form x y = invo (sesq_form y x))
+(is_conj_sym : ∀ (x y : V), sesq_form x y = invo Hi (sesq_form y x))
 
 open sesquilinear_form_space
 
-variables {F : Type v} {V : Type u} [ring F] [ring_invo F] [sesquilinear_form_space F V]
- 
-def sesq_form_to := λ (x y : V), sesq_form F x y   
+variables {F : Type v} {V : Type u} [ring F] (Hi : ring_invo F) [sesquilinear_form_space F V Hi]  
 
-notation a ∘ b := sesq_form_to a b
+--notation a ∘ b := sesq_form a b
 
-lemma to_is_conj_sym : ∀ (x y : V), sesq_form F x y = invo (y ∘ x) := 
+lemma to_is_conj_sym : ∀ (x y : V), sesq_form Hi x y = invo Hi (sesq_form Hi y x) := 
 begin
 intros,
-dunfold sesq_form_to,
-exact is_conj_sym F x y,
+exact is_conj_sym Hi x y,
 end
 
 theorem is_anti_linear : 
-∀ (a b : F), ∀ (x y z : V), sesq_form F x ((a • y) + (b • z)) = invo(a) * (x ∘ y) + invo(b) * (x ∘ z):=
+∀ (a b : F), ∀ (x y z : V), sesq_form Hi x ((a • y) + (b • z)) = invo Hi (a) * (sesq_form Hi x y) + invo Hi (b) * (sesq_form Hi x z) :=
 begin
 intros,
 rw is_conj_sym,
@@ -98,14 +97,13 @@ rw invo_pres_add,
 rw invo_pres_mul,
 rw invo_pres_mul,
 rw is_conj_sym,
-rw is_conj_sym F z x,
+rw is_conj_sym Hi z x,
 rw invo_invo,
-rw invo_invo,
-refl, 
+rw invo_invo, 
 end
 
 @[simp] lemma add_lin_left (x y z : V) : 
-sesq_form F (x + y) z = x ∘ z + y ∘ z := 
+sesq_form Hi (x + y) z = sesq_form Hi x z + sesq_form Hi y z := 
 begin
 rw [←module.one_smul x, ←module.one_smul y],
 rw is_fst_lin,
@@ -113,11 +111,10 @@ rw ring.one_mul,
 rw ring.one_mul,
 rw module.one_smul,
 rw module.one_smul,
-refl,
 end
 
 @[simp] lemma add_lin_right (x y z : V) : 
-sesq_form F x (y + z) = x ∘ y + x ∘ z := 
+sesq_form Hi x (y + z) = sesq_form Hi x y + sesq_form Hi x z := 
 begin
 rw [←module.one_smul y, ←module.one_smul z],
 rw is_anti_linear,
@@ -129,19 +126,18 @@ rw one_smul,
 end
 
 @[simp] lemma mul_lin_left (a : F) (x y : V) :
-sesq_form F (a • x) y = a * (x ∘ y) :=
+sesq_form Hi (a • x) y = a * sesq_form Hi x y :=
 begin
 rw ←add_zero (a • x),
 rw ←zero_smul,
 rw is_fst_lin,
 rw zero_mul,
 rw ring.add_zero,
-refl,
 exact 0,
 end
 
 @[simp] lemma mul_antilin_right (a : F) (x y : V) :
-sesq_form F x (a • y) = invo(a) * (x ∘ y) :=
+sesq_form Hi x (a • y) = invo Hi (a) * sesq_form Hi x y :=
 begin
 rw ←add_zero (a • y),
 rw ←zero_smul,
@@ -153,42 +149,19 @@ exact 0,
 end
 
 @[simp] lemma zero_sesq (x : V) :
-sesq_form F 0 x = 0 := by rw [←zero_smul, mul_lin_left, zero_mul]; exact 0
+sesq_form Hi 0 x = 0 := by rw [←zero_smul, mul_lin_left, zero_mul]; exact 0
 
 @[simp] lemma sesq_zero (x : V) :
-sesq_form F x 0 = 0 := by rw [is_conj_sym, zero_sesq, invo_zero]  
-#print ring_invo
--- set_option trace.class_instances true
+sesq_form Hi x 0 = 0 := by rw [is_conj_sym, zero_sesq, invo_zero]  
+
 @[simp] lemma neg_smul_left_linear (x y : V) : 
-((sesq_form F ((-x) : V)  y) : F) = (sesq_form F x y : F)  
-:= begin end
+sesq_form Hi (-x) y = -(sesq_form Hi x y : F) := by rw [←neg_one_smul, mul_lin_left, neg_one_mul]
 
--- by rw [←neg_one_smul, mul_lin_left, neg_one_mul]
+@[simp] lemma neg_smul_right_antilinear (x y : V) : 
+sesq_form Hi x (-y) = -(sesq_form Hi x y) := by rw [←neg_one_smul, mul_antilin_right, conj_neg, conj_one, neg_one_mul]
 
---@[simp] lemma neg_smul_right_antilinear (x y : V) : 
---sesq_form F x (-y) = -(x ∘ y) := by rw [←neg_one_smul, mul_antilin_right, conj_neg, conj_one, neg_one_mul]
+class bilinear_form_space (R : Type v) (W : Type u) [ring R] (Hid : ring_invo R) extends sesquilinear_form_space R W Hid :=
+(invo_id : invo Hid = id)
 
-lemma conj_eq_real (x : ℂ) : x.im = 0 ↔ conj(x) = x :=
-begin
-split,
-    intros H,
-    have hn : -x.im = 0,
-        rw neg_eq_zero,
-        exact H,
-    rw ←conj_im at hn,
-    have hie : x.im = (conj(x)).im,
-        simp [H, hn],
-    have hre : x.re = (conj(x)).re,
-        simp, 
-    rw eq_comm,
-    apply complex.ext hre hie, 
-    
-    intros H,
-    have hie : (conj(x)).im = x.im,
-        rw H,          
-    simp at hie,
-    rw ←add_left_inj (x.im) at hie,
-    simp at hie,
-    rw eq_comm at hie,
-    exact iff.elim_left add_self_eq_zero hie,
-end
+#check bilinear_form_space
+lemma bilin_bilinear [bilinear_form_space F V Hi]
