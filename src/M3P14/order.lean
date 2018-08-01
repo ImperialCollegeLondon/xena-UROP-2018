@@ -7,7 +7,7 @@ def order (a n k : ℕ) := ∀m : ℕ, coprime a n ∧ (a^k) ≡ 1 [MOD n]
 
 theorem order_div (a n k d : ℕ) (h : order a n k) : (a^d) ≡ 1 [MOD n] → k ∣ d := sorry
 
-lemma order_div_phi_n (a n k: ℕ) (h1 : coprime a n) (h2 : order a n k) : k ∣ phi n := sorry
+theorem order_div_phi_n (a n k: ℕ) (h1 : coprime a n) (h2 : order a n k) : k ∣ phi n := sorry
 
 def primitive_root (a n : ℕ) := ∃ k : ℕ, coprime a n ∧ order a n k → k = phi n 
 
