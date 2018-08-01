@@ -6,20 +6,19 @@ open fintype
 
 --defining the phi function
 
-def phi (n : ℕ) := ((finset.range n).filter (nat.coprime n)).card
+definition phi (n : ℕ) := ((finset.range n).filter (nat.coprime n)).card
 local notation `φ`  := phi 
-#reduce φ 18
 instance {α : Type*} [fintype α] [monoid α] : fintype (units α) := sorry
 
 --lemmas
 
-lemma phi_n (n : ℕ) [pos_nat n] : phi n = card (units (zmod n)) := sorry
+theorem phi_n (n : ℕ) [pos_nat n] : phi n = card (units (zmod n)) := sorry
 
-lemma phi_p (p : ℕ) (hp: prime p) : φ p = p-1 := sorry
+theorem phi_p (p : ℕ) (hp: prime p) : φ p = p-1 := sorry
 
-lemma strong_mul (m n : ℕ) : φ(m*n) = (φ m) * (φ n) * (gcd m n / φ (gcd m n)) := sorry
+theorem strong_mul (m n : ℕ) : φ(m*n) = (φ m) * (φ n) * (gcd m n / φ (gcd m n)) := sorry
 
-lemma phi_mul (n m : ℕ) (hp: gcd n m = 1) : φ (n*m) = (φ n) * (φ m) := 
+theorem phi_mul (n m : ℕ) (hp: gcd n m = 1) : φ (n*m) = (φ n) * (φ m) := 
 begin
     rw [nat.mul_comm, strong_mul],
     rw [nat.gcd_comm, hp],
@@ -29,7 +28,7 @@ begin
     rwa mul_comm,
 end
 
-lemma phi_odd_twice_eq_n (n : ℕ) (hp : gcd 2 n = 1) : φ (2*n) = φ n := 
+theorem phi_odd_twice_eq_n (n : ℕ) (hp : gcd 2 n = 1) : φ (2*n) = φ n := 
 begin 
 rw phi_mul 2 n,
 rw phi_p 2,
@@ -42,7 +41,7 @@ rwa ← dvd_prime (prime_two),
 assumption,
 end
 
-lemma phi_even_twice_eq_twice_n (n : ℕ) (hp : gcd 2 n = 2) : φ (2*n) = 2 * φ n := 
+theorem phi_even_twice_eq_twice_n (n : ℕ) (hp : gcd 2 n = 2) : φ (2*n) = 2 * φ n := 
 begin 
 rw strong_mul 2 n,
 rw hp,
@@ -56,9 +55,9 @@ intros,
 rwa ← dvd_prime (prime_two),
 end
 
-lemma power_p_phi (p k : ℕ) (hp: prime p) : φ p^k = (p^k)*(1-1/p) := sorry
+theorem power_p_phi (p k : ℕ) (hp: prime p) : φ p^k = (p^k)*(1-1/p) := sorry
 
-lemma dvd_phi (m n : ℕ) (hp : m > 0) : (m ∣ n) → (φ m ∣ φ n) := 
+theorem dvd_phi (m n : ℕ) (hp : m > 0) : (m ∣ n) → (φ m ∣ φ n) := 
 begin
 intros,
 have eq_n_m : n = m * (n / m), 
@@ -75,10 +74,9 @@ have h8 : φ m ∣ φ (m * (n / m)), from eq.subst (strong_mul m (n/m)).symm h7,
 exact eq.subst eq_n_m.symm h8,
 end
 
-lemma dvd_a_power (a n : ℕ) : n ∣ φ (a^n - 1) := sorry
+theorem dvd_a_power (a n : ℕ) : n ∣ φ (a^n - 1) := sorry
 
-lemma gcd_phi_eq_lcm_phi (m n d l : ℕ) (hp : d = gcd m n) (hq : l = lcm m n)  : φ l * φ d = φ m * φ n := 
-sorry
+theorem gcd_phi_eq_lcm_phi (m n d l : ℕ) (hp : d = gcd m n) (hq : l = lcm m n)  : φ l * φ d = φ m * φ n := sorry
 
 theorem euler_phi_thm (a n : ℕ) (hp: gcd a n = 1) : a^(φ n) ≡ 1 [MOD n] := sorry
 

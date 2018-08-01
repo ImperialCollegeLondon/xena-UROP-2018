@@ -462,6 +462,26 @@ exact is_add_group_hom.add _,
  smul:= smul_ _,
 }
 
+-- definition matrix_to_map {R : Type} [ring R] {a b : nat} (M : matrix R a b) :
+-- (has_space R a) → (has_space R b) := λ v ,(λ i,finset.sum finset.univ (λ K, (v K) *M K i ) )
+
+def vec_to_mat {R : Type} [ring R] {n : nat} (vc : vector R n) :
+matrix R n 1 := λ I, λ J, vector.nth vc I
+
+def mat_mul_vec {R : Type} [ring R] {n m : nat} (M : matrix R n m) (vc : vector R m) :
+matrix R n 1 := @matrix.mul _ _ m n 1 M (vec_to_mat vc)
+
+theorem mat_mat_vec_assoc {R : Type} [ring R] {a b c : nat} (M : matrix R a b) 
+(N : matrix R b c) (vc : vector R c) :
+@matrix.mul _ _ b a 1 M (@mat_mul_vec _ _ b c N vc) = 
+@mat_mul_vec _ _ a c (@matrix.mul _ _ b a c M N) vc :=
+begin
+apply matrix.mul_assoc,
+end
+
+def matrix_transpose {R : Type} [ring R] {a b : nat} (M : matrix R a b) :
+matrix R b a := λ I, λ J, M J I
+
 end map_matrix
 
 namespace vector_space 
@@ -594,4 +614,6 @@ equiv (vector V n) (linear_map (has_space k n) V) :=
   left_inv := left_inv_ V n,
   right_inv := right_inv_ V n,
 }
-end vector_space 
+end vector_space
+
+ 

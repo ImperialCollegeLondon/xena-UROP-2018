@@ -22,15 +22,20 @@ else 0
 
 theorem law_of_quadratic_reciprocity {p q : ℕ} (hp : prime p ∧ p ≠ 2) (hq : prime q ∧ q ≠ 2) : (legendre_sym p hq)*(legendre_sym q hp) = (-1)^(((p-1)/2)*((q-1)/2)) := sorry 
 
+theorem law_of_quadratic_reciprocity' {p q : ℕ} (hp : prime p ∧ p ≠ 2) (hq : prime q ∧ q ≠ 2) : (legendre_sym p hq) = (legendre_sym q hp) * (-1)^(((p-1)/2)*((q-1)/2)):= sorry 
+
 theorem legendre_sym_mul {p : ℕ} (a b : ℤ) (hp : prime p ∧ p ≠ 2) : legendre_sym (a*b) hp = (legendre_sym a hp)*(legendre_sym b hp) := sorry
 
 theorem legendre_sym_refl {p : ℕ} (a b : ℤ) (hp : prime p ∧ p ≠ 2) :  (a ≡ b [ZMOD p] → legendre_sym a hp = legendre_sym b hp) := sorry
 
 theorem legendre_sym_supplementary_laws {p : ℕ} (hp : prime p ∧ p ≠ 2) : legendre_sym 2 hp = (-1:ℤ)^((p^2-1)/8) := sorry 
 
-lemma pow_two_eq_mul_self (x : ℕ) : x^2 = x * x := begin show 1*x*x=x*x,rw one_mul end
+theorem legendre_one {p : ℕ} (hp : prime p ∧ p ≠ 2) : legendre_sym 1 hp = 1 := sorry
+theorem legendre_neg_one {p : ℕ} (hp : prime p ∧ p ≠ 2) : legendre_sym (-1) hp = (-1)^((p-1)/2) := sorry
 
-lemma factorization_x_square_minus_one(x : ℕ) : x^2-1 = (x+1)*(x-1):= begin
+theorem pow_two_eq_mul_self (x : ℕ) : x^2 = x * x := begin show 1*x*x=x*x,rw one_mul end
+
+theorem factorization_x_square_minus_one(x : ℕ) : x^2-1 = (x+1)*(x-1):= begin
   rw pow_two_eq_mul_self,
   cases x with t,
   norm_num,
@@ -38,13 +43,12 @@ lemma factorization_x_square_minus_one(x : ℕ) : x^2-1 = (x+1)*(x-1):= begin
   ring,
 end
 
-@[simp] lemma int.cast_pow {α : Type*} [ring α] (a : ℤ) (n : ℕ): ((a ^ n : ℤ) : α) = a ^ n :=
+@[simp] theorem int.cast_pow {α : Type*} [ring α] (a : ℤ) (n : ℕ): ((a ^ n : ℤ) : α) = a ^ n :=
 by induction n; simp [*, _root_.pow_succ]
 
 
-lemma euler_c_1 (a p : ℕ) (hp : prime p ∧ p ≠ 2) (ha : ¬ p ∣ a) : quadratic_res a p → a^((p-1)/2)-1 ≡ 0 [ZMOD p] := 
+theorem euler_c_1 (a p : ℕ) (hp : prime p ∧ p ≠ 2) (ha : ¬ p ∣ a) : quadratic_res a p → a^((p-1)/2)-1 ≡ 0 [ZMOD p] := 
 begin
-<<<<<<< HEAD
 intro Hqr,
 cases Hqr with x hx,
 haveI : prime p := hp.1,
@@ -85,11 +89,6 @@ rw int.cast_sub, rw int.cast_pow, rw hx, rw int.cast_pow, rw ← pow_mul, rw nat
 --  ↑a ^ ((p - 1) / 2) - 1 = (x ^ 2) ^ ((p - 1) / 2) - 1  : by rw eq.subst 
 --},
 
-=======
-  intro Hqr,
-  cases Hqr with x hx,
-  sorry,
->>>>>>> e4eb39322d55329c976f6c56bb36b0e9538e6843
 end
 
 
@@ -114,7 +113,7 @@ end
 
 theorem minus_one_quad_res_of_p {p : ℕ} (hp : prime p ∧ p ≠ 2) : (p ≡ 1 [MOD 4] ↔ legendre_sym (-1 : ℤ) hp = 1) ∧ (p ≡ 3 [MOD 4] ↔ legendre_sym (-1 : ℤ) hp = (-1 : ℤ)) := sorry
 
-lemma quad_res_two (n : ℕ) : n % 8 = 1 ∨ n % 8 = 7 → ((n ^ 2 - 1) / 8 % 2 = 0) :=
+theorem quad_res_two (n : ℕ) : n % 8 = 1 ∨ n % 8 = 7 → ((n ^ 2 - 1) / 8 % 2 = 0) :=
 begin
   intro H,
   have H2 := nat.mod_add_div n 8,
@@ -147,7 +146,7 @@ begin
   }
 end 
 
-lemma quad_nonres_two (n : ℕ) : n % 8 = 3 ∨ n % 8 = 5 → ((n ^ 2 - 1) / 8 % 2 = 1) :=
+theorem quad_nonres_two (n : ℕ) : n % 8 = 3 ∨ n % 8 = 5 → ((n ^ 2 - 1) / 8 % 2 = 1) :=
 begin
   intro H,
   have H2 := nat.mod_add_div n 8,
