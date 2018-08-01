@@ -12,16 +12,18 @@ variables (v : Type) [norm_space V]
 def norm : V → ℝ := norm_space.N
 
 -- Incorrect, working on it atm
-lemma banach_is_metric [banach_space V] : metric_space V :=
+lemma banach_is_metric [h : banach_space V] : metric_space V :=
 {
-dist := norm, 
-dist_self := 
-    begin
-    intros, 
-    dunfold herm_dist,
-    dunfold herm_norm,
-    simp,
-    end,
+dist := by {
+    intros x y,
+    have n := h.N,
+    exact n (x - y) },
+dist_self := by { 
+    intro x,
+    have d := h.norm_pos_def,
+    rw [sub_self],
+    apply (d 0).mpr,
+    exact eq.refl 0 },
 eq_of_dist_eq_zero :=
     begin
     dunfold herm_dist,
