@@ -7,9 +7,9 @@ theorem exists_pow_eq_one_mod_n (a n : ℕ) : ∃i≠0, a ^ i ≡ 1 [MOD n] := s
 
 def order_of (a n : ℕ) (h : coprime a n) : ℕ := nat.find (exists_pow_eq_one_mod_n a n)
 
-theorem order_div (a n k d : ℕ) (h : coprime a n) : (a^d) ≡ 1 [MOD n] → order_of a n h ∣ d := sorry
+theorem order_div (a n d : ℕ) (h : coprime a n) : (a^d) ≡ 1 [MOD n] → order_of a n h ∣ d := sorry
 
-theorem order_div_phi_n (a n k: ℕ) (h : coprime a n) : order_of a n h ∣ phi n := sorry
+theorem order_div_phi_n (a n : ℕ) (h : coprime a n) : order_of a n h ∣ phi n := sorry
 
 def primitive_root (a n : ℕ) (h : coprime a n) := order_of a n h = phi n 
 
