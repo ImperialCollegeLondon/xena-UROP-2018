@@ -65,10 +65,14 @@ rw mul_zero at He,
 exact He,
 end
 
-lemma id_is_invo {R : Type v} [ring R] : ring_invo R := 
-begin
+def id_is_equiv (R : Type v) : equiv R R := 
+⟨id, id, begin dunfold function.left_inverse, intros, simp, end, begin dunfold function.right_inverse, dunfold function.left_inverse, intros, simp, end⟩
 
-end
+def id_is_isom (R : Type v) [ring R] : ring_isom R R := 
+⟨id_is_equiv R, begin dunfold pres_add, have He : (id_is_equiv R).to_fun = id, refl, rw He, simp end, begin dunfold pres_mul, have He : (id_is_equiv R).to_fun = id, refl, rw He, simp end, begin have He : (id_is_equiv R).to_fun = id, refl, rw He, simp end⟩ 
+
+def id_is_invo (R : Type v) [ring R] : ring_invo R :=
+⟨id_is_isom R, begin dunfold comp_self_eq_id, have He : ((id_is_isom R).to_equiv).to_fun = id, refl, rw He, simp end⟩ 
 
 class sesquilinear_form_space (F : Type v) (V : Type u) [ring F] (Hi : ring_invo F) extends module F V := 
 (sesq_form : V → V → F)
@@ -78,7 +82,6 @@ class sesquilinear_form_space (F : Type v) (V : Type u) [ring F] (Hi : ring_invo
 open sesquilinear_form_space
 
 variables {F : Type v} {V : Type u} [ring F] (Hi : ring_invo F) [sesquilinear_form_space F V Hi]  
-
 --notation a ∘ b := sesq_form a b
 
 lemma to_is_conj_sym : ∀ (x y : V), sesq_form Hi x y = invo Hi (sesq_form Hi y x) := 
@@ -160,8 +163,10 @@ sesq_form Hi (-x) y = -(sesq_form Hi x y : F) := by rw [←neg_one_smul, mul_lin
 @[simp] lemma neg_smul_right_antilinear (x y : V) : 
 sesq_form Hi x (-y) = -(sesq_form Hi x y) := by rw [←neg_one_smul, mul_antilin_right, conj_neg, conj_one, neg_one_mul]
 
-class bilinear_form_space (R : Type v) (W : Type u) [ring R] (Hid : ring_invo R) extends sesquilinear_form_space R W Hid :=
-(invo_id : invo Hid = id)
+structure bilinear_form_space (R : Type v) (W : Type u) [ring R] extends sesquilinear_form_space R W (id_is_invo R)
 
-#check bilinear_form_space
-lemma bilin_bilinear [bilinear_form_space F V Hi]
+def bilin_form (R : Type v) {W : Type u} [ring R] (x y : W) : R := (bilinear_form_space R W).sesq_form (id_is_equiv R) x y  
+
+lemma bilin_bilinear (H : bilinear_form_space F V) (x y z : V) (a b : F) :
+sesq_form F (a • x + b • y) z = a * (sesq_form F x z) + b * (sesq_form F y z) :=
+sorry
