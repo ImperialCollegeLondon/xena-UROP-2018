@@ -2,6 +2,27 @@
 Copyright (c) 2018 Keji Neri, Blair Shi. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Keji Neri, Blair Shi
+
+* `has_space R n`: the set of maps from (fin n) to R (R ^ n)
+
+-- Proved R^n is an abellian group and module R (R ^ n)
+
+* `matrix_to_linear_map` : constructs a matrix based on the given linear map
+
+* `linear_map_to_matrix` : constructs the linear map based on the given matrix
+
+-- Proved the a x b matrices and R-linear maps R^b -> R^a are equivalent 
+
+-- Proved the product of two matrix is equivalent to the component of two 
+-- corresponding linear maps
+
+-- Proved Hom(R^b,R^a)
+
+* `linear_map_to_vec V n` : constructs the basis based on the linear map 
+
+* `vec_to_linear_map V n M` : construct the linear map based on the given basis
+
+-- proved a basis v1,v2,...,vn of a fdvs V/k is just an isomorphism k^n -> V
 -/
 
 import xenalib.Ellen_Arlt_matrix_rings  algebra.big_operators
@@ -11,12 +32,6 @@ import data.equiv.basic linear_algebra.linear_map_module
 import algebra.pi_instances algebra.module data.list.basic
 
 open function  
--- reserve infix ` ^ `: 50
-
-
--- class has_map (R : Type) (n : nat) [ring R] := (char : nat → fin n → R)
--- infix ^ := has_map.char
-
 -- R^n
 universe u
 variables {α : Type u}
@@ -67,6 +82,7 @@ unfold add,
 funext,
 exact add_comm (a i) (b i),
 end
+
 def zero (R : Type) (n : nat) [ring R]: has_space R n := λ (i:fin n),(0 :R)
 #check zero
 theorem zero__add {R : Type} {n : nat} [ring R] (a:has_space R n): add R n (zero R n) a = a:=
@@ -157,9 +173,7 @@ instance (R : Type) [ring R] (n : nat) : has_scalar R (has_space R n) :=
     smul := smul
 }
 
-
-instance {R : Type} {n : nat} [ring R] 
-: module R (has_space R n) :=
+instance {R : Type} {n : nat} [ring R] : module R (has_space R n) :=
 {   
     smul_add := R_module.smul_add R n,
     add_smul := R_module.add_smul R n,
@@ -212,9 +226,9 @@ def matrix_to_linear_map {R : Type} [ring R] {a b : nat} (M : matrix R a b):(@li
 ⟨matrix_to_map M, module_hom M⟩ 
 
 def e (R : Type) [ring R] (a: nat) (i: fin a): has_space R a:= λ j, if i =j then 1 else 0
-definition map_to_matrix {R : Type} [ring R] {a b : nat} (f: @linear_map R (has_space R a)  (has_space R b) _ _ _) : matrix R a b :=
-    λ i j, f.1 (e R a i) j
 
+definition linear_map_to_matrix {R : Type} [ring R] {a b : nat} (f: @linear_map R (has_space R a)  (has_space R b) _ _ _) : matrix R a b :=
+    λ i j, f.1 (e R a i) j
 
 theorem finset.sum_single {α : Type*} [fintype α]
   {β : Type*} [add_comm_monoid β]
@@ -262,10 +276,10 @@ unfold smul,
 end 
 
 theorem equiv_one {R : Type} [ring R] {a b : nat} (f : (@linear_map R (has_space R a) (has_space R b) _ _ _)) :
-    matrix_to_map (map_to_matrix f ) = f := 
+    matrix_to_map (linear_map_to_matrix f ) = f := 
 begin
 funext,
-unfold map_to_matrix,
+unfold linear_map_to_matrix,
 unfold matrix_to_map,
 conv begin
 to_rhs,
@@ -284,12 +298,12 @@ funext,
 rw[( linear_map.is_linear_map_coe).smul],
 refl,
 end 
-#check is_linear_map
-  theorem equiv_two {R : Type} [ring R] {p b : nat} (M : matrix R p b):
-   map_to_matrix ⟨ matrix_to_map M, module_hom M⟩  = M := 
-   begin
+
+theorem equiv_two {R : Type} [ring R] {p b : nat} (M : matrix R p b):
+  linear_map_to_matrix ⟨ matrix_to_map M, module_hom M⟩  = M := 
+  begin
    funext,
-   unfold map_to_matrix,
+   unfold linear_map_to_matrix,
    show (matrix_to_map M) (e R p i) j =_,
    unfold matrix_to_map,
     have H1: ∀ (K : fin p), i ≠ K →  e R p i K * M K j = 0,
@@ -306,11 +320,11 @@ end
     split_ifs,
     simp,
     simp,
-   end
-  def matrix_to_linear_map_equiv {R : Type} [ring R] {a b : nat} :
-   equiv  (matrix R a b)  (@linear_map R (has_space R a)  (has_space R b) _ _ _):= 
+  end
+def matrix_to_linear_map_equiv {R : Type} [ring R] {a b : nat} :
+  equiv  (matrix R a b)  (@linear_map R (has_space R a)  (has_space R b) _ _ _):= 
     {to_fun := matrix_to_linear_map,
-    inv_fun := map_to_matrix,
+    inv_fun := linear_map_to_matrix,
     right_inv:= 
     begin 
      unfold function.right_inverse,
@@ -320,6 +334,7 @@ end
     dsimp,
     exact equiv_one x, 
     end,
+
     left_inv:= 
     begin 
     unfold function.left_inverse,
@@ -327,8 +342,10 @@ end
     exact equiv_two x,
     end  
    }
-  instance  {R : Type} [ring R] {a b : nat}:  is_add_group_hom (@matrix_to_linear_map R _ a b):=
-  { add:= 
+
+instance  {R : Type} [ring R] {a b : nat}:  is_add_group_hom (@matrix_to_linear_map R _ a b):=
+  { 
+  add:= 
   begin 
   intros,
   unfold matrix_to_linear_map,
@@ -350,37 +367,40 @@ end
   rw[mul_add],
   end
 }
+
 theorem comp_is_linear_map {R : Type} [ring R] {a b c : nat} 
 (f : (@linear_map R (has_space R b)  (has_space R a) _ _ _)) 
 (g : (@linear_map R (has_space R c)  (has_space R b) _ _ _)):
   @is_linear_map R _ _ _ _ _ (f.1 ∘ g.1):= 
-{ add:= 
-begin 
-intros,
-simp,
-have H1: f.val (g.val (x) + g.val(y)) = f.val (g.val (x + y)) ,
-rw[g.2.add],
-rw[← H1],
-rw[f.2.add],
-end,
-smul:= 
-begin 
-intros,
-simp,
-have H1: f.val (g.val (c_1 • x)) = f.val(c_1 • g.val(x)),
-rw[g.2.smul],
-rw[H1],
-rw[f.2.smul],
-end 
+{ 
+  add:= 
+    begin 
+      intros,
+      simp,
+      have H1: f.val (g.val (x) + g.val(y)) = f.val (g.val (x + y)),
+      rw[g.2.add],
+      rw[← H1],
+      rw[f.2.add],
+    end,
+
+  smul:= 
+    begin 
+      intros,
+      simp,
+      have H1: f.val (g.val (c_1 • x)) = f.val(c_1 • g.val(x)),
+      rw[g.2.smul],
+      rw[H1],
+      rw[f.2.smul],
+    end 
 }
 
 theorem comp_equal_product_one {R : Type} [ring R] {a b c : nat} 
 (f : (@linear_map R (has_space R b)  (has_space R a) _ _ _)) 
 (g : (@linear_map R (has_space R c)  (has_space R b) _ _ _)):
-  (@map_to_matrix R _ c a (⟨ f.1 ∘ g.1,  comp_is_linear_map f g⟩))  
-  = @matrix.mul _ _ b c a (@map_to_matrix R _ c b g ) (@map_to_matrix R _ b a f) :=
+  (@linear_map_to_matrix R _ c a (⟨ f.1 ∘ g.1,  comp_is_linear_map f g⟩))  
+  = @matrix.mul _ _ b c a (@linear_map_to_matrix R _ c b g ) (@linear_map_to_matrix R _ b a f) :=
 begin
-  unfold map_to_matrix,
+  unfold linear_map_to_matrix,
   unfold matrix.mul,
   funext,
   simp,
@@ -431,13 +451,13 @@ begin
 
 -- R-module structure on Hom(R^b, R^a)  
 
-theorem left_inv {R : Type} [ring R] {a b : nat} : left_inverse (@map_to_matrix R _ a b ) (matrix_to_linear_map) := 
+theorem left_inv {R : Type} [ring R] {a b : nat} : left_inverse (@linear_map_to_matrix R _ a b ) (matrix_to_linear_map) := 
     begin 
     unfold function.left_inverse,
     intros,
     exact equiv_two x,
     end  
-theorem right_inv {R : Type} [ring R] {a b : nat} : right_inverse (@map_to_matrix R _ a b ) (matrix_to_linear_map) := 
+theorem right_inv {R : Type} [ring R] {a b : nat} : right_inverse (@linear_map_to_matrix R _ a b ) (matrix_to_linear_map) := 
     begin 
      unfold function.right_inverse,
      unfold function.left_inverse,
@@ -447,10 +467,11 @@ theorem right_inv {R : Type} [ring R] {a b : nat} : right_inverse (@map_to_matri
     exact equiv_one x, 
     end
 
-instance keji  {R : Type} [ring R] {a b : nat}:  is_add_group_hom (@map_to_matrix R _ a b):=
+instance keji  {R : Type} [ring R] {a b : nat}:  is_add_group_hom (@linear_map_to_matrix R _ a b):=
 begin
  exact is_add_group_hom_right_inv  (injective_of_left_inverse left_inv ) right_inv,
 end
+
 def Hom {R : Type} [comm_ring R] {a b : nat} := {f: has_space R a → has_space R b // is_add_group_hom f}
 
 def module_Hom {R: Type} [ring R] {a b : nat} (M : matrix R a b) : 
@@ -616,4 +637,33 @@ equiv (vector V n) (linear_map (has_space k n) V) :=
 }
 end vector_space
 
- 
+-- eigenvalue and eigenvector
+namespace eigen
+variables {k : Type} (V : Type*)
+variables [field k] [vector_space k V] [module k V]
+
+def is_eigenvalue (T : linear_map V V) (a : k) :=
+∃ v : V , (v ≠ (0 : V)) ∧ (T v = a • v)
+
+def is_eigenvector (T : linear_map V V) (v : V) (h : v ≠ (0 : V)) :=
+∃ a : k, T v = a • v
+
+-- Suppose V is a f.d.v.s, and B = {v1,...,vn} is a vasis of V. Let T : V → V be a linear map.
+-- i The eigenvalues of T are exactly the same as the eigenvalues of [T]B.
+-- ii The eigenvectors of T are those v ∈ V such that [v]B is an eigenvector of [T]B.
+open vector_space
+-- theorem eigen_equil_one (T : linear_map V V)  (b : vector_space.linear_map_to_vec):= sorry
+
+-- Proposition 7.5. Suppose V is a f.d.v.s, and B = {v1, ..., vn} is a basis. Suppose T : V → V is a linear map. Then,
+-- [T]B isdiagonal⇔v1,...,vn areeigenvectorsofT
+
+-- Definition 7.6. If V is a f.d.v.s, and T : V → V is a linear map, say that T is diagonalisable if
+-- there a basis of V consisting of eigenvectors of V .
+
+
+
+-- Corollary 7.7. Suppose V is a f.d.v.s. with a basis B = {v1, ..., vn}. Suppose T : V → V is a
+-- linear map. Then the following are equivalent: i T is diagonalisable
+-- ii There is a basis C of V with [T]C is diagonal
+-- iii There is an invertible n×n matrix P with P−1[T]BP a diagonal matrix
+end eigen
