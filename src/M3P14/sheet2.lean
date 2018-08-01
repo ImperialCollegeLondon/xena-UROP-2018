@@ -7,6 +7,7 @@ import data.int.basic
 import M3P14.order
 import chris_hughes_various.zmod
 import M3P14.lqr
+import M3P14.phi
 
 open nat
 
@@ -41,12 +42,84 @@ end
 
 theorem ls_7_449 (H : prime 449 ∧ 449 ≠ 2) : legendre_sym 7 H = 1 := 
 begin
+<<<<<<< HEAD
+split,
+have h1: 210 = 2*105, refl,
+have h2: legendre_sym 210 H1 = legendre_sym 210 H1, refl, 
+have h3: legendre_sym 210 H1 = legendre_sym (2*105) H1, from eq.subst h1 h2, 
+have h4: legendre_sym (2*105) H1 = (legendre_sym 2 H1)*(legendre_sym 105 H1), from legendre_sym_mul 2 105 H1,
+have h5: 105 = 3*35, refl,
+have h6: legendre_sym 105 H1 = legendre_sym 105 H1, refl,
+have h7: legendre_sym 105 H1 = legendre_sym (3*35) H1, from eq.subst h5 h6, 
+have h8: legendre_sym (3*35) H1 = (legendre_sym 3 H1)*(legendre_sym 35 H1), from legendre_sym_mul 3 35 H1,
+have h9: 35 = 5*7, refl,
+have h10: legendre_sym 35 H1 = legendre_sym 35 H1, refl,
+have h11: legendre_sym 35 H1 = legendre_sym (5*7) H1, from eq.subst h9 h10,
+have h12: legendre_sym (5*7) H1 = (legendre_sym 5 H1)*(legendre_sym 7 H1), from legendre_sym_mul 5 7 H1,
+
+have h : (-1: ℤ)^((449^2 -1)/8) = 1, by norm_num,
+
+have h13: legendre_sym 2 H1 = (-1:ℤ)^((449^2-1)/8), from legendre_sym_supplementary_laws H1, 
+have a1: legendre_sym 2 H1 = 1, from eq.trans h13 h,  
+
+have prime_3 : prime 3, by norm_num,
+have h14: (legendre_sym 3 H1)*(legendre_sym 449 prime_3) = (-1: ℤ)^(((3-1)/2)*((449-1)/2)), from (law_of_quadratic_reciprocity prime_3 H1),
+have h15: (-1: ℤ)^(((3-1)/2)*((449-1)/2)) = 1, by norm_num,
+
+have h16: 449-2 = 3*149, by norm_num,
+have h17: 3 ∣ 3*149, from dvd_mul_right 3 149,
+have h18: 3 ∣  (449-2), from eq.subst h16 h17,
+have h19: (3:ℤ) ∣  (449-2), sorry,
+have h20: 2 ≡ 449 [MOD 3], from nat.modeq.modeq_of_dvd h19,
+have h21: 449 ≡ 2 [MOD 3], from nat.modeq.symm h20,
+have h22: legendre_sym 449 prime_3 = legendre_sym 2 prime_3, from legendre_sym_refl 449 2 prime_3 h21,
+have h23: (-1: ℤ)^((3^2-1)/8) = -1, by norm_num,
+have h24: legendre_sym 2 prime_3 = (-1: ℤ)^((3^2-1)/8), from legendre_sym_supplementary_laws prime_3,
+have h25: legendre_sym 2 prime_3 = -1, from eq.trans h24 h23,
+have h26: legendre_sym 449 prime_3 = -1, from eq.trans h22 h25, 
+have h27: (legendre_sym 3 H1)*(legendre_sym 449 prime_3) = 1, from eq.trans h14 h15,
+have h28: (legendre_sym 3 H1)*(-1) =1, from eq.subst h26 h27,
+have h29: 1=(legendre_sym 3 H1)*(-1), from eq.symm h28,
+have h30: (-1:ℤ) ≠ (0:ℤ) := dec_trivial,
+have h31: 1/(-1 : ℤ) = legendre_sym 3 H1, sorry, --from int.basic.div_eq_of_eq_mul_left h30 h29,
+have h32: -1 = 1/(-1:ℤ), by norm_num,
+have h33: -1 = legendre_sym 3 H1, from eq.trans h32 h31,
+have a2: legendre_sym 3 H1 = -1, from eq.symm h33,
+
+
+------
+
+have prime_5 : prime 5, by norm_num,
+
+have h34: (legendre_sym 5 H1)*(legendre_sym 449 prime_5) = (-1: ℤ)^(((5-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity prime_5 H1,
+have h35: (-1: ℤ)^(((5-1)/2)*((449 -1)/2)) = 1, by norm_num,
+
+have h36: 449-4 = 5*89, by norm_num,
+have h37: 5 ∣ 5*89, from dvd_mul_right 5 89,
+have h38: 5 ∣  (449-4), from eq.subst h36 h37,
+have h39: (5:ℤ) ∣  (449-4), sorry,
+have h40: 4 ≡ 449 [MOD 5], from nat.modeq.modeq_of_dvd h39,
+have h41: 449 ≡ 4 [MOD 5], from nat.modeq.symm h40,
+have h42: legendre_sym 449 prime_5 = legendre_sym 4 prime_5, from legendre_sym_refl 449 4 prime_5 h41,
+have h43: 4-2^2=5*0, by norm_num,
+have h44: 5 ∣ 5*0, from dvd_mul_right 5 0,
+have h45: 5 ∣ 4-2^2, from eq.subst h43 h44,
+have h46: (5:ℤ) ∣ 4-2^2, sorry,
+have h47: 4 ≡ 2^2 [MOD 5], from nat.modeq.modeq_of_dvd h46,
+have : quadratic_res 4 5, 
+begin 
+unfold quadratic_res,
+existsi 2,
+exact h47,
+end,
+=======
    have prime_7 : prime 7 ∧ 7 ≠ 2, sorry,
     rw (show (legendre_sym 7 H) = (legendre_sym 449 prime_7) * (-1)^(((7-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity' _ _),
     norm_num,
     have : 449 ≡ 1 [ZMOD 7], by unfold int.modeq; norm_num, 
     rw [legendre_sym_refl _ _ prime_7 this, legendre_one],
 end
+>>>>>>> 486b1c066a05114d8a1a24deb3bfbcc7aa8b78f3
 
 theorem ls_5_617 (H : prime 617 ∧ 617 ≠ 2) : legendre_sym 5 H = -1 := 
 begin
@@ -91,7 +164,47 @@ theorem q2b {a n : ℕ} (h_odd : gcd 2 n = 1) (hp : primitive_root a n) : (gcd 2
 -- Let p be a prime and let a be a primitive root mod p. 
 -- Show that a is also a primitive root mod p² if, and only if, a^p−1 is not congruent to 1 mod p².
 -- [HINT: what is the order of a mod p? What does this say about the order of a mod p²?]
-theorem q3 {a p : ℕ} (hp : prime p) (hq : primitive_root a p) : primitive_root a (p*p) ↔ ¬(a^(p-1) ≡ 1 [MOD (p*p)]) := sorry
+--set_option pp.proofs true
+theorem q3 {a p : ℕ} (hp : prime p) (hq : prim_root a p) : 
+prim_root a (p^2) ↔ ¬(a^(p-1) ≡ 1 [MOD (p^2)]) :=
+begin
+apply iff.intro,
+{intro h1, unfold prim_root at hq h1,
+have h2: phi (p^2) = p^1*(p-1), from power_p_phi p 2 hp,
+have h3: p^1*(p-1) = p*(p-1), by simp,
+have h4: phi (p^2) = p*(p-1), from eq.subst h2.symm h3,
+have h5: order_of a (p^2) = p*(p-1), from eq.subst h1.symm h4,
+assume h6: a^(p-1) ≡ 1 [MOD (p^2)],
+have h7: p*(p-1) ∣ (p-1), from order_of_div a (p^2) (p*(p-1)) (p-1) h5 h6,
+
+/-have h8: order_of a (p^2) = p-1,
+{
+unfold order_of,
+have p1: ∃i≠0, a ^ i ≡ 1 [MOD p^2], from exists_pow_eq_one_mod_n a (p^2),
+from existsi p-1,  
+},
+have h9: p*(p-1) ≠ p-1,  
+{assume j1: p*(p-1) = p-1,
+have j2: 1*(p-1) = p-1, by rw one_mul,
+have j3: p*(p-1) = 1*(p-1), from eq.subst j2.symm j1,
+have j4: 0 < p-1,
+{have k1: 1 < p, from prime.gt_one hp,
+have k2: 1 + 0 = 1, from add_zero 1,
+have k3: 1 + 0 < p, from eq.subst k2 k1,
+from nat.lt_sub_left_of_add_lt k3,},
+have j5: p = 1, from (nat.mul_right_inj j4).1 j3,
+have j6: prime 1, from eq.subst j5 hp,
+from absurd j6 not_prime_one,},
+have h10: order_of a (p^2) ≠ p*(p-1), from eq.subst h8.symm h9.symm,
+from false.elim (h10 h5),},-/
+{intro h,
+have h1: phi (p^2) = p^1*(p-1), from power_p_phi p 2 hp,
+have h2: order_of a (p^2) ∣ phi (p^2), from order_of_div_phi_n a (p^2),
+have h3: order_of a (p^2) ∣ p^1*(p-1), from eq.subst h1 h2,
+have h4: a ^ order_of a (p^2) ≡ 1 [MOD (p^2)], from pow_order_of_eq_one a (p^2),
+have h5: a ^ order_of a p ≡ 1 [MOD p], from sorry,
+sorry,}
+end 
 
 -- Let p be a prime, and let a be an integer not divisible by p. 
 -- Show that the equation x^d ≡ a (mod p) has a solution if, and only if, a^(p−1/(d,p−1)) ≡ 1 (mod p). 
@@ -118,3 +231,5 @@ theorem q7 {a n : ℕ} (hp : primitive_root a n) : ∀ d : ℕ, gcd d (phi n) = 
 -- Show that if p is a prime congruent to ±1 mod 24 then none of 2, 3, 4, 6is a primitive root modulo p.
 -- [Hint: show that 2 and 3 are squares mod p.]
 theorem q8 (p : ℕ) (hp : prime p) : (p ≡ 1 [ZMOD 24] ∨ p ≡ -1 [ZMOD 24])  := sorry
+
+#check zero_add
