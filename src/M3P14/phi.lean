@@ -56,7 +56,7 @@ intros,
 rwa ← dvd_prime (prime_two),
 end
 
-lemma power_p_phi (p k : ℕ) (hp: prime p) : φ p^k = (p^k)*(1-1/p) := sorry
+lemma power_p_phi (p k : ℕ) (hp: prime p) : φ (p^k) = p^(k-1)*(p-1) := sorry
 
 lemma dvd_phi (m n : ℕ) (hp : m > 0) : (m ∣ n) → (φ m ∣ φ n) := 
 begin
