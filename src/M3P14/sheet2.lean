@@ -85,7 +85,21 @@ theorem q2a : ∃ A : set ℕ, ∀ x : ℕ, primitive_root x 19 ↔ x ∈ A := s
 
 -- Show that if n is odd and a is a primitive root mod n, then a is a primitive root mod 2n if a is odd, and a + n is a primitive root mod 2n if a is even. 
 -- [HINT: Φ(2n) = Φ(n) when n is odd.]
-theorem q2b {a n : ℕ} (h_odd : gcd 2 n = 1) (hp : primitive_root a n) : (gcd 2 a = 1 → primitive_root a (2*n)) ∧ (gcd 2 a = 0 → primitive_root (a + n) (2*n)) := sorry
+theorem q2b {a n : ℕ} (h_odd : gcd 2 n = 1) (hp : primitive_root a n) : (gcd 2 a = 1 → primitive_root a (2*n)) ∧ (gcd 2 a = 0 → primitive_root (a + n) (2*n)) := 
+begin
+    split,
+    have phi1 : order_of a (phi n) = n, 
+    {
+        
+    },
+    {
+        intro h,
+        sorry,
+    },
+    {   intro h,
+        sorry,
+    }
+end
 
 -- Let p be a prime and let a be a primitive root mod p. 
 -- Show that a is also a primitive root mod p² if, and only if, a^p−1 is not congruent to 1 mod p².
@@ -161,5 +175,3 @@ theorem q7 {a n : ℕ} (hp : primitive_root a n) : ∀ d : ℕ, gcd d (phi n) = 
 -- Show that if p is a prime congruent to ±1 mod 24 then none of 2, 3, 4, 6is a primitive root modulo p.
 -- [Hint: show that 2 and 3 are squares mod p.]
 theorem q8 (p : ℕ) (hp : prime p) : (p ≡ 1 [ZMOD 24] ∨ p ≡ -1 [ZMOD 24])  := sorry
-
-#check zero_add
