@@ -1,3 +1,9 @@
+/-
+Copyright (c) 2018 Keji Neri, Blair Shi. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Keji Neri, Blair Shi
+-/
+
 import xenalib.Ellen_Arlt_matrix_rings  algebra.big_operators
 import data.set.finite algebra.module  data.finsupp
 import algebra.group linear_algebra.basic data.fintype
@@ -182,7 +188,8 @@ rw finset.sum_add_distrib,
 refl,
 end⟩ 
 
-theorem smul_ {R: Type} [ring R] {a b : nat} (M : matrix R a b): ∀ (c : R) (x : has_space R a), matrix_to_map M (smul c x) = smul c  (matrix_to_map M x):=
+theorem smul_ {R: Type} [ring R] {a b : nat} (M : matrix R a b): ∀ (c : R) (x : has_space R a), 
+matrix_to_map M (smul c x) = smul c (matrix_to_map M x):=
 begin 
 intros,
 unfold matrix_to_map,
@@ -393,7 +400,9 @@ end
 
 theorem comp_equal_product_two {R : Type} [ring R] {a b c : nat} 
 (M : matrix R b a) (N : matrix R c b):
-@matrix_to_linear_map _ _ _ _ (@matrix.mul _ _ b c a N M) = ⟨(@matrix_to_linear_map _ _ _ _ M).1 ∘ (@matrix_to_linear_map _ _ _ _ N).1,  comp_is_linear_map (@matrix_to_linear_map _ _ _ _ M) (@matrix_to_linear_map _ _ _ _ N)⟩  :=
+@matrix_to_linear_map _ _ _ _ (@matrix.mul _ _ b c a N M) = 
+⟨(@matrix_to_linear_map _ _ _ _ M).1 ∘ (@matrix_to_linear_map _ _ _ _ N).1,  
+comp_is_linear_map (@matrix_to_linear_map _ _ _ _ M) (@matrix_to_linear_map _ _ _ _ N)⟩  :=
 begin
   unfold matrix_to_linear_map,
   funext,
