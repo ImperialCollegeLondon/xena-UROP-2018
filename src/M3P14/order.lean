@@ -2,18 +2,17 @@ import data.nat.prime data.nat.gcd data.nat.modeq data.nat.gcd M3P14.phi
 
 open nat
 
-
 theorem exists_pow_eq_one_mod_n (a n : ℕ) : ∃i≠0, a ^ i ≡ 1 [MOD n] := sorry
 
-def order_of (a n : ℕ) (h : coprime a n) : ℕ := nat.find (exists_pow_eq_one_mod_n a n)
+def order_of (a n : ℕ) : ℕ := if coprime a n then nat.find (exists_pow_eq_one_mod_n a n) else 0
 
-theorem order_div (a n d : ℕ) (h : coprime a n) : (a^d) ≡ 1 [MOD n] → order_of a n h ∣ d := sorry
+theorem order_div (a n d : ℕ) (h : coprime a n) : a^d ≡ 1 [MOD n] → order_of a n∣ d := sorry
 
-theorem order_div_phi_n (a n : ℕ) (h : coprime a n) : order_of a n h ∣ phi n := sorry
+theorem order_div_phi_n (a n : ℕ) (h : coprime a n) : order_of a n∣ phi n := sorry
 
-theorem pow_order_eq_one (a n : ℕ) (h: coprime a n) : a ^ (order_of a n h) ≡ 1 [MOD n] := sorry
+theorem pow_order_eq_one (a n : ℕ) (h: coprime a n) : a ^ (order_of a n) ≡ 1 [MOD n] := sorry
 
-def primitive_root (a n : ℕ) (h : coprime a n) := order_of a n h = phi n
+def primitive_root (a n : ℕ) := coprime a n ∧ order_of a n = phi n
 
 --theorem primitive_root_existence (n : ℕ) : ∃ a : ℕ, (primitive_root a n) ↔ n = 1 ∨ n = 2 ∨ n = 4 ∨ ∃ p r : ℕ, prime p ∧ r > 0 → (n = p^r ∨ n = 2*p^r) := sorry
 
