@@ -16,6 +16,7 @@ import data.int.basic
 open nat 
 
 definition quadratic_res (a n : ℤ) := ∃ x : ℕ, a ≡ x^2 [ZMOD n]
+definition quadratic_res' (p : ℕ)(hp : prime p ∧ p ≠ 2) (a n : zmod p) := ∃ x : ℕ, a ≡ x^2 [ZMOD n]
 
 attribute [instance, priority 0] classical.prop_decidable
 noncomputable definition legendre_sym {p : ℕ} (a : ℤ) (H1 : prime p ∧ p ≠ 2) : ℤ := 
@@ -61,7 +62,6 @@ theorem factorization_x_square_minus_one(x : ℕ) : x^2-1 = (x+1)*(x-1):= begin
   ring,
 end
 
-<<<<<<< HEAD
 --theorem num_of_quad_res {p : ℕ} (hp : prime p ∧ p ≠ 2) : ∃ (A : set ℕ) [finset A], ∀ x : [1, (p-1)], (legendre_sym x hp = 1 ↔ x ∈ A) ∧ finset.card A = (p-1)/2
 
 @[simp] lemma int.cast_pow {α : Type*} [ring α] (a : ℤ) (n : ℕ): ((a ^ n : ℤ) : α) = a ^ n :=
@@ -75,13 +75,6 @@ by induction n; simp [*, _root_.pow_succ, nat.pow_succ, mul_comm]
 
 
 lemma euler_c_1 (a p : ℕ) (hp : prime p ∧ p ≠ 2) (ha : ¬ p ∣ a) : quadratic_res a p → a^((p-1)/2) ≡ 1 [ZMOD p] := 
-=======
-@[simp] theorem int.cast_pow {α : Type*} [ring α] (a : ℤ) (n : ℕ): ((a ^ n : ℤ) : α) = a ^ n :=
-by induction n; simp [*, _root_.pow_succ]
-
-
-theorem euler_c_1 (a p : ℕ) (hp : prime p ∧ p ≠ 2) (ha : ¬ p ∣ a) : quadratic_res a p → a^((p-1)/2)-1 ≡ 0 [ZMOD p] := 
->>>>>>> 92b9d48860f0f68de78ccdd3c103335d9b55d5c8
 begin
 intro Hqr,
 cases Hqr with x hx,
@@ -105,7 +98,6 @@ begin
   rw h, rw nat.add_sub_cancel_left,
   simp,
 end,
-<<<<<<< HEAD
 rw int.cast_pow, rw hx, rw int.cast_pow, rw ← pow_mul, rw nat.mul_div_cancel' q,
 have h1 : x^(p-1) ≡ 1 [MOD p], from fermat_little_theorem_extension x p hp.1,
 have h2 : ↑(x^(p-1)) ≡ ↑1 [ZMOD ↑p], from (int.modeq.coe_nat_modeq_iff (x^(p-1)) 1 p).2 h1,
@@ -114,17 +106,6 @@ rw ← int.cast_pow,
 suffices h4 : x^(p-1) = ↑x^(p-1), rw h4 at h3, 
 simpa [nat.cast_pow]using h3,
 simp,
-=======
-rw int.cast_sub, rw int.cast_pow, rw hx, rw int.cast_pow, rw ← pow_mul, rw nat.mul_div_cancel' q,
---have hx_eq: ↑a = ↑(x^2) , from ← zmod.eq_iff_modeq_int,
---↑a Mod p = ↑x^2 MOD p
---have ↑a ^ ((p - 1) / 2) - 1 = x ^ (p-1), from 
---{
---  calc 
---  ↑a ^ ((p - 1) / 2) - 1 = (x ^ 2) ^ ((p - 1) / 2) - 1  : by rw eq.subst 
---},
-
->>>>>>> 92b9d48860f0f68de78ccdd3c103335d9b55d5c8
 end
 
 
@@ -149,7 +130,13 @@ begin
 end
 
 
+theorem Jason_and_partly_Guy_did_it {p : ℕ} (hp : prime p ∧ p ≠ 2) : ∃ A : finset (zmod p), ∀ a : zmod p, (quadratic_res a p ↔ a ∈ A) → finset.card A = (p-1)/2 := 
+begin 
+existsi A, 
 
+end 
+
+theorem Guy_suggested_this_but_i_am_not_sure {p : ℕ} (hp : prime p ∧ p ≠ 2) : ∃ A : finset ℕ, ∀ a : ℕ, (¬quadratic_res a p ↔ a ∈ A) ∧ finset.card A = (p-1)/2 := sorry
 --Let p be an odd prime. Then there are exactly (p - 1) /2 quadratic residues modulo p and exactly (p - 1) /2 nonresidues modulo p. 
 --theorem quad_res_sol {p : ℕ} (hp : prime p) : 
 
