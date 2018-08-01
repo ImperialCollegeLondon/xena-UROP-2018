@@ -19,7 +19,7 @@ open nat
 
 theorem ls_3_449 (oddprime_449 : (prime 449 ∧ 449 ≠ 2)) : legendre_sym 3 oddprime_449 = -1 :=
 begin
-    have oddprime_3 : prime 3 ∧ 3 ≠ 2, sorry,
+    have oddprime_3 : prime 3 ∧ 3 ≠ 2, from ⟨prime_three, by norm_num⟩,
     have b2: (legendre_sym 3 oddprime_449) = (legendre_sym 449 oddprime_3) * 1, from eq.subst (show (-1:ℤ)^(((3-1)/2)*((449-1)/2)) = 1, by norm_num) (law_of_quadratic_reciprocity' oddprime_3 oddprime_449),
     rw b2,
     simp, 
@@ -112,7 +112,7 @@ primitive_root a (p^2) h2 ↔ ¬(a^(p-1) ≡ 1 [MOD (p^2)]) :=
     },
 
     {
-        intro j1, unfold primitive_root,
+        intro j1, unfold primitive_root at hq, unfold primitive_root,
         have j2: phi (p^2) = p^1*(p-1), from power_p_phi p 2 hp,
         have j3: order_of a (p^2) ∣ phi (p^2), from order_of_div_phi_n a (p^2),
         have j4: order_of a (p^2) ∣ p^1*(p-1), from eq.subst h1 h2,
