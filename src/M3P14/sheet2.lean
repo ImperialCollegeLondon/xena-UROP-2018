@@ -98,25 +98,26 @@ primitive_root a (p^2) h2 ↔ ¬(a^(p-1) ≡ 1 [MOD (p^2)]) :=
     begin
     apply iff.intro,
     {
-        intro h1, unfold primitive_root at hq h1,
-        have h2: phi (p^2) = p^1*(p-1), from power_p_phi p 2 hp,
-        have h3: p^1*(p-1) = p*(p-1), by simp,
-        have h4: phi (p^2) = p*(p-1), from eq.subst h2.symm h3,
-        have h5: order_of a (p^2) = p*(p-1), from eq.subst h1.symm h4,
-        assume h6: a^(p-1) ≡ 1 [MOD (p^2)],
-        have h7: p*(p-1) ∣ (p-1), from order_of_div a (p^2) (p*(p-1)) (p-1) h5 h6,
-        have h8: ¬ p*(p-1) ∣ (p-1), from mt (le_of_dvd (nat.sub_pos_of_lt hp.gt_one)) 
+        intro j1, unfold primitive_root at hq j1,
+        have j2: phi (p^2) = p^1*(p-1), from power_p_phi p 2 hp,
+        have j3: p^1*(p-1) = p*(p-1), by simp,
+        have j4: phi (p^2) = p*(p-1), from eq.subst j2.symm j3,
+        have j5: order_of a (p^2) h2 = p*(p-1), from eq.subst j1.symm j4,
+        assume j6: a^(p-1) ≡ 1 [MOD (p^2)],
+        have j7: order_of a (p^2) h2 ∣ (p-1), from order_div a (p^2) (p*(p-1)) (p-1) h2 j6,
+        have j8: p*(p-1) ∣ (p-1), from eq.subst j5 j7,
+        have j9: ¬ p*(p-1) ∣ (p-1), from mt (le_of_dvd (nat.sub_pos_of_lt hp.gt_one)) 
           (not_le_of_gt ((lt_mul_iff_one_lt_left (nat.sub_pos_of_lt hp.gt_one)).2 hp.gt_one)),
-        from absurd h7 h8,
+        from absurd j8 j9,
     },
 
     {
-        intro h, unfold prim_root,
-        have h1: phi (p^2) = p^1*(p-1), from power_p_phi p 2 hp,
-        have h2: order_of a (p^2) ∣ phi (p^2), from order_of_div_phi_n a (p^2),
-        have h3: order_of a (p^2) ∣ p^1*(p-1), from eq.subst h1 h2,
-        have h4: a ^ order_of a (p^2) ≡ 1 [MOD (p^2)], from pow_order_of_eq_one a (p^2),
-        have h5: a ^ order_of a p ≡ 1 [MOD p], from sorry,
+        intro j1, unfold primitive_root,
+        have j2: phi (p^2) = p^1*(p-1), from power_p_phi p 2 hp,
+        have j3: order_of a (p^2) ∣ phi (p^2), from order_of_div_phi_n a (p^2),
+        have j4: order_of a (p^2) ∣ p^1*(p-1), from eq.subst h1 h2,
+        have j5: a ^ order_of a (p^2) ≡ 1 [MOD (p^2)], from pow_order_of_eq_one a (p^2),
+        have j6: a ^ order_of a p ≡ 1 [MOD p], from sorry,
         sorry,
     }
 end 
