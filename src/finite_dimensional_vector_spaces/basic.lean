@@ -22,7 +22,6 @@ class finite_dimensional_vector_space (k : Type u) (V : Type v) [field k]
 
 variables {k : Type u} {V : Type v}
 variable [field k]
--- variable [ring k] 
 variable [module k V]
 variables {a : k} {b : V}
 include k 
@@ -62,30 +61,10 @@ have h₂  : ∃ lc₂ : lc k V, (∀x∉fvs.ordered_basis, lc₂ x = 0)
 apply exists.elim h₁,
 apply exists.elim h₂,
 intros lc₁ h₃ lc₂ h₄,
-
-
-
--- def span (s : set β) : set β := { x | ∃(v : lc α β),  (∀x∉s, v x = 0) ∧ x = v.sum (λb a, a • b) }
+sorry
 end
 
--- lemma add_closed : is_in_vecsp x fvs ∧ is_in_vecsp y fvs → is_in_vecsp (x + y) fvs :=
--- by {
---   unfold is_in_vecsp span at *,
---   intros h, cases h with h1 h2,
---   cases h1 with a ha,
---   cases h2 with b hb,
---   cases ha with ha1 ha2,
---   cases hb with hb1 hb2,
---   existsi (a+b), split,
---     { intros v hv, have := exact @ha1 hv,  }
--- }
-
-
-
-
-
 end basic_property
-
 
 section span_liid
 variables (v₀ v₁ v₂ vc: V)

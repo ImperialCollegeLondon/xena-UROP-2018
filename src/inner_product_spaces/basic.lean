@@ -652,4 +652,21 @@ dist_triangle :=
     end,
 }
 
-class hilbert_space (V : Type u) extends herm_inner_product_space V, complete_space V
+
+--example (M : Type) [metric_space M] : topological_space M := by apply_instance 
+--noncomputable example (M : Type) [herm_inner_product_space M] : metric_space M := by apply_instance 
+
+--noncomputable example (M : Type) [herm_inner]
+
+
+-- this needs doing correctly via the metric
+--instance herm_inner_product_space.to_topological_space (V : Type u) [herm_inner_product_space V] : topological_space V := sorry 
+
+class Hilbert_space (V : Type u) extends herm_inner_product_space V, uniform_space.core V :=
+(is_open_uniformity : ∀s : set V, is_open s ↔ (∀x∈s, { p : V × V | p.1 = x → p.2 ∈ s } ∈ uniformity.sets))
+(complete : ∀{f:filter V}, cauchy f → ∃x, f ≤ nhds x)
+
+instance Hilbert_space.to_complete_space (V : Type u) [c : Hilbert_space V] : complete_space V :=
+{ complete := @Hilbert_space.complete V c
+
+}
