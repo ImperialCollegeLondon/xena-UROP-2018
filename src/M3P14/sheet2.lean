@@ -13,7 +13,7 @@ open nat
 
 -- Questions:
 -- Compute 210 449 and 605/617 using quadratic reciprocity.
---  449 and 617 are both prime).
+-- (449 and 617 are both prime).
 -- TODO: how to prove it using quadratic reciprocity?
 
 theorem ls_3_449 (oddprime_449 : (prime 449 ∧ 449 ≠ 2)) : legendre_sym 3 oddprime_449 = -1 :=
@@ -94,42 +94,46 @@ theorem q2b {a n : ℕ} (h_odd : gcd 2 n = 1) (hp : primitive_root a n) : (gcd 2
 theorem q3 {a p : ℕ} (hp : prime p) (hq : prim_root a p) : 
 prim_root a (p^2) ↔ ¬(a^(p-1) ≡ 1 [MOD (p^2)]) :=
 begin
-apply iff.intro,
-{intro h1, unfold prim_root at hq h1,
-have h2: phi (p^2) = p^1*(p-1), from power_p_phi p 2 hp,
-have h3: p^1*(p-1) = p*(p-1), by simp,
-have h4: phi (p^2) = p*(p-1), from eq.subst h2.symm h3,
-have h5: order_of a (p^2) = p*(p-1), from eq.subst h1.symm h4,
-assume h6: a^(p-1) ≡ 1 [MOD (p^2)],
-have h7: p*(p-1) ∣ (p-1), from order_of_div a (p^2) (p*(p-1)) (p-1) h5 h6,
-
-/-have h8: order_of a (p^2) = p-1,
-{
-unfold order_of,
-have p1: ∃i≠0, a ^ i ≡ 1 [MOD p^2], from exists_pow_eq_one_mod_n a (p^2),
-from existsi p-1,  
-},
-have h9: p*(p-1) ≠ p-1,  
-{assume j1: p*(p-1) = p-1,
-have j2: 1*(p-1) = p-1, by rw one_mul,
-have j3: p*(p-1) = 1*(p-1), from eq.subst j2.symm j1,
-have j4: 0 < p-1,
-{have k1: 1 < p, from prime.gt_one hp,
-have k2: 1 + 0 = 1, from add_zero 1,
-have k3: 1 + 0 < p, from eq.subst k2 k1,
-from nat.lt_sub_left_of_add_lt k3,},
-have j5: p = 1, from (nat.mul_right_inj j4).1 j3,
-have j6: prime 1, from eq.subst j5 hp,
-from absurd j6 not_prime_one,},
-have h10: order_of a (p^2) ≠ p*(p-1), from eq.subst h8.symm h9.symm,
-from false.elim (h10 h5),},-/
-{intro h,
-have h1: phi (p^2) = p^1*(p-1), from power_p_phi p 2 hp,
-have h2: order_of a (p^2) ∣ phi (p^2), from order_of_div_phi_n a (p^2),
-have h3: order_of a (p^2) ∣ p^1*(p-1), from eq.subst h1 h2,
-have h4: a ^ order_of a (p^2) ≡ 1 [MOD (p^2)], from pow_order_of_eq_one a (p^2),
-have h5: a ^ order_of a p ≡ 1 [MOD p], from sorry,
-sorry,}
+    apply iff.intro,
+    {
+        intro h1, unfold prim_root at hq h1,
+        have h2: phi (p^2) = p^1*(p-1), from power_p_phi p 2 hp,
+        have h3: p^1*(p-1) = p*(p-1), by simp,
+        have h4: phi (p^2) = p*(p-1), from eq.subst h2.symm h3,
+        have h5: order_of a (p^2) = p*(p-1), from eq.subst h1.symm h4,
+        assume h6: a^(p-1) ≡ 1 [MOD (p^2)],
+        have h7: p*(p-1) ∣ (p-1), from order_of_div a (p^2) (p*(p-1)) (p-1) h5 h6,
+        sorry,
+    },
+    /-have h8: order_of a (p^2) = p-1,
+    {
+    unfold order_of,
+    have p1: ∃i≠0, a ^ i ≡ 1 [MOD p^2], from exists_pow_eq_one_mod_n a (p^2),
+    from existsi p-1,  
+    },
+    have h9: p*(p-1) ≠ p-1,  
+    {assume j1: p*(p-1) = p-1,
+    have j2: 1*(p-1) = p-1, by rw one_mul,
+    have j3: p*(p-1) = 1*(p-1), from eq.subst j2.symm j1,
+    have j4: 0 < p-1,
+    {have k1: 1 < p, from prime.gt_one hp,
+    have k2: 1 + 0 = 1, from add_zero 1,
+    have k3: 1 + 0 < p, from eq.subst k2 k1,
+    from nat.lt_sub_left_of_add_lt k3,},
+    have j5: p = 1, from (nat.mul_right_inj j4).1 j3,
+    have j6: prime 1, from eq.subst j5 hp,
+    from absurd j6 not_prime_one,},
+    have h10: order_of a (p^2) ≠ p*(p-1), from eq.subst h8.symm h9.symm,
+    from false.elim (h10 h5),},-/
+    {
+        intro h,
+        have h1: phi (p^2) = p^1*(p-1), from power_p_phi p 2 hp,
+        have h2: order_of a (p^2) ∣ phi (p^2), from order_of_div_phi_n a (p^2),
+        have h3: order_of a (p^2) ∣ p^1*(p-1), from eq.subst h1 h2,
+        have h4: a ^ order_of a (p^2) ≡ 1 [MOD (p^2)], from pow_order_of_eq_one a (p^2),
+        have h5: a ^ order_of a p ≡ 1 [MOD p], from sorry,
+        sorry,
+    }
 end 
 
 -- Let p be a prime, and let a be an integer not divisible by p. 
