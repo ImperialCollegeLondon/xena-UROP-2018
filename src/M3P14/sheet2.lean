@@ -16,24 +16,33 @@ open nat
 --  449 and 617 are both prime).
 -- TODO: how to prove it using quadratic reciprocity?
 
-lemma LQR_1 {p q : ℕ} (hp : (prime p ∧ p ≠ 2)) (hq : (prime q ∧ q ≠ 2)) : (legendre_sym p hq) = (legendre_sym q hp) * (-1)^(((p-1)/2)*((q-1)/2)):= sorry 
 
-
-lemma aux2 (oddprime_449 : (prime 449 ∧ 449 ≠ 2)) : legendre_sym 3 oddprime_449 = -1 :=
+theorem ls_3_449 (oddprime_449 : (prime 449 ∧ 449 ≠ 2)) : legendre_sym 3 oddprime_449 = -1 :=
 begin
-have oddprime_3 : prime 3 ∧ 3 ≠ 2, sorry,
-
-have b1: (legendre_sym 3 oddprime_449) = (legendre_sym 449 oddprime_3) * (-1)^(((3-1)/2)*((449-1)/2)), from LQR_1 oddprime_3 oddprime_449,
-have b2: (legendre_sym 3 oddprime_449) = (legendre_sym 449 oddprime_3) * 1, from eq.subst (show (-1:ℤ)^(((3-1)/2)*((449-1)/2)) = 1, by norm_num) b1,
-rw b2,
-simp, 
-rw legendre_sym_refl 449 2 oddprime_3 (show 449 ≡ 2 [MOD 3], by norm_num),
-sorry
+    have oddprime_3 : prime 3 ∧ 3 ≠ 2, sorry,
+    have b2: (legendre_sym 3 oddprime_449) = (legendre_sym 449 oddprime_3) * 1, from eq.subst (show (-1:ℤ)^(((3-1)/2)*((449-1)/2)) = 1, by norm_num) (law_of_quadratic_reciprocity' oddprime_3 oddprime_449),
+    rw b2,
+    simp, 
+    rw legendre_sym_refl 449 2 oddprime_3, 
+    rw legendre_sym_supplementary_laws,
+    norm_num,
+    unfold int.modeq,
+    norm_num,
 end
 
+theorem ls_5_449 (H : prime 449 ∧ 449 ≠ 2) : legendre_sym 5 H = 1 := 
+begin 
+    have prime_5 : prime 5 ∧ 5 ≠ 2, sorry,
+    rw (show (legendre_sym 5 H) = (legendre_sym 449 prime_5) * (-1)^(((5-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity' _ _),
+    norm_num,
+    have : 449 ≡ -1 [ZMOD 5], by norm_num [int.modeq],
+    rw [legendre_sym_refl _ _ prime_5 this, legendre_neg_one],
+    norm_num,
+end
 
-theorem q1 (H1 : prime 449) (H2 : prime 617) : ((legendre_sym 210 H1) = (-1 : ℤ)) ∧ ((legendre_sym 605 H2) = (-1: ℤ) ) :=
+theorem ls_7_449 (H : prime 449 ∧ 449 ≠ 2) : legendre_sym 7 H = 1 := 
 begin
+<<<<<<< HEAD
 split,
 have h1: 210 = 2*105, refl,
 have h2: legendre_sym 210 H1 = legendre_sym 210 H1, refl, 
@@ -103,98 +112,48 @@ unfold quadratic_res,
 existsi 2,
 exact h47,
 end,
+=======
+   have prime_7 : prime 7 ∧ 7 ≠ 2, sorry,
+    rw (show (legendre_sym 7 H) = (legendre_sym 449 prime_7) * (-1)^(((7-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity' _ _),
+    norm_num,
+    have : 449 ≡ 1 [ZMOD 7], by unfold int.modeq; norm_num, 
+    rw [legendre_sym_refl _ _ prime_7 this, legendre_one],
+end
+>>>>>>> 486b1c066a05114d8a1a24deb3bfbcc7aa8b78f3
 
-have h49: legendre_sym 4 prime_5 = 1,
+theorem ls_5_617 (H : prime 617 ∧ 617 ≠ 2) : legendre_sym 5 H = -1 := 
 begin
-unfold legendre_sym,
-split_ifs,
-refl,
-exfalso,
-apply h_1,
-split,
-exact this,
-exact dec_trivial,
-end,
+    have prime_5 : prime 5 ∧ 5 ≠ 2, sorry,
+    rw (show (legendre_sym 5 H) = (legendre_sym 617 prime_5) * (-1)^(((5-1)/2)*((617-1)/2)), from law_of_quadratic_reciprocity' _ _),
+    norm_num,
+    have : 617 ≡ 2 [ZMOD 5], by unfold int.modeq; norm_num, 
+    rw [legendre_sym_refl _ _ prime_5 this, legendre_sym_supplementary_laws],
+    norm_num,
+end
 
-have g27: (legendre_sym 5 H1)*(legendre_sym 449 prime_5)= 1, from eq.trans h34 h35,
-have g28: (legendre_sym 5 H1)*(legendre_sym 4 prime_5) =1, from eq.subst h42 g27,
-have g29: (legendre_sym 5 H1)*1 = 1, sorry,
-have g30: 1*(legendre_sym 5 H1) = legendre_sym 5 H1, from one_mul (legendre_sym 5 H1),
-have g31: (legendre_sym 5 H1)*1 = 1*(legendre_sym 5 H1), from mul_comm (legendre_sym 5 H1) 1,  
-have g32: (legendre_sym 5 H1)*1=(legendre_sym 5 H1), from eq.trans g31 g30,
-have g33: (legendre_sym 5 H1)=(legendre_sym 5 H1)*1, from eq.symm g32,
-have a3: legendre_sym 5 H1 = 1, from eq.trans g33 g29,
-
------
-
-have prime_7 : prime 7, sorry,
-
-have h50: (legendre_sym 7 H1)*(legendre_sym 449 prime_7) = (-1: ℤ)^(((7-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity prime_7 H1,
-have h51: (-1: ℤ)^(((7-1)/2)*((449)-1)/2) = 1, by norm_num,
-
-have h52: 449-1 = 7*64, by norm_num,
-have h53: 7 ∣ 7*64, from dvd_mul_right 7 64,
-have h54: 7 ∣ (449-1), from eq.subst h52 h53,
-have h55: (7:ℤ) ∣ (449-1), sorry,
-have h56: 1 ≡ 449 [MOD 7], from nat.modeq.modeq_of_dvd h55,
-have h57: 449 ≡ 1 [MOD 7], from nat.modeq.symm h56,
-have h58: legendre_sym 449 prime_7 = legendre_sym 1 prime_7, from legendre_sym_refl 449 1 prime_7 h57,
-have h59: 1-1^2=7*0, by norm_num,
-have h60: 7 ∣ 7*0, from dvd_mul_right 7 0,
-have h61: 7 ∣ 1-1^2, from eq.subst h59 h60,
-have h62: (7:ℤ) ∣ 1-1^2, sorry,
-have h63: 1 ≡ 1^2 [MOD 7], from nat.modeq.modeq_of_dvd h62,
-
-have : quadratic_res 1 7, 
-begin 
-unfold quadratic_res,
-existsi 1,
-exact h63,
-end,
-
-have h64: legendre_sym 1 prime_7 = 1,
+theorem ls_11_617 (H : prime 617 ∧ 617 ≠ 2) : legendre_sym 11 H = 1 := 
 begin
-unfold legendre_sym,
-split_ifs,
-refl,
-exfalso,
-apply h_1,
-split,
-exact this,
-exact dec_trivial,
-end,
+    have prime_11 : prime 11 ∧ 11 ≠ 2, sorry,
+    rw (show (legendre_sym 11 H) = (legendre_sym 617 prime_11) * (-1)^(((11-1)/2)*((617-1)/2)), from law_of_quadratic_reciprocity' _ _),
+    norm_num,
+    have : 617 ≡ 1 [ZMOD 11], by unfold int.modeq; norm_num, 
+    rw [legendre_sym_refl _ _ prime_11 this, legendre_one],
+end
 
-have j27: (legendre_sym 7 H1)*(legendre_sym 449 prime_7) = 1, from eq.trans h50 h51,
-have j28: (legendre_sym 7 H1)*(legendre_sym 1 prime_7) =1, from eq.subst h58 j27,
-have j29: (legendre_sym 7 H1)*1 = 1, sorry,
-have j30: 1*(legendre_sym 7 H1) = legendre_sym 7 H1, from one_mul (legendre_sym 7 H1),
-have j31: (legendre_sym 7 H1)*1 = 1*(legendre_sym 7 H1), from mul_comm (legendre_sym 7 H1) 1,  
-have j32: (legendre_sym 7 H1)*1 = (legendre_sym 7 H1), from eq.trans j31 j30,
-have j33: (legendre_sym 7 H1) = (legendre_sym 7 H1)*1, from eq.symm j32,
-have a4: legendre_sym 7 H1 = 1, from eq.trans j33 j29,
-
-
-exact calc 
- legendre_sym 210 H1 = (legendre_sym 2 H1)*(legendre_sym 105 H1) : by rw eq.trans h3 h4
-            ... = (legendre_sym 2 H1)*(legendre_sym (3*35) H1) : by rw h7 
-            ... = (legendre_sym 2 H1)*((legendre_sym 3 H1)*(legendre_sym 35 H1)) : by rw legendre_sym_mul 3 35 H1
-            ... = (legendre_sym 2 H1)*(legendre_sym 3 H1)*(legendre_sym 35 H1) : by rw mul_assoc 
-            ... = (legendre_sym 2 H1)*(legendre_sym 3 H1)*(legendre_sym (5*7) H1) : by rw h11
-            ... = (legendre_sym 2 H1)*(legendre_sym 3 H1)*((legendre_sym 5 H1)*(legendre_sym 7 H1)) : by rw h12
-            ... = (legendre_sym 2 H1)*(legendre_sym 3 H1)*(legendre_sym 5 H1)*(legendre_sym 7 H1) : by rw ←mul_assoc
-            ... = 1*(legendre_sym 3 H1)*(legendre_sym 5 H1)*(legendre_sym 7 H1) : by rw a1
-            ... = 1*(-1)*(legendre_sym 5 H1)*(legendre_sym 7 H1) : by rw a2
-            ... = 1*(-1)*1*(legendre_sym 7 H1) : by rw a3
-            ... = 1*(-1)*1*1 : by rw a4
-            ... = -1 : by norm_num,
-
-
-
-sorry,
-
---have (legendre_sym 2 H1)*(legendre_sym 105 H1), from legendre_sym_mul 2 105 H1,
+theorem q1 (H1 : prime 449 ∧ 449 ≠ 2) (H2 : prime 617 ∧ 617 ≠ 2) : ((legendre_sym 210 H1) = (-1 : ℤ)) ∧ ((legendre_sym 605 H2) = (-1: ℤ) ) :=
+begin
+    split,
+    have h : (-1 : ℤ)^((449^2 -1)/8) = 1, by norm_num,
+    have h13: legendre_sym 2 H1 = (-1:ℤ)^((449^2-1)/8), from legendre_sym_supplementary_laws H1, 
+    have a1: legendre_sym 2 H1 = 1, from eq.trans h13 h,  
+    have eq_210 : (210 : ℤ) = (2 : ℤ)  * (3 : ℤ) * (5 : ℤ) * (7 : ℤ), by norm_num,
+    rw [eq_210, legendre_sym_mul, legendre_sym_mul, legendre_sym_mul, ls_7_449 H1, ls_5_449 H1, ls_3_449 H1, a1],
+    norm_num,
+    have eq_605 : (605 : ℤ) = (5 : ℤ)  * (11 : ℤ) * (11 : ℤ), by norm_num,
+    rw [eq_605, legendre_sym_mul, legendre_sym_mul,ls_5_617, ls_11_617],
+    norm_num,
 end 
- 
+
 -- Find all 6 primitive roots modulo 19.
 theorem q2a : ∃ A : set ℕ, ∀ x : ℕ, primitive_root x 19 ↔ x ∈ A := sorry
 

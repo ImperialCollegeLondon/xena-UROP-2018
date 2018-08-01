@@ -192,6 +192,27 @@ apply unique_of_exists_unique (six19 h),
 assumption
 end
 
+theorem six22 {x : point} {A : set point} : line A → x ∈ A → ∃ y, x ≠ y ∧ A = l x y :=
+begin
+intros h h1,
+let h2 := h,
+cases h with u hu,
+cases hu with v hv,
+cases em (u = x),
+  rw h at *,
+  constructor,
+  exact hv,
+constructor,
+split,
+  exact ne.symm h,
+have : u ∈ A,
+  rw hv.2,
+  exact (six17 hv.1).1,
+exact six18 h2 (ne.symm h) h1 this
+end
+
+def is (x : point) (A B : set point) : Prop := line A ∧ line B ∧ A ≠ B ∧ x ∈ A ∧ x ∈ B
+
 theorem six23 {a b c : point} : col a b c ↔ ∃ (L : set point), line L ∧ a ∈ L ∧ b ∈ L ∧ c ∈ L :=
 begin
 apply iff.intro,
@@ -286,7 +307,7 @@ end
 
 def M (a m b : point) : Prop := B a m b ∧ eqd m a m b 
 
-theorem seven2 {a b m : point} : M a m b → M b m a :=
+theorem M.symm {a b m : point} : M a m b → M b m a :=
 begin
 intro h,
 split,

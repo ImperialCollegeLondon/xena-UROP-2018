@@ -12,7 +12,7 @@ import tactic.ring
 
 open nat 
 
-definition quadratic_res (a n : ℤ) := ∃ x: ℕ, a ≡ x^2 [ZMOD n]
+definition quadratic_res (a n : ℤ) := ∃ x : ℕ, a ≡ x^2 [ZMOD n]
 
 attribute [instance, priority 0] classical.prop_decidable
 noncomputable definition legendre_sym {p : ℕ} (a : ℤ) (H1 : prime p ∧ p ≠ 2) : ℤ := 
@@ -22,30 +22,72 @@ else 0
 
 theorem law_of_quadratic_reciprocity {p q : ℕ} (hp : prime p ∧ p ≠ 2) (hq : prime q ∧ q ≠ 2) : (legendre_sym p hq)*(legendre_sym q hp) = (-1)^(((p-1)/2)*((q-1)/2)) := sorry 
 
-theorem legendre_sym_mul {p : ℕ} (a b : ℕ) (hp : prime p ∧ p ≠ 2) : legendre_sym (a*b) hp = (legendre_sym a hp)*(legendre_sym b hp) := sorry
+theorem law_of_quadratic_reciprocity' {p q : ℕ} (hp : prime p ∧ p ≠ 2) (hq : prime q ∧ q ≠ 2) : (legendre_sym p hq) = (legendre_sym q hp) * (-1)^(((p-1)/2)*((q-1)/2)):= sorry 
 
-theorem legendre_sym_refl {p : ℕ} (a b : ℕ) (hp : prime p ∧ p ≠ 2) :  (a ≡ b [MOD p] → legendre_sym a hp = legendre_sym b hp) :=sorry
+theorem legendre_sym_mul {p : ℕ} (a b : ℤ) (hp : prime p ∧ p ≠ 2) : legendre_sym (a*b) hp = (legendre_sym a hp)*(legendre_sym b hp) := sorry
+
+theorem legendre_sym_refl {p : ℕ} (a b : ℤ) (hp : prime p ∧ p ≠ 2) :  (a ≡ b [ZMOD p] → legendre_sym a hp = legendre_sym b hp) := sorry
 
 theorem legendre_sym_supplementary_laws {p : ℕ} (hp : prime p ∧ p ≠ 2) : legendre_sym 2 hp = (-1:ℤ)^((p^2-1)/8) := sorry 
 
-lemma pow_two_eq_mul_self (x : ℕ) : x^2 = x * x := begin show 1*x*x=x*x,rw one_mul end
+theorem legendre_one {p : ℕ} (hp : prime p ∧ p ≠ 2) : legendre_sym 1 hp = 1 := sorry
+theorem legendre_neg_one {p : ℕ} (hp : prime p ∧ p ≠ 2) : legendre_sym (-1) hp = (-1)^((p-1)/2) := sorry
 
-lemma factorization_x_square_minus_one(x:ℕ) : x^2-1 = (x+1)*(x-1):= begin
-rw pow_two_eq_mul_self,
-cases x with t,
-norm_num,
-show (t+1) * (t+1) - 1 = (succ t + 1) * t,
-ring,
+theorem pow_two_eq_mul_self (x : ℕ) : x^2 = x * x := begin show 1*x*x=x*x,rw one_mul end
+
+theorem factorization_x_square_minus_one(x : ℕ) : x^2-1 = (x+1)*(x-1):= begin
+  rw pow_two_eq_mul_self,
+  cases x with t,
+  norm_num,
+  show (t+1) * (t+1) - 1 = (succ t + 1) * t,
+  ring,
 end
 
-lemma euler_c_1 (a p : ℕ) (hp : prime p ∧ p ≠ 2) (ha : ¬ p ∣ a) : quadratic_res a p → a^((p-1)/2)-1 ≡ 0 [ZMOD p] := 
+@[simp] theorem int.cast_pow {α : Type*} [ring α] (a : ℤ) (n : ℕ): ((a ^ n : ℤ) : α) = a ^ n :=
+by induction n; simp [*, _root_.pow_succ]
+
+
+theorem euler_c_1 (a p : ℕ) (hp : prime p ∧ p ≠ 2) (ha : ¬ p ∣ a) : quadratic_res a p → a^((p-1)/2)-1 ≡ 0 [ZMOD p] := 
 begin
 intro Hqr,
 cases Hqr with x hx,
+haveI : prime p := hp.1,
+rw ← zmod.eq_iff_modeq_int,
+rw ← zmod.eq_iff_modeq_int at hx,
+have q: 2 ∣ (p-1):=
+begin
+  cases nat.mod_two_eq_zero_or_one p,
+  have : p % 2 ≡ p [MOD 2], from nat.modeq.mod_modeq p 2,
+  have : 0 ≡ p [MOD 2], from eq.subst h this,
+  have : p ≡ 0 [MOD 2], from modeq.symm this,
+  rw ← nat.modeq.modeq_zero_iff,
+  exfalso,
+  have h1 := hp.1.2 2 (nat.modeq.modeq_zero_iff.1 this),
+  cases h1 with h3 h4,
+  have h2: 2 ≠ 1, by norm_num,
+  exact h2 h3,
+  exact hp.2.symm h4,
+  rw ← nat.mod_add_div p 2,
+  rw h, rw nat.add_sub_cancel_left,
+  simp,
 
+  -- from false.elim (h2 h3), 
+  -- from false.elim (hp.2 h4.symm),
+  -- have h5: p % 2 ≡ p [MOD 2], from nat.modeq.mod_modeq p 2,
+  -- have h6: 1 ≡ p [MOD 2], from  
+  --have : 1 ≡ p [MOD 2], from eq.subst h (nat.modeq.mod_modeq p 2),
+  
 
-
-
+  --have p ≡ 0 [MOD 2]
+end,
+rw int.cast_sub, rw int.cast_pow, rw hx, rw int.cast_pow, rw ← pow_mul, rw nat.mul_div_cancel' q,
+--have hx_eq: ↑a = ↑(x^2) , from ← zmod.eq_iff_modeq_int,
+--↑a Mod p = ↑x^2 MOD p
+--have ↑a ^ ((p - 1) / 2) - 1 = x ^ (p-1), from 
+--{
+--  calc 
+--  ↑a ^ ((p - 1) / 2) - 1 = (x ^ 2) ^ ((p - 1) / 2) - 1  : by rw eq.subst 
+--},
 
 end
 
@@ -71,7 +113,7 @@ end
 
 theorem minus_one_quad_res_of_p {p : ℕ} (hp : prime p ∧ p ≠ 2) : (p ≡ 1 [MOD 4] ↔ legendre_sym (-1 : ℤ) hp = 1) ∧ (p ≡ 3 [MOD 4] ↔ legendre_sym (-1 : ℤ) hp = (-1 : ℤ)) := sorry
 
-lemma quad_res_two (n : ℕ) : n % 8 = 1 ∨ n % 8 = 7 → ((n ^ 2 - 1) / 8 % 2 = 0) :=
+theorem quad_res_two (n : ℕ) : n % 8 = 1 ∨ n % 8 = 7 → ((n ^ 2 - 1) / 8 % 2 = 0) :=
 begin
   intro H,
   have H2 := nat.mod_add_div n 8,
@@ -104,7 +146,7 @@ begin
   }
 end 
 
-lemma quad_nonres_two (n : ℕ) : n % 8 = 3 ∨ n % 8 = 5 → ((n ^ 2 - 1) / 8 % 2 = 1) :=
+theorem quad_nonres_two (n : ℕ) : n % 8 = 3 ∨ n % 8 = 5 → ((n ^ 2 - 1) / 8 % 2 = 1) :=
 begin
   intro H,
   have H2 := nat.mod_add_div n 8,
