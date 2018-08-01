@@ -232,7 +232,7 @@ class norm_space (V : Type u) extends vector_space ℂ V :=
 (norm_pos : ∀ (x : V), N(x) ≥ 0)
 (norm_sub_add : ∀ (x y : V), N(x + y) ≤ N(x) + N(y))
 (norm_abs_hom : ∀ (x : V), ∀ (a : ℂ), N(a • x) = abs(a)*N(x))
-(norm_pos_def : ∀ (x : V), N(x) = 0 ↔ x = 0) 
+(norm_pos_def : ∀ (x : V), N(x) = (0 : ℝ) ↔ x = (0 : V)) 
 
 open norm_space
 
