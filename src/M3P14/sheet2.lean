@@ -101,8 +101,8 @@ primitive_root a (p^2) h2 ↔ ¬(a^(p-1) ≡ 1 [MOD (p^2)]) :=
         intro j1, unfold primitive_root at hq j1,
         have j2: phi (p^2) = p^1*(p-1), from power_p_phi p 2 hp,
         have j3: p^1*(p-1) = p*(p-1), by simp,
-        have j4: phi (p^2) = p*(p-1), from eq.subst j2.symm j3,
-        have j5: order_of a (p^2) h2 = p*(p-1), from eq.subst j1.symm j4,
+        have j4: phi (p^2) = p*(p-1), rw [j2,j3],
+        have j5: order_of a (p^2) h2 = p*(p-1), rw [j1,j4],
         assume j6: a^(p-1) ≡ 1 [MOD (p^2)],
         have j7: order_of a (p^2) h2 ∣ (p-1), from order_div a (p^2) (p-1) h2 j6,
         have j8: p*(p-1) ∣ (p-1), from eq.subst j5 j7,
@@ -112,12 +112,24 @@ primitive_root a (p^2) h2 ↔ ¬(a^(p-1) ≡ 1 [MOD (p^2)]) :=
     },
 
     {
-        intro j1, unfold primitive_root at hq, unfold primitive_root,
+        unfold prime at hp, unfold primitive_root at hq, unfold primitive_root,
+        intro j1,
         have j2: phi (p^2) = p^1*(p-1), from power_p_phi p 2 hp,
-        have j3: order_of a (p^2) h2 ∣ phi (p^2), from order_div_phi_n a (p^2) h2,
-        have j4: order_of a (p^2) h2 ∣ p^1*(p-1), from eq.subst j2 j3,
-        have j5: a ^ order_of a (p^2) h2 ≡ 1 [MOD (p^2)], from pow_order_eq_one a (p^2) h2,
-        have j6: a ^ order_of a p h1 ≡ 1 [MOD p], from sorry,
+        have j3: p^1*(p-1) = p*(p-1), by simp,
+        have j4: phi (p^2) = p*(p-1), from eq.subst j2.symm j3,
+        have j5: order_of a (p^2) h2 ∣ phi (p^2), from order_div_phi_n a (p^2) h2,
+        have j6: order_of a (p^2) h2 ∣ p*(p-1), from eq.subst j4 j5, 
+        have j7: phi (p^1) = p^0*(p-1), from power_p_phi p 1 hp,
+        have j8: p^0 = 1, from nat.pow_zero p,
+        have j9: phi (p^1) = 1*(p-1), rw [j7,j8], 
+        have j10: (p^1) = p, from pow_one p,
+        have j11: phi p = 1*(p-1), rw [←j9,j10],
+        have j12: 1*(p-1) = p-1, from one_mul (p-1),
+        have j13: phi p = p-1, rw [j11,j12],
+        have j14: order_of a p h1 = p-1, rw [hq,j13],
+        have j15: a ^ order_of a (p^2) h2 ≡ 1 [MOD (p^2)], from pow_order_eq_one a (p^2) h2,
+        
+        /-have j8: a ^ order_of a p h1 ≡ 1 [MOD p], from sorry,-/
         sorry,
     }
 end 
@@ -142,7 +154,7 @@ theorem q5 (p x : ℕ) (hp: prime p) (hq: p ≠ 7) : x^2 ≡ 7 [MOD p] ↔ (p �
 
 -- Suppose a is a primitive root modulo n. Show that a^d is also a primitive root modulo n for all d such that (d, Φ(n)) = 1.
 -- [Hint: show that there exists k such that (a^d)^k is equal to a.]
-theorem q7 {a n : ℕ} (hp : primitive_root a n) : ∀ d : ℕ, gcd d (phi n) = 1 → primitive_root (a^d) n := sorry 
+theorem q7 {a n : ℕ} (h1 : coprime a n) (hp : primitive_root a n h1) : ∀ d : ℕ, gcd d (phi n) = 1 → primitive_root (a^d) n h2 := sorry 
 
 -- Show that if p is a prime congruent to ±1 mod 24 then none of 2, 3, 4, 6is a primitive root modulo p.
 -- [Hint: show that 2 and 3 are squares mod p.]
