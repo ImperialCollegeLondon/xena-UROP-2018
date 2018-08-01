@@ -15,15 +15,13 @@ open nat
 --  449 and 617 are both prime).
 -- TODO: how to prove it using quadratic reciprocity?
 
-
 theorem ls_3_449 (oddprime_449 : (prime 449 ∧ 449 ≠ 2)) : legendre_sym 3 oddprime_449 = -1 :=
 begin
-    have oddprime_3 : prime 3 ∧ 3 ≠ 2, sorry,
+    have oddprime_3 : prime 3 ∧ 3 ≠ 2, by norm_num,
     have b2: (legendre_sym 3 oddprime_449) = (legendre_sym 449 oddprime_3) * 1, from eq.subst (show (-1:ℤ)^(((3-1)/2)*((449-1)/2)) = 1, by norm_num) (law_of_quadratic_reciprocity' oddprime_3 oddprime_449),
     rw b2,
     simp, 
-    rw legendre_sym_refl 449 2 oddprime_3, 
-    rw legendre_sym_supplementary_laws,
+    rw [legendre_sym_refl 449 2 oddprime_3, legendre_sym_supplementary_laws],
     norm_num,
     unfold int.modeq,
     norm_num,
@@ -31,7 +29,7 @@ end
 
 theorem ls_5_449 (H : prime 449 ∧ 449 ≠ 2) : legendre_sym 5 H = 1 := 
 begin 
-    have prime_5 : prime 5 ∧ 5 ≠ 2, sorry,
+    have prime_5 : prime 5 ∧ 5 ≠ 2, by norm_num,
     rw (show (legendre_sym 5 H) = (legendre_sym 449 prime_5) * (-1)^(((5-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity' _ _),
     norm_num,
     have : 449 ≡ -1 [ZMOD 5], by norm_num [int.modeq],
@@ -41,7 +39,7 @@ end
 
 theorem ls_7_449 (H : prime 449 ∧ 449 ≠ 2) : legendre_sym 7 H = 1 := 
 begin
-   have prime_7 : prime 7 ∧ 7 ≠ 2, sorry,
+   have prime_7 : prime 7 ∧ 7 ≠ 2, by norm_num,
     rw (show (legendre_sym 7 H) = (legendre_sym 449 prime_7) * (-1)^(((7-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity' _ _),
     norm_num,
     have : 449 ≡ 1 [ZMOD 7], by unfold int.modeq; norm_num, 
@@ -50,7 +48,7 @@ end
 
 theorem ls_5_617 (H : prime 617 ∧ 617 ≠ 2) : legendre_sym 5 H = -1 := 
 begin
-    have prime_5 : prime 5 ∧ 5 ≠ 2, sorry,
+    have prime_5 : prime 5 ∧ 5 ≠ 2, by norm_num,
     rw (show (legendre_sym 5 H) = (legendre_sym 617 prime_5) * (-1)^(((5-1)/2)*((617-1)/2)), from law_of_quadratic_reciprocity' _ _),
     norm_num,
     have : 617 ≡ 2 [ZMOD 5], by unfold int.modeq; norm_num, 
@@ -60,7 +58,7 @@ end
 
 theorem ls_11_617 (H : prime 617 ∧ 617 ≠ 2) : legendre_sym 11 H = 1 := 
 begin
-    have prime_11 : prime 11 ∧ 11 ≠ 2, sorry,
+    have prime_11 : prime 11 ∧ 11 ≠ 2, by norm_num,
     rw (show (legendre_sym 11 H) = (legendre_sym 617 prime_11) * (-1)^(((11-1)/2)*((617-1)/2)), from law_of_quadratic_reciprocity' _ _),
     norm_num,
     have : 617 ≡ 1 [ZMOD 11], by unfold int.modeq; norm_num, 

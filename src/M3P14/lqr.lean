@@ -31,6 +31,7 @@ theorem legendre_sym_refl {p : ℕ} (a b : ℤ) (hp : prime p ∧ p ≠ 2) :  (a
 theorem legendre_sym_supplementary_laws {p : ℕ} (hp : prime p ∧ p ≠ 2) : legendre_sym 2 hp = (-1:ℤ)^((p^2-1)/8) := sorry 
 
 theorem legendre_one {p : ℕ} (hp : prime p ∧ p ≠ 2) : legendre_sym 1 hp = 1 := sorry
+
 theorem legendre_neg_one {p : ℕ} (hp : prime p ∧ p ≠ 2) : legendre_sym (-1) hp = (-1)^((p-1)/2) := sorry
 
 theorem pow_two_eq_mul_self (x : ℕ) : x^2 = x * x := begin show 1*x*x=x*x,rw one_mul end
