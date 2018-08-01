@@ -11,31 +11,28 @@ class banach_space (V : Type) extends norm_space V: Type :=
 variables (v : Type) [norm_space V]
 def norm : V → ℝ := norm_space.N
 
+#check @eq.trans 
 -- Incorrect, working on it atm
-lemma banach_is_metric [h : banach_space V] : metric_space V :=
+noncomputable lemma banach_is_metric [h : banach_space V] : metric_space V :=
 {
 dist := by {
     intros x y,
     have n := h.N,
     exact n (x - y) },
 dist_self := by { 
-    intro x,
+    intro,
     have d := h.norm_pos_def,
     rw [sub_self],
-    apply (d 0).mpr,
-    exact eq.refl 0 },
-eq_of_dist_eq_zero :=
-    begin
-    dunfold herm_dist,
-    dunfold herm_norm,
-    intros x y H,
-    rw sqrt_eq_zero (is_pos_def (x - y)).left at H,
-    rw ←zero_re at H,
-    have H1 : (x - y) ∘ (x - y) = 0,
-        exact im_re_eq_imp_eq H (in_self_real (x - y)),
-    rw (is_pos_def (x - y)).right at H1,
-    exact sub_eq_zero.mp H1,
-    end,
+    apply (d (0 : V)).mpr,
+    exact eq.refl (0 : V) },
+eq_of_dist_eq_zero := by {
+    intros x y hxy,
+    have d := h.norm_pos_def,
+    replace d := (d (x - y)).mp hxy,
+    replace d := congr_arg (+ y) d,
+    simp at d,
+    have a := add_zero y,
+    exact eq.trans d a },
 dist_comm := 
     begin
     intros,
