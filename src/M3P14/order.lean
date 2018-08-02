@@ -8,7 +8,7 @@ def order_of (a n : ℕ) : ℕ := if coprime a n then nat.find (exists_pow_eq_on
 
 theorem order_div (a n d : ℕ) (h : coprime a n) : a^d ≡ 1 [MOD n] → order_of a n∣ d := sorry
 
-theorem order_div_phi_n (a n : ℕ) (h : coprime a n) : order_of a n∣ phi n := sorry
+theorem order_div_phi_n (a n : ℕ) (h : coprime a n) : order_of a n ∣ phi n := sorry
 
 theorem pow_order_eq_one (a n : ℕ) (h: coprime a n) : a ^ (order_of a n) ≡ 1 [MOD n] := sorry
 

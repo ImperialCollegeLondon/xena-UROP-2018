@@ -93,8 +93,8 @@ theorem q2b {a n : ℕ} (h_odd : gcd 2 n = 1) (hp : primitive_root a n) : (gcd 2
 -- Show that a is also a primitive root mod p² if, and only if, a^p−1 is not congruent to 1 mod p².
 -- [HINT: what is the order of a mod p? What does this say about the order of a mod p²?]
 --set_option pp.proofs true
-theorem q3 {a p : ℕ} (hp : prime p) (h1: coprime a p) (h2 : coprime a (p^2)) (hq : primitive_root a p h1) :
-primitive_root a (p^2) h2 ↔ ¬(a^(p-1) ≡ 1 [MOD (p^2)]) :=
+theorem q3 {a p : ℕ} (hp : prime p) (h1: coprime a p) (h2 : coprime a (p^2)) (hq : primitive_root a p) :
+primitive_root a (p^2) ↔ ¬(a^(p-1) ≡ 1 [MOD (p^2)]) :=
     begin
     apply iff.intro,
     {
@@ -102,9 +102,9 @@ primitive_root a (p^2) h2 ↔ ¬(a^(p-1) ≡ 1 [MOD (p^2)]) :=
         have j2: phi (p^2) = p^1*(p-1), from power_p_phi p 2 hp,
         have j3: p^1*(p-1) = p*(p-1), by simp,
         have j4: phi (p^2) = p*(p-1), rw [j2,j3],
-        have j5: order_of a (p^2) h2 = p*(p-1), rw [j1,j4],
+        have j5: order_of a (p^2) = p*(p-1), rw [j1.2,j4],
         assume j6: a^(p-1) ≡ 1 [MOD (p^2)],
-        have j7: order_of a (p^2) h2 ∣ (p-1), from order_div a (p^2) (p-1) h2 j6,
+        have j7: order_of a (p^2) ∣ (p-1), from order_div a (p^2) (p-1) h2 j6,
         have j8: p*(p-1) ∣ (p-1), from eq.subst j5 j7,
         have j9: ¬ p*(p-1) ∣ (p-1), from mt (le_of_dvd (nat.sub_pos_of_lt hp.gt_one)) 
           (not_le_of_gt ((lt_mul_iff_one_lt_left (nat.sub_pos_of_lt hp.gt_one)).2 hp.gt_one)),
@@ -117,8 +117,8 @@ primitive_root a (p^2) h2 ↔ ¬(a^(p-1) ≡ 1 [MOD (p^2)]) :=
         have j2: phi (p^2) = p^1*(p-1), from power_p_phi p 2 hp,
         have j3: p^1*(p-1) = p*(p-1), by simp,
         have j4: phi (p^2) = p*(p-1), from eq.subst j2.symm j3,
-        have j5: order_of a (p^2) h2 ∣ phi (p^2), from order_div_phi_n a (p^2) h2,
-        have j6: order_of a (p^2) h2 ∣ p*(p-1), from eq.subst j4 j5, 
+        have j5: order_of a (p^2) ∣ phi (p^2), from order_div_phi_n a (p^2) h2,
+        have j6: order_of a (p^2) ∣ p*(p-1), from eq.subst j4 j5, 
         have j7: phi (p^1) = p^0*(p-1), from power_p_phi p 1 hp,
         have j8: p^0 = 1, from nat.pow_zero p,
         have j9: phi (p^1) = 1*(p-1), rw [j7,j8], 
@@ -126,10 +126,14 @@ primitive_root a (p^2) h2 ↔ ¬(a^(p-1) ≡ 1 [MOD (p^2)]) :=
         have j11: phi p = 1*(p-1), rw [←j9,j10],
         have j12: 1*(p-1) = p-1, from one_mul (p-1),
         have j13: phi p = p-1, rw [j11,j12],
-        have j14: order_of a p h1 = p-1, rw [hq,j13],
-        have j15: a ^ order_of a (p^2) h2 ≡ 1 [MOD (p^2)], from pow_order_eq_one a (p^2) h2,
-        
-        /-have j8: a ^ order_of a p h1 ≡ 1 [MOD p], from sorry,-/
+        have j14: order_of a p = p-1, rw [hq.2,j13],
+        have j15: a ^ order_of a (p^2) ≡ 1 [MOD (p^2)], from pow_order_eq_one a (p^2) h2,
+        have j16: p^2 ∣ a ^ order_of a (p^2) - 1, from sorry,
+        have j17: p ∣ a ^ order_of a (p^2) - 1, from sorry,
+        have j18: a ^ order_of a (p^2) ≡ 1 [MOD p], from sorry,
+        have j19: order_of a p ∣ order_of a (p^2), from sorry,
+        have j20: p-1 ∣ order_of a (p^2), from eq.subst j14 j19,
+
         sorry,
     }
 end 
