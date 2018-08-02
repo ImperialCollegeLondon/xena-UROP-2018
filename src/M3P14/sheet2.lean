@@ -131,7 +131,7 @@ primitive_root a (p^2) ↔ ¬(a^(p-1) ≡ 1 [MOD (p^2)]) :=
         have j16: p^2 ∣ a ^ order_of a (p^2) - 1, from sorry,
         have j17: p ∣ a ^ order_of a (p^2) - 1, from sorry,
         have j18: a ^ order_of a (p^2) ≡ 1 [MOD p], from sorry,
-        have j19: order_of a p ∣ order_of a (p^2), from sorry,
+        have j19: order_of a p ∣ order_of a (p^2), from order_div a p (order_of a (p^2)) h1 j18,
         have j20: p-1 ∣ order_of a (p^2), from eq.subst j14 j19,
 
         sorry,
@@ -158,7 +158,7 @@ theorem q5 (p x : ℕ) (hp: prime p) (hq: p ≠ 7) : x^2 ≡ 7 [MOD p] ↔ (p �
 
 -- Suppose a is a primitive root modulo n. Show that a^d is also a primitive root modulo n for all d such that (d, Φ(n)) = 1.
 -- [Hint: show that there exists k such that (a^d)^k is equal to a.]
-theorem q7 {a n : ℕ} (h1 : coprime a n) (hp : primitive_root a n h1) : ∀ d : ℕ, gcd d (phi n) = 1 → primitive_root (a^d) n h2 := sorry 
+theorem q7 {a n : ℕ} (h1 : coprime a n) (hp : primitive_root a n) : ∀ d : ℕ, gcd d (phi n) = 1 → primitive_root (a^d) n := sorry 
 
 -- Show that if p is a prime congruent to ±1 mod 24 then none of 2, 3, 4, 6is a primitive root modulo p.
 -- [Hint: show that 2 and 3 are squares mod p.]
