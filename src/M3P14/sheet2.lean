@@ -93,7 +93,7 @@ theorem q2b {a n : ℕ} (h_odd : gcd 2 n = 1) (hp : primitive_root a n) : (gcd 2
 -- Show that a is also a primitive root mod p² if, and only if, a^p−1 is not congruent to 1 mod p².
 -- [HINT: what is the order of a mod p? What does this say about the order of a mod p²?]
 --set_option pp.proofs true
-theorem q3 {a p : ℕ} (hp : prime p) (h1: coprime a p) (h2 : coprime a (p^2)) (hq : primitive_root a p) :
+theorem q3 {a p : ℕ} (hp : prime p) (hq : primitive_root a p) :
 primitive_root a (p^2) ↔ ¬(a^(p-1) ≡ 1 [MOD (p^2)]) :=
     begin
     apply iff.intro,
@@ -104,7 +104,7 @@ primitive_root a (p^2) ↔ ¬(a^(p-1) ≡ 1 [MOD (p^2)]) :=
         have j4: phi (p^2) = p*(p-1), rw [j2,j3],
         have j5: order_of a (p^2) = p*(p-1), rw [j1.2,j4],
         assume j6: a^(p-1) ≡ 1 [MOD (p^2)],
-        have j7: order_of a (p^2) ∣ (p-1), from order_div a (p^2) (p-1) h2 j6,
+        have j7: order_of a (p^2) ∣ (p-1), from order_div a (p^2) (p-1) j1.1 j6,
         have j8: p*(p-1) ∣ (p-1), from eq.subst j5 j7,
         have j9: ¬ p*(p-1) ∣ (p-1), from mt (le_of_dvd (nat.sub_pos_of_lt hp.gt_one)) 
           (not_le_of_gt ((lt_mul_iff_one_lt_left (nat.sub_pos_of_lt hp.gt_one)).2 hp.gt_one)),
@@ -158,7 +158,7 @@ theorem q5 (p x : ℕ) (hp: prime p) (hq: p ≠ 7) : x^2 ≡ 7 [MOD p] ↔ (p �
 
 -- Suppose a is a primitive root modulo n. Show that a^d is also a primitive root modulo n for all d such that (d, Φ(n)) = 1.
 -- [Hint: show that there exists k such that (a^d)^k is equal to a.]
-theorem q7 {a n : ℕ} (h1 : coprime a n) (hp : primitive_root a n) : ∀ d : ℕ, gcd d (phi n) = 1 → primitive_root (a^d) n := sorry 
+theorem q7 {a n : ℕ} (hp : primitive_root a n) : ∀ d : ℕ, gcd d (phi n) = 1 → primitive_root (a^d) n := sorry 
 
 -- Show that if p is a prime congruent to ±1 mod 24 then none of 2, 3, 4, 6is a primitive root modulo p.
 -- [Hint: show that 2 and 3 are squares mod p.]
