@@ -1,4 +1,4 @@
-import linear_algebra.basic algebra.field norm_space data.complex.basic data.real.basic analysis.metric_space analysis.topology.uniform_space
+import linear_algebra.basic algebra.field inner_product_spaces.norm_space data.complex.basic data.real.basic analysis.metric_space analysis.topology.uniform_space
 
 open vector_space field set complex real
 universes u v w
