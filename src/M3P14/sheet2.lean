@@ -24,7 +24,7 @@ begin
     rw b2,
     simp, 
     rw legendre_sym_refl 449 2 oddprime_3, 
-    rw legendre_sym_supplementary_laws,
+    rw LQR_supplementary_2,
     norm_num,
     unfold int.modeq,
     norm_num,
@@ -55,7 +55,7 @@ begin
     rw (show (legendre_sym 5 H) = (legendre_sym 617 prime_5) * (-1)^(((5-1)/2)*((617-1)/2)), from law_of_quadratic_reciprocity' _ _),
     norm_num,
     have : 617 ≡ 2 [ZMOD 5], by unfold int.modeq; norm_num, 
-    rw [legendre_sym_refl _ _ prime_5 this, legendre_sym_supplementary_laws],
+    rw [legendre_sym_refl _ _ prime_5 this, LQR_supplementary_2],
     norm_num,
 end
 
@@ -72,7 +72,7 @@ theorem q1 (H1 : prime 449 ∧ 449 ≠ 2) (H2 : prime 617 ∧ 617 ≠ 2) : ((leg
 begin
     split,
     have h : (-1 : ℤ)^((449^2 -1)/8) = 1, by norm_num,
-    have h13: legendre_sym 2 H1 = (-1:ℤ)^((449^2-1)/8), from legendre_sym_supplementary_laws H1, 
+    have h13: legendre_sym 2 H1 = (-1:ℤ)^((449^2-1)/8), from LQR_supplementary_2 H1, 
     have a1: legendre_sym 2 H1 = 1, from eq.trans h13 h,  
     have eq_210 : (210 : ℤ) = (2 : ℤ)  * (3 : ℤ) * (5 : ℤ) * (7 : ℤ), by norm_num,
     rw [eq_210, legendre_sym_mul, legendre_sym_mul, legendre_sym_mul, ls_7_449 H1, ls_5_449 H1, ls_3_449 H1, a1],
@@ -87,7 +87,21 @@ theorem q2a : ∃ A : set ℕ, ∀ x : ℕ, primitive_root x 19 ↔ x ∈ A := s
 
 -- Show that if n is odd and a is a primitive root mod n, then a is a primitive root mod 2n if a is odd, and a + n is a primitive root mod 2n if a is even. 
 -- [HINT: Φ(2n) = Φ(n) when n is odd.]
-theorem q2b {a n : ℕ} (h_odd : gcd 2 n = 1) (hp : primitive_root a n) : (gcd 2 a = 1 → primitive_root a (2*n)) ∧ (gcd 2 a = 0 → primitive_root (a + n) (2*n)) := sorry
+theorem q2b {a n : ℕ} (h_odd : gcd 2 n = 1) (hp : primitive_root a n) : (gcd 2 a = 1 → primitive_root a (2*n)) ∧ (gcd 2 a = 0 → primitive_root (a + n) (2*n)) := 
+begin
+    split,
+    have phi1 : order_of a (phi n) = n, 
+    {
+        sorry,
+    },
+    {
+        intro h,
+        sorry,
+    },
+    {   intro h,
+        sorry,
+    }
+end
 
 -- Let p be a prime and let a be a primitive root mod p. 
 -- Show that a is also a primitive root mod p² if, and only if, a^p−1 is not congruent to 1 mod p².
