@@ -108,10 +108,11 @@ lemma union_left_inter_distrib {A B C D : set α} : A = (B ∪ C) ∩ D → B �
 lemma union_right_inter_distrib {A B C D : set α} : A = (B ∪ C) ∩ D → C ∩ A = C ∩ D
 := by {intro H, rw [H,←inter_assoc, inter_eq_self_of_subset_left (subset_union_right _ _ )]}
 
--- These are simple, doing these now
-@[simp] lemma inter_union_self_left {A B : set α} : A ∩ (A ∪ B) = A := sorry
+@[simp] lemma inter_union_self_left {A B : set α} : A ∩ (A ∪ B) = A :=
+ext (assume x, iff.intro (assume h1, mem_of_mem_inter_left h1) (assume h2, mem_inter h2 (mem_union_left _ h2)))
 
-@[simp] lemma inter_union_self_right {A B : set α} : B ∩ (A ∪ B) = B := sorry
+@[simp] lemma inter_union_self_right {A B : set α} : B ∩ (A ∪ B) = B := 
+ext (assume x, iff.intro (assume h1, mem_of_mem_inter_left h1) (assume h2, mem_inter h2 (mem_union_right _ h2)))
 
 -----------------------------------------------------------------
 

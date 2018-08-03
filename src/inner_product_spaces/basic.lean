@@ -1,4 +1,4 @@
-import linear_algebra.basic algebra.field data.complex.basic data.real.basic analysis.metric_space analysis.topology.uniform_space
+import linear_algebra.basic algebra.field inner_product_spaces.norm_space data.complex.basic data.real.basic analysis.metric_space analysis.topology.uniform_space
 
 open vector_space field set complex real
 universes u v w
@@ -227,31 +227,17 @@ rw conj_re,
 ring,
 end
 
-class norm_space (V : Type u) extends vector_space ℂ V :=
-(N : V → ℝ)
-(norm_pos : ∀ (x : V), N(x) ≥ 0)
-(norm_sub_add : ∀ (x y : V), N(x + y) ≤ N(x) + N(y))
-(norm_abs_hom : ∀ (x : V), ∀ (a : ℂ), N(a • x) = abs(a)*N(x))
-(norm_pos_def : ∀ (x : V), N(x) = 0 ↔ x = 0) 
-
 open norm_space
 
-lemma norm_ne_zero_iff_ne_zero {V : Type u} [norm_space V] (x : V) :
-N(x) ≠ 0 ↔ x ≠ 0 :=
-begin
-split,
-    intros H,
-    exact (iff_false_left H).mp (norm_pos_def x), 
-
-    intros H,
-    exact (iff_false_right H).mp (norm_pos_def x),
-end
+theorem norm_parallelogram_iff_herm {W : Type v} [norm_space W] : 
+∀ (x y : W), N(x + y)^2 + N(x - y)^2 = 2*N(x)^2 + 2*N(y)^2 ↔ 
+herm_inner_product_space W := sorry
 
 noncomputable instance herm_space_is_norm_space {V : Type u} [herm_inner_product_space V] :
 norm_space V := 
 { 
 N := herm_norm, 
-norm_pos := begin intros, exact sqrt_nonneg ((x ∘ x).re), end,  
+norm_nonneg := begin intros, exact sqrt_nonneg ((x ∘ x).re), end,  
 norm_sub_add := 
     begin  
     intros,
@@ -364,15 +350,9 @@ rw mul_self_sqrt (is_pos_def x).left,
 rw re_of_real (x ∘ x) (in_self_real x),
 end
 
-def is_normalised {V : Type u} [herm_inner_product_space V] (x : V) := |x| = 1 
-
-noncomputable def normalise {V : Type u} [herm_inner_product_space V] (x : V) := ↑|x|⁻¹ • x 
-
-lemma normalise_normalises {V : Type u} [herm_inner_product_space V] (x : V) (ho : x ≠ 0) : 
-is_normalised(normalise x) :=
+lemma herm_normalise_normalises {V : Type u} [herm_inner_product_space V] (x : V) (ho : x ≠ 0) : 
+| ↑|x|⁻¹ • x| = 1 :=
 begin
-dunfold is_normalised,
-dunfold normalise,
 dunfold herm_norm,
 simp [-sqrt_inv],
 rw ←sqrt_one,
@@ -384,8 +364,8 @@ rw field.inv_mul_cancel,
     exact (ne_zero_im_zero_imp_re_ne_zero ((ne_zero_iff_inprod_ne_zero x).mpr ho) (in_self_real x)),
 end
 
-def normalise_set {V : Type u} [herm_inner_product_space V] :
-set V → set V := image(normalise)
+def herm_normalise_set {V : Type u} [herm_inner_product_space V] :
+set V → set V := image(λ x, ↑|x|⁻¹ • x)
 
 lemma normalise_set_normalises {V : Type u} [herm_inner_product_space V] 
 (A : set V) (Ho : (0 : V) ∉ A) : 
@@ -404,19 +384,51 @@ have ho : a ≠ 0,
     intros h,
     rw h at Hl,
     exact Ho Hl.left,
-exact normalise_normalises a ho,
+exact herm_normalise_normalises a ho,
 end
 
+/-
 lemma normalised_linear_indep {V : Type u} [herm_inner_product_space V] (s : set V) :
 linear_independent s → linear_independent (normalise_set s) :=
 begin
 dunfold linear_independent,
-intros H1 l H3 H4,
+intros H1 l H3 H4, 
+have H5 : ∀ (x : V), x ∉ s → x ∈ normalise_set s,
+    intros x hx,
+end
 
+#print finsupp.sum
+#print finsupp
+#print coe_fn
+
+
+lemma normalised_span_spans {V : Type u} [herm_inner_product_space V] (s : set V) : 
+span s = span (normalise_set s) :=
+begin
+rw set_eq_def,
+intros,
+dunfold span, 
+split,
+    intros H,
+    rw mem_set_of_eq at H,
+    apply exists.elim H,
+    intros v Hv,
+    
+    admit,
+
+    admit,
 end
 
 lemma normalised_basis_is_basis {V : Type u} [herm_inner_product_space V] (b : set V) :
-is_basis b →  
+is_basis b → is_basis (normalise_set b) := 
+begin
+dunfold is_basis,
+intros H,
+apply and.intro,
+    exact normalised_linear_indep b H.left,
+
+    exact (forall_congr ((set_eq_def (span b) (span (normalise_set b))).mp (normalised_span_spans b))).mp H.right,
+end
 
 theorem exists_normalised_basis {V : Type u} [herm_inner_product_space V] : 
 ∃ (b : set V), is_basis b ∧ ∀ (x : V), x ∈ b → is_normalised x :=
@@ -424,17 +436,10 @@ begin
 have H1 : ∃ (b : set V), is_basis b,
     exact exists_is_basis V,
 apply exists.elim H1,
-intros b1 Hb1,
-have H2 : ∃ (b1 : set V), ∀ (x : V), x ∈ b1 → is_normalised x,
-    exact exists.intro (normalise_set b1) (normalise_set_normalises b1 (zero_not_mem_of_linear_independent (zero_ne_one) (Hb.left))),
-apply exists.elim H2,
-intros b2 Hb2,
-apply exists.intro b2, 
-
+intros b Hb,
+exact exists.intro (normalise_set b) (and.intro (normalised_basis_is_basis b Hb) (normalise_set_normalises b (zero_not_mem_of_linear_independent (zero_ne_one ℂ) Hb.left))),
 end
-
-variables (V : Type u) [herm_inner_product_space V] (A : set V)
-#print ∉ 
+-/
 
 def is_ortho {V : Type u} [herm_inner_product_space V] (x y : V) : Prop :=
 x ∘ y = 0
@@ -610,8 +615,10 @@ noncomputable def herm_dist {V : Type u} [herm_inner_product_space V] (x y : V) 
 
 open metric_space
 
+
+/-
 noncomputable instance herm_space_is_metric_space {V : Type u} [herm_inner_product_space V] : 
-metric_space V :=
+metric_space V := norm_space_is_metric_space
 {
 dist := herm_dist, 
 dist_self := 
@@ -651,5 +658,11 @@ dist_triangle :=
     exact norm_sub_add (x - y) (y - z),
     end,
 }
+-/
 
-class hilbert_space (V : Type u) extends herm_inner_product_space V, complete_space V
+class Hilbert_space (V : Type u) extends herm_inner_product_space V, uniform_space.core V :=
+(is_open_uniformity : ∀s : set V, is_open s ↔ (∀x∈s, { p : V × V | p.1 = x → p.2 ∈ s } ∈ uniformity.sets))
+(complete : ∀{f:filter V}, cauchy f → ∃x, f ≤ nhds x)
+
+instance Hilbert_space.to_complete_space (V : Type u) [c : Hilbert_space V] : complete_space V :=
+{ complete := @Hilbert_space.complete V c}

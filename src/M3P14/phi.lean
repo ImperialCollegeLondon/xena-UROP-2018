@@ -10,7 +10,7 @@ definition phi (n : ℕ) := ((finset.range n).filter (nat.coprime n)).card
 local notation `φ`  := phi 
 instance {α : Type*} [fintype α] [monoid α] : fintype (units α) := sorry
 
---lemmas
+-- theorems
 
 theorem phi_n (n : ℕ) [pos_nat n] : phi n = card (units (zmod n)) := sorry
 
@@ -30,15 +30,15 @@ end
 
 theorem phi_odd_twice_eq_n (n : ℕ) (hp : gcd 2 n = 1) : φ (2*n) = φ n := 
 begin 
-rw phi_mul 2 n,
-rw phi_p 2,
-simp,
-unfold prime,
-split,
-exact dec_trivial,
-intros,
-rwa ← dvd_prime (prime_two),
-assumption,
+    rw phi_mul 2 n,
+    rw phi_p 2,
+    simp,
+    unfold prime,
+    split,
+    exact dec_trivial,
+    intros,
+    rwa ← dvd_prime (prime_two),
+    assumption,
 end
 
 theorem phi_even_twice_eq_twice_n (n : ℕ) (hp : gcd 2 n = 2) : φ (2*n) = 2 * φ n := 
@@ -55,7 +55,7 @@ intros,
 rwa ← dvd_prime (prime_two),
 end
 
-theorem power_p_phi (p k : ℕ) (hp: prime p) : φ p^k = (p^k)*(1-1/p) := sorry
+theorem power_p_phi (p k : ℕ) (hp: prime p) : φ (p^k) = p^(k-1)*(p-1) := sorry
 
 theorem dvd_phi (m n : ℕ) (hp : m > 0) : (m ∣ n) → (φ m ∣ φ n) := 
 begin
