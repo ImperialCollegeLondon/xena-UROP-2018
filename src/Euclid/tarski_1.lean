@@ -1032,7 +1032,29 @@ have : a = p,
 contradiction
 end
 
-theorem six6 {a b p : point} : sided p a b → sided p b a :=
+theorem six6 {a b c d : point} : B a b c → sided b c d → B a b d :=
+begin
+intros h h1,
+cases h1.2.2,
+  exact three7b h h_1 h1.1.symm,
+exact three5a h h_1
+end
+
+theorem six7 {a b p : point} : B p a b → a ≠ p → sided p a b :=
+begin
+intros h h1,
+split,
+  exact h1,
+split,
+  intro h_1,
+  subst h_1,
+  apply h1.symm,
+  exact bet_same b a h,
+left,
+exact h
+end
+
+theorem sided.symm {a b p : point} : sided p a b → sided p b a :=
 begin
 intro h,
 cases six3.1 h with h h1,
@@ -1049,7 +1071,7 @@ split,
 exact hc.2.1
 end
 
-theorem six7 {a b c p : point} : sided p a b → sided p b c → sided p a c :=
+theorem sided.trans {a b c p : point} : sided p a b → sided p b c → sided p a c :=
 begin
 intros h1 h,
 cases six3.1 h1 with h1 h2,
@@ -1060,6 +1082,18 @@ have h3 : c ≠ p,
 have : B c p q,
   exact (six2 h2 h3 hq.1 hq.2.2).2 h,
 exact (six2 h1 h3 hq.1 hq.2.1).1 this
+end
+
+theorem six8 {a b c p q : point} : sided b p a → sided b q c → B a b c → B p b q :=
+begin
+intros h h1 h2,
+have h3 : B p b c,
+  cases h.2.2,
+    exact three6a h_1.symm h2,
+  exact three7a h_1.symm h2 h.2.1,
+cases h1.2.2,
+  exact three5a h3 h_1,
+exact three7b h3 h_1 h1.2.1.symm
 end
 
 def ray (p a : point) : set point := {x | sided p a x}
@@ -1087,7 +1121,7 @@ apply exists_unique.intro,
   exact ⟨h3, hx.2⟩,
 intros y hy,
 have : B p a y,
-  exact ((six2 h2 hy.1.1 hp.2.symm hx.1.symm).2 (six7 h3 (six6 hy.1))).symm,
+  exact ((six2 h2 hy.1.1 hp.2.symm hx.1.symm).2 (sided.trans h3 hy.1.symm)).symm,
 apply unique_of_exists_unique (two12 a b c p hp.2.symm),
   exact ⟨this, hy.2⟩,
 exact hx

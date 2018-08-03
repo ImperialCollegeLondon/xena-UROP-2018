@@ -303,6 +303,20 @@ rw h at *,
 exact h (four11 (four12 c b)).1
 end
 
+theorem six27 {a b c : point} {A : set point} : line A → a ∈ A → c ∈ A → B a b c → b ∈ A :=
+begin
+intros h h1 h2 h3,
+cases em (a = c),
+  rw h_1 at h3,
+  have : c = b,
+    exact bet_same c b h3,
+  rwa this at h2,
+let h4 := six18 h h_1 h1 h2,
+rw h4,
+right, left,
+exact h3.symm
+end
+
 -- middle points
 
 def M (a m b : point) : Prop := B a m b ∧ eqd m a m b 
@@ -832,6 +846,19 @@ have h6 : hourglass q p c b a n m,
     exact h4.1.symm,
   exact h4.2.symm,
 exact (seven23 h6 h_1).symm
+end
+
+theorem seven24 {a p : point} {A : set point} : line A → a ∈ A → p ∈ A → (S a p) ∈ A :=
+begin
+intros h h1 h2,
+cases em (a = p),
+  let h3 := seven10.2 h_1.symm,
+  rwa h3,
+let h3 := six18 h h_1 h1 h2,
+rw h3,
+let h4 := seven5 a p,
+right, right,
+exact h4.1.symm
 end
 
 theorem seven25 {a b c : point} : eqd c a c b → ∃ x, M a x b :=

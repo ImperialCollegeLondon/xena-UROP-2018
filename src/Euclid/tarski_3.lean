@@ -150,6 +150,14 @@ intros u v hu hv,
 exact (h.2.2.2.2 v u hv hu).symm
 end
 
+theorem perp.symm {A A' : set point} : perp A A' → perp A' A :=
+begin
+intro h,
+cases h with x hx,
+constructor,
+exact hx.symm
+end
+
 theorem eight14a {A A' : set point} : perp A A' → A ≠ A' :=
 begin
 intros h h1,
@@ -539,6 +547,19 @@ have h23 : R c x' x,
 exact eight7 h23 h22
 end
 
+theorem eight17 {a : point} {A : set point}: line A → a ∉ A → ∃! x, x ∈ A ∧ perp A (l a x) :=
+begin
+intros h h1,
+cases h with p hp,
+cases hp with q hq,
+cases hq with hq h2,
+subst h2,
+have h3 : ¬col p q a,
+  intro h_1,
+  exact h1 h_1,
+exact eight18 h3
+end
+
 theorem eight19 {p q r : point} (a : point) : R p q r ↔ R (S a p) (S a q) (S a r) :=
 begin
 unfold R,
@@ -755,10 +776,9 @@ split,
 exact ht.1.symm
 end
 
-lemma eight23 {a b p q t t': point} (h : a ≠ b) (hp : a ≠ p ∧ ((l a b) ⊥ l p a) ∧ col a b t' ∧ B a t' p)
-(ht : b ≠ q ∧ ((l b a) ⊥ l q b) ∧ col b a t ∧ B p t q) (h_1 : distle a p b q): ∃ x, M a x b := 
+lemma eight23 {a b p q t t' r : point} (h : a ≠ b) (hp : a ≠ p ∧ ((l a b) ⊥ l p a) ∧ col a b t' ∧ B a t' p)
+(ht : b ≠ q ∧ ((l b a) ⊥ l q b) ∧ col b a t ∧ B p t q) (hr : B b r q ∧ eqd a p b r): ∃ x, M a x b ∧ M p x r := 
 begin
-cases h_1 with r hr,
 cases pasch p b q t r ht.2.2.2 hr.1 with x hx,
 have h1 : col a b x,
   have h_1 : col b t x,
@@ -802,12 +822,10 @@ suffices : eqd b p a r,
       exact bet_same r x hx.2,
     rw h_2 at h8,
     exact h8 h1,
-  have h_2 : M a x b ∧ M p x r,
-    apply seven21 h7 h_1 hr.2 this.flip (four11 h1).1,
-    left,
-    exact hx.2.symm,
   constructor,
-  exact h_2.1,
+  apply seven21 h7 h_1 hr.2 this.flip (four11 h1).1,
+  left,
+  exact hx.2.symm,
 have h9 : x ≠ a,
   intro h_1,
   rw h_1 at *,
@@ -952,7 +970,7 @@ have h25 : m = b,
     left,
     exact three1 a b,
   exact h23,
-rw h25 at *,
+subst m,
 have h26 : ifs (S a p) a p r r b r' (S a p),
   focus {repeat {split}},
     exact h10.1.symm,
@@ -989,37 +1007,54 @@ apply exists_unique_of_exists_of_unique,
   cases hp with t' hp,
   cases hq with t ht,
   cases five10 a p b q,
-    exact eight23 h hp ht h_1,
+    cases h_1 with r hr,
+    cases eight23 h hp ht hr with x hx,
+    constructor,
+    exact hx.1,
   suffices : ∃ x, M b x a,
     cases this with x hx,
     constructor,
     exact hx.symm,
-  apply eight23 (ne.symm h),
+  cases h_1 with r hr,
+  have : ∃ x, M b x a ∧ M q x r,
+    apply (eight23 (ne.symm h)),
+        split,
+          exact ht.1,
+        split,
+          exact ht.2.1,
+        split,
+          exact (four11 (four12 b a)).1,
+        exact three3 b q,
       split,
-        exact ht.1,
+        exact hp.1,
       split,
-        exact ht.2.1,
+        exact hp.2.1,
       split,
-        exact (four11 (four12 b a)).1,
-      exact three3 b q,
-    split,
-      exact hp.1,
-    split,
-      exact hp.2.1,
-    split,
-      exact (four11 ht.2.2.1).2.1,
-    exact ht.2.2.2.symm,
-  exact h_1,
+        exact (four11 ht.2.2.1).2.1,
+      exact ht.2.2.2.symm,
+    exact hr,
+  cases this with x hx,
+  constructor,
+  exact hx.1,  
 intros x y hx hy,
 exact seven17 hx hy
 end
 
-theorem eight24 {a b p q r t : point} : perp (l p a) (l a b) → perp (l q b) (l a b) → col a b t → B p t q → 
-B b r q → eqd a p b r → ∃ x, M a x b ∧ M p x r :=
+theorem eight24 {a b p q r t : point} : a ≠ b → a ≠ p → b ≠ q → perp (l p a) (l a b) → perp (l q b) (l a b) → 
+col a b t → B p t q → B b r q → eqd a p b r → ∃ x, M a x b ∧ M p x r :=
 begin
-sorry
+intros h g1 g2 g3 g4 g5 g6 g7 g8,
+let g9 := (four11 (four12 a b)).1,
+let g10 := three3 a p,
+let g11 := (six17 h).2.2,
+rw g11 at g4,
+have hp : a ≠ p ∧ ((l a b) ⊥ l p a) ∧ col a b a ∧ B a a p,
+  exact ⟨g1, ⟨g3.symm, ⟨g9, g10⟩⟩⟩,
+have ht : b ≠ q ∧ ((l b a) ⊥ l q b) ∧ col b a t ∧ B p t q,
+  exact ⟨g2, ⟨g4.symm, ⟨(four11 g5).2.1, g6⟩⟩⟩,
+have hr : B b r q ∧ eqd a p b r,
+  exact ⟨g7, g8⟩,
+exact eight23 h hp ht hr
 end
-
---unfold/cases and keep the old prop
 
 end Euclidean_plane
