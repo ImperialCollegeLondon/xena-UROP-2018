@@ -361,16 +361,19 @@ begin unfold T1 T2 T set.inter, simp [mem_set_of_eq, -one_div_eq_inv], apply set
     rw mem_set_of_eq , rw mem_set_of_eq, intro H, rw H, norm_num,
 end
 
-
+@[simp]
 lemma eqn_start : par T1._proof_1 ⟨0, help_T1⟩ = 0 := 
 begin unfold par, simp [-one_div_eq_inv], exact subtype.mk_eq_mk.2 (begin exact zero_div _,  end  ), end  
 
+@[simp]
 lemma eqn_1 : par T1._proof_1 ⟨⟨1 / 2, begin unfold I01, rw mem_set_of_eq, norm_num end⟩, begin unfold T, rw mem_set_of_eq, show 0 ≤ (1/2 : ℝ ) ∧ (1/2 : ℝ ) ≤ 1 / 2 ,  norm_num end ⟩ 
 = 1 :=  begin unfold par, simp [-one_div_eq_inv], exact subtype.mk_eq_mk.2 (begin exact div_self (begin norm_num, end), end) end 
 
+@[simp]
 lemma eqn_2 : par T2._proof_1 ⟨⟨1 / 2, help_01  ⟩, begin unfold T, rw mem_set_of_eq, show 1/2 ≤ (1/2 : ℝ ) ∧ (1/2 : ℝ ) ≤ 1  ,  norm_num end⟩ 
 = 0 := begin unfold par, simp [-one_div_eq_inv], exact subtype.mk_eq_mk.2 (by refl) end 
 
+@[simp]
 lemma eqn_end : par T2._proof_1 ⟨1, help_T2 ⟩ = 1 :=  
 begin unfold par, exact subtype.mk_eq_mk.2 ( begin show ( ( 1:ℝ ) - 1 / 2) / (1 - 1 / 2) = 1,  norm_num, end ),  end 
 
@@ -570,6 +573,25 @@ structure path_homotopy {β} [topological_space β] { x y : β } ( f : path x y)
 (at_one :  ∀ y, to_fun (1,y) = g.to_fun y)
 (cont : continuous to_fun)
 
+@[simp] 
+lemma at_zero_path_hom {β} [topological_space β] { x y : β } { f : path x y} { g : path x y} {F : path_homotopy f g} (y : I01) : 
+F.to_fun (0, y) = path.to_fun f y := F.3 y
+
+@[simp] 
+lemma at_one_path_hom {β} [topological_space β] { x y : β } { f : path x y} { g : path x y} {F : path_homotopy f g} (y : I01) : 
+F.to_fun (1, y) = path.to_fun g y := F.4 y 
+
+@[simp]
+lemma at_pt_zero_hom {β} [topological_space β] { x y : β } { f : path x y} { g : path x y} {F : path_homotopy f g} (s : I01) :
+F.to_fun (s, 0) = x :=  begin exact (F.2 s).1 end 
+
+@[simp]
+lemma at_pt_one_hom {β} [topological_space β] { x y : β } { f : path x y} { g : path x y} {F : path_homotopy f g} (s : I01) :
+F.to_fun (s, 1) = y :=  begin exact (F.2 s).2.1  end 
+
+--F.to_fun (par T1._proof_1 ⟨s, _⟩, 1) = y
+
+
 structure path_homotopy2 {β} [topological_space β] { x y : β } ( f : path x y) ( g : path x y) := 
 (to_fun : I01 → I01 →  β )
 (path_s : ∀ s : I01, is_path x y ( λ t, to_fun s t ) ) 
@@ -615,6 +637,7 @@ begin
         rw H1, exact (F.path_s s).right.left 
 end 
 
+
 lemma hom_path_is_cont { x y : β } { f g : path x y } ( F : path_homotopy f g ) : 
 ∀ s : I01, continuous ( λ t,  F.to_fun (s, t)) := 
 begin 
@@ -658,8 +681,8 @@ def path_homotopy_inverse { x y : β} (f : path x y) (g : path x y) ( F : path_h
           exact (F.path_s (par_inv s)).2.1, 
             exact (F.path_s (par_inv s)).2.2
     end,  
-    at_zero := begin intro t, simp, exact F.at_one t  end, 
-    at_one := begin intro t, simp, exact F.at_zero t  end,  
+    at_zero := begin intro t, simp,   end, --exact F.at_one t
+    at_one := begin intro t, simp, end,   --exact F.at_zero t 
     cont := begin 
     show continuous ((λ (st : ↥I01 × ↥I01), F.to_fun (st.fst , st.snd)) ∘ (λ (x : I01 × I01) , (( par_inv x.1 , x.2 ) : I01 × I01))), 
     have H : continuous (λ (x : I01 × I01) , (( par_inv x.1 , x.2 ) : I01 × I01)),
@@ -668,25 +691,205 @@ def path_homotopy_inverse { x y : β} (f : path x y) (g : path x y) ( F : path_h
     end 
 } 
 
---lemma cover_prod_I01 : set.union (T1 × I01) (T2 × I01) = I01 × I01 := 
+
+---- Homotopy Composition
+
+local notation `I` := @set.univ I01
+#check I 
+#print has_union 
+
+--lemma cover_prod_I01 : ( (set.prod T1 I ) ∪  (set.prod T2 I) ) = set.prod I I := 
+lemma cover_prod_I01 : ( (set.prod T1 (@set.univ I01)) ∪  (set.prod T2 (@set.univ I01)) ) = @set.univ (I01 × I01) := 
+begin apply set.ext, intro x, split, 
+  simp [mem_set_of_eq], 
+  intro H, simp, have H : 0≤ x.1.val ∧ x.1.val ≤ 1, exact x.1.property, unfold T1 T2 T, simp [mem_set_of_eq, or_iff_not_imp_left, -one_div_eq_inv], 
+  intro nL, have H2 : (1 / 2 :ℝ )< x.1.val, exact nL H.1, exact ⟨ le_of_lt H2, H.2 ⟩ ,
+end
+
+--lemma cover_prod_I01' :  ( @has_union (I01 × I01) _ ( T1 × (@set.univ I01))  ( T2 ×  (@set.univ I01)) ) = @set.univ (I01 × I01) :=
+--sorry
+
+#check set.prod 
+#print prefix set
+
 #print function.uncurry 
 
 
-def path_homotopy_comp { x y : β} (f : path x y) (g : path x y) (h : path x y) ( F : path_homotopy f g) ( G : path_homotopy g h) : 
+def path_homotopy_comp_curry { x y : β} (f : path x y) (g : path x y) (h : path x y) ( F : path_homotopy f g) ( G : path_homotopy g h) : 
 path_homotopy f h :=
 {   to_fun := function.uncurry (λ t , (λ s, paste cover_I01 ( (function.curry F.to_fun) ∘  (par T1._proof_1)) ( (function.curry G.to_fun) ∘  (par T2._proof_1)) s) t) , 
 
 ---( paste _ ( λ st , F.to_fun (par T1._proof_1  st.1, st.2) ) ( λ st, G.to_fun (par T2._proof_1  st.1, st.2) ) ) st  , 
 --fun_composer_2_closed F' G' ( F'(s,.) = F(2s,.)  ) 
-    path_s := sorry,  
+    path_s := begin sorry end,  
     at_zero := sorry, 
     at_one := sorry,  
     cont := begin simp, --refine cont_of_paste _ _ ( by simp [continuous_par T1._proof_1,  F.cont] ) ()
-    
+    /- show   continuous  paste cover_I01 (function.curry (F.to_fun) ∘ par T1._proof_1)
+          (function.curry (G.to_fun) ∘ par T2._proof_1)), -/ 
      sorry 
     end 
 }  
 
+#check @paste 
+
+--- @paste I01 × I01 β (set.prod T1 I) (set.prod T2 I) 
+
+-- with cross 
+--def fgen_hom2{α } [topological_space α ] { x y : α }{r s : ℝ}{f g: path x y } (Hrs : r < s) ( F : path_homotopy f g) : T r s Hrs × I01 → α := λ st, F.to_fun ( par Hrs st.1 , st.2 )
+
+-- with set.prod
+--lemma help_prod_1 {r s : ℝ}(Hrs : r < s)  : ∀ (st : ↥(set.prod (T r s Hrs) univ)) , (st.val).fst ∈ T r s Hrs := begin sorry end
+
+def fgen_hom {α } [topological_space α ] { x y : α }{r s : ℝ}{f g: path x y } (Hrs : r < s)
+ ( F : path_homotopy f g) : (set.prod (T r s Hrs ) I) → α := 
+λ st, F.to_fun (( par Hrs ⟨st.1.1, (mem_prod.1 st.2).1 ⟩) , st.1.2 )
+
+constant l : set.prod T1 T2
+#check l.1
+#check ↥I01 × ↥I01
+#check @set.prod _ 
+#check fgen_hom._proof_1 
+
+constant st : ↥(set.prod T1 I)
+#check st.val.fst
+
+
+/- lemma help_p_hom {α } [topological_space α ]{ x y : α }{r s : ℝ} (Hrs : r < s)
+: (λ (st : (set.prod (T r s Hrs) I)), (⟨(st.val).fst, (mem_prod.1 st.2).1⟩ : T r s Hrs) ) = (λ (x :  ↥I01 × ↥I01 ) (H : x.fst ∈ T r s Hrs),  (⟨ x.1, H ⟩ : T r s Hrs)) ∘ (λ (st : ↥(set.prod (T r s Hrs) I)), st.val ) := 
+sorry-/ 
+#print continuous_subtype_mk
+--set_option trace.simplify.rewrite true
+--set_option pp.implicit true
+theorem p_hom_cont {α } [topological_space α ]{ x y : α }{r s : ℝ} {f g : path x y } (Hrs : r < s) ( F : path_homotopy f g)  : continuous (fgen_hom Hrs F) := 
+begin unfold fgen_hom,
+refine continuous.comp _ F.cont , 
+refine continuous.prod_mk _ (continuous.comp continuous_subtype_val continuous_snd), 
+--show continuous (λ (st : ↥(set.prod (T r s Hrs) univ)), par Hrs ⟨(st.val).fst, (mem_prod.1 st.2).1 ⟩), 
+refine continuous.comp _ (continuous_par Hrs), 
+refine continuous_subtype_mk _ _,
+exact continuous.comp continuous_subtype_val continuous_fst,
+
+end
+
+
+--def fa_hom2 { x y : α }{f g: path x y } ( F : path_homotopy f g) : T1 × I01 → α  := @fgen_hom2 _ _ _ _ 0 (1/2 : ℝ ) _ _  T1._proof_1 F 
+
+def fa_hom { x y : α }{f g: path x y } ( F : path_homotopy f g) : (set.prod T1 I) → α  := @fgen_hom _ _ _ _ 0 (1/2 : ℝ ) _ _  T1._proof_1 F 
+
+lemma CA_hom { x y : α }{f g: path x y } ( F : path_homotopy f g) : continuous (fa_hom F) := p_hom_cont T1._proof_1 F 
+ 
+def fb_hom { x y : α }{f g: path x y } ( F : path_homotopy f g) : (set.prod T2 I) → α  := @fgen_hom _ _ _ _ (1/2 : ℝ ) 1 _ _  T2._proof_1 F 
+
+lemma CB_hom { x y : α }{f g: path x y } ( F : path_homotopy f g) : continuous (fb_hom F) := p_hom_cont T2._proof_1 F 
+
+lemma help_hom_1 {s t : I01} (H : s ∈ T1) : (s, t) ∈ set.prod T1 I := begin simp, exact H   end
+
+
+
+/- exact (F.path_s (par_inv s)).1, split, 
+          exact (F.path_s (par_inv s)).2.1, 
+            exact (F.path_s (par_inv s)).2.2-/
+
+--λ (t : ↥I01), paste cover_prod_I01 (fa_hom F) (fb_hom G) (s, t))
+
+#check is_closed_ge'
+
+
+lemma prod_T1_is_closed : is_closed (set.prod T1 I) := begin simp [T1_is_closed, is_closed_prod]  end
+
+lemma prod_T2_is_closed : is_closed (set.prod T2 I) := begin simp [T2_is_closed, is_closed_prod] end
+
+lemma prod_inter_T : set.inter (set.prod T1 I) (set.prod T2 I) = set.prod  { x : I01 | x.val = 1/2 } I := 
+begin unfold T1 T2 T set.inter set.prod, simp [mem_set_of_eq, -one_div_eq_inv], apply set.ext, intro x, split,
+  {rw mem_set_of_eq , rw mem_set_of_eq, simp [-one_div_eq_inv], intros A B C D, have H : x.1.val < 1 / 2 ∨ x.1.val = 1/2, 
+        exact  lt_or_eq_of_le B, exact le_antisymm  B C,    
+  }, { rw mem_set_of_eq , rw mem_set_of_eq, intro H, rw H, norm_num }
+end
+
+set_option trace.simplify.rewrite false
+
+local attribute [instance] classical.prop_decidable 
+
+
+lemma cond_start { x y : β} {f : path x y} {g : path x y} {h : path x y} 
+( F : path_homotopy f g) ( G : path_homotopy g h) : paste cover_prod_I01 (fa_hom F) (fb_hom G) (s, 0) = x := 
+begin  unfold paste, split_ifs, unfold fa_hom fgen_hom, simp, unfold fb_hom fgen_hom, simp, end
+
+
+lemma cond_end { x y : β} {f : path x y} {g : path x y} {h : path x y} 
+( F : path_homotopy f g) ( G : path_homotopy g h) : paste cover_prod_I01 (fa_hom F) (fb_hom G) (s, 1) = y := 
+begin unfold paste, split_ifs, unfold fa_hom fgen_hom, simp, unfold fb_hom fgen_hom, simp, end
+
+lemma part_CA_hom { x y : α }{f g: path x y } ( F : path_homotopy f g) (s : I01) (H : s ∈ T1) : continuous (λ (t: ↥I01), (fa_hom F) ⟨ (s, t), (help_hom_1 H ) ⟩   ) := 
+begin unfold fa_hom fgen_hom, simp, exact (F.path_s (par T1._proof_1 ⟨ s, H ⟩  )).2.2, 
+end
+
+
+#check lt_of_not_ge
+/- H4 : ¬s.val ≤ 1 / 2
+⊢ 2⁻¹ < s.val-/
+lemma T2_of_not_T1 { s : I01} : (s ∉ T1) → s ∈ T2 := 
+begin intro H, have H2 : T1 ∪ T2 = @set.univ I01, exact cover_I01, unfold T1 T2 T at *, simp [-one_div_eq_inv],
+ rw mem_set_of_eq at H, rw not_and at H, have H3 : 1/2 < s.val, have H4 : ¬s.val ≤ 1 / 2, exact  H (s.2.1), exact lt_of_not_ge H4,
+ exact ⟨ le_of_lt H3, s.2.2⟩ , 
+end
+
+#check not_forall
+
+def path_homotopy_comp { x y : β} {f : path x y} {g : path x y} {h : path x y} ( F : path_homotopy f g) ( G : path_homotopy g h) : 
+path_homotopy f h :=
+{   to_fun := λ st, ( @paste (I01 × I01) β (set.prod T1 I) (set.prod T2 I)  cover_prod_I01 ( λ st , (fa_hom F ) st ) ) ( λ st, (fb_hom G ) st  )  st  , 
+
+-- to_fun := λ st, ( @paste (I01 × I01) β (set.prod T1 I) (set.prod T2 I)  cover_prod_I01 ( λ st , F.to_fun (par T1._proof_1  st.1, st.2) ) ( λ st, G.to_fun (par T2._proof_1  st.1, st.2) ) ) st  , 
+
+    path_s := begin intro s, unfold is_path, split, simp, 
+        exact cond_start s F G, split,  
+        exact cond_end s F G,
+        simp, --refine cont_of_paste cover_prod_I01  prod_T1_is_closed prod_T2_is_closed (part_CA_hom F s _) _, 
+        
+        unfold paste, unfold fa_hom fb_hom fgen_hom, simp,  --rw  (F.path_s (par T1._proof_1 s)).2.2 , 
+        by_cases H : ∀ t : I01, (s, t) ∈ set.prod T1 I, simp [H],  
+          refine (F.path_s (par T1._proof_1 ⟨ s, _ ⟩  )).2.2, unfold set.prod at H, 
+          have H2 : (s, s) ∈ {p : ↥I01 × ↥I01 | p.fst ∈ T1 ∧ p.snd ∈ univ}, exact H s, simp [mem_set_of_eq] at H2, exact H2, 
+          simp at H,
+          have H3:  s ∉ T1, simp [not_forall] at H, exact H.2,
+          simp [H3], refine (G.path_s (par T2._proof_1 ⟨ s, _ ⟩  )).2.2, --unfold set.prod at H,        
+          exact T2_of_not_T1 H3, 
+           --simp [mem_set_of_eq]  at H, 
+        --exact F.cont, 
+       
+
+    
+    
+    
+    end,  
+    at_zero := begin  intro y, simp, unfold paste, rw dif_pos, unfold fa_hom fgen_hom, simp , 
+        simp [mem_set_of_eq], exact help_T1,  end, 
+
+    at_one := begin intro y, simp, unfold paste, rw dif_neg, unfold fb_hom fgen_hom, simp , 
+        simp [mem_set_of_eq], exact help_02, end,  
+
+    cont := begin simp, refine cont_of_paste _ _ _ (CA_hom F) (CB_hom G) , 
+      exact prod_T1_is_closed, 
+      exact prod_T2_is_closed, 
+      unfold match_of_fun, intros x B1 B2, 
+        have Int : x ∈ set.inter (set.prod T1 I) (set.prod T2 I), exact ⟨ B1 , B2 ⟩ , 
+        rwa [prod_inter_T] at Int, 
+        have V : x.1.1 = 1/2, rwa [set.prod, mem_set_of_eq] at Int, rwa [mem_set_of_eq] at Int, exact Int.1, cases x, 
+        have xeq : x_fst = ⟨ 1/2 , help_01 ⟩ , apply subtype.eq, rw V,
+        simp [xeq, -one_div_eq_inv], 
+        show fa_hom F ⟨(⟨1 / 2, help_01⟩, x_snd), _⟩ = fb_hom G ⟨(⟨1 / 2, help_01⟩, x_snd), _⟩ , unfold fa_hom fb_hom fgen_hom, 
+        simp [eqn_1, eqn_2, -one_div_eq_inv], 
+    end 
+}  
+
+#check cont_of_paste
+
+
+
+
+--- curried homotopy
 def path_homotopy_comp2 { x y : β} (f : path x y) (g : path x y) (h : path x y) ( F : path_homotopy2  f g) ( G : path_homotopy2 g h) : 
 path_homotopy2 f h :=
 {   to_fun := λ t  , (λ s, paste cover_I01 ( (F.to_fun) ∘  (par T1._proof_1) ) ( ( G.to_fun) ∘  (par T2._proof_1)) s) t , 
@@ -707,7 +910,7 @@ path_homotopy2 f h :=
         have V : x.val = 1/2, rwa [mem_set_of_eq] at Int, have xeq : x = (⟨ 1/2 , help_01 ⟩ : I01 ) , apply subtype.eq, rw V,
         simp [xeq, -one_div_eq_inv], 
         show F.to_fun (par T1._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T1⟩) = G.to_fun (par T2._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T2⟩), 
-        simp [eqn_1, eqn_2, -one_div_eq_inv], apply funext, intro y, rw [F.at_one y , G.at_zero y] 
+        simp [eqn_1, eqn_2, -one_div_eq_inv], apply funext, intro y, rw [F.at_one y , G.at_zero y],
 
     end 
 }  
@@ -728,7 +931,7 @@ begin
     have HF : path_homotopy g f, 
         unfold is_homotopic_to at H, 
         let F : path_homotopy f g, 
-            sorry, ----by H, , 
+            exact classical.choice H, 
         exact path_homotopy_inverse f g F, 
     exact ⟨ HF ⟩ 
 end 
@@ -739,10 +942,11 @@ begin
     have HF : path_homotopy f h, 
         unfold is_homotopic_to at *, 
         let F : path_homotopy f g, 
-            sorry, --by Hfg existence (as nonempty)
+            exact classical.choice Hfg, 
+         --by Hfg existence (as nonempty)
         let G : path_homotopy g h,
-            sorry, --by Hgh
-        exact path_homotopy_comp f g h F G, 
+            exact classical.choice Hgh,
+        exact path_homotopy_comp  F G, 
     exact ⟨ HF ⟩ 
 end 
 
@@ -751,7 +955,7 @@ theorem is_equivalence : @equivalence (path x y)  (is_homotopic_to) :=
 
 --local notation `≈` := is_homotopic_to _ _ 
 
-
+#check nonempty.
 
 lemma setoid_hom {α : Type*} [topological_space α ] (x : α )  : setoid (loop x) := setoid.mk is_homotopic_to (is_equivalence x x)
 -- loop3 simplifier works it out
