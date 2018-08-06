@@ -1,7 +1,5 @@
 import linear_algebra.basic
 
-set_option class.instance_max_depth 128
-
 open vector_space field
 universes u v w
 
