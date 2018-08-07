@@ -66,7 +66,7 @@ end
 
 
 
-
+-- (WORK IN PROGRESS...)
 theorem loc_pcon_and_con_imp_pcon [connected_space α] (H1 : ∀ x : α, is_loc_pcon_at x) 
 {t : α} : path_connected_space α :=
 begin
