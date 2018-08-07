@@ -81,6 +81,12 @@ begin
 end
 
 
+lemma subset_def_iff {A B : set α} : (A ⊆ B) ↔ ∀ x, x ∈ A → x ∈ B :=
+by {apply iff.intro, intro h1, rwa [←subset_def], intro h2, rwa [subset_def]}
+
+lemma nmem_compl_iff (s : set α) (x : α) : x ∉ -s ↔ x ∈ s := by simp
+
+
 lemma not_in_right_union_empty {A B : set α} {x : α} (H : A ∩ B = ∅) : x ∈ A → x ∉ B :=
 by {intros hx hc, exact absurd H (ne_empty_of_mem (mem_inter hx hc))}
 
@@ -96,17 +102,22 @@ x ∉ A := by {by_contradiction HC, exact absurd H2 (ne_empty_of_mem (mem_inter 
 
 
 
+lemma disjoint_compl_imp_subset {A B : set α} (H : A ∩ -B = ∅) : A ⊆ B :=
+subset_def_iff.mpr (assume (x : α) (hA : x ∈ A), (nmem_compl_iff _ _ ).mp (mem_inter_empty_left hA H))
+
+
+
 lemma eq_union_of_inter_if_subseteq {A B C : set α} (H1 : A ⊆ B ∪ C) : A = (A ∩ B) ∪ (A ∩ C) 
 := by {rw [←inter_distrib_left,inter_eq_self_of_subset_left H1]}
 
 lemma inter_empty_distrib {A B C : set α} (H1 : B ∩ C = ∅) : (A ∩ B) ∩ (A ∩ C) = ∅ 
 := by {rw [inter_left_comm,←inter_assoc,←inter_assoc], simp, rw [inter_assoc,H1], simp}
 
-lemma union_left_inter_distrib {A B C D : set α} : A = (B ∪ C) ∩ D → B ∩ A = B ∩ D
-:= by {intro H, rw [H,←inter_assoc, inter_eq_self_of_subset_left (subset_union_left _ _ )]}
+lemma union_left_inter_distrib {A B C D : set α} (H : A = (B ∪ C) ∩ D) : B ∩ A = B ∩ D
+:= by {rw [H,←inter_assoc, inter_eq_self_of_subset_left (subset_union_left _ _ )]}
 
-lemma union_right_inter_distrib {A B C D : set α} : A = (B ∪ C) ∩ D → C ∩ A = C ∩ D
-:= by {intro H, rw [H,←inter_assoc, inter_eq_self_of_subset_left (subset_union_right _ _ )]}
+lemma union_right_inter_distrib {A B C D : set α} (H : A = (B ∪ C) ∩ D) : C ∩ A = C ∩ D
+:= by {rw [H,←inter_assoc, inter_eq_self_of_subset_left (subset_union_right _ _ )]}
 
 @[simp] lemma inter_union_self_left {A B : set α} : A ∩ (A ∪ B) = A :=
 ext (assume x, iff.intro (assume h1, mem_of_mem_inter_left h1) (assume h2, mem_inter h2 (mem_union_left _ h2)))
@@ -160,11 +171,8 @@ begin
   intro s, apply iff.intro, 
     rw [frontier_eq_closure_inter_closure], 
     intro h, simp at h, 
-    have h1 : ∀ x, x ∈ closure s → x ∈ interior s, 
-      {intros x a1, have a2 := mem_inter_empty_left a1 h, simp at a2, assumption},
-    by exact (closure_eq_interior_iff_clopen _ ).mp (subset.antisymm h1 interior_subset_closure),
-  intro H1, 
-  rw [frontier, closure_eq_iff_is_closed.mpr H1.2, interior_eq_iff_open.mpr H1.1, diff_eq], simp,  
+    by exact (closure_eq_interior_iff_clopen _ ).mp (subset.antisymm (disjoint_compl_imp_subset h) interior_subset_closure),
+  intro H1, rw [frontier, closure_eq_iff_is_closed.mpr H1.2, interior_eq_iff_open.mpr H1.1, diff_eq], simp,  
 end
 
 
@@ -173,25 +181,17 @@ lemma components_of_separation_clopen [topological_space α]
 is_clopen U1 ∧ is_clopen U2 :=
 begin 
   intro H,
-  have h2 : U1 = -U2 := disjoint_and_union_univ_imp_compl H.1 H.2.1, 
-  have h3 : -U1 = U2 := eq_comm.mp (eq_compl_iff_compl_eq.mp h2),
-  have hu1c : is_closed U1, {rw [←h3] at hu2, rwa is_closed},
-  have hu2c : is_closed U2, {rw h2 at hu1, rwa is_closed}, 
-  exact ⟨⟨hu1,hu1c⟩,⟨hu2,hu2c⟩⟩,  
+  exact ⟨⟨hu1, by {rw [←eq_comm.mp (eq_compl_iff_compl_eq.mp (disjoint_and_union_univ_imp_compl H.1 H.2.1))] at hu2, rwa is_closed}⟩,
+    ⟨hu2, by {rw disjoint_and_union_univ_imp_compl H.1 H.2.1 at hu1, rwa is_closed}⟩⟩,  
 end 
 
 
 lemma components_of_separation_clopen2 [topological_space α] 
 {U1 U2 : set α} (hu1 : is_open U1) (hu2 : is_open U2) (hunion : U1 ∪ U2 = univ) 
-(hinter : U1 ∩ U2 = ∅) (hnon1 : U1 ≠ ∅) (hnon2 : U2 ≠ ∅) : 
-is_clopen U1 ∧ is_clopen U2 :=
-begin 
-  have h2 : U1 = -U2 := disjoint_and_union_univ_imp_compl hunion hinter, 
-  have h3 : -U1 = U2 := eq_comm.mp (eq_compl_iff_compl_eq.mp h2),
-  have hu1c : is_closed U1, {rw [←h3] at hu2, rwa is_closed},
-  have hu2c : is_closed U2, {rw h2 at hu1, rwa is_closed}, 
-  exact ⟨⟨hu1,hu1c⟩,⟨hu2,hu2c⟩⟩,  
-end 
+(hinter : U1 ∩ U2 = ∅) (hnon1 : U1 ≠ ∅) (hnon2 : U2 ≠ ∅) : is_clopen U1 ∧ is_clopen U2 :=
+⟨⟨hu1, by {rw [←eq_comm.mp (eq_compl_iff_compl_eq.mp (disjoint_and_union_univ_imp_compl hunion hinter))] at hu2, rwa is_closed}⟩,
+  ⟨hu2, by {rw disjoint_and_union_univ_imp_compl hunion hinter at hu1, rwa is_closed}⟩⟩  
+ 
 
 
 lemma open_separation_to_closed [topological_space α] 
@@ -199,11 +199,8 @@ lemma open_separation_to_closed [topological_space α]
 is_closed U1 ∧ is_closed U2 :=
 begin 
   intro H,
-  have h2 : U1 = -U2 := disjoint_and_union_univ_imp_compl H.1 H.2.1, 
-  have h3 : -U1 = U2 := eq_comm.mp (eq_compl_iff_compl_eq.mp h2),
-  have hu1c : is_closed U1, {rw [←h3] at hu2, rwa is_closed},
-  have hu2c : is_closed U2, {rw h2 at hu1, rwa is_closed}, 
-  exact ⟨hu1c,hu2c⟩,  
+  exact ⟨by {rw [←eq_comm.mp (eq_compl_iff_compl_eq.mp (disjoint_and_union_univ_imp_compl H.1 H.2.1))] at hu2, rwa is_closed}, 
+  by {rw disjoint_and_union_univ_imp_compl H.1 H.2.1 at hu1, rwa is_closed}⟩
 end 
 
 
@@ -211,10 +208,8 @@ lemma open_separation_to_closed2 [topological_space α]
   {U1 U2 : set α} (hu1 : is_open U1) (hu2 : is_open U2) (hunion : U1 ∪ U2 = univ)
   (hinter : U1 ∩ U2 = ∅) (hnon1 : U1 ≠ ∅) (hnon2 :U2 ≠ ∅) : is_closed U1 ∧ is_closed U2 :=  
 begin 
-  have h2 : U1 = -U2 := disjoint_and_union_univ_imp_compl hunion hinter, 
-  have h3 : -U1 = U2 := eq_comm.mp (eq_compl_iff_compl_eq.mp h2),
-  have hu1c : is_closed U1, {rw [←h3] at hu2, rwa is_closed},
-  have hu2c : is_closed U2, {rw h2 at hu1, rwa is_closed}, 
+  have hu1c : is_closed U1, {rw [←eq_comm.mp (eq_compl_iff_compl_eq.mp (disjoint_and_union_univ_imp_compl hunion hinter))] at hu2, rwa is_closed},
+  have hu2c : is_closed U2, {rw disjoint_and_union_univ_imp_compl hunion hinter at hu1, rwa is_closed}, 
   exact ⟨hu1c,hu2c⟩,  
 end 
 
@@ -224,13 +219,8 @@ lemma closed_separation_to_open [topological_space α]
 is_open U1 ∧ is_open U2 :=
 begin 
   intro H,
-  have h2 : U1 = -U2 := disjoint_and_union_univ_imp_compl H.1 H.2.1, 
-  have h3 : -U1 = U2 := eq_comm.mp (eq_compl_iff_compl_eq.mp h2),
-  have hu1c : is_open U1,
-    {rw [←h3] at hu2, rwa is_closed at hu2, simp at hu2, assumption},
-  have hu2c : is_open U2, 
-    {rw h2 at hu1, rwa is_closed at hu1, simp at hu1, assumption}, 
-  exact ⟨hu1c,hu2c⟩,    
+    exact ⟨by {rw [←eq_comm.mp (eq_compl_iff_compl_eq.mp (disjoint_and_union_univ_imp_compl H.1 H.2.1))] at hu2, rwa is_closed at hu2, simp at hu2, assumption},
+      by {rw disjoint_and_union_univ_imp_compl H.1 H.2.1 at hu1, rwa is_closed at hu1, simp at hu1, assumption}⟩,    
 end 
 
 
@@ -238,14 +228,10 @@ lemma closed_separation_to_open2 [topological_space α]
 {U1 U2 : set α} (hu1 : is_closed U1) (hu2 : is_closed U2) (hunion : U1 ∪ U2 = univ)
 (hinter : U1 ∩ U2 = ∅) (hnon1 : U1 ≠ ∅) (hnon2 :U2 ≠ ∅) : is_open U1 ∧ is_open U2 :=  
 begin 
-  have h2 : U1 = -U2 := disjoint_and_union_univ_imp_compl hunion hinter, 
-  have h3 : -U1 = U2 := eq_comm.mp (eq_compl_iff_compl_eq.mp h2),
-  have hu1c : is_open U1,
-    {rw [←h3] at hu2, rwa is_closed at hu2, simp at hu2, assumption},
-  have hu2c : is_open U2, 
-    {rw h2 at hu1, rwa is_closed at hu1, simp at hu1, assumption}, 
-  exact ⟨hu1c,hu2c⟩,  
+  exact ⟨by {rw [←eq_comm.mp (eq_compl_iff_compl_eq.mp (disjoint_and_union_univ_imp_compl hunion hinter))] at hu2, rwa is_closed at hu2, simp at hu2, assumption},
+    by {rw disjoint_and_union_univ_imp_compl hunion hinter at hu1, rwa is_closed at hu1, simp at hu1, assumption}⟩,    
 end 
+
 
 
 lemma no_open_sep_iff_no_closed_sep [topological_space α] :
@@ -253,37 +239,34 @@ lemma no_open_sep_iff_no_closed_sep [topological_space α] :
 ↔ (∀ V1 V2 : set α, is_closed V1 ∧ is_closed V2 → ¬( V1 ∪ V2 = univ ∧ V1 ∩ V2 = ∅ ∧ V1 ≠ ∅ ∧ V2 ≠ ∅)) :=
 begin
   apply iff.intro, 
-    intros H1 V1 V2 h1, by_contradiction c1,
-    have a1, from closed_separation_to_open h1.1 h1.2 c1, 
-    have c2, from H1 V1 V2 a1, 
-    apply absurd c1 c2,
-
-  intros H1 U1 U2 h1, by_contradiction c1,
-  have a1, from open_separation_to_closed h1.1 h1.2 c1, 
-  have c2, from H1 U1 U2 a1, 
-  apply absurd c1 c2,
+    intros H1 V1 V2 h1 c1,
+    apply absurd c1 (H1 V1 V2 (closed_separation_to_open h1.1 h1.2 c1)),
+  intros H1 U1 U2 h1 c1,
+  apply absurd c1 (H1 U1 U2 (open_separation_to_closed h1.1 h1.2 c1)),
 end
 
 
 lemma closure_union_closure_compl_eq_univ [topological_space α] {A : set α} :
 closure A ∪ closure (-A) = univ :=
-begin
-  have h1 : A ∪ -A = univ := union_compl_self _ ,
-  have s1 : A ⊆ closure A := subset_closure,
-  have s2 : -A ⊆ closure (-A) := subset_closure,
-  have h2 := union_subset_union s1 s2,
-  rw h1 at h2, by exact eq_univ_of_univ_subset h2,
-end
+  by {simp, rw [←compl_subset_iff_union], rw [compl_subset_comm, compl_compl], 
+  exact interior_subset_closure}
+
 
  
-lemma trivial_imp_empty_frontier [topological_space α] (A : set α) :
+lemma trivial_imp_empty_frontier [topological_space α] {A : set α} :
 A = univ ∨ A = ∅ → frontier A = ∅ :=
 begin 
-  intro g1, rw frontier, 
-  by exact or.elim g1
+  intro H,
+  by exact or.elim H
     (assume a1, show closure A \ interior A = ∅, {rw a1, simp, rw [←compl_eq_univ_diff _], simp})
     (assume a1, show closure A \ interior A = ∅, {rw a1, by simp}),
 end
+
+lemma trivial_imp_empty_frontier2 [topological_space α] {A : set α} 
+(H : A = univ ∨ A = ∅) : frontier A = ∅ :=
+  or.elim H
+    (assume a1, show closure A \ interior A = ∅, {rw a1, simp, rw [←compl_eq_univ_diff _], simp})
+    (assume a1, show closure A \ interior A = ∅, {rw a1, by simp})
 
 
 ------------------------------------------------------------
@@ -299,25 +282,18 @@ lemma two_implies_three [topological_space α] : (∀ U V : set α, is_closed U 
 ¬( U ∪ V = univ ∧ U ∩ V = ∅ ∧ U ≠ ∅ ∧ V ≠ ∅ )) → (∀ s : set α, frontier s = ∅ ↔ s = univ ∨ s = ∅) :=
 begin
   intros h1 s, apply iff.intro, assume h2,
-  have h3 : closure s ∩ closure (- s) = ∅, 
-    {rwa frontier_eq_closure_inter_closure at h2},
-  have h4 : closure s ∪ closure (-s) = univ := closure_union_closure_compl_eq_univ,
-  have c1 : is_closed (closure s), by simp,
-  have c2 : is_closed (closure (-s)), by simp,
-  have h5, from h1 (closure s) (closure (-s)) ⟨c1,c2⟩, simp at h5 h4 h3,
-  have h6, from neq_empty_imp_empty_to_union (h5 h4 h3), 
-  by exact or.elim h6
-    (assume a1, have a2 : s ⊆ ∅, {rw [←a1], by exact subset_closure},
-      by exact or.inr (eq_empty_of_subset_empty a2))
-    (assume a1, have a2 : -s ⊆ ∅, {rw [←closure_compl_eq] at a1, rw[←a1],
-      by exact subset_closure},
-      have a3 : -s = ∅ := eq_empty_of_subset_empty a2,
-      have a4 : s = univ, {have b1 : -(-s) = -∅, 
-      {rw [←a3]}, simp at b1, assumption},
-      by exact or.inl a4),
-
-  by exact trivial_imp_empty_frontier s,
-
+    have h3 : closure s ∩ closure (- s) = ∅, {rwa frontier_eq_closure_inter_closure at h2},
+    have h4 := closure_union_closure_compl_eq_univ,
+    have h5 := h1 (closure s) (closure (-s)) ⟨by simp, by simp⟩, simp at h5 h4 h3,
+    by exact or.elim (neq_empty_imp_empty_to_union (h5 h4 h3))
+      (assume a1, have a2 : s ⊆ ∅, {rw [←a1], by exact subset_closure},
+        by exact or.inr (eq_empty_of_subset_empty a2))
+      (assume a1,
+        have a2 : -s = ∅ := eq_empty_of_subset_empty 
+          (by {rw [←closure_compl_eq] at a1, rw [←a1], by exact subset_closure}),
+        by exact or.inl 
+          (by {have b1 : -(-s) = -∅, {rw [←a2]}, simp at b1, assumption})),
+  by exact trivial_imp_empty_frontier,
 end
 
 -- (3) → (4)
@@ -991,7 +967,4 @@ begin
     {rw [h2 U1] at hU1, by exact hU1.1}, by exact absurd a1 hc.2.2.1),
 end
 
-
-
- ------------------------------------------------------------
-
+------------------------------------------------------------
