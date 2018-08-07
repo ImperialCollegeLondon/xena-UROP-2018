@@ -33,12 +33,8 @@ cases (classical.em (n > 1)),
     intros,
     have h9 : (nat.gcd n ((A.val).val) : ℤ) ∣ n , from int.coe_nat_dvd.mpr (nat.gcd_dvd_left _ _),
     have h10 : (nat.gcd n ((A.val).val) : ℤ) ∣ n * a, from dvd_mul_of_dvd_left h9 a, 
-
-    have a_nat : a = (int.nat_abs a : ℤ), 
-    {
-        sorry,
-    },
-    have h11 : (nat.gcd n ((A.val).val) : ℤ) ∣ n * (int.nat_abs a : ℤ), rwa a_nat at h10,
+    have h11 : (nat.gcd n ((A.val).val) : ℤ) ∣ n * (int.nat_abs a : ℤ), 
+    refine dvd_trans h10 (mul_dvd_mul_left _ (int.dvd_nat_abs.2 (dvd_refl _))),
     have h12 : nat.gcd n ((A.val).val) ∣ n * int.nat_abs a, from int.coe_nat_dvd.mp h11,
     have uneq : ((A.val).val * a_1.val) ≥ n * int.nat_abs a,
     {
@@ -60,8 +56,7 @@ cases (classical.em (n > 1)),
 } 
 end,
 inv_val := begin 
-
-sorry 
+sorry, 
 end},
 left_inv := begin 
 

@@ -16,6 +16,7 @@ open nat
 --  449 and 617 are both prime).
 -- TODO: how to prove it using quadratic reciprocity?
 
+local attribute [instance] decidable_prime_1
 
 theorem ls_3_449 (oddprime_449 : (prime 449 ∧ 449 ≠ 2)) : legendre_sym 3 oddprime_449 = -1 :=
 begin
@@ -32,7 +33,7 @@ end
 
 theorem ls_5_449 (H : prime 449 ∧ 449 ≠ 2) : legendre_sym 5 H = 1 := 
 begin 
-    have prime_5 : prime 5 ∧ 5 ≠ 2, sorry,
+    have prime_5 : prime 5 ∧ 5 ≠ 2, from ⟨dec_trivial, by norm_num⟩,
     rw (show (legendre_sym 5 H) = (legendre_sym 449 prime_5) * (-1)^(((5-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity' _ _),
     norm_num,
     have : 449 ≡ -1 [ZMOD 5], by norm_num [int.modeq],
@@ -42,7 +43,7 @@ end
 
 theorem ls_7_449 (H : prime 449 ∧ 449 ≠ 2) : legendre_sym 7 H = 1 := 
 begin
-   have prime_7 : prime 7 ∧ 7 ≠ 2, sorry,
+   have prime_7 : prime 7 ∧ 7 ≠ 2, from ⟨dec_trivial, by norm_num⟩,
     rw (show (legendre_sym 7 H) = (legendre_sym 449 prime_7) * (-1)^(((7-1)/2)*((449-1)/2)), from law_of_quadratic_reciprocity' _ _),
     norm_num,
     have : 449 ≡ 1 [ZMOD 7], by unfold int.modeq; norm_num, 
@@ -51,7 +52,7 @@ end
 
 theorem ls_5_617 (H : prime 617 ∧ 617 ≠ 2) : legendre_sym 5 H = -1 := 
 begin
-    have prime_5 : prime 5 ∧ 5 ≠ 2, sorry,
+    have prime_5 : prime 5 ∧ 5 ≠ 2, from ⟨dec_trivial, by norm_num⟩,
     rw (show (legendre_sym 5 H) = (legendre_sym 617 prime_5) * (-1)^(((5-1)/2)*((617-1)/2)), from law_of_quadratic_reciprocity' _ _),
     norm_num,
     have : 617 ≡ 2 [ZMOD 5], by unfold int.modeq; norm_num, 
@@ -61,7 +62,7 @@ end
 
 theorem ls_11_617 (H : prime 617 ∧ 617 ≠ 2) : legendre_sym 11 H = 1 := 
 begin
-    have prime_11 : prime 11 ∧ 11 ≠ 2, sorry,
+    have prime_11 : prime 11 ∧ 11 ≠ 2, from ⟨dec_trivial, by norm_num⟩,
     rw (show (legendre_sym 11 H) = (legendre_sym 617 prime_11) * (-1)^(((11-1)/2)*((617-1)/2)), from law_of_quadratic_reciprocity' _ _),
     norm_num,
     have : 617 ≡ 1 [ZMOD 11], by unfold int.modeq; norm_num, 
@@ -87,19 +88,22 @@ theorem q2a : ∃ A : set ℕ, ∀ x : ℕ, primitive_root x 19 ↔ x ∈ A := s
 
 -- Show that if n is odd and a is a primitive root mod n, then a is a primitive root mod 2n if a is odd, and a + n is a primitive root mod 2n if a is even. 
 -- [HINT: Φ(2n) = Φ(n) when n is odd.]
-theorem q2b {a n : ℕ} (h_odd : gcd 2 n = 1) (hp : primitive_root a n) : (gcd 2 a = 1 → primitive_root a (2*n)) ∧ (gcd 2 a = 0 → primitive_root (a + n) (2*n)) := 
+theorem q2b {a n : ℕ} (n_odd : gcd 2 n = 1) (hp : primitive_root a n) : (gcd 2 a = 1 → primitive_root a (2*n)) ∧ (gcd 2 a = 2 → primitive_root (a + n) (2*n)) := 
 begin
-    split,
-    have phi1 : order_of a (phi n) = n, 
+    unfold primitive_root at hp, split,
+    have p1: coprime a n, from hp.1,
+    have p2: order_of a n = phi n, from hp.2, 
+    have p3: phi (2*n) = phi n, rw [phi_mul 2 n n_odd, phi_p 2 (prime_two), one_mul],
     {
+        intro h, unfold primitive_root, split,
+        have h1: coprime 2 a, by {unfold coprime, exact h},
+        by {unfold coprime, unfold coprime at p1, rw [@coprime.gcd_mul_left_cancel_right 2 a n h1, p1],},
+        rw p3,
         sorry,
     },
-    {
-        intro h,
-        sorry,
-    },
-    {   intro h,
-        sorry,
+    {   
+        intro h, unfold primitive_root, split,
+        sorry, sorry,
     }
 end
 
@@ -113,45 +117,52 @@ primitive_root a (p^2) ↔ ¬(a^(p-1) ≡ 1 [MOD (p^2)]) :=
     apply iff.intro,
     {
         intro j1, unfold primitive_root at hq j1,
-        have j2: phi (p^2) = p^1*(p-1), from power_p_phi p 2 hp,
-        have j3: p^1*(p-1) = p*(p-1), by simp,
-        have j4: phi (p^2) = p*(p-1), rw [j2,j3],
-        have j5: order_of a (p^2) = p*(p-1), rw [j1.2,j4],
-        assume j6: a^(p-1) ≡ 1 [MOD (p^2)],
-        have j7: order_of a (p^2) ∣ (p-1), from order_div a (p^2) (p-1) j1.1 j6,
-        have j8: p*(p-1) ∣ (p-1), from eq.subst j5 j7,
-        have j9: ¬ p*(p-1) ∣ (p-1), from mt (le_of_dvd (nat.sub_pos_of_lt hp.gt_one)) 
+        have j2: order_of a (p^2) = p*(p-1), rw [j1.2, power_p_phi p 2 hp, nat.pow_one],
+        assume j3,
+        have j4: order_of a (p^2) ∣ (p-1), from order_div a (p^2) (p-1) j1.1 j3,
+        have j5: p*(p-1) ∣ (p-1), rwa j2 at j4,
+        have j6: ¬ p*(p-1) ∣ (p-1), from mt (le_of_dvd (nat.sub_pos_of_lt hp.gt_one)) 
           (not_le_of_gt ((lt_mul_iff_one_lt_left (nat.sub_pos_of_lt hp.gt_one)).2 hp.gt_one)),
-        from absurd j8 j9,
+        from absurd j5 j6,
     },
 
     {
         unfold prime at hp, unfold primitive_root at hq, unfold primitive_root,
-        intro j1,
-        have j2: phi (p^2) = p^1*(p-1), from power_p_phi p 2 hp,
-        have j3: p^1*(p-1) = p*(p-1), by simp,
-        have j4: phi (p^2) = p*(p-1), from eq.subst j2.symm j3,
-        have j5: order_of a (p^2) ∣ phi (p^2), from order_div_phi_n a (p^2) h2,
-        have j6: order_of a (p^2) ∣ p*(p-1), from eq.subst j4 j5, 
-        have j7: phi (p^1) = p^0*(p-1), from power_p_phi p 1 hp,
-        have j8: p^0 = 1, from nat.pow_zero p,
-        have j9: phi (p^1) = 1*(p-1), rw [j7,j8], 
-        have j10: (p^1) = p, from pow_one p,
-        have j11: phi p = 1*(p-1), rw [←j9,j10],
-        have j12: 1*(p-1) = p-1, from one_mul (p-1),
-        have j13: phi p = p-1, rw [j11,j12],
-        have j14: order_of a p = p-1, rw [hq.2,j13],
-        have j15: a ^ order_of a (p^2) ≡ 1 [MOD (p^2)], from pow_order_eq_one a (p^2) h2,
-        have j16: p^2 ∣ a ^ order_of a (p^2) - 1, from sorry,
-        have j17: p ∣ a ^ order_of a (p^2) - 1, from sorry,
-        have j18: a ^ order_of a (p^2) ≡ 1 [MOD p], from sorry,
-        have j19: order_of a p ∣ order_of a (p^2), from order_div a p (order_of a (p^2)) h1 j18,
-        have j20: p-1 ∣ order_of a (p^2), from eq.subst j14 j19,
-
-        sorry,
+        intro h,
+        have j1: coprime a (p^2),
+        {
+            unfold coprime,
+            have h1: gcd a (p*p) = gcd a p, from @coprime.gcd_mul_right_cancel_right p a p hq.1.symm,
+            have h2: gcd a (p*p) = 1, from eq.subst hq.1 h1,
+            have h3: p^2 = p*p, norm_num,
+            from eq.subst h3.symm h2,
+        },
+        have j2: phi (p^2) = p*(p-1), rw [power_p_phi p 2 hp, nat.pow_one],
+        have j3: order_of a (p^2) ∣ phi (p^2), from order_div_phi_n a (p^2) j1,
+        have j4: order_of a (p^2) ∣ p*(p-1), from eq.subst j2 j3, 
+        have j5: phi (p^1) = 1*(p-1), rw [power_p_phi p 1 hp, nat.pow_zero],
+        have j6: phi p = 1*(p-1), rw [←j5, nat.pow_one],
+        have j7: order_of a p = p-1, rw [hq.2, j6, one_mul],
+        have j8: a ^ order_of a (p^2) ≡ 1 [MOD (p^2)], from pow_order_eq_one a (p^2) j1,
+        have j9: ↑(p^2) ∣ ↑(a ^ order_of a (p^2)) - ↑1, from nat.modeq.dvd_of_modeq j8.symm,
+        --have j17: ↑(a ^ order_of a (p^2)) - ↑1 = ↑(a ^ order_of a (p ^ 2) - 1), from sorry,
+        --have j18: ↑(p^2) ∣ ↑(a ^ order_of a (p ^ 2) - 1), from eq.subst j17 j16,
+        have j10: (p^2) ∣ a ^ order_of a (p^2) - 1, from sorry,
+        have j11: p ∣ a ^ order_of a (p^2) - 1,
+        {
+            have h1: p^2 = p*p, norm_num,
+            have h2: p*p ∣ a ^ order_of a (p*p) - 1, from eq.subst h1 j10,
+            have h3: p ∣ p*p, from sorry,
+            from dvd_trans h3 h2,
+        },
+        have j12: a ^ order_of a (p^2) ≡ 1 [MOD p], from sorry,
+        have j13: order_of a p ∣ order_of a (p^2), from order_div a p (order_of a (p^2)) hq.1 j12,
+        have j14: p-1 ∣ order_of a (p^2), from eq.subst j7 j13,
+        have j15: order_of a (p^2) = p*(p-1), from sorry,
+        have j16: order_of a (p^2) = phi (p^2), rw[j15, ←j2], 
+        from ⟨j1, j16⟩,    
     }
-end 
-
+end
 -- Let p be a prime, and let a be an integer not divisible by p. 
 -- Show that the equation x^d ≡ a (mod p) has a solution if, and only if, a^(p−1/(d,p−1)) ≡ 1 (mod p). 
 -- Show further that if this is the case then this equation has (d, p − 1) solutions mod p.
