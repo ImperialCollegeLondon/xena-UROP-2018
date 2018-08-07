@@ -15,7 +15,7 @@ open nat
 
 
 definition prime_int (p : ℤ) := nat.prime(int.nat_abs p) 
-definition quadratic_res (a n : ℤ) := ∃ x : ℤ, a ≡ x^2 [ZMOD n]
+definition quadratic_res (a n : ℤ) := ∃ x : ℤ, a ≡ x^2 [ZMOD (int.nat_abs n)]
 --definition quadratic_res' (p : ℤ) (hp : prime_int_int p ∧ p ≠ 2) (a n : zmod p) := ∃ x : ℕ, a ≡ x^2 [ZMOD n]
 
 attribute [instance, priority 0] classical.prop_decidable
@@ -58,8 +58,23 @@ by induction n; simp [*, _root_.pow_succ]
 ((a ^ n : ℕ ) : α) = a ^ n :=
 by induction n; simp [*, _root_.pow_succ, nat.pow_succ, mul_comm]
 
+lemma int.mod_two_eq_zero_or_one (n : ℤ): n % 2 = 0 ∨ n % 2 = 1 := 
+have h: n % 2 < 2 := abs_of_nonneg (show (2 : ℤ) ≥ 0, from dec_trivial) ▸
+int.mod_lt _ dec_trivial, 
+have h1 : n % 2 ≥ 0 := int.mod_nonneg _ dec_trivial, 
+match (n % 2), h, h1 with 
+| (0 : ℕ) := λ _ _, or.inl rfl
+| (1 : ℕ) := λ _ _, or.inr rfl
+| (k+2 : ℕ) := λ h _, absurd h dec_trivial
+|(-[1+ a]) := λ _ h1, absurd h1 dec_trivial 
+end
 
-theorem euler_c_1 (a p : ℤ) (hp : prime_int p ∧ p ≠ 2) (ha : ¬ p ∣ a) : quadratic_res a p → a^int.nat_abs((p-1)/2) ≡ 1 [ZMOD (int.nat_abs p)] := 
+lemma int.modeq.mod_modeq : ∀ (a n : ℤ), a % n ≡ a [ZMOD (int.nat_abs n)] := sorry 
+
+lemma int.add_sub_cancel_left : ∀ (n m : ℤ), n + m - n = m := sorry 
+
+
+theorem euler_c_1 (a p : ℤ) (hp : prime_int p ∧ int.nat_abs p ≠ 2) (ha : ¬ p ∣ a) : quadratic_res a p → a^int.nat_abs((p-1)/2) ≡ 1 [ZMOD (int.nat_abs p)] := 
 begin
 intro Hqr,
 cases Hqr with x hx,
@@ -67,55 +82,61 @@ haveI : prime_int p := hp.1,
 haveI : pos_nat(int.nat_abs p) := sorry,
 rw ← zmod.eq_iff_modeq_int,
 rw ← zmod.eq_iff_modeq_int at hx,
-have q: 2 ∣ (p-1):=
+have q: 2 ∣ int.nat_abs(p-1):=
 begin
-  cases nat.mod_two_eq_zero_or_one p,
-  have : p % 2 ≡ p [MOD 2], from nat.modeq.mod_modeq p 2,
-  have : 0 ≡ p [MOD 2], from eq.subst h this,
-  have : p ≡ 0 [MOD 2], from modeq.symm this,
+  cases nat.mod_two_eq_zero_or_one (int.nat_abs p),
+  have : (int.nat_abs p) % 2 ≡ int.nat_abs p [MOD 2], from nat.modeq.mod_modeq (int.nat_abs p) 2,
+  have : 0 ≡ int.nat_abs p [MOD 2], from eq.subst h this,
+  have : int.nat_abs p ≡ 0 [MOD 2], from nat.modeq.symm this,
   rw ← nat.modeq.modeq_zero_iff,
   exfalso,
-  have h1 := hp.1.2 2 (nat.modeq.modeq_zero_iff.1 this),
+  have h1 := hp.1.2 _ (nat.modeq.modeq_zero_iff.1 this),
   cases h1 with h3 h4,
   have h2: 2 ≠ 1, by norm_num,
   exact h2 h3,
   exact hp.2.symm h4,
-  rw ← nat.mod_add_div p 2,
-  rw h, rw nat.add_sub_cancel_left,
-  simp,
+  rw ← int.coe_nat_dvd,
+  rw int.dvd_nat_abs,
+  rw ← int.mod_add_div p 2,
+  have : p % 2 = 1, sorry,
+  rw this, rw int.add_sub_cancel_left,
+  have r: 2 ≠ 0, by norm_num,
+  exact dvd_mul_right _ _,
 end,
-rw int.cast_pow, rw hx, rw int.cast_pow, rw ← pow_mul, rw nat.mul_div_cancel' q,
-have h1 : x^(p-1) ≡ 1 [MOD p], from fermat_little_theorem_extension x p hp.1,
-have h2 : ↑(x^(p-1)) ≡ ↑1 [ZMOD ↑p], from (int.modeq.coe_nat_modeq_iff (x^(p-1)) 1 p).2 h1,
-have h3 : ↑(x^(p-1)) = ↑1, from zmod.eq_iff_modeq_int.2 h2,
-rw ← int.cast_pow,
-suffices h4 : x^(p-1) = ↑x^(p-1), rw h4 at h3, 
-simpa [nat.cast_pow]using h3,
-simp,
+rw int.cast_pow, rw hx, rw int.cast_pow, rw ← pow_mul,-- rw nat.mul_div_cancel' q,
+--have h1 : x^(p-1) ≡ 1 [MOD p], from fermat_little_theorem_extension x p hp.1,
+--have h2 : ↑(x^(p-1)) ≡ ↑1 [ZMOD ↑p], from (int.modeq.coe_nat_modeq_iff (x^(p-1)) 1 p).2 h1,
+--have h3 : ↑(x^(p-1)) = ↑1, from zmod.eq_iff_modeq_int.2 h2,
+--rw ← int.cast_pow,
+--suffices h4 : x^(p-1) = ↑x^(p-1), rw h4 at h3, 
+--simpa [nat.cast_pow]using h3,
+--simp,
+sorry,
 end
 
 
-lemma euler_c_2 (a p : ℕ) (hp : prime_int p ∧ p ≠ 2) (ha : ¬ p ∣ a) : ¬ (quadratic_res a p) → a^((p-1)/2) ≡ -1 [ZMOD p] := sorry
+lemma euler_c_2 (a p : ℕ) (hp : prime_int p ∧ p ≠ 2) (ha : ¬ p ∣ a) : ¬ (quadratic_res a p) → a^int.nat_abs((p-1)/2) ≡ -1 [ZMOD (int.nat_abs p)] := sorry
 
 
-theorem euler_criterion (p : ℕ) (a : ℤ) (hp : prime_int p ∧ p ≠ 2) (ha : ¬ p ∣ a) :
-  (a^((p - 1) / 2) : ℤ) ≡ legendre_sym a hp [ZMOD p] := 
+theorem euler_criterion (p : ℤ) (a : ℤ) (hp : prime_int p ∧ p ≠ 2) (ha : ¬ p ∣ a) :
+  a^int.nat_abs((p - 1) / 2) ≡ legendre_sym a hp [ZMOD (int.nat_abs p)] := 
 begin 
-  have h1 : a^(p-1) ≡ 1 [MOD p], from fermat_little_theorem_extension a p hp.left,
-  have h2 : ↑(a ^ (p - 1)) ≡ ↑1 [ZMOD ↑p], from (int.modeq.coe_nat_modeq_iff (a^(p-1)) 1 p).mpr h1,
-  have h3 : ↑1 ≡ ↑1 [ZMOD p], from int.modeq.refl 1,
-  have h4 : ((a ^ (p - 1)) : ℕ) - 1 ≡ 0 [ZMOD p], from int.modeq.modeq_sub h2 h3,
-  have h5 : (a ^ ((p - 1)/2))^2-1 = (a^((p-1)/2)+1)*(a^((p-1)/2)-1), from factorization_x_square_minus_one (a^((p-1)/2)),
-  unfold legendre_sym,
-  split_ifs,
-  exact euler_c_1 a p hp ha h.1,
-  exfalso,
-  have h7 : ¬quadratic_res ↑a ↑p, from not_and'.1 h (show ¬↑p ∣ ↑a, from (not_iff_not.2 int.coe_nat_dvd).2 ha),
-  from absurd h_1 h7,
-  exact euler_c_2 a p hp ha h_1,
+  --have h1 : a^(p-1) ≡ 1 [MOD p], from fermat_little_theorem_extension a p hp.left,
+  --have h2 : ↑(a ^ (p - 1)) ≡ ↑1 [ZMOD ↑p], from (int.modeq.coe_nat_modeq_iff (a^(p-1)) 1 p).mpr h1,
+  --have h3 : ↑1 ≡ ↑1 [ZMOD p], from int.modeq.refl 1,
+  --have h4 : ((a ^ (p - 1)) : ℕ) - 1 ≡ 0 [ZMOD p], from int.modeq.modeq_sub h2 h3,
+  --have h5 : (a ^ ((p - 1)/2))^2-1 = (a^((p-1)/2)+1)*(a^((p-1)/2)-1), from factorization_x_square_minus_one (a^((p-1)/2)),
+  --unfold legendre_sym,
+  --split_ifs,
+  --exact euler_c_1 a p hp ha h.1,
+  --exfalso,
+  --have h7 : ¬quadratic_res ↑a ↑p, from not_and'.1 h (show ¬↑p ∣ ↑a, from (not_iff_not.2 int.coe_nat_dvd).2 ha),
+  --from absurd h_1 h7,
+  --exact euler_c_2 a p hp ha h_1,
+  sorry,
 end
 
-theorem LQR_supplementary_1 {p : ℕ} (hp : prime_int p ∧ p ≠ 2) : legendre_sym (-1:ℤ) hp = (-1:ℤ)^((p-1)/2) := 
+theorem LQR_supplementary_1 {p : ℤ} (hp : prime_int p ∧ p ≠ 2) : legendre_sym (-1:ℤ) hp = (-1:ℤ)^int.nat_abs((p-1)/2) := 
 begin 
 have h1 : ¬ ((p:ℤ)∣(-1:ℤ)), 
 {
