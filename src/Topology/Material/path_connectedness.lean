@@ -19,18 +19,36 @@ def open_interval (a b : ℝ) : set ℝ := {x : ℝ | a < x ∧ x < b}
 --def is_connected_in_reals (s : set ℝ) [topological_space ℝ] : Prop :=
 --is_open s ↔ ∃ a b, s = open_interval a b
 
-def is_path_connected [topological_space α] : Prop := 
+def is_path_connected [topological_space α] (U : set α) : Prop :=
+∀ x y, x ∈ U → y ∈ U → ∃ f : I01 → α, is_path x y f ∧ ∀ r : I01, f r ∈ U
+
+def is_path_connected_space [topological_space α] : Prop := 
 ∀ x y : α, ∃ f : I01 → α, is_path x y f
 
 class path_connected_space α extends topological_space α :=
 (path_connectedness : ∀ x y : α, ∃ f : I01 → α, is_path x y f)
 
+theorem is_pcon_univ_iff_pcon (t : topological_space α) :
+@is_path_connected_space α t ↔ @is_path_connected α t univ :=
+begin
+  apply iff.intro,
+    intros H x y hx hy, cases (H x y) with f hf,
+    by exact exists.intro f ⟨hf, assume r : I01, by simp⟩,
+  intros H x y, cases (H x y (by simp) (by simp)) with f hf,
+  by exact exists.intro f hf.1,
+end
+
+
+theorem exists_id_path [topological_space α] : ∀ x : α, ∃ f : I01 → α, is_path x x f :=
+  assume x, exists.intro (λ y : I01, x) ⟨by simp, by simp, continuous_const⟩
+
+
 
 lemma I01_connected : connected_space I01 := sorry
 
 lemma I01_no_sep (C : connected_space I01) : ∀ U V : set I01, 
-is_open U ∧ is_open V → ¬(U ∪ V = univ ∧ U ∩ V = ∅ ∧ U ≠ ∅ ∧ V ≠ ∅) := sorry
-
+is_open U ∧ is_open V → ¬(U ∪ V = univ ∧ U ∩ V = ∅ ∧ U ≠ ∅ ∧ V ≠ ∅) 
+:= sorry
 
 
 theorem path_connected_imp_connected [path_connected_space α] : connected_space α :=
@@ -63,5 +81,7 @@ begin
   have b1 : ¬((f ⁻¹' U) ∪ (f ⁻¹' V) = univ ∧ (f ⁻¹' U) ∩ (f ⁻¹' V) = ∅ ∧ (f ⁻¹' U) ≠ ∅ ∧ (f ⁻¹' V) ≠ ∅)
     := I01_no_sep C (f ⁻¹' U) (f ⁻¹' V) ⟨g5,g6⟩,
   by exact absurd ha b1,
-  end
+end
+
+
 
