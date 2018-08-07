@@ -14,8 +14,10 @@ noncomputable instance {n : ℕ} : fintype {f : fin n→ fin n // function.bijec
 set_fintype _
 def S (n: ℕ ) := equiv.perm (fin n)
 instance (n : ℕ) : has_coe_to_fun (S n) := by unfold S; apply_instance
-def e {n:ℕ} (σ :S n) {R:Type} [comm_ring R] : R:= sorry 
-
+def e {n:ℕ} {R:Type} [comm_ring R] (σ : fin n → fin n) : R:= sorry 
+theorem Sig_eq_inv {n:ℕ} {R:Type} [comm_ring R] (π: S n)  : @e n R _  π.1 = e (π.symm).1 := sorry
+theorem sig_mul  {n:ℕ} {R:Type} [comm_ring R] (σ π : fin n → fin n) : @e n R _  (σ ∘ π  )= (@e n R _  σ ) *  @e n R _   π  := sorry
+theorem sig_swap  {n:ℕ} {R:Type} [comm_ring R] (i j : fin n): e (equiv.swap i j).1 = (-1 :R) := sorry
 noncomputable instance Sn_finite {n:ℕ}: fintype (S n):=
 fintype.of_surjective 
 (λ (f : {f : fin n → fin n // function.bijective f}), equiv.of_bijective f.2) 
