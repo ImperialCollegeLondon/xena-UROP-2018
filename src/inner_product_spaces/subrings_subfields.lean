@@ -71,7 +71,6 @@ rw zero_sub at H,
 exact H,
 end
 
-
 lemma add_mem {F : Type u} [field F] {s : set F} [is_subfield s] {x y : F} :
 x ∈ s → y ∈ s → x + y ∈ s := λ hx hy, eq.subst (sub_neg_eq_add x y) (sub_mem hx (neg_mem hy))
 
