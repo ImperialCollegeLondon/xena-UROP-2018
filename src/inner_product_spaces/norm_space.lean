@@ -73,9 +73,8 @@ end
 
 noncomputable def norm_dist (x y : V) := N(x - y)
 
-noncomputable instance norm_space_is_metric_space : 
-metric_space V :=
-{
+noncomputable instance to_metric_space : has_coe (norm_space V) (metric_space V) :=
+⟨λh, {
 dist := norm_dist, 
 dist_self := 
     begin
@@ -105,7 +104,7 @@ dist_triangle :=
     rw H, 
     exact norm_sub_add (x - y) (y - z),
     end,
-}
+} ⟩ 
 
 def is_normalised (x : V) := N(x) = 1 
 
