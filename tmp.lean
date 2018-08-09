@@ -42,7 +42,9 @@ instance : add_comm_group (vector ℝ n) :=
         },
     zero := vector.has_zero.zero,
     zero_add := by 
-        { intro a, },
+        { intro a, 
+        cases n,
+        have := vector.map_nil, },
 }
 
 noncomputable instance : vector_space ℝ (vector ℝ n) :=
