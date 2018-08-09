@@ -175,7 +175,7 @@ have Int : int_clos Hrs =  R ∩ L,
     unfold has_inter.inter set.inter , unfold int_clos, simp,  
 rw Int, exact is_closed_inter C2 C1, 
 end 
-#check subtype.topological_space
+--#check subtype.topological_space
 lemma is_closed_I01 : is_closed I01 := 
 begin exact @is_closed_int_clos 0 1 (by norm_num) end 
 
@@ -415,7 +415,7 @@ definition par_inv : I01 → I01 :=  λ x, ⟨ 1 - x.val , inv_in_I01 x ⟩
 
 @[simp] lemma eqn_2_par_inv : par_inv 1 = 0 := by refl 
 
-#check mul_one
+--#check mul_one
 
 lemma help_inv (y : ℝ ) : ( 1 - y) = (-1) * y + 1 := by simp 
 
@@ -488,5 +488,5 @@ def loop_const {α} [topological_space α] (x0 : α) : loop x0 :=
 -- instance loop_is_path (l1 : loop3 x0) : path x0 x0  := l1.to_path 
 
 
---end path 
+end path 
 
