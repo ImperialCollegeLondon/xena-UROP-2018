@@ -18,12 +18,12 @@ include n
 
 -- infix ` • ` := has_scalar.smul
 
--- def has_add : has_add (vector ℝ n) := 
--- { add := map₂ real.has_add.add }
+def has_add : has_add (vector ℝ n) := 
+{ add := map₂ real.has_add.add }
 
--- def has_add.add := @has_add.add _ (@has_add n)
+def has_add.add := @has_add.add _ (@has_add n)
 
--- infix ` + ` := has_add.add
+infix ` + ` := has_add.add
 
 -- def has_zero : has_zero (vector ℝ n) :=
 -- { zero := repeat 0 n }
@@ -35,23 +35,42 @@ include n
 set_option pp.all false
 -- set_option pp.all true
 
--- variables (a b : vector ℝ n)
-
 instance : add_comm_group (vector ℝ n) :=
 {
     add := map₂ real.has_add.add,
     add_assoc := by 
-        { simp, intros a b c,
+        { intros a b c, simp,
+        cases a with a la,
+        cases b with b lb,
+        cases c with c lc,
+        unfold map₂, simp,
+        induction n with n ih generalizing a b c,
+            { have := list.length_eq_zero.mp la,
+            have := list.length_eq_zero.mp lc,
+            simp *,
+            rw [list.nil_map₂, list.map₂_nil, list.nil_map₂] },
+            { 
+                cases a with ha ta, contradiction,
+                cases b with hb tb, contradiction,
+                cases c with hc tc, contradiction,
+                unfold list.map₂,
+                apply congr, simp,
+                simp [nat.add_one] at la lb lc,
+                exact ih _ _ _ la lb lc } },
+    add_comm := by 
+        { intros a b,
+        
          },
-    zero := @repeat ℝ 0 n,
     neg := (map ∘ real.has_mul.mul) (-1),
-    add_left_neg := by simp ,
+    add_left_neg := by simp,
+    zero := @repeat ℝ 0 n,
     zero_add := by 
-        { simp, intro a,
+        { intro a, simp,
         apply vector.eq, unfold to_list,
         cases a with a la, 
         unfold repeat map₂, simp,
-        induction n with n ih generalizing a; unfold list.repeat,
+        induction n with n ih generalizing a; 
+        unfold list.repeat,
             { cases a,
             apply list.map₂_nil,
             contradiction }, 
@@ -59,9 +78,14 @@ instance : add_comm_group (vector ℝ n) :=
             contradiction,
             unfold list.map₂,
             rw [zero_add],
-            
-             } } },
+            have := list.length_cons ha ta,
+            replace := eq.trans this.symm la,
+            simp [nat.add_one] at this,  
+            apply congr rfl, 
+            exact ih ta this } },
+    add_zero := by simp
 }
+
 #check list.map₂ 
 noncomputable instance : vector_space ℝ (vector ℝ n) :=
 { 
