@@ -76,10 +76,9 @@ def check_pts_of_path ( x y : α ) ( h : path z w ) := check_pts x y h.to_fun
 
 def equal_of_path  : Prop := g1.to_fun = g2.to_fun  -- == ? 
 
-theorem equal {α} [topological_space α ] { x y : α } {f  g: path x y} : f = g ↔ f.to_fun = g.to_fun := 
+theorem path_equal {α} [topological_space α ] { x y : α } {f  g: path x y} : f = g ↔ f.to_fun = g.to_fun := 
 begin 
-split, intro H, rw H, intro H2, sorry, --constructor_mathching H2,   
-end
+split, intro H, rw H, intro H2, cases f, cases g, cc,  end
 
 
 -- for later paths homotopy (do not Remove)
@@ -1012,7 +1011,7 @@ local attribute [instance] classical.prop_decidable
 def hom_f_to_f_const {α : Type*} [topological_space α ] {x y : α } ( f : path x y) : path_homotopy (comp_of_path f (loop_const y)) f:= 
 begin 
 have H : comp_of_path f (loop_const y) = repar_path f p1, 
-  { apply equal.2, unfold comp_of_path repar_path, simp, unfold fa_path fb_path fgen_path loop_const p1, simp, unfold par, funext,  
+  { apply path_equal.2, unfold comp_of_path repar_path, simp, unfold fa_path fb_path fgen_path loop_const p1, simp, unfold par, funext,  
   unfold paste,  split_ifs, simp [-one_div_eq_inv], simp,
      }, 
 rw H, exact hom_repar_path_to_path f p1, 
