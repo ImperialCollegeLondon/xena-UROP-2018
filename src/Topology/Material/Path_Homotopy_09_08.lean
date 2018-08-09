@@ -78,8 +78,8 @@ def equal_of_path  : Prop := g1.to_fun = g2.to_fun  -- == ?
 
 theorem equal {α} [topological_space α ] { x y : α } {f  g: path x y} : f = g ↔ f.to_fun = g.to_fun := 
 begin 
-split, intro H, rw H, intro H2, sorry, --constructor_mathching H2,   
-end
+split, intro H, rw H, intro H2, cases f, cases g, cc,  end --constructor_mathching H2,   
+
 
 
 -- for later paths homotopy (do not Remove)
