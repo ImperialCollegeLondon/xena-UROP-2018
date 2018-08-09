@@ -400,6 +400,25 @@ repeat {split};unfold col;
   simp *
 end
 
+theorem four10 {a b c : point} : ¬col a b c → ¬col a c b ∧ ¬col b a c ∧ ¬col b c a ∧ ¬col c a b ∧ ¬col c b a :=
+begin
+intro h,
+split,
+  intro h_1,
+  exact h (four11 h_1).1,
+split,
+  intro h_1,
+  exact h (four11 h_1).2.1,
+split,
+  intro h_1,
+  exact h (four11 h_1).2.2.2.1,
+split,
+  intro h_1,
+  exact h (four11 h_1).2.2.1,
+intro h_1,
+exact h (four11 h_1).2.2.2.2
+end
+
 theorem four12 (a b : point) : col a a b := 
 begin
 unfold col,
@@ -1127,7 +1146,7 @@ apply unique_of_exists_unique (two12 a b c p hp.2.symm),
 exact hx
 end
 
-theorem six13 {a b p : point} : sided p a b → (distle p a p b ↔ B p a b) :=
+theorem six12 {a b p : point} : sided p a b → (distle p a p b ↔ B p a b) :=
 begin
 intro h1,
 have hp : sided p a b, exact h1,

@@ -10,7 +10,7 @@ theorem six9 {a b p : point} : b ∈ ray p a → ray p a = ray p b :=
 begin
 intro h,
 ext,
-apply iff.intro,
+split,
   intro h1,
   cases h with h h2,
   cases h2 with h2 h3,
@@ -67,7 +67,7 @@ theorem six15 {p q r : point} : p ≠ q → p ≠ r → B q p r → l p q = ray 
 begin
 intros h h1 h2,
 ext,
-apply iff.intro,
+split,
   intro h3,
   cases em (x = p),
     left, right,
@@ -123,7 +123,7 @@ theorem six16 {p q r : point} : p ≠ q → p ≠ r → r ∈ l p q → l p q = 
 begin
 intros h h1 h2,
 ext,
-apply iff.intro,
+split,
   intro h3,
   exact five4 h h2 h3,
 intro h3,
@@ -132,20 +132,19 @@ have : col p r q,
 exact five4 h1 this h3
 end
 
-theorem six17 {p q : point} : p ≠ q → p ∈ l p q ∧ q ∈ l p q ∧ l p q = l q p :=
+theorem six17 (p q : point) : l p q = l q p :=
 begin
-intro h,
-split,
-  exact (four11 (four12 p q)).1,
-split,
-  exact (four11 (four12 q p)).2.2.2.1,
 ext,
-apply iff.intro,
+split,
   intro h1,
   exact (four11 h1).2.1,
 intro h1,
 exact (four11 h1).2.1
 end
+
+@[simp] theorem six17a (p q : point) : p ∈ l p q := (four11 (four12 p q)).1
+
+@[simp] theorem six17b (p q : point) : q ∈ l p q := (four11 (four12 q p)).2.2.2.1
 
 theorem six18 {a b : point} {L : set point} : line L → a ≠ b → a ∈ L → b ∈ L → L = l a b :=
 begin
@@ -159,10 +158,22 @@ cases em (a = p),
 have ha : l p q = l p a,
   exact six16 hq.1 (ne.symm h) h2,
 rw ha at *,
-have hp : l p a = l a p,
-  exact (six17 (ne.symm h)).2.2,
-rw hp at *,
+rw six17 p a at *,
 exact six16 h h1 h3
+end
+
+theorem six18a {a p q : point} : a ∉ l p q → a ≠ p ∧ a ≠ q :=
+begin
+intro h,
+split,
+  intro h1,
+  subst a,
+  apply h,
+  simp,
+intro h1,
+subst a,
+apply h,
+simp
 end
 
 theorem six19 {a b : point} : a ≠ b → ∃! L : set point, line L ∧ a ∈ L ∧ b ∈ L :=
@@ -176,9 +187,8 @@ split,
     split,
       exact h,
     refl,
-  split,
-    exact (six17 h).1,
-  exact (six17 h).2.1,
+  split;
+    simp,
 intros y hy,
 exact six18 hy.1 h hy.2.1 hy.2.2
 end
@@ -207,7 +217,7 @@ split,
   exact ne.symm h,
 have : u ∈ A,
   rw hv.2,
-  exact (six17 hv.1).1,
+  simp,
 exact six18 h2 (ne.symm h) h1 this
 end
 
@@ -215,7 +225,7 @@ def is (x : point) (A B : set point) : Prop := line A ∧ line B ∧ A ≠ B ∧
 
 theorem six23 {a b c : point} : col a b c ↔ ∃ (L : set point), line L ∧ a ∈ L ∧ b ∈ L ∧ c ∈ L :=
 begin
-apply iff.intro,
+split,
   intro h,
   cases em (a = b),
     rw h_1 at *,
@@ -226,22 +236,14 @@ apply iff.intro,
       split,
         exact six14 hp.2,
       simp,
-      exact (six17 hp.2).1,
     existsi l b c,
     split,
       exact six14 h_2,
-    split,
-      exact (six17 h_2).1,
-    split,
-      exact (six17 h_2).1,
-    exact (six17 h_2).2.1,
+    simp,
   existsi l a b,
   split,
     exact six14 h_1,
-  split,
-    exact (six17 h_1).1,
-  split,
-    exact (six17 h_1).2.1,
+  simp,
   exact h,
 intro h,
 cases h with L h,
@@ -287,6 +289,28 @@ split,
 exact h2 z
 end
 
+lemma six13a (a : point) : ¬line (l a a) :=
+begin
+intro h,
+cases h with p hp,
+cases hp with q hq,
+cases six25 hq.1 with r hr,
+apply hr,
+suffices : r ∈ l a a,
+  rw hq.2 at this,
+  exact this,
+left,
+exact three3 a r
+end
+
+lemma six13 {a b : point} : line (l a b) → a ≠ b := 
+begin
+intros h h1,
+subst b,
+apply six13a a,
+exact h
+end
+
 theorem six26 {a b c : point} : ¬col a b c → a ≠ b ∧ b ≠ c ∧ a ≠ c :=
 begin
 intro h,
@@ -317,6 +341,22 @@ right, left,
 exact h3.symm
 end
 
+theorem six28 {a b c :point} : ¬col a b c → is a (l a b) (l a c) :=
+begin
+intro h,
+split,
+  exact six14 (six26 h).1,
+split,
+  exact six14 (six26 h).2.2,
+split,
+  intro h1,
+  have h2 : c ∈ l a b,
+    rw h1,
+    simp,
+  contradiction,
+simp
+end
+
 -- middle points
 
 def M (a m b : point) : Prop := B a m b ∧ eqd m a m b 
@@ -331,7 +371,7 @@ end
 
 theorem seven3 {a m : point} : M a m a ↔ a = m :=
 begin
-apply iff.intro,
+split,
   intro h,
   exact bet_same a m h.1,
 intro h,
@@ -415,7 +455,7 @@ end
 
 theorem seven10 {a p : point} : S a p = p ↔ p = a :=
 begin
-apply iff.intro,
+split,
   intro h,
   have : M p a (S a p),
     exact seven5 a p,
@@ -433,6 +473,15 @@ end
 begin
 apply seven10.2,
 refl
+end
+
+theorem seven12 {a p : point} : a ≠ p → a ≠ S a p :=
+begin
+intros h h1,
+apply h,
+have h2 : S a a = a,
+  exact seven11 a,
+exact seven9 (eq.trans h2 h1)
 end
 
 theorem seven13 (a p q : point) : eqd p q (S a p) (S a q) :=
@@ -514,7 +563,7 @@ end
 
 theorem seven15 (a : point) {p q r : point} : B p q r ↔ B (S a p) (S a q) (S a r) :=
 begin
-apply iff.intro,
+split,
   intro h,
   have h1 : cong p q r (S a p) (S a q) (S a r),
     split,
@@ -538,7 +587,7 @@ end
 
 theorem seven16 (a : point) {p q r s : point}: eqd p q r s ↔ eqd (S a p) (S a q) (S a r) (S a s) :=
 begin
-apply iff.intro,
+split,
   intro h,
   exact eqd.trans (seven13 a p q).symm (eqd.trans h (seven13 a r s)),
 intro h,
@@ -549,7 +598,7 @@ end
 
 theorem seven14 (a : point) {p q r : point} : M p q r ↔ M (S a p) (S a q) (S a r) :=
 begin
-apply iff.intro,
+split,
   intro h,
   cases h with h h1,
   split,
@@ -594,7 +643,7 @@ end
 
 theorem seven19 {a b p : point} : S a (S b p) = S b (S a p) ↔ a = b :=
 begin
-apply iff.intro,
+split,
   intro h,
   generalize h1 : S a p = q,
   let h2 := seven5 a p,
@@ -679,9 +728,11 @@ have h17 : p = q,
   by_contradiction h_1,
   have h_2 : l a c = l b d,
     exact six21 h_1 (six14 (six26 h).2.2) (six14 h1) h13 h14 h15 h16,
-  let h_3 := (six17 h1).1,
-  rw ←h_2 at h_3,
-  exact h (four11 h_3).1,
+  apply h,
+  suffices : b ∈ l a c,
+    exact (four11 this).1,
+  rw h_2,
+  simp,
 rw h17 at *,
 split,
   cases seven20 h4 h9,
@@ -757,7 +808,7 @@ have h14 : sided c a a',
     exact h,
   exact h10.1.symm,
 have h15 : B c a a',
-  exact (six13 h14).1 h13,
+  exact (six12 h14).1 h13,
 have h16 : distle c b c b',
   exact five6 h_1 h2 h11.2,
 have h_5 : q ≠ c,
@@ -792,7 +843,7 @@ have h17 : sided c b b',
     exact h1,
   exact h11.1.symm,
 have h18 : B c b b',
-  exact (six13 h17).1 h16,
+  exact (six12 h17).1 h16,
 cases three17 h15.symm h18.symm h9.1 with r hr,
 have h19 : B r c n,
   exact three6a hr.1 h12.1.symm,
@@ -848,17 +899,29 @@ have h6 : hourglass q p c b a n m,
 exact (seven23 h6 h_1).symm
 end
 
-theorem seven24 {a p : point} {A : set point} : line A → a ∈ A → p ∈ A → (S a p) ∈ A :=
+theorem seven24 {a p : point} {A : set point} : line A → a ∈ A → (p ∈ A ↔ (S a p) ∈ A) :=
 begin
-intros h h1 h2,
-cases em (a = p),
+intros h h1,
+split,
+  intro h2,
+  cases em (a = p),
+    let h3 := seven10.2 h_1.symm,
+    rwa h3,
+  let h3 := six18 h h_1 h1 h2,
+  rw h3,
+  let h4 := seven5 a p,
+  right, right,
+  exact h4.1.symm,
+intro h2,
+cases em (a = (S a p)),
   let h3 := seven10.2 h_1.symm,
+  rw ←seven7 a p,
   rwa h3,
 let h3 := six18 h h_1 h1 h2,
 rw h3,
 let h4 := seven5 a p,
 right, right,
-exact h4.1.symm
+exact h4.1
 end
 
 theorem seven25 {a b c : point} : eqd c a c b → ∃ x, M a x b :=
@@ -946,12 +1009,13 @@ have h_3 : b ≠ p,
   exact h_1 this,
 have h10 : l a q ≠ l b p,
   intro h_4,
-  let h_5 := (six17 h_2).1,
-  rw h_4 at *,
-  have h_6 : col a p c,
-    right, right,
-    exact hp.1,
-  exact h_1 (five4 hp.2 h_6 (four11 h_5).2.2.2.2),
+  suffices : a ∈ l b p,
+    have h_6 : col a p c,
+      right, right,
+      exact hp.1,
+    exact h_1 (five4 hp.2 h_6 (four11 this).2.2.2.2),
+  rw ←h_4,
+  simp,
 have h11 : col b p r,
   right, left,
   exact hr.2.symm,
