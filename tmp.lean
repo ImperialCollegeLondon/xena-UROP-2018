@@ -53,26 +53,20 @@ instance : add_comm_group (vector ℝ n) :=
     neg := (map ∘ real.has_mul.mul) (-1),
     add_left_neg := by simp ,
     zero_add := by 
-        { simp,
-            intro a,
-            -- rw [←a.cons_head_tail],
-            apply vector.eq,
-            unfold to_list,
-            cases a with a la,
-            unfold repeat map₂,
-            simp,
-            induction n with n ih generalizing a; unfold list.repeat,
-                { cases a,
-                apply list.map₂_nil,
-                contradiction }, 
-                { cases a with ha ta,
-                contradiction,
-                unfold list.map₂,
-                rw [zero_add],
-                
-                 }
+        { simp, intro a,
+        apply vector.eq, unfold to_list,
+        cases a with a la, 
+        unfold repeat map₂, simp,
+        induction n with n ih generalizing a; unfold list.repeat,
+            { cases a,
+            apply list.map₂_nil,
+            contradiction }, 
+            { cases a with ha ta,
+            contradiction,
+            unfold list.map₂,
+            rw [zero_add],
             
-             } },
+             } } },
 }
 #check list.map₂ 
 noncomputable instance : vector_space ℝ (vector ℝ n) :=
