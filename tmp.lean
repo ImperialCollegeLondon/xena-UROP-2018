@@ -2,12 +2,6 @@ import algebra.module linear_algebra.basic analysis.real data.vector data.list.b
 
 universes u w
 
--- variables {k : Type u} [field k] {V : Type w} 
-
--- instance fvs {n : nat} (B : set (vector k n)) 
---     [@is_basis k (vector k n) _ {} B] : vector_space k V := 
--- by constructor 
-
 def R_n_basis (n : nat) : set (vector ℝ n) :=
 {v | ∀ i : fin n, (v.nth i = 1 ∧ ∀ j : fin n, j.val ≠ i.val → v.nth j = 0) }
 
@@ -41,7 +35,7 @@ include n
 set_option pp.all false
 -- set_option pp.all true
 
-variables (a b : vector ℝ n)
+-- variables (a b : vector ℝ n)
 
 instance : add_comm_group (vector ℝ n) :=
 {
