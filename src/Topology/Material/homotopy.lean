@@ -11,7 +11,7 @@ import Topology.Material.path
 
 
 open set filter lattice classical
---namespace homotopy  
+namespace homotopy  
 open path
 
 variables {α  : Type*} [topological_space α ] 
@@ -321,7 +321,7 @@ def repar_path {α : Type*} [topological_space α ] {x y : α } ( f : path x y)(
     cont := continuous.comp φ.cont f.cont
 }
 
-set_option trace.simplify.rewrite true
+--set_option trace.simplify.rewrite true
 --set_option pp.implicit true
 
 
@@ -420,4 +420,4 @@ begin unfold is_homotopic_to, exact nonempty.intro (hom_repar_path_to_path f φ 
 
 
 
---end homotopy
+end homotopy
