@@ -3,7 +3,7 @@ import analysis.topology.continuity
 import data.set.basic
 import logic.basic
 import Topology.Material.connected_spaces 
-import Topology.Material.WIP_Path_Homotopy 
+import Topology.Material.Path_Homotopy_29_07
 import Topology.Material.path_connectedness
 
 open set filter lattice classical
@@ -14,6 +14,15 @@ variables {α : Type u} {β : Type u}
 
 
 -- Locally connected / path connected spaces
+
+open path
+
+
+lemma exists_from_path [topological_space α] {x y : α} (H : path x y) : ∃ f : I01 → α, is_path x y f :=
+exists.intro H.1 ⟨H.2,H.3,H.4⟩ 
+
+
+
 
 def is_loc_con_at [topological_space α] (x : α) : Prop :=
 ∀ U : set α, x ∈ U → is_open U → (∃ V : set α, is_connected V ∧ is_open V ∧ x ∈ V ∧ V ⊂ U)
@@ -47,10 +56,36 @@ ne_empty_of_mem self_mem_set_of_pcon
 
 
 
+
+-- Fix these 
+
+lemma subpath_left [topological_space α] {x y : α} (H1 : path x y) (r : I01) :
+path x (H1.1 r) := sorry
+
+lemma subpath_right [topological_space α] {x y : α} (H1 : path x y) (r : I01) :
+path (H1.1 r) y := sorry
+
+lemma exists_subpath_left [topological_space α] {x y : α} {f : I01 → α} (H1 : is_path x y f) 
+(r : I01) : ∃ f' : I01 → α, is_path x (f r) f' := sorry
+
+lemma exists_subpath_right [topological_space α] {x y : α} {f : I01 → α} (H1 : is_path x y f) 
+(r : I01) : ∃ f' : I01 → α, is_path (f r) y f' := sorry
+
+
+
+
 lemma set_of_pcon_is_pcon [topological_space α] : ∀ x : α, is_path_connected (set_of_pcon_to_point x) :=
-begin
-  intro z, unfold is_path_connected, intros x y hx hy,
-  apply exists.intro, admit
+begin 
+  intros z x y hx hy, rw set_of_pcon_to_point at hx hy, simp at hx hy,
+  cases hx with fx Hzx, cases hy with fy Hzy,
+  cases (exists_from_path (comp_of_path (inv_of_path (to_path fx Hzx)) (to_path fy Hzy))) with f Hxy, 
+  have H2 : ∀ r : I01, f r ∈ set_of_pcon_to_point z,
+    {intro r, 
+    cases (exists_subpath_left (Hxy) r) with f' Hxfr,
+    have H4 : ∃ f'' : I01 → α, is_path z (f r) f'' := 
+      exists_from_path (comp_of_path (to_path fx Hzx) (to_path f' Hxfr)),
+    rw set_of_pcon_to_point, simp, assumption},
+  exact exists.intro f ⟨Hxy,H2⟩,
 end
 
 
@@ -66,7 +101,6 @@ end
 
 
 
--- (WORK IN PROGRESS...)
 theorem loc_pcon_and_con_imp_pcon [connected_space α] (H1 : ∀ x : α, is_loc_pcon_at x) 
 {t : α} : path_connected_space α :=
 begin
@@ -91,4 +125,5 @@ begin
   --self_mem_set_of_pcon
   -/
 end
+
 
