@@ -13,7 +13,7 @@ open nat
 
 -- Questions:
 -- Compute 210 449 and 605/617 using quadratic reciprocity.
---  449 and 617 are both prime).
+-- 449 and 617 are both prime).
 -- TODO: how to prove it using quadratic reciprocity?
 
 local attribute [instance] decidable_prime_1

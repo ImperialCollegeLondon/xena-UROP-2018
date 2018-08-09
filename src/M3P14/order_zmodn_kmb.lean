@@ -3,6 +3,10 @@ import chris_hughes_various.zmod
 import group_theory.order_of_element
 
 instance (n : nat) : pos_nat (nat.succ n) := ⟨nat.succ_pos _⟩ 
+instance : decidable_eq (units (zmod 5)) := 
+λ x y, decidable_of_iff _ ⟨ units.ext, λ _,by simp *⟩
+
+--λ x y, decidable_of_iff _ ⟨ units.ext, λ _,by simp *⟩
 
 open zmod nat
 
@@ -40,7 +44,7 @@ end
 @[simp] lemma cast_val {n : ℕ} [pos_nat n] (a : zmod n) : (a.val : zmod n) = a :=
 by cases a; simp [mk_eq_cast]
 
-theorem coprime_zmodn_units (n : ℕ) [pos_nat n] : 
+def coprime_zmodn_units (n : ℕ) [pos_nat n] : 
 equiv (units (zmod n)) {a : zmod n // ∃ b, a * b = 1} :=
 { to_fun := λ u, ⟨u.1, u.2, u.3⟩,
   inv_fun := λ A, 
@@ -51,3 +55,25 @@ equiv (units (zmod n)) {a : zmod n // ∃ b, a * b = 1} :=
   left_inv := λ u,begin apply units.ext,show (↑((u.val).val) : zmod n) = u.val,simp,end,
   right_inv := λ A,by simp
 }
+
+/-
+instance test (n : nat) (h : 1 < n) : decidable_eq {a : zmod n // ∃ b, a * b = ⟨1, h⟩ } :=
+λ x y, decidable_of_iff _ ⟨ units.ext, λ _,by simp *⟩ 
+-/
+
+
+example (n : nat) (h : 1 < n) : decidable_eq {a : zmod n // ∃ b, a * b = ⟨1, h⟩ }  := by apply_instance
+instance test (n : nat) (h : 1 < n) : decidable_eq {a : zmod n // ∃ b, a * b = ⟨1, h⟩ } :=  by apply_instance
+
+lemma hello : (1 : ℕ) < (7 : ℕ) := by exact dec_trivial 
+
+#check decidable_of_iff 
+#check units.ext
+
+instance (n : ℕ) [pos_nat n] : fintype (units (zmod n)) := fintype.of_equiv _ (equiv.symm (coprime_zmodn_units n))
+
+--#eval @order_of (⟨units (zmod 5), by exact test ⟩ : {x:Type // decidable_eq (x)})  _ _ _ ⟨(2 : zmod 5), 2⁻¹, rfl, rfl⟩
+#eval @order_of (units (zmod 5)) _ _ _ ⟨(2 : zmod 5), 2⁻¹, rfl, rfl⟩
+--#eval @order_of (units (zmod 7)) _ _ (test 7 hello) ⟨(1 : zmod 7), 1⁻¹, rfl, rfl⟩
+
+#check units (zmod 5)
