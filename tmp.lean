@@ -90,9 +90,10 @@ instance : add_comm_group (vector ℝ n) :=
                 simp [nat.add_one] at la lb lc,
                 exact ih _ _ _ la lb lc } },
     add_comm := by 
-        { intros a b, 
+        { intros a b,
         cases a with a la,
         cases b with b lb,
+        
          },
     neg := (map ∘ real.has_mul.mul) (-1),
     add_left_neg := by simp,
