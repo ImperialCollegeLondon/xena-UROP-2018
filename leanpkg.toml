@@ -1,8 +1,8 @@
 [package]
 name = "xena-UROP-2018"
 version = "0.1"
-lean_version = "3.4.1"
+lean_version = "master"
 path = "src"
 
 [dependencies]
-mathlib = {git = "https://github.com/leanprover/mathlib", rev = "732ec0efaca37955bf08d656f1b47a065d45bf7f"}
+mathlib = {git = "https://github.com/leanprover/mathlib", rev = "905345a2ceaa5d0c7bc2f6310026961416b2cae4"}
