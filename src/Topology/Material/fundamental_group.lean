@@ -8,72 +8,59 @@ import data.real.basic tactic.norm_num
 import data.set.basic
 import Topology.Material.subsets
 import Topology.Material.path 
-improt Topology.Material.homotopy 
+import Topology.Material.homotopy
 
 
 open set filter lattice classical
-open path
--- open homotopy
+
 
 ---------------------------------------------------
 ---------------------------------------------------
 
----- FUNDAMENTAL GROUP 
+---- FUNDAMENTAL GROUP
 
 
 namespace fundamental_group
 open homotopy
-open path 
+open path
 variables {α  : Type*} [topological_space α ] {x : α }
 
 
---- Underlying Notions 
+-- life seems easier if you have both these instances, for some reason
+instance setoid_hom_path {α : Type*} [topological_space α] (x : α)  :
+setoid (path x x) := setoid.mk is_homotopic_to (is_equivalence x x)
 
-def setoid_hom {α : Type*} [topological_space α ] (x : α )  : setoid (loop x) := setoid.mk is_homotopic_to (is_equivalence x x)
+instance setoid_hom_loop {α : Type*} [topological_space α] (x : α)  :
+setoid (loop x) := by unfold loop;apply_instance
 
---@[simp]
-def space_π_1 {α : Type*} [topological_space α ] (x : α ) := quotient (setoid_hom x)
+def space_π_1 {α : Type*} [topological_space α] (x : α) :=
+quotient (fundamental_group.setoid_hom_loop x)
 
----#print prefix quotient
-
-/- def hom_eq_class2 {α : Type*} [topological_space α ] {x : α } ( f : loop x ) : set (path x x) := 
-{ g : path x x | is_homotopic_to f g } -/ 
-
-def eq_class {α : Type*} [topological_space α ] {x : α } ( f : loop x ) : space_π_1 x := @quotient.mk _ (setoid_hom x) f 
-
-def out_loop {α : Type*} [topological_space α ] {x : α } ( F : space_π_1 x ) : loop x := @quotient.out (loop x) (setoid_hom x)  F 
-
+def eq_class {α : Type*} [topological_space α ] {x : α } ( f : loop x ) : space_π_1 x :=
+quotient.mk f
 
 def id_eq_class {α : Type*} [topological_space α ] (x : α )  : space_π_1 x := eq_class (loop_const x)
 
 
-def inv_eq_class {α : Type*} [topological_space α ] {x : α } (F : space_π_1 x) : space_π_1 x := eq_class (inv_of_path (out_loop F))
+lemma mul_aux {α : Type*} [topological_space α] {x : α} :
+∀ (a₁ a₂ b₁ b₂ : loop x), a₁ ≈ b₁ → a₂ ≈ b₂ →
+    ⟦comp_of_path a₁ a₂⟧ = ⟦comp_of_path b₁ b₂⟧ :=
+begin
+  intros a₁ a₂ b₁ b₂ H₁ H₂,
+  apply quotient.sound,
+  cases H₁ ,
+  cases H₂ ,
+  existsi _,
+  exact path_homotopy_of_comp_path H₁ H₂, 
+end
+
+-- Definition of multiplication on π₁ 
+protected noncomputable def mul {α : Type*} [topological_space α] {x : α}  :
+space_π_1 x → space_π_1 x → space_π_1 x :=
+quotient.lift₂ (λ f g, ⟦comp_of_path f g⟧) mul_aux
 
 
--- Multiplication 
-
-def und_mul {α : Type*} [topological_space α ] (x : α )  ( f : loop x ) ( g : loop x ) :  space_π_1 x := 
-eq_class (comp_of_path f g) 
-
-
-def mul2 {α : Type*} [topological_space α ] {x : α }  : space_π_1 x → space_π_1 x → space_π_1 x := 
-begin 
-intros F G, let f := out_loop F , let g := out_loop G, 
-exact eq_class ( comp_of_path f g )  
-end 
-
-def mul {α : Type*} [topological_space α ] {x : α } : space_π_1 x → space_π_1 x → space_π_1 x := 
-λ F G,  und_mul x (out_loop  F) (out_loop  G)
-
-
-/- 
-#print prefix quotient 
-#print ≈ 
-#print has_equiv.equiv
-#print setoid.r -/
-
---------
-
+----------------------------------------------
 
 
 -- Identity Elememt 
@@ -81,7 +68,7 @@ def mul {α : Type*} [topological_space α ] {x : α } : space_π_1 x → space_
 
 -- right identity - mul_one
 
-def p1 : repar_I01 := 
+noncomputable def p1 : repar_I01 := 
 {   to_fun :=  λ  t, (paste cover_I01 (λ s, par T1._proof_1 s ) (λ s, 1) ) t ,  
     at_zero := begin unfold paste, rw dif_pos, swap, exact help_T1, simp   end, 
     at_one := begin unfold paste, rw dif_neg, exact help_02 end, 
@@ -101,7 +88,7 @@ def p1 : repar_I01 :=
 local attribute [instance] classical.prop_decidable 
 
 --mul a (id_eq_class x) = a
-def hom_f_to_f_const {α : Type*} [topological_space α ] {x y : α } ( f : path x y) : path_homotopy (comp_of_path f (loop_const y)) f:= 
+noncomputable def hom_f_to_f_const {α : Type*} [topological_space α ] {x y : α } ( f : path x y) : path_homotopy (comp_of_path f (loop_const y)) f:= 
 begin 
 have H : comp_of_path f (loop_const y) = repar_path f p1, 
   { apply path_equal.2, unfold comp_of_path repar_path, simp, unfold fa_path fb_path fgen_path loop_const p1, simp, unfold par, funext,  
@@ -115,17 +102,16 @@ end
 lemma path_const_homeq_path {α : Type*} [topological_space α ] {x y : α } ( f : path x y)  : is_homotopic_to (comp_of_path f (loop_const y)) f := 
 begin  unfold is_homotopic_to, refine nonempty.intro (hom_f_to_f_const f), end 
 
-/- 
-#check quotient.exists_rep
-#check quotient.induction_on
-#check quotient.out_eq
-#check setoid -/ 
+
+---local notation `mul` := fundamental_group.mul 
+
 
 
 -- Now prove [f][c] = [f]
 
-theorem mul_one {α : Type*} [topological_space α ] {x : α } ( F : space_π_1 x) : mul F (id_eq_class x) = F := 
-begin unfold mul und_mul eq_class, --have H : F = ⟦ quotient.out _ (setoid_hom x) F ⟧, 
+theorem mul_one {α : Type*} [topological_space α ] {x : α } ( F : space_π_1 x) : fundamental_group.mul F (id_eq_class x) = F := 
+begin 
+--unfold mul und_mul eq_class, --have H : F = ⟦ quotient.out _ (setoid_hom x) F ⟧, 
 --- Code below does not lead to much progress atm
  /- refine quotient.induction_on _ (setoid_hom x) _ F , 
  have f := @quotient.out (loop x) (setoid_hom x) F , 

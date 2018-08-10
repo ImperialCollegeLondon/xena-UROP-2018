@@ -78,6 +78,21 @@ structure path_homotopy3 {β} [topological_space β] { x y : β } ( f : path x y
 variables (f : path x y) (g : path x y)
 variable F : path_homotopy f g 
 
+def path_homotopy.mk' {β} [topological_space β] { x y : β } { f : path x y} { g : path x y}  
+(F : I01 × I01 →  β) (start_pt : ∀ s : I01, F (s, 0) = x) (end_pt : ∀ s : I01, F (s, 1) = y) 
+(at_zero : ∀ y, F (0,y) = f.to_fun y ) (at_one : ∀ y, F (1,y) = g.to_fun y ) (F_cont : continuous F) : 
+path_homotopy f g := 
+{   to_fun := F, 
+    path_s := begin unfold is_path, intro s, split, exact start_pt s, split, exact end_pt s, 
+        refine continuous.comp _ _, exact continuous.prod_mk continuous_const continuous_id, exact F_cont, 
+    end,
+    at_zero := at_zero, 
+    at_one := at_one, 
+    cont := F_cont
+
+}
+
+
 
 def hom_to_path { x y : β } { f g : path x y } 
 ( F : path_homotopy f g ) (s : I01) : path x y := 
@@ -259,6 +274,8 @@ path_homotopy f h :=
     end 
 }  
 
+---------------------------------
+
 ------------------------------------------------------
 
 ---- EQUIVALENCE OF HOMOTOPY
@@ -267,7 +284,6 @@ path_homotopy f h :=
 
 definition is_homotopic_to { x y : β } (f : path x y) ( g : path x y) : Prop := nonempty ( path_homotopy f g) 
 
-
 theorem is_reflexive {β  : Type*} [topological_space β ] { x y : β  } : @reflexive (path x y) ( is_homotopic_to ) := 
 begin 
   unfold reflexive, intro f, unfold is_homotopic_to, 
@@ -275,7 +291,6 @@ begin
         exact path_homotopy_id f , 
     exact ⟨ H ⟩ 
 end
-
 
 
 theorem is_symmetric {β  : Type*} [topological_space β ] { x y : β  } : @symmetric (path x y)  (is_homotopic_to) :=
@@ -296,6 +311,10 @@ theorem is_equivalence : @equivalence (path x y)  (is_homotopic_to) :=
 
 
 -----------------------------------------------------
+
+-----------------------------------------------------
+
+---- OTHER RESULTS (for FUNDAMETAL GROUP)
 
 
 ---- Reparametrisation of path and homotopies 
@@ -320,10 +339,6 @@ def repar_path {α : Type*} [topological_space α ] {x y : α } ( f : path x y)(
     at_one := by simp, 
     cont := continuous.comp φ.cont f.cont
 }
-
---set_option trace.simplify.rewrite true
---set_option pp.implicit true
-
 
 
 def rep_hom (φ : repar_I01) : I01 × I01 → I01 := λ st, ⟨ ((1 : ℝ ) - st.1.1)*(φ.to_fun st.2).1 + st.1.1 * st.2.1,  
@@ -415,6 +430,120 @@ theorem repar_path_is_homeq {α : Type*} [topological_space α ] {x y : α } ( f
 begin unfold is_homotopic_to, exact nonempty.intro (hom_repar_path_to_path f φ ),  end 
 
 ------------------------------
+
+
+--------------------------------- 
+
+-- Homotopy on composition of paths 
+------ a₁ ≈ b₁ , a₂ ≈ b₂  →  a₁ ⬝ a₂ ≈ b₁ ⬝ b₂ 
+
+
+-- Define (continuous) shift function to employ results from  path_homotopy_comp
+def shift_order ( α : Type* ) (β : Type*) [topological_space α] [topological_space β ] : α × β → β × α := λ ab, (ab.2, ab.1) 
+
+theorem continuous_shift_order {α β } [topological_space α] [topological_space β ] : continuous (shift_order α β ) := 
+begin unfold shift_order, exact continuous.prod_mk continuous_snd continuous_fst end 
+
+local notation `shift` := shift_order _ _ 
+
+@[simp]
+lemma shift_cond_start { x y : β} { a₁ b₁ : path x y} { a₂  b₂  : path y z} { F : path_homotopy a₁ b₁ } { G : path_homotopy a₂ b₂ } : 
+paste cover_prod_I01 (λ (st : ↥(set.prod T1 univ)), F.to_fun (shift ↑st)) (λ (st : ↥(set.prod T2 univ)), G.to_fun (shift ↑st))(shift (s, 0)) = x := 
+begin unfold shift_order paste, rw dif_pos, simp, simp, exact help_T1,      end
+
+@[simp]
+lemma shift_cond_end { x y : β} { a₁ b₁ : path x y} { a₂  b₂  : path y z} { F : path_homotopy a₁ b₁ } { G : path_homotopy a₂ b₂ } : 
+paste cover_prod_I01 (λ (st : ↥(set.prod T1 univ)), F.to_fun (shift ↑st)) (λ (st : ↥(set.prod T2 univ)), G.to_fun (shift ↑st))(shift (s, 1)) = z :=
+begin unfold shift_order paste, rw dif_neg, simp, simp, exact help_02,   end
+
+--- 
+
+
+-- Define (continuous ) reparametrisations to shift domain and construct a homotopy  : a₁ ⬝ a₂ ≈ b₁ ⬝ b₂  
+----- by pasting homotopies a₁ ≈ b₁ , a₂ ≈ b₂
+def repar_shift_a : set.prod T1 I → I01 × I01 := λ st, shift (  par T1._proof_1 ⟨ st.1.1, (mem_prod.1 st.2).1⟩ , st.1.2 ) 
+
+def repar_shift_b : set.prod T2 I → I01 × I01 := λ st, shift (  par T2._proof_1 ⟨ st.1.1, (mem_prod.1 st.2).1 ⟩ , st.1.2 ) 
+
+lemma cont_r_shift_a : continuous repar_shift_a := 
+begin 
+unfold repar_shift_a, refine continuous.comp _ continuous_shift_order, refine continuous.prod_mk _ _, 
+  refine continuous.comp _ (continuous_par _ ), refine continuous_subtype_mk _ _, exact continuous.comp continuous_subtype_val continuous_fst, 
+  exact continuous.comp continuous_subtype_val continuous_snd, 
+end
+
+lemma cont_r_shift_b : continuous repar_shift_b := 
+begin 
+unfold repar_shift_b, refine continuous.comp _ continuous_shift_order, refine continuous.prod_mk _ _, 
+  refine continuous.comp _ (continuous_par _ ), refine continuous_subtype_mk _ _, exact continuous.comp continuous_subtype_val continuous_fst, 
+  exact continuous.comp continuous_subtype_val continuous_snd, 
+end
+
+-- Define the function of homotopy a₁ ⬝ a₂ ≈ b₁ ⬝ b₂ and prove lemmas to use with path_homotopy.mk' 
+def f_path_comp {α } [topological_space α] {x y z : α} { a₁ b₁ : path x y} { a₂  b₂  : path y z} ( F : path_homotopy a₁ b₁ ) ( G : path_homotopy a₂ b₂ ) :=
+ λ st, ( paste  cover_prod_I01 ( λ st, F.to_fun (repar_shift_a st) ) ( λ st, G.to_fun (repar_shift_b st) ) )  ( shift  st) 
+
+lemma f_path_comp_start_pt {α } [topological_space α] {x y z : α} { a₁ b₁ : path x y} { a₂  b₂  : path y z} ( F : path_homotopy a₁ b₁ ) ( G : path_homotopy a₂ b₂ ) : 
+∀ (s : I01), f_path_comp F G (s, 0) = x := 
+begin intro s, unfold f_path_comp, unfold repar_shift_a repar_shift_b shift_order paste, rw dif_pos, 
+ show F.to_fun (s, par T1._proof_1 ⟨0, help_T1⟩) = x,  simp,  
+ simp, exact help_T1,    
+end
+
+lemma f_path_comp_end_pt {α } [topological_space α] {x y z : α} { a₁ b₁ : path x y} { a₂  b₂  : path y z} ( F : path_homotopy a₁ b₁ ) ( G : path_homotopy a₂ b₂ ) : 
+∀ (s : I01), f_path_comp F G (s, 1) = z := 
+begin intro s, unfold f_path_comp, unfold repar_shift_a repar_shift_b shift_order paste, rw dif_neg, simp, 
+  show G.to_fun (s, par T2._proof_1 ⟨1, help_T2⟩) = z, simp, 
+  simp [help_02],
+end
+
+lemma f_path_comp_at_zero {α } [topological_space α] {x y z : α} { a₁ b₁ : path x y} { a₂  b₂  : path y z} ( F : path_homotopy a₁ b₁ ) ( G : path_homotopy a₂ b₂ ) : 
+∀ (y : I01), f_path_comp F G (0, y) = (comp_of_path a₁ a₂).to_fun y := 
+begin intro s, unfold f_path_comp comp_of_path fa_path fb_path fgen_path paste,  simp, 
+split_ifs,  unfold repar_shift_a, unfold shift_order, simpa, 
+  { by_contradiction, unfold shift_order at h, simp at h, cc, }, 
+  { by_contradiction, unfold shift_order at h, simp at h, cc, }, 
+  unfold repar_shift_b, unfold shift_order, simpa,
+end
+
+lemma f_path_comp_at_one {α } [topological_space α] {x y z : α} { a₁ b₁ : path x y} { a₂  b₂  : path y z} ( F : path_homotopy a₁ b₁ ) ( G : path_homotopy a₂ b₂ ) : 
+ ∀ (y : I01), f_path_comp F G (1, y) = (comp_of_path b₁ b₂).to_fun y := 
+begin intro s, unfold f_path_comp comp_of_path fa_path fb_path fgen_path paste,  simp, 
+split_ifs,  unfold repar_shift_a, unfold shift_order, simpa, 
+  { by_contradiction, unfold shift_order at h, simp at h, cc, }, 
+  { by_contradiction, unfold shift_order at h, simp at h, cc, },
+  unfold repar_shift_b, unfold shift_order, simpa,
+end
+
+lemma f_path_comp_cont {α } [topological_space α] {x y z : α} { a₁ b₁ : path x y} { a₂  b₂  : path y z} ( F : path_homotopy a₁ b₁ ) ( G : path_homotopy a₂ b₂ ) : 
+continuous (f_path_comp F G) := 
+begin unfold f_path_comp, refine continuous.comp continuous_shift_order _,     
+    refine cont_of_paste prod_T1_is_closed prod_T2_is_closed _ _ _, 
+    {unfold match_of_fun, intros w B1 B2, 
+    have Int : w ∈ set.inter (set.prod T1 I) (set.prod T2 I), exact ⟨ B1 , B2 ⟩ , rwa [prod_inter_T] at Int, 
+    have V : w.1.1 = 1/2, rwa [set.prod, mem_set_of_eq] at Int, rwa [mem_set_of_eq] at Int, exact Int.1, cases w, 
+    have xeq : w_fst = ⟨ 1/2 , help_01 ⟩ , apply subtype.eq, rw V,
+    simp [xeq, -one_div_eq_inv], unfold repar_shift_a repar_shift_b shift_order, 
+    simp [-one_div_eq_inv], 
+    show F.to_fun (w_snd, par T1._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T1⟩) =
+    G.to_fun (w_snd, par T2._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T2⟩) , rw [eqn_1, eqn_2], simp,  
+    } ,  
+    exact continuous.comp cont_r_shift_a F.cont, 
+    exact continuous.comp cont_r_shift_b G.cont, 
+end
+
+-- Prove that we have the homotopy a₁ ⬝ a₂ ≈ b₁ ⬝ b₂
+noncomputable theorem path_homotopy_of_comp_path {α } [topological_space α] {x y z : α} { a₁ b₁ : path x y} { a₂  b₂  : path y z} 
+( F : path_homotopy a₁ b₁ ) ( G : path_homotopy a₂ b₂ ) : path_homotopy (comp_of_path a₁ a₂) (comp_of_path b₁ b₂) := 
+begin 
+refine path_homotopy.mk' (f_path_comp F G ) _ _ _ _ _, 
+exact f_path_comp_start_pt F G, exact f_path_comp_end_pt F G, 
+exact f_path_comp_at_zero F G , exact f_path_comp_at_one F G, 
+exact f_path_comp_cont F G, 
+end
+
+
+-----------------------------------------------------
 
 
 
