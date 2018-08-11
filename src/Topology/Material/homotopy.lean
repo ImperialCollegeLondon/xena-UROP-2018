@@ -284,9 +284,11 @@ path_homotopy f h :=
 
 definition is_homotopic_to { x y : β } (f : path x y) ( g : path x y) : Prop := nonempty ( path_homotopy f g) 
 
+--definition is_homotopic_to' { x y : β } (f : path x y) ( g : path x y) : Prop := ∃ (F : Type*) , F = path_homotopy f g -- without nonempty
+
 theorem is_reflexive {β  : Type*} [topological_space β ] { x y : β  } : @reflexive (path x y) ( is_homotopic_to ) := 
 begin 
-  unfold reflexive, intro f, unfold is_homotopic_to, 
+  unfold reflexive, intro f, unfold is_homotopic_to,   
     have H : path_homotopy f f, 
         exact path_homotopy_id f , 
     exact ⟨ H ⟩ 
