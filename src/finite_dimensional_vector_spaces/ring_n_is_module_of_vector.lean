@@ -7,142 +7,104 @@ universes u
 
 namespace vector
 
-variables {n : ℕ} {R : Type u } [h : ring R]
+variables {n : ℕ} {R : Type u }
 
-include n R h
-
-instance : module R (vector R n) :=
+instance [h : ring R]: module R (vector R n) :=
 {
     add := map₂ h.add,
     add_assoc := by 
-        { intros a b c, simp,
+        { intros a b c,
         cases a with a la,
         cases b with b lb,
         cases c with c lc,
-        unfold map₂, simp,
-        induction n with n ih generalizing a b c,
-            { cases a; cases c,
-            rw [list.nil_map₂, list.map₂_nil, list.nil_map₂],
-            repeat { contradiction } },
-            { cases a, contradiction,
-                cases b, contradiction,
-                cases c, contradiction,
-                unfold list.map₂,
-                simp [nat.add_one] at la lb lc,
-                apply congr, 
-                    { apply congr, refl, apply add_assoc },
-                    exact ih _ _ _ la lb lc } },
+        simp [map₂],
+        induction n with _ ih generalizing a b c;
+        cases a; cases b; cases c; simp [list.map₂],
+            contradiction,
+            simp [nat.add_one] at la lb lc,
+            split, apply add_assoc, exact ih _ _ _ la lb lc },
     add_comm := by 
-        { intros a b, simp [has_add.add], 
+        { intros a b, 
         cases a with a la,
         cases b with b lb,
-        unfold map₂, simp,
-        induction n with n ih generalizing a b,
-            { cases a; cases b, 
-            unfold list.map₂, repeat { contradiction } },
-            { cases a, contradiction,
-                cases b, contradiction,
-                unfold list.map₂, 
-                simp [nat.add_one] at la lb,
-                apply congr,
-                    { apply congr, refl, apply add_comm },
-                    exact ih _ _ la lb } },
-    zero := @repeat R 0 n,
+        simp [has_add.add, map₂],
+        induction n with _ ih generalizing a b;
+        cases a; cases b; simp [list.map₂], 
+            contradiction,
+            simp [nat.add_one] at la lb,
+            split, apply add_comm, exact ih _ _ la lb },
+    zero := repeat h.zero _,
     zero_add := by 
-        { intro a, simp,
+        { intro a,
         cases a with a la, 
-        unfold repeat map₂, simp,
-        induction n with n ih generalizing a; 
-        unfold list.repeat; cases a,
-            apply list.map₂_nil,
-            repeat { contradiction }, 
-            unfold list.map₂,
+        simp [repeat, map₂],
+        induction n with _ ih generalizing a; 
+        cases a; simp [list.repeat, list.map₂],
+            contradiction,
             simp [nat.add_one] at la,  
-            apply congr,
-                { apply congr, refl, apply zero_add},
-                exact ih _ la },
+            split, apply zero_add, exact ih _ la },
     add_zero := by 
-        { intro a, simp [has_add.add],
+        { intro a, 
         cases a with a la,
-        unfold repeat map₂, simp,
-        induction n with n ih generalizing a;
-        unfold list.repeat; cases a,
-            apply list.map₂_nil,
-            repeat { contradiction },
-            unfold list.map₂,
+        simp [has_add.add, repeat, map₂],
+        induction n with _ ih generalizing a;
+        cases a; simp [list.repeat, list.map₂],
+            contradiction,
             simp [nat.add_one] at la,
-            apply congr,
-                { apply congr, refl, apply add_zero },
-                exact ih _ la },
+            split, apply add_zero, exact ih _ la },
     smul := map ∘ h.mul,
     smul_add := by 
-        { intros r a b, simp [add_group.add],
+        { intros _ a b,
         cases a with a la,
         cases b with b lb,
-        unfold map map₂, simp,
-        induction n with n ih generalizing a b,
-            { cases a; cases b,
-            rw [list.map, list.map₂_nil, list.map], 
-            repeat { contradiction } },
-            { cases a, contradiction,
-            cases b, contradiction,
-            unfold list.map list.map₂,
+        simp [add_group.add, map, map₂],
+        induction n with _ ih generalizing a b; 
+        cases a; cases b; simp [list.map, list.map₂],
+            contradiction,
             simp [nat.add_one] at la lb,
-            apply congr, 
-                { apply congr, refl, apply left_distrib },
-                exact ih _ _ la lb } },
+            split, apply left_distrib, exact ih _ _ la lb },
     add_smul := by 
-        { intros r s a, 
-        simp [has_add.add, add_semigroup.add, 
-            add_monoid.add, add_group.add],
+        { intros _ _ a, 
         cases a with a la,
-        unfold map map₂, simp,
-        induction n with n ih generalizing a;
-        cases a; unfold list.map list.map₂,
-            repeat { contradiction },
-            simp, split, 
-            apply right_distrib,
+        simp [has_add.add, add_semigroup.add,
+            add_monoid.add, add_group.add, map, map₂],
+        induction n with _ ih generalizing a; 
+        cases a; simp [list.map, list.map₂],
+            contradiction,
             simp [nat.add_one] at la,
-            exact ih _ la },
+            split, apply right_distrib, exact ih _ la },
     mul_smul := by  
-        { intros r s a, simp,
+        { intros _ _ a, 
         cases a with a la,
-        unfold map, simp,
-        induction n with n ih generalizing a;
-        cases a; unfold list.map,
-            repeat { contradiction },
-            simp, split, 
-            apply mul_assoc,
+        simp [map],
+        induction n with _ ih generalizing a; 
+        cases a; simp [list.map],
+            contradiction,
             simp [nat.add_one] at la,
-            exact ih _ la },
+            split, apply mul_assoc, exact ih _ la },
     one_smul := by 
-        { intro a, simp,
+        { intro a, 
         cases a with a la,
-        unfold map, simp,
-        induction n with n ih generalizing a;
-        cases a; unfold list.map,
-            repeat { contradiction }, 
-            simp, split, 
-            apply h.one_mul,
+        simp [map],
+        induction n with _ ih generalizing a; 
+        cases a; simp [list.map], 
+            contradiction,
             simp [nat.add_one] at la,
-            exact ih _ la },
+            split, apply one_mul, exact ih _ la },
     neg := map h.neg,
     add_left_neg := by
-        { intro a, simp,
-        simp [has_zero.zero],
-        unfold repeat,
+        { intro a, 
         cases a with a la,
-        unfold map map₂, simp,
-        induction n with n ih generalizing a;
-        unfold list.repeat; cases a; simp,
+        simp [repeat, map, map₂],
+        induction n with _ ih generalizing a; 
+        cases a; simp [list.repeat, list.map, list.map₂],
             repeat { contradiction },
-            split, 
-            apply add_left_neg,
             simp [nat.add_one] at la,
-            exact ih _ la } 
+            split, apply add_left_neg,
+                exact ih _ la } 
 }
 
-instance [field R] : vector_space R (vector R n) :=
-sorry
+instance [h : field R] : vector_space R (vector R n) := 
+vector_space.mk _ _
 
 end vector
