@@ -41,7 +41,27 @@ quotient.mk f
 
 --
 
-def id_eq_class {α : Type*} [topological_space α ] (x : α )  : space_π₁ x := eq_class (loop_const x)
+-- Definition of identity and inverse classes 
+
+def id_eq_class {α : Type*} [topological_space α ] (x : α )  : space_π₁ x := ⟦ loop_const x ⟧ 
+
+--def inv_eq_class {α : Type*} [topological_space α ] {x : α } (F : space_π₁  x) : space_π_1 x := eq_class (inv_of_path (out_loop F))
+
+def inv_eq_class' {α : Type*} [topological_space α ] {x : α } ( f : loop x ) : space_π₁  x := eq_class (inv_of_path f)
+
+lemma inv_eq_class_aux {α : Type*} [topological_space α] {x : α} : 
+∀ (a b : path x x),
+    a ≈ b → ⟦ inv_of_path a ⟧ = ⟦ inv_of_path b ⟧  := 
+begin 
+intros a b Hab, 
+apply quotient.sound, 
+cases Hab, 
+existsi _, 
+exact path_homotopy_of_inv_path Hab,
+end 
+
+def inv_eq_class {α : Type*} [topological_space α ] {x : α } : space_π₁ x → space_π₁ x := 
+quotient.lift ( λ f, ⟦ inv_of_path f ⟧ ) inv_eq_class_aux
 
 
 -- Definition of multiplication on π₁ 
@@ -180,7 +200,9 @@ begin
   exact hom_const_f_to_f (quotient.out F),
 end
 
+----------------------------------------------------
 
+-- Inverse Element
 
 
 --set_option trace.simplify.rewrite true
@@ -190,7 +212,7 @@ end
 
 -- Group π₁ (α  , x)
 
-def π₁_group {α : Type*} [topological_space α ] (x : α ) : group ( space_π₁ x) := 
+noncomputable def π₁_group {α : Type*} [topological_space α ] (x : α ) : group ( space_π₁ x) := 
 {   mul := fundamental_group.mul ,  
     
     mul_assoc := begin sorry end, 
@@ -212,6 +234,7 @@ def π₁_group {α : Type*} [topological_space α ] (x : α ) : group ( space_�
 
 
 --------------------- Next things after identity for π_1 group 
+-- Not Compiling 
 
 -- Inverse 
 

@@ -433,6 +433,44 @@ begin unfold is_homotopic_to, exact nonempty.intro (hom_repar_path_to_path f φ 
 
 ------------------------------
 
+-- Homotopy of path inverses
+------  a ≈ b  →  a⁻¹ ≈ b⁻¹ 
+
+
+def f_path_inv {α } [topological_space α] {x y : α} { a b : path x y } ( F : path_homotopy a b ) : I01 × I01 → α :=
+λ st, F.to_fun (st.1 , par_inv st.2) 
+
+lemma f_path_inv_start_pt {α } [topological_space α] {x y : α} { a b : path x y } ( F : path_homotopy a b ) :
+∀ (s : I01), f_path_inv F (s, 0) = y := begin unfold f_path_inv, simp end
+
+lemma f_path_inv_end_pt {α } [topological_space α] {x y : α} { a b : path x y } ( F : path_homotopy a b ) :
+∀ (s : I01), f_path_inv F (s, 1) = x := begin unfold f_path_inv, simp end
+
+lemma f_path_inv_at_zero {α } [topological_space α] {x y : α} { a b : path x y } ( F : path_homotopy a b ) :
+∀ (y_1 : I01), f_path_inv F (0, y_1) = (inv_of_path a).to_fun y_1 := 
+begin intro y, unfold f_path_inv inv_of_path, simp, end
+
+lemma f_path_inv_at_one {α } [topological_space α] {x y : α} { a b : path x y } ( F : path_homotopy a b ) :
+∀ (y_1 : I01), f_path_inv F (1, y_1) = (inv_of_path b).to_fun y_1 := 
+begin intro y, unfold f_path_inv inv_of_path, simp, end 
+
+lemma f_path_inv_cont {α } [topological_space α] {x y : α} { a b : path x y } ( F : path_homotopy a b ) :
+continuous (f_path_inv F) := 
+begin 
+ unfold f_path_inv, 
+ refine continuous.comp _ F.cont, 
+ refine continuous.prod_mk continuous_fst _, 
+ exact continuous.comp continuous_snd continuous_par_inv 
+end
+
+noncomputable theorem path_homotopy_of_inv_path {α } [topological_space α] {x y : α} { a b : path x y } 
+( F : path_homotopy a b ) : path_homotopy (inv_of_path a) (inv_of_path b) := 
+path_homotopy.mk' (f_path_inv F) (f_path_inv_start_pt F) (f_path_inv_end_pt F) (f_path_inv_at_zero F) 
+(f_path_inv_at_one F) (f_path_inv_cont F) 
+
+
+---------------------------------
+
 
 --------------------------------- 
 
