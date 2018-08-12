@@ -208,7 +208,36 @@ end
 --set_option trace.simplify.rewrite true
 --set_option pp.implicit true
 
------
+
+-- Inverse 
+
+
+
+--instance : @topological_semiring I01 (by apply_instance )  := 
+/-
+lemma comp_inv_eqv_const {α : Type*} [topological_space α ] {x : α } (F : space_π₁  x) : is_homotopic_to (comp_of_path (out_loop (inv_eq_class F)) (out_loop F) ) (loop_const x) := 
+begin 
+unfold is_homotopic_to, 
+sorry,
+
+end  -/ 
+
+
+
+/- α : Type u_1,
+_inst_2 : topological_space α,
+x : α,
+F : space_π₁ x
+⊢ path_homotopy (comp_of_path (inv_of_path (quotient.out F)) (quotient.out F)) (loop_const x) -/
+
+
+
+theorem mul_left_inv {α : Type*} [topological_space α ] {x : α } (F : space_π₁ x) : fg_mul (inv_eq_class F) F = id_eq_class x := 
+begin 
+ unfold fundamental_group.mul, unfold id_eq_class eq_class inv_eq_class, rw [quotient.out_eq' F],
+ apply quotient.sound, existsi _, exact hom_inv_comp_to_const (quotient.out F)
+end
+
 
 -- Group π₁ (α  , x)
 
@@ -223,51 +252,20 @@ noncomputable def π₁_group {α : Type*} [topological_space α ] (x : α ) : g
     one_mul := fundamental_group.one_mul , 
     mul_one := fundamental_group.mul_one , 
 
-    inv :=  sorry , --inv_eq_class  ,
-    mul_left_inv :=  begin 
-    intro F, simp, 
-    sorry end 
-
+    inv :=  inv_eq_class  ,
+    mul_left_inv := fundamental_group.mul_left_inv 
+    /- begin 
+    intro F, unfold fundamental_group.mul, unfold inv_eq_class eq_class, rw [quotient.out_eq' F],apply quotient.sound, 
+    existsi _, 
+    end -/ 
 
 }
-
 
 
 --------------------- Next things after identity for π_1 group 
 -- Not Compiling 
 
--- Inverse 
 
-
-
-lemma hom_comp_inv_to_const {α : Type*} [topological_space α ] {x : α } (f : loop x) : path_homotopy (comp_of_path (inv_of_path f) f) (loop_const x) := 
-{   to_fun := sorry, 
-    path_s := sorry, 
-    at_zero := sorry, 
-    at_one := sorry, 
-    cont := sorry
-
------ NEED STOP FUNCTION
-
-
-}
-
---instance : @topological_semiring I01 (by apply_instance )  := 
-
-lemma comp_inv_eqv_const {α : Type*} [topological_space α ] {x : α } (F : space_π_1 x) : is_homotopic_to (comp_of_path (out_loop (inv_eq_class F)) (out_loop F) ) (loop_const x) := 
-begin 
-unfold is_homotopic_to, 
-sorry,
-
-end 
-
-
-theorem mul_left_inv {α : Type*} [topological_space α ] {x : α } (F : space_π_1 x) : mul (inv_eq_class F) F = id_eq_class x := 
-begin 
-unfold mul und_mul, unfold id_eq_class, unfold eq_class, simp [quotient.eq], unfold inv_eq_class out_loop,  unfold has_equiv.equiv, 
---suffices H : is_homotopic_to (comp_of_path (out_loop (inv_eq_class F)) (out_loop F) ) (loop_const x)
-sorry, 
-end
 
 
 

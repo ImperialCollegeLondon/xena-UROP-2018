@@ -605,8 +605,8 @@ fb ⟨t, h₂⟩ -/
 
 
 
-def par_aux_a : I01 × I01 → I01 := 
-λ st, if ((1 : ℝ ) - st.1.1) < st.2.1 then st.1 else st.2
+def ps_aux_a : I01 × I01 → I01 := 
+λ st, if ((1 : ℝ ) - st.1.1) ≤ st.2.1 then st.1 else st.2
 
 -- dite or ite? 
 
@@ -617,10 +617,10 @@ end -/
 
 
 
-lemma continuous_par_aux_a  : continuous par_aux_a := 
+lemma continuous_ps_aux_a  : continuous ps_aux_a := 
 begin 
-unfold par_aux_a, 
-by_cases h : ∀ (st : I01 × I01), ((1 : ℝ ) - ((st.1).1 )) < (st.snd).val , 
+unfold ps_aux_a, 
+by_cases h : ∀ (st : I01 × I01), ((1 : ℝ ) - ((st.1).1 ))≤ (st.snd).val , 
 simp [h, continuous_fst], 
 
 rw [not_forall] at h, 
@@ -647,20 +647,20 @@ end
 
 
 
-/- def par_stop_a : I01 × I01 → I01 := 
-λ st, ps_aux_a st -/ 
+def par_stop_a : I01 × I01 → I01 × I01 := 
+λ st, (st.1, ps_aux_a st )
 
-/- lemma continuous_par_stop_a : continuous par_stop_a := 
-begin unfold par_stop_a, exact continuous.prod_mk continuous_fst continuous_ps_aux_a end -/ 
+lemma continuous_par_stop_a : continuous par_stop_a := 
+begin unfold par_stop_a, exact continuous.prod_mk continuous_fst continuous_ps_aux_a end
 
-def repar_stop_a : set.prod T1 I → I01 := 
-λ st, par_aux_a ( shift (  par T1._proof_1 ⟨ st.1.1, (mem_prod.1 st.2).1⟩ , st.1.2 ) )
+def repar_stop_a : set.prod T1 I → I01 × I01 := 
+λ st, par_stop_a ( shift (  par T1._proof_1 ⟨ st.1.1, (mem_prod.1 st.2).1⟩ , st.1.2 ) )
 --- need shift to have st.2 double speed (and re-shift starting domain to keep ordering when constructing homotopy)
 
 
 lemma cont_r_stop_a : continuous repar_stop_a := 
 begin 
- unfold repar_stop_a, refine continuous.comp _ continuous_par_aux_a,
+ unfold repar_stop_a, refine continuous.comp _ continuous_par_stop_a,
  refine continuous.comp _ continuous_shift_order,
  refine continuous.prod_mk _ (continuous.comp continuous_subtype_val continuous_snd), 
  refine continuous.comp _ (continuous_par _ ),
@@ -672,22 +672,17 @@ def fa_inv_comp {α : Type*} [topological_space α ] {x y : α } (f : path x y) 
 λ st, f.to_fun ( par_inv ( repar_stop_a st  )) 
 
 
-lemma cont_fa_inv_comp {α : Type*} [topological_space α ] {x y : α } (f : path x y) : 
-continuous (fa_inv_comp f) := 
-begin unfold fa_inv_comp, exact continuous.comp (continuous.comp cont_r_stop_a continuous_par_inv) f.cont, end 
-
-
 
 ----- 
 
 -- To shrink path f 
-def par_aux_b : I01 × I01 → I01 := 
-λ st, if st.2.1 < st.1.1 then st.1 else st.2
+def ps_aux_b : I01 × I01 → I01 := 
+λ st, if st.2.1 ≤ st.1.1 then st.1 else st.2
 
-lemma continuous_par_aux_b  : continuous par_aux_b := 
+lemma continuous_ps_aux_b  : continuous ps_aux_b := 
 begin 
-unfold par_aux_b, 
-by_cases h : ∀ (st : I01 × I01), (st.snd).val < (st.fst).val , 
+unfold ps_aux_b, 
+by_cases h : ∀ (st : I01 × I01), (st.snd).val ≤ (st.fst).val , 
 simp [h, continuous_fst], 
 
 rw [not_forall] at h, 
@@ -695,132 +690,44 @@ cases h with x h₂ , --simp [h₂ , if_false , continuous_snd],
 sorry
 end
 
-/- def par_stop_b : I01 × I01 → I01 × I01 := 
+def par_stop_b : I01 × I01 → I01 × I01 := 
 λ st, (st.1, ps_aux_b st )
 
 lemma continuous_par_stop_b : continuous par_stop_b := 
-begin unfold par_stop_b, exact continuous.prod_mk continuous_fst continuous_ps_aux_b end -/ 
+begin unfold par_stop_b, exact continuous.prod_mk continuous_fst continuous_ps_aux_b end
 
-def repar_stop_b : set.prod T2 I → I01  := 
-λ st, par_aux_b ( shift (  par T2._proof_1 ⟨ st.1.1, (mem_prod.1 st.2).1⟩ , st.1.2 ) )
+def repar_stop_b : set.prod T2 I → I01 × I01 := 
+λ st, par_stop_b ( shift (  par T2._proof_1 ⟨ st.1.1, (mem_prod.1 st.2).1⟩ , st.1.2 ) )
 
 lemma cont_r_stop_b : continuous repar_stop_b := 
 begin 
- unfold repar_stop_b, refine continuous.comp _ continuous_par_aux_b,
+ unfold repar_stop_b, refine continuous.comp _ continuous_par_stop_b,
  refine continuous.comp _ continuous_shift_order,
  refine continuous.prod_mk _ (continuous.comp continuous_subtype_val continuous_snd), 
  refine continuous.comp _ (continuous_par _ ),
  refine continuous_subtype_mk _ _, exact continuous.comp continuous_subtype_val continuous_fst, 
 end
 
-def fb_inv_comp {α : Type*} [topological_space α ] {x y : α } (f : path x y) : set.prod T2 I → α := 
-λ st, f.to_fun (  repar_stop_b st  )
 
-lemma cont_fb_inv_comp {α : Type*} [topological_space α ] {x y : α } (f : path x y) : 
-continuous (fb_inv_comp f) := 
-begin unfold fb_inv_comp, exact continuous.comp cont_r_stop_b  f.cont, end 
+
+
 
 --------------
-/- 
-#check le_add_of_le_of_nonneg
-#check le_antisymm
-#check lt_iff_le_and_ne 
-#check lt_of_le_of_lt
-#check sub_lt
-#check subtype.ext -/
+
 
 def f_inv_comp {α : Type*} [topological_space α ] {x y : α } (f : path x y) : I01 × I01 → α := 
-λ st, ( paste cover_prod_I01  ( λ st, (fa_inv_comp f ) st ) ( λ st, (fb_inv_comp f ) st ) ) (shift st)
--- see repar_stop_a
+λ st, ( paste cover_prod_I01  ( λ st,  )
 
-lemma f_inv_comp_start_pt {α : Type*} [topological_space α ] {x y : α } (f : path x y) :
- ∀ (s : I01), f_inv_comp f (s, 0) = y := 
-begin intro s, 
- unfold f_inv_comp fa_inv_comp fb_inv_comp, unfold repar_stop_a repar_stop_b shift_order par_aux_a par_aux_b paste, simp [-sub_eq_add_neg], 
- rw [dif_pos ], 
- have H : (ite (1 - s.val < (par T1._proof_1 ⟨0, help_T1⟩).val) s (par T1._proof_1 ⟨0, help_T1⟩)) = (0 : I01), 
-    split_ifs,   have H2 : s.val + (0 : I01).val = s.val, show s.val + (0:ℝ ) = s.val, exact  add_zero s.val, 
-      have H3 : s.val ≤ (1:I01).val, exact s.2.2, have H4 : 1 - (0:I01).val = 1, exact sub_zero 1, 
-      rw [ eqn_start ] at h, rw [sub_lt] at h, have H5 : 1 < s.val, rw H4 at h,  exact h,
-      --[sub_lt] at h,    rw [H2] at h, 
-      by_contradiction, have G : s.val < s.val, exact lt_of_le_of_lt H3 h, sorry, --exact ⟨ G ⟩ , 
-      exact eqn_start, 
- show f.to_fun (par_inv (ite (1 - s.val < (par T1._proof_1 ⟨0, help_T1⟩).val) s (par T1._proof_1 ⟨0, help_T1⟩))) = y, 
- rw [H], rw eqn_1_par_inv, exact f.at_one,
- simp, exact help_T1, 
-end
+-- λ st, ( paste  cover_prod_I01 ( λ st, F.to_fun (repar_shift_a st) ) ( λ st, G.to_fun (repar_shift_b st) ) )  ( shift  st) 
 
 
-lemma f_inv_comp_end_pt {α : Type*} [topological_space α ] {x y : α } (f : path x y) :
-∀ (s : I01), f_inv_comp f (s, 1) = y := 
+
+noncomputable def hom_inv_comp_to_const {α : Type*} [topological_space α ] {x y : α } (f : path x y) : path_homotopy (comp_of_path (inv_of_path f) f) (loop_const y) := 
 begin 
- intro s, unfold f_inv_comp, unfold paste, rw dif_neg, unfold fb_inv_comp repar_stop_b shift_order par_aux_b, simp [-sub_eq_add_neg], 
- have H : ite ((par T2._proof_1 ⟨1, help_T2⟩).val < s.val) s (par T2._proof_1 ⟨1, help_T2⟩) = 1,
-    split_ifs, {  by_contradiction, rw eqn_end at h, have H2 : s.val ≤ (1:I01).val, exact s.2.2, 
-      have G : s.val < s.val, exact lt_of_le_of_lt H2 h, sorry, --exact ⟨ G ⟩ , 
-      },  
-      exact eqn_end, 
- show f.to_fun (ite ((par T2._proof_1 ⟨1, help_T2⟩).val < s.val) s (par T2._proof_1 ⟨1, help_T2⟩ )) = y, 
- rw H, exact f.at_one, 
- unfold shift_order, simp [help_02], 
-end 
+refine path_homotopy.mk' _ _ _ _ _ _ , 
 
-lemma f_inv_comp_at_zero {α : Type*} [topological_space α ] {x y : α } (f : path x y) :
-∀ (y_1 : I01), f_inv_comp f (0, y_1) = (comp_of_path (inv_of_path f) f).to_fun y_1 := sorry 
-
-lemma f_inv_comp_at_one {α : Type*} [topological_space α ] {x y : α } (f : path x y) :
-∀ (y_1 : I01), f_inv_comp f (1, y_1) = (loop_const y).to_fun y_1 := sorry
-
-lemma f_inv_comp_cont {α : Type*} [topological_space α ] {x y : α } (f : path x y) :
-continuous (f_inv_comp f) := 
-begin 
-  unfold f_inv_comp, refine continuous.comp continuous_shift_order _,  
-  refine cont_of_paste prod_T1_is_closed prod_T2_is_closed _ _ _, 
-  { unfold match_of_fun, intros w B1 B2, -- can strip out this..? 
-    have Int : w ∈ set.inter (set.prod T1 I) (set.prod T2 I), exact ⟨ B1 , B2 ⟩ , rwa [prod_inter_T] at Int, 
-    have V : w.1.1 = 1/2, rwa [set.prod, mem_set_of_eq] at Int, rwa [mem_set_of_eq] at Int, exact Int.1, cases w, 
-    have xeq : w_fst = ⟨ 1/2 , help_01 ⟩ , apply subtype.eq, rw V,
-    simp [xeq, -one_div_eq_inv], unfold  fa_inv_comp fb_inv_comp, 
-    unfold repar_stop_a repar_stop_b shift_order par_aux_a par_aux_b, --simp [-sub_eq_add_neg,-one_div_eq_inv], 
-    show f.to_fun
-      (par_inv
-         (ite (1 - w_snd.val < (par T1._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T1 ⟩).val) w_snd
-            (par T1._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T1 ⟩))) =
-    f.to_fun
-      (ite ((par T2._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T2 ⟩).val < w_snd.val) w_snd
-         (par T2._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T2 ⟩)), 
-    rw [eqn_1, eqn_2],   sorry, 
-    /- split_ifs, 
-      { by_contradiction, simp at h_1,   }, 
-
-  sorry -/ 
-  }, 
-sorry, 
 sorry 
-end
-
-
-/- refine continuous.comp continuous_shift_order _,     
-    refine cont_of_paste prod_T1_is_closed prod_T2_is_closed _ _ _, 
-    {unfold match_of_fun, intros w B1 B2, 
-    have Int : w ∈ set.inter (set.prod T1 I) (set.prod T2 I), exact ⟨ B1 , B2 ⟩ , rwa [prod_inter_T] at Int, 
-    have V : w.1.1 = 1/2, rwa [set.prod, mem_set_of_eq] at Int, rwa [mem_set_of_eq] at Int, exact Int.1, cases w, 
-    have xeq : w_fst = ⟨ 1/2 , help_01 ⟩ , apply subtype.eq, rw V,
-    simp [xeq, -one_div_eq_inv], unfold repar_shift_a repar_shift_b shift_order, 
-    simp [-one_div_eq_inv], 
-    show F.to_fun (w_snd, par T1._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T1⟩) =
-    G.to_fun (w_snd, par T2._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T2⟩) , rw [eqn_1, eqn_2], simp,  
-    } ,  
-    exact continuous.comp cont_r_shift_a F.cont, 
-    exact continuous.comp cont_r_shift_b G.cont, -/
-
-noncomputable def hom_inv_comp_to_const {α : Type*} [topological_space α ] {x y : α } (f : path x y) : 
-path_homotopy (comp_of_path (inv_of_path f) f) (loop_const y) := 
-path_homotopy.mk' (f_inv_comp f) (f_inv_comp_start_pt f) (f_inv_comp_end_pt f) 
-(f_inv_comp_at_zero f) (f_inv_comp_at_one f) (f_inv_comp_cont f)  
-
-
-
+end 
 
 
 
