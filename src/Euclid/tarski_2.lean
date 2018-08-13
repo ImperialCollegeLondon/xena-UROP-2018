@@ -106,8 +106,7 @@ cases h3,
     right, left,
     exact h5.symm,
   have : x = p,
-    simp at *,
-    exact h3,
+    simpa using h3,
   right, left,
   rw this,
   exact three1 q p,
@@ -142,6 +141,8 @@ intro h1,
 exact (four11 h1).2.1
 end
 
+theorem line.symm {a b : point} (h : line (l a b)) : line (l b a) := (six17 a b) ▸ h
+
 @[simp] theorem six17a (p q : point) : p ∈ l p q := (four11 (four12 p q)).1
 
 @[simp] theorem six17b (p q : point) : q ∈ l p q := (four11 (four12 q p)).2.2.2.1
@@ -172,8 +173,7 @@ split,
   simp,
 intro h1,
 subst a,
-apply h,
-simp
+simpa using h
 end
 
 theorem six19 {a b : point} : a ≠ b → ∃! L : set point, line L ∧ a ∈ L ∧ b ∈ L :=
@@ -188,7 +188,7 @@ split,
       exact h,
     refl,
   split;
-    simp,
+  simp,
 intros y hy,
 exact six18 hy.1 h hy.2.1 hy.2.2
 end
@@ -243,8 +243,7 @@ split,
   existsi l a b,
   split,
     exact six14 h_1,
-  simp,
-  exact h,
+  simpa using h,
 intro h,
 cases h with L h,
 cases em (a = b),
@@ -565,35 +564,32 @@ theorem seven15 (a : point) {p q r : point} : B p q r ↔ B (S a p) (S a q) (S a
 begin
 split,
   intro h,
-  have h1 : cong p q r (S a p) (S a q) (S a r),
-    split,
-      exact seven13 a p q,
-    split,
-      exact seven13 a q r,
-    exact seven13 a p r,
-  exact four6 h h1,
+  apply four6 h,
+  repeat {split};
+  exact seven13 a _ _, 
 intro h,
 rw ←(seven7 a p),
 rw ←(seven7 a q),
 rw ←(seven7 a r),
-have h1 : cong (S a p) (S a q) (S a r) (S a (S a p)) (S a (S a q)) (S a (S a r)),
-  split,
-    exact seven13 a (S a p) (S a q),
-  split,
-    exact seven13 a (S a q) (S a r),
-  exact seven13 a (S a p) (S a r),
-exact four6 h h1
+apply four6 h,
+repeat {split};
+exact seven13 a _ _, 
 end
 
 theorem seven16 (a : point) {p q r s : point}: eqd p q r s ↔ eqd (S a p) (S a q) (S a r) (S a s) :=
 begin
 split,
   intro h,
-  exact eqd.trans (seven13 a p q).symm (eqd.trans h (seven13 a r s)),
+  exact (seven13 a p q).symm.trans (h.trans (seven13 a r s)),
 intro h,
 let h1 := eqd.trans (seven13 a (S a p) (S a q)).symm (eqd.trans h (seven13 a (S a r) (S a s))),
-simp at h1,
-exact h1
+simpa using h1
+end
+
+theorem seven16a (a : point) {p q r : point} : cong p q r (S a p) (S a q) (S a r) :=
+begin
+repeat {split};
+exact seven13 a _ _
 end
 
 theorem seven14 (a : point) {p q r : point} : M p q r ↔ M (S a p) (S a q) (S a r) :=
