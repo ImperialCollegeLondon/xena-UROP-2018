@@ -1,10 +1,6 @@
 import data.nat.prime data.nat.gcd data.nat.modeq data.nat.gcd algebra.group chris_hughes_various.zmod group_theory.order_of_element M3P14.order_zmodn_kmb M3P14.phi
 
 open zmod nat
- 
-#eval @order_of (units (zmod 7)) _ _ _ ⟨(2 : zmod 7), 2⁻¹, rfl, rfl⟩
-#eval @order_of (units (zmod 5)) _ _ _ ⟨(2 : zmod 5), 2⁻¹, rfl, rfl⟩
-#eval @order_of (units (zmod 7)) _ _ _ ⟨(1 : zmod 7), 1⁻¹, rfl, rfl⟩
 
 def order_of_zmod (a n : ℕ) [pos_nat n] : ℕ := @order_of (units (zmod n)) _ _ _ ⟨a, a⁻¹, sorry, sorry⟩ 
 
