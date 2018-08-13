@@ -11,8 +11,9 @@ def C : set ℝ := { x | x^3 < 3}
 
 definition real_half := (1 / 2 : ℝ)
 -- useful lemmas
-#check (real_half_not_an_integer : ¬∃ (n : ℤ), real_half = ↑n)
+
 #check (B_is_minus_one_zero_one : ∀ (x : ℝ), x ∈ B ↔ x = -1 ∨ x = 0 ∨ x = 1)
+#check (real_half_not_in_B : real_half ∉ B)
 
 -- For each part x, prove exactly one of part_x_true and
 -- part_x_false, and comment out the other one!

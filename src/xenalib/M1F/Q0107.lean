@@ -2,6 +2,16 @@ import algebra.group_power
 import data.real.basic
 import tactic.norm_num 
 import tactic.interactive
+noncomputable theory 
+
+namespace Q0107
+def B : set ℝ := { x | x^2 < 3 ∧ ∃ y : ℤ, x = y}
+noncomputable def real_half : ℝ := 1/2
+
+end Q0107
+
+open Q0107 
+
 
 -- The integers, rationals and reals are all different types in Lean
 -- and the obvious inclusions between them are all denoted by ↑ . 
@@ -31,6 +41,12 @@ begin
   simp -- simplifier is good at that sort of thing
 end 
 
+lemma real_half_not_in_B : real_half ∉ B := begin
+  intro H,
+  cases H with Hsquare Hint,
+  revert Hint,
+  exact real_half_not_an_integer,
+end
 -- proof that the real numbers which are integers and whose squares are less than three
 -- are precisely -1, 0 and 1
 
@@ -70,9 +86,8 @@ begin
   }
 end
 
-def B_temp : set ℝ := { x | x^2 < 3 ∧ ∃ y : ℤ, x = y}
 
-theorem B_is_minus_one_zero_one : ∀ x : ℝ, x ∈ B_temp ↔ x = -1 ∨ x = 0 ∨ x = 1 :=
+theorem B_is_minus_one_zero_one : ∀ x : ℝ, x ∈ B ↔ x = -1 ∨ x = 0 ∨ x = 1 :=
 begin
   intro x,
   split,
