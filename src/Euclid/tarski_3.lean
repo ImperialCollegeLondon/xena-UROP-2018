@@ -30,15 +30,19 @@ theorem R.flip {a b c : point} : R a b c → R a b (S b c) :=
 begin
 intro h,
 unfold R at *,
-simp,
-exact h.symm
+simpa using h.symm
 end
 
-theorem eight5 (a b : point) : R a b b :=
+@[simp] theorem eight5a (a b : point) : R a b b :=
 begin
 unfold R,
-simp,
-exact eqd.refl a b
+simpa using eqd.refl a b
+end
+
+@[simp] theorem eight5b (a b : point) : R a a b :=
+begin
+apply R.symm,
+simp
 end
 
 theorem eight6 {a b c a' : point} : R a b c → R a' b c → B a c a' → b = c :=
@@ -86,7 +90,7 @@ end
 theorem eight8 {a b : point} : R a b a → a = b :=
 begin
 intro h,
-exact eight7 (eight5 b a).symm h 
+exact eight7 (eight5a b a).symm h 
 end
 
 theorem eight9 {a b c : point} : R a b c → col a b c → a = b ∨ c = b :=
@@ -107,7 +111,7 @@ cases em (b = c),
   have h2 : b' = c',
     exact id_eqd b' c' c h1.2.1.symm,
   rw h2,
-  exact eight5 a' c',
+  exact eight5a a' c',
 unfold R at *,
 generalize h2 : S b c = d,
 generalize h3 : S b' c' = d',
@@ -188,7 +192,7 @@ end
 
 theorem eight14c {x : point} {A A' : set point} : xperp x A A' ↔ perp A A' ∧ is x A A' :=
 begin
-apply iff.intro,
+split,
   intro h,
   split,
   constructor,
@@ -245,10 +249,18 @@ split,
 exact hx.2.1
 end
 
+theorem eight14f {a b c : point} {A : set point} : perp (l a b) A → col a b c → a ≠ c → perp (l a c) A :=
+begin
+intros h h1 h2,
+suffices : l a b = l a c,
+  rwa ←this,
+exact six18 (eight14e h).1 h2 (six17a a b) h1
+end
+
 theorem eight13 {x : point} {A A' : set point} : xperp x A A' ↔ line A ∧ line A' ∧ x ∈ A ∧ x ∈ A' ∧
 ∃ u v, u ∈ A ∧ v ∈ A' ∧ u ≠ x ∧ v ≠ x ∧ R u x v :=
 begin
-apply iff.intro,
+split,
   intro h,
   split,
     exact h.1,
@@ -305,38 +317,32 @@ rw h_2 at hb,
 exact hb
 end
 
-theorem eight15 {a b c x : point} : col a b x → (perp (l a b) (l c x) ↔ xperp x (l a b) (l c x)) :=
+theorem eight15 {a x : point} {A : set point} : x ∈ A → perp A (l a x) → xperp x A (l a x) :=
 begin
-intro h,
-split,
-  intro h1,
-  cases h1 with y hy,
-  suffices : x = y,
-    subst x,
-    exact hy,
-  by_contradiction h_1,
-  apply eight14b hy,
-  let h1 := six13 hy.1,
-  let h2 := six13 hy.2.1,
-  apply six21 h_1,
-    exact hy.1,
-    exact hy.2.1,
-    exact h,
-    simp,
-    exact hy.2.2.1,
-  exact hy.2.2.2.1,
-intro h1,
-constructor,
-exact h1
+intros h h1,
+cases h1 with y hy,
+suffices : x = y,
+  subst x,
+  exact hy,
+by_contradiction h_1,
+apply eight14b hy,
+apply six21 h_1,
+  exact hy.1,
+  exact hy.2.1,
+  exact h,
+  simp,
+  exact hy.2.2.1,
+exact hy.2.2.2.1
 end
 
 theorem eight16 {a b c u x : point} : col a b x → col a b u → u ≠ x →
 (c ≠ x ∧ perp (l a b) (l c x) ↔ ¬col a b c ∧ R c x u) :=
 begin
 intros h1 h2 h3,
-apply iff.intro,
+split,
   intro h4,
-  let h5 := (eight15 h1).1 h4.2, 
+  have h5 : xperp x (l a b) (l c x),
+    exact eight15 h1 h4.2, 
   split,
     intro h_1,
     apply eight14b h5,
@@ -550,7 +556,8 @@ have h20 : c ≠ x',
   apply h,
   rw ←h_1 at hx',
   exact hx'.1,
-let h21 := (eight15 hx'.1).1 hx'.2,
+have h21 : xperp x' (l a b) (l c x'),
+  exact eight15 hx'.1 hx'.2,
 have h22 : R c x x',
   apply (h18.symm).2.2.2.2 c x',
     simp,
@@ -579,7 +586,7 @@ end
 theorem eight19 {p q r : point} (a : point) : R p q r ↔ R (S a p) (S a q) (S a r) :=
 begin
 unfold R,
-apply iff.intro,
+split,
   intro h,
   suffices : (S (S a q) (S a r)) = (S a (S q r)),
     rw this,
@@ -617,8 +624,7 @@ have h7 : R (S a b) b c,
   cases em (a = b),
     rw h_1 at *,
     simp,
-    exact (eight5 c b).symm,
-  apply eight3 h h_1,
+    apply eight3 h h_1,
   left,
   exact h3.1,
 let h8 := (eight19 a).1 h7,
@@ -665,7 +671,8 @@ cases em (col a b c) with habc h,
     intro h_1,
     rw h_1 at *,
     exact h hx.1.1,
-  let h2 := (eight15 hx.1.1).1 hx.1.2,
+  have h2 : xperp x (l a b) (l c' x),
+    exact eight15 hx.1.1 hx.1.2,
   unfold xperp at h2,
   let h3 := h2.2.2.2.2 a c' (six17a a b) (six17a c' x),
   unfold R at h3,
@@ -722,7 +729,8 @@ have h1 : c ≠ x,
   intro h_1,
   rw h_1 at *,
   exact h hx.1.1,
-let h2 := (eight15 hx.1.1).1 hx.1.2,
+have h2 : xperp x (l a b) (l c x),
+  exact eight15 hx.1.1 hx.1.2,
 unfold xperp at h2,
 let h3 := h2.2.2.2.2 a c (six17a a b) (six17a c x),
 unfold R at h3,
@@ -804,9 +812,9 @@ have h1 : col a b x,
     exact three1 a b,
   exact (four11 (five4 h_2 (four11 ht.2.1).1 h_1)).2.1,
 have h2 : xperp a (l a b) (l p a),
-  exact (eight15 (four11 (four12 a b)).1).1 hp.1,
+  exact eight15 (four11 (four12 a b)).1 hp.1,
 have h3 : xperp b (l b a) (l q b),
-  exact (eight15 (four11 (four12 b a)).1).1 ht.1,
+  exact eight15 (four11 (four12 b a)).1 ht.1,
 let h4 := h2.2.2.2.2 b p (six17b a b) (six17a p a),
 let h5 := h3.2.2.2.2 a q (six17b b a) (six17a q b),
 have h6 : R a b r,
