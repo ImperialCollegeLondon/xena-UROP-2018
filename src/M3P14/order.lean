@@ -6,7 +6,13 @@ def order_of_zmod (a n : ℕ) [pos_nat n] : ℕ := @order_of (units (zmod n)) _ 
 
 #eval order_of_zmod 7 53
 
-theorem order_zmod_div (a n d : ℕ) (h : coprime a n) [pos_nat n] : a^d ≡ 1 [MOD n] → order_of_zmod a n ∣ d := sorry
+theorem order_zmod_div (a n d : ℕ) (h : coprime a n) [pos_nat n] : a^d ≡ 1 [MOD n] → order_of_zmod a n ∣ d := 
+begin
+intro h,
+unfold order_of_zmod,
+unfold order_of,
+sorry
+end
 
 theorem order_zmod_div_phi_n (a n : ℕ) (h : coprime a n) [pos_nat n] : order_of_zmod a n ∣ phi n :=
 begin
