@@ -42,11 +42,22 @@ def coprime_zmodn_units (n : ℕ) [pos_nat n] :
 equiv (units (zmod n)) {a : zmod n // ∃ b, a * b = 1} :=
 { to_fun := λ u, ⟨u.1, u.2, u.3⟩,
   inv_fun := λ A, 
-  { 
-    val := (A.val).val, inv := ((A.val).val⁻¹),
+  { val := (A.val).val, inv := ((A.val).val⁻¹),
     val_inv := by rw [mul_inv_eq_gcd,gcd_one_of_has_inv A.val A.property];dsimp;rw zero_add,
     inv_val := by rw [mul_comm,mul_inv_eq_gcd,gcd_one_of_has_inv A.val A.property];dsimp;rw zero_add,
   },
   left_inv := λ u,begin apply units.ext,show (↑((u.val).val) : zmod n) = u.val,simp,end,
   right_inv := λ A, by simp
 }
+
+instance (n : nat) : pos_nat (nat.succ n) := ⟨nat.succ_pos _⟩ 
+instance (n : ℕ) [pos_nat n] : fintype (units (zmod n)) := fintype.of_equiv _ (equiv.symm (coprime_zmodn_units n))
+instance decidable_eq_units_zmod (n : ℕ) [pos_nat n] [monoid (zmod n)] : decidable_eq (units (zmod n)) :=  λ x y, decidable_of_iff _ ⟨ units.ext, λ _,by simp *⟩
+ 
+#eval @order_of (units (zmod 7)) _ _ _ ⟨(2 : zmod 7), 2⁻¹, rfl, rfl⟩
+#eval @order_of (units (zmod 5)) _ _ _ ⟨(2 : zmod 5), 2⁻¹, rfl, rfl⟩
+#eval @order_of (units (zmod 7)) _ _ _ ⟨(1 : zmod 7), 1⁻¹, rfl, rfl⟩
+
+def order_of_zmod (a n : ℕ) [pos_nat n] [monoid (zmod n)] [fintype (units (zmod n))] : ℕ := @order_of (units (zmod n)) _ _ _ ⟨(a : zmod n), a⁻¹, sorry, sorry⟩ 
+
+#eval order_of_zmod 7 53
