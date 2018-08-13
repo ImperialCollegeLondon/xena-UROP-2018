@@ -1,27 +1,34 @@
-import data.nat.prime data.nat.gcd data.nat.modeq data.nat.gcd M3P14.phi
+import data.nat.prime data.nat.gcd data.nat.modeq data.nat.gcd algebra.group chris_hughes_various.zmod group_theory.order_of_element M3P14.order_zmodn_kmb M3P14.phi
 
-open nat
+open zmod nat
+instance (n : nat) : pos_nat (nat.succ n) := ⟨nat.succ_pos _⟩ 
+instance (n : ℕ) [pos_nat n] : fintype (units (zmod n)) := fintype.of_equiv _ (equiv.symm (coprime_zmodn_units n))
+instance decidable_eq_units_zmod (n : ℕ) [pos_nat n] : decidable_eq (units (zmod n)) :=  λ x y, decidable_of_iff _ ⟨ units.ext, λ _,by simp *⟩
+ 
+#eval @order_of (units (zmod 7)) _ _ _ ⟨(2 : zmod 7), 2⁻¹, rfl, rfl⟩
+#eval @order_of (units (zmod 5)) _ _ _ ⟨(2 : zmod 5), 2⁻¹, rfl, rfl⟩
+#eval @order_of (units (zmod 7)) _ _ _ ⟨(1 : zmod 7), 1⁻¹, rfl, rfl⟩
 
-theorem exists_pow_eq_one_mod_n (a n : ℕ) : ∃i≠0, a ^ i ≡ 1 [MOD n] := sorry
+def order_of_zmod (a n : ℕ) [pos_nat n] : ℕ := @order_of (units (zmod n)) _ _ _ ⟨a, a⁻¹, sorry, sorry⟩ 
 
-def order_of (a n : ℕ) : ℕ := if coprime a n then nat.find (exists_pow_eq_one_mod_n a n) else 0
+#eval order_of_zmod 7 53
 
-theorem order_div (a n d : ℕ) (h : coprime a n) : a^d ≡ 1 [MOD n] → order_of a n ∣ d := sorry
+theorem order_zmod_div (a n d : ℕ) (h : coprime a n) [pos_nat n] : a^d ≡ 1 [MOD n] → order_of_zmod a n ∣ d := sorry
 
-theorem order_div_phi_n (a n : ℕ) (h : coprime a n) : order_of a n ∣ phi n := sorry
+theorem order_zmod_div_phi_n (a n : ℕ) (h : coprime a n) [pos_nat n] : order_of_zmod a n ∣ phi n :=
+begin
+have : a ^ (phi n) ≡ 1 [MOD n], from euler_phi_thm a n h,
+exact order_zmod_div a n (phi n) h this,
+end
 
-theorem pow_order_eq_one (a n : ℕ) (h: coprime a n) : a ^ (order_of a n) ≡ 1 [MOD n] := sorry
+@[simp] lemma units.coe_pow {α : Type*} [monoid α] (u : units α) (n : ℕ) : (↑(u ^ n) : α) = u ^ n :=
+by induction n; simp [*, _root_.pow_succ]
 
-def primitive_root (a n : ℕ) := coprime a n ∧ order_of a n = phi n
+#print units.one_coe
 
-theorem primitive_root_existence (n : ℕ) : ∃ a : ℕ, (primitive_root a n) ↔ n = 1 ∨ n = 2 ∨ n = 4 ∨ ∃ p r : ℕ, prime p ∧ r > 0 → (n = p^r ∨ n = 2*p^r) := sorry
+theorem pow_order_zmod_eq_one (a n : ℕ) (h: coprime a n) [pos_nat n] : (a : zmod n) ^ (order_of_zmod a n) = (1 : zmod n) := sorry
+--by rw [units.coe_inj, ← units.coe_pow, pow_order_of_eq_one]
 
-/-
-def order (a n k : ℕ) := ∀m : ℕ, coprime a n ∧ (a^k) ≡ 1 [MOD n] ∧ (a^m) ≡ 1 [MOD n] → k ≤ m
+def primitive_root (a n : ℕ) [pos_nat n] := coprime a n ∧ order_of_zmod a n = phi n
 
-def prim_root (a n : ℕ) := order_of a n = phi n
-
-theorem order_of_div (a n k d : ℕ) (h1: order_of a n = k) (h2: a^d ≡ 1 [MOD n]) : k ∣ d := sorry
-
-theorem order_of_div_phi_n (a n : ℕ) : order_of a n ∣ phi n := sorry 
--/
+theorem primitive_root_existence (n : ℕ) [pos_nat n] : ∃ a : ℕ, (primitive_root a n) ↔ n = 1 ∨ n = 2 ∨ n = 4 ∨ ∃ p r : ℕ, prime p ∧ r > 0 → (n = p^r ∨ n = 2*p^r) := sorry
