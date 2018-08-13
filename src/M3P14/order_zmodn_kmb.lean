@@ -75,5 +75,9 @@ theorem pow_order_eq_one (a n : ℕ) (h: coprime a n) : a ^ order_of_zmod (a : z
 
 def primitive_root (a n : ℕ) := coprime a n ∧ order_of_zmod (a : zmod n) = phi n
 
+<<<<<<< HEAD
 theorem primitive_root_existence (n : ℕ) : ∃ a : ℕ, (primitive_root a n) ↔ n = 1 ∨ n = 2 ∨ n = 4 ∨ ∃ p r : ℕ, prime p ∧ r > 0 → (n = p^r ∨ n = 2*p^r) := sorry
 -/
+=======
+#eval order_of_zmod 7 53
+>>>>>>> 77a5c94de5fd976beaa9b95ee2272ec8b854debb
