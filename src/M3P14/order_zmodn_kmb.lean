@@ -76,3 +76,5 @@ end
 def order_of_zmod (a n : ℕ) [pos_nat n] : ℕ := @order_of (units (zmod n)) _ _ _ ⟨(a : zmod n), a⁻¹, sorry, sorry⟩ 
 
 #eval order_of_zmod 7 53
+
+--ehllo
