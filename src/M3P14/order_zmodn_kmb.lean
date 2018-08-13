@@ -54,25 +54,26 @@ instance (n : nat) : pos_nat (nat.succ n) := ⟨nat.succ_pos _⟩
 instance (n : ℕ) [pos_nat n] : fintype (units (zmod n)) := fintype.of_equiv _ (equiv.symm (coprime_zmodn_units n))
 instance (n : ℕ) [pos_nat n] : decidable_eq (units (zmod n)) :=  λ x y, decidable_of_iff _ ⟨ units.ext, λ _,by simp *⟩
  
-#eval @order_of (units (zmod 7)) _ _ _ ⟨(2 : zmod 7), 2⁻¹, rfl, rfl⟩
-#eval @order_of (units (zmod 5)) _ _ _ ⟨(2 : zmod 5), 2⁻¹, rfl, rfl⟩
-#eval @order_of (units (zmod 7)) _ _ _ ⟨(1 : zmod 7), 1⁻¹, rfl, rfl⟩
+def order_of_zmod (a n : ℕ) [pos_nat n] : ℕ := @order_of (units (zmod n)) _ _ _ ⟨a, a⁻¹, sorry, sorry⟩ 
 
+#eval order_of_zmod 2 7
 
-theorem mul_right_inv_zmod (n : ℕ) [monoid (zmod n)] (a : units (zmod n)) [pos_nat n] :
-a * a⁻¹ = 1 :=
-begin 
-  --refl,
-  --have eq : {a // ∃ (b : zmod n), a * b = 1} = (a : zmod n)
-  --have group : group (zmod n), sorry,
-  --have h : (a : zmod n) * (a : zmod n)⁻¹, from @mul_right_inv (zmod n) _ (a : zmod n),
-  sorry,
+theorem exists_pow_eq_one_mod_n (a n : ℕ) : ∃i≠0, a ^ i ≡ 1 [MOD n] := sorry
+
+theorem order_div (a n d : ℕ) (h : coprime a n) [pos_nat n] : a^d ≡ 1 [MOD n] → (order_of_zmod a n) ∣ d := 
+begin
+  intro h,
+  unfold order_of_zmod,
+  unfold order_of,
+  sorry
 end
 
-#check @mul_right_inv
-#check @order_of
-#eval (3 : zmod 5)⁻¹ 
---def order_of_zmod (a n : ℕ) [pos_nat n] [monoid (zmod n)] [fintype (units (zmod n))] : ℕ := @order_of (units (zmod n)) _ _ _ ⟨(a : zmod n), a⁻¹, sorry, sorry⟩ 
-def order_of_zmod (a n : ℕ) [pos_nat n] : ℕ := @order_of (units (zmod n)) _ _ _ ⟨(a : zmod n), a⁻¹, sorry, sorry⟩ 
+/-
+theorem order_div_phi_n (a n : ℕ) (h : coprime a n) : order_of_zmod (a : zmod n) ∣ phi n := sorry
 
-#eval order_of_zmod 7 53
+theorem pow_order_eq_one (a n : ℕ) (h: coprime a n) : a ^ order_of_zmod (a : zmod n) ≡ 1 [MOD n] := sorry
+
+def primitive_root (a n : ℕ) := coprime a n ∧ order_of_zmod (a : zmod n) = phi n
+
+theorem primitive_root_existence (n : ℕ) : ∃ a : ℕ, (primitive_root a n) ↔ n = 1 ∨ n = 2 ∨ n = 4 ∨ ∃ p r : ℕ, prime p ∧ r > 0 → (n = p^r ∨ n = 2*p^r) := sorry
+-/
