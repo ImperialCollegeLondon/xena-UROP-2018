@@ -70,8 +70,11 @@ begin
   }
 end
 
-theorem B_is_minus_one_zero_one (x : ℝ) : x ∈ { x : ℝ | x^2 < 3 ∧ ∃ y : ℤ, x = ↑y} ↔ x = -1 ∨ x = 0 ∨ x = 1 :=
+def B_temp : set ℝ := { x | x^2 < 3 ∧ ∃ y : ℤ, x = y}
+
+theorem B_is_minus_one_zero_one : ∀ x : ℝ, x ∈ B_temp ↔ x = -1 ∨ x = 0 ∨ x = 1 :=
 begin
+  intro x,
   split,
   { intro H,
     cases H.right with y Hy,
