@@ -32,7 +32,7 @@ import data.equiv.basic linear_algebra.linear_map_module
 import algebra.pi_instances algebra.module data.list.basic
 
 open function  
--- R^n
+
 universe u
 variables {α : Type u}
 variables {β : Type*} [add_comm_group α] [add_comm_group β]
@@ -638,4 +638,3 @@ equiv (vector V n) (linear_map (has_space k n) V) :=
   right_inv := right_inv_ V n,
 }
 end vector_space
-
