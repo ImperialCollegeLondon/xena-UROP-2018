@@ -12,6 +12,20 @@ open nat
 --have h1 : b < b+1, by lt_succ_self b, 
 --end
 
+definition prime_int (p : ℤ) := nat.prime(int.nat_abs p) 
+theorem prime_int_to_nat {p : ℤ} (h : prime_int p) : prime (int.nat_abs p) := sorry
+
+definition quadratic_res (a n : ℤ) := ∃ x : ℤ, a ≡ x^2 [ZMOD (int.nat_abs n)]
+--definition quadratic_res' (p : ℤ) (hp : prime_int_int p ∧ p ≠ 2) (a n : zmod p) := ∃ x : ℕ, a ≡ x^2 [ZMOD n]
+
+attribute [instance, priority 0] classical.prop_decidable
+noncomputable definition legendre_sym {p : ℤ} (a : ℤ) (H1 : prime_int p ∧ p≠ 2) : ℤ := 
+if quadratic_res a p ∧ ¬ ((p : ℤ) ∣ a) then 1 else 
+if ¬ quadratic_res a p then -1 
+else 0
+
+theorem minus_one_quad_res_of_p {p : ℤ} (hp : prime_int p ∧ p ≠ 2) : (p ≡ 1 [ZMOD 4] ↔ (legendre_sym (-1: ℤ) hp) = 1) ∧ (p ≡ 3 [ZMOD 4] ↔ legendre_sym (-1 : ℤ) hp = (-1 : ℤ)) := sorry
+
 
 definition is_sum_of_two_squares (n : ℕ) := ∃ x y : ℤ, (n : ℤ) =  x ^ 2 + y ^ 2
 
@@ -25,17 +39,29 @@ rcases h with ⟨⟨a, b, hab⟩, ⟨c, d, hcd⟩⟩,
 existsi [a * c - b * d, a * d + b * c],
 rw int.coe_nat_mul, rw hab, rw hcd, 
 ring,
-
-
---have h2 : is_sum_of_two_squares m, from h.1,
---unfold is_sum_of_two_squares at h2,
---conv at h in (is_sum_of_two_squares m )
---begin
---unfold is_sum_of_two_squares
---end
-
 end 
 
+theorem one_mod_four_prime (p : ℤ)(h : prime_int p) : p ^ 2 ≡  1 [ZMOD 4] := sorry 
+
+theorem fermat_descent (p : ℤ)(h : prime_int p) : ∃ a b r : ℤ, (a ^ 2 + b ^ 2 = p * r) ∧ (1 < r) ∧ (r < p) → ∃ x y r' : ℤ, (1 ≤ r') ∧ (r'< r) ∧ (x ^ 2 + y ^ 2 = p * r') := 
+begin
+sorry 
+end 
+
+theorem fermat_two_square (p : ℤ)(h : prime_int p) : p ≡ 1 [ZMOD 4] → is_sum_of_two_squares (int.nat_abs p) := 
+begin
+intro hpp, 
+have hp : prime_int p ∧ p ≠ 2, 
+begin 
+split, 
+exact h, 
+by_contradiction,
+sorry 
+end, 
+sorry 
+end   
+
+ 
 
 --inductive less_than_or_equal (a : ℤ) : ℤ → Prop
 --| refl : less_than_or_equal a
