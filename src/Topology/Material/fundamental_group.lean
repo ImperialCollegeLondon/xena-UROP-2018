@@ -41,7 +41,27 @@ quotient.mk f
 
 --
 
-def id_eq_class {α : Type*} [topological_space α ] (x : α )  : space_π₁ x := eq_class (loop_const x)
+-- Definition of identity and inverse classes 
+
+def id_eq_class {α : Type*} [topological_space α ] (x : α )  : space_π₁ x := ⟦ loop_const x ⟧ 
+
+--def inv_eq_class {α : Type*} [topological_space α ] {x : α } (F : space_π₁  x) : space_π_1 x := eq_class (inv_of_path (out_loop F))
+
+def inv_eq_class' {α : Type*} [topological_space α ] {x : α } ( f : loop x ) : space_π₁  x := eq_class (inv_of_path f)
+
+lemma inv_eq_class_aux {α : Type*} [topological_space α] {x : α} : 
+∀ (a b : path x x),
+    a ≈ b → ⟦ inv_of_path a ⟧ = ⟦ inv_of_path b ⟧  := 
+begin 
+intros a b Hab, 
+apply quotient.sound, 
+cases Hab, 
+existsi _, 
+exact path_homotopy_of_inv_path Hab,
+end 
+
+def inv_eq_class {α : Type*} [topological_space α ] {x : α } : space_π₁ x → space_π₁ x := 
+quotient.lift ( λ f, ⟦ inv_of_path f ⟧ ) inv_eq_class_aux
 
 
 -- Definition of multiplication on π₁ 
@@ -180,17 +200,48 @@ begin
   exact hom_const_f_to_f (quotient.out F),
 end
 
+----------------------------------------------------
 
+-- Inverse Element
 
 
 --set_option trace.simplify.rewrite true
 --set_option pp.implicit true
 
------
+
+-- Inverse 
+
+
+
+--instance : @topological_semiring I01 (by apply_instance )  := 
+/-
+lemma comp_inv_eqv_const {α : Type*} [topological_space α ] {x : α } (F : space_π₁  x) : is_homotopic_to (comp_of_path (out_loop (inv_eq_class F)) (out_loop F) ) (loop_const x) := 
+begin 
+unfold is_homotopic_to, 
+sorry,
+
+end  -/ 
+
+
+
+/- α : Type u_1,
+_inst_2 : topological_space α,
+x : α,
+F : space_π₁ x
+⊢ path_homotopy (comp_of_path (inv_of_path (quotient.out F)) (quotient.out F)) (loop_const x) -/
+
+
+
+theorem mul_left_inv {α : Type*} [topological_space α ] {x : α } (F : space_π₁ x) : fg_mul (inv_eq_class F) F = id_eq_class x := 
+begin 
+ unfold fundamental_group.mul, unfold id_eq_class eq_class inv_eq_class, rw [quotient.out_eq' F],
+ apply quotient.sound, existsi _, exact hom_inv_comp_to_const (quotient.out F)
+end
+
 
 -- Group π₁ (α  , x)
 
-def π₁_group {α : Type*} [topological_space α ] (x : α ) : group ( space_π₁ x) := 
+noncomputable def π₁_group {α : Type*} [topological_space α ] (x : α ) : group ( space_π₁ x) := 
 {   mul := fundamental_group.mul ,  
     
     mul_assoc := begin sorry end, 
@@ -201,50 +252,20 @@ def π₁_group {α : Type*} [topological_space α ] (x : α ) : group ( space_�
     one_mul := fundamental_group.one_mul , 
     mul_one := fundamental_group.mul_one , 
 
-    inv :=  sorry , --inv_eq_class  ,
-    mul_left_inv :=  begin 
-    intro F, simp, 
-    sorry end 
-
+    inv :=  inv_eq_class  ,
+    mul_left_inv := fundamental_group.mul_left_inv 
+    /- begin 
+    intro F, unfold fundamental_group.mul, unfold inv_eq_class eq_class, rw [quotient.out_eq' F],apply quotient.sound, 
+    existsi _, 
+    end -/ 
 
 }
-
 
 
 --------------------- Next things after identity for π_1 group 
-
--- Inverse 
-
+-- Not Compiling 
 
 
-lemma hom_comp_inv_to_const {α : Type*} [topological_space α ] {x : α } (f : loop x) : path_homotopy (comp_of_path (inv_of_path f) f) (loop_const x) := 
-{   to_fun := sorry, 
-    path_s := sorry, 
-    at_zero := sorry, 
-    at_one := sorry, 
-    cont := sorry
-
------ NEED STOP FUNCTION
-
-
-}
-
---instance : @topological_semiring I01 (by apply_instance )  := 
-
-lemma comp_inv_eqv_const {α : Type*} [topological_space α ] {x : α } (F : space_π_1 x) : is_homotopic_to (comp_of_path (out_loop (inv_eq_class F)) (out_loop F) ) (loop_const x) := 
-begin 
-unfold is_homotopic_to, 
-sorry,
-
-end 
-
-
-theorem mul_left_inv {α : Type*} [topological_space α ] {x : α } (F : space_π_1 x) : mul (inv_eq_class F) F = id_eq_class x := 
-begin 
-unfold mul und_mul, unfold id_eq_class, unfold eq_class, simp [quotient.eq], unfold inv_eq_class out_loop,  unfold has_equiv.equiv, 
---suffices H : is_homotopic_to (comp_of_path (out_loop (inv_eq_class F)) (out_loop F) ) (loop_const x)
-sorry, 
-end
 
 
 

@@ -310,6 +310,32 @@ end
 
 def cong (a b c a' b' c' : point) : Prop := eqd a b a' b' ∧ eqd b c b' c' ∧ eqd a c a' c'
 
+theorem cong.refl (a b c : point) : cong a b c a b c :=
+begin
+repeat {split};
+exact eqd.refl _ _
+end
+
+theorem cong.symm {a b c a' b' c' : point} : cong a b c a' b' c' → cong a' b' c' a b c :=
+begin
+intro h,
+split,
+  exact h.1.symm,
+split,
+  exact h.2.1.symm,
+exact h.2.2.symm
+end
+
+theorem cong.trans {a b c a' b' c' a'' b'' c'' : point} : cong a b c a' b' c' → cong a' b' c' a'' b'' c'' → cong a b c a'' b'' c'' :=
+begin
+intros h h1,
+split,
+  exact eqd.trans h.1 h1.1,
+split,
+  exact eqd.trans h.2.1 h1.2.1,
+exact eqd.trans h.2.2 h1.2.2
+end
+
 lemma four4 {a b c a' b' c' : point} : cong a b c a' b' c' → cong b c a b' c' a' :=
 begin
 intro h,
