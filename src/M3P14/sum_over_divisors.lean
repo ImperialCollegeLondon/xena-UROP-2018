@@ -15,22 +15,8 @@ definition factors (d : ℕ+) : list ℕ :=
 #eval factors 6 -- [1, 2, 3, 6]
 
 lemma mem_factors_iff_divides (d : ℕ+) (e : ℕ) : e ∈ factors d ↔ e ∣ d :=
-begin
-  unfold factors,
-  rw mem_filter,
-  split,
-  { -- easy direction
-    intro H, exact H.2
-  },
-  { -- this is the "hard direction" :-)
-    intro H,
-    have He_le_d : e ≤ ↑d := le_of_dvd d.property H,
-    split,
-      rw mem_range,
-      exact lt_of_le_of_lt He_le_d (lt_succ_self _),
-    exact H
-  }
-end
+by simp [factors, -add_comm, nat.lt_succ_iff];
+   exact and_iff_right_of_imp (le_of_dvd d.2)
 
 lemma nodup_factors (d : ℕ+) : nodup (factors d) :=
 nodup_filter _ (nodup_range (d+1) : nodup (range (d+1)))
