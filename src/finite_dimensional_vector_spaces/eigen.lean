@@ -1,3 +1,23 @@
+/-
+Copyright (c) 2018 Keji Neri, Blair Shi. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Blair Shi
+
+-- This file aims to prove some theorems about eigenvalue and eigenvectors
+
+* `is_eigenvalue` `is_eigenvector`: constructed eigenvalues and eigenvectors 
+in terms of linear map way
+
+* `is_eigenvalue_M` `is_eigenvector_M`: constructed eigenvalues and eigenvectors 
+in terms of matrix way
+
+-- Proved two ways are equivalent
+
+* `is_diagonal_mat` : checked whether the given matrix is diagonal
+
+-- currently working on Cayley-Hamilton Theorem :(
+-/
+
 import .linear_map .ring_n_is_module_of_vector
 import xenalib.Ellen_Arlt_matrix_rings
 import xenalib.Keji_further_matrix_things
@@ -12,6 +32,46 @@ vector F n := vector.of_fn fn
 
 def smul' {F : Type} {n : ℕ} [ring F] (M : matrix F n n) (fn : has_space F n) :
 has_space F n := @mat_to_has_space F n _ (map_matrix.mat_mul_vec M (has_space_to_vec fn))
+
+def smul_M {F : Type} {n m : ℕ} [ring F] (a : F) (M : matrix F n m) :
+matrix F n n := λ I, λ J, a * (M I J)
+
+theorem vector.nth_map {α β : Type*} {n : ℕ} (v : vector α n) (f : α → β) (m : fin n) :
+  (v.map f).nth m = f (v.nth m) := 
+begin
+  cases v with l hl,
+  unfold vector.nth vector.map,
+  rw list.nth_le_map,
+end
+
+lemma smul_eq_smul_one {F : Type} {n : ℕ} [ring F] (fn : has_space F n) : 
+∀ a : F, (has_space_to_vec (smul a fn)) = (a • (has_space_to_vec fn)) :=
+begin
+intro a,
+unfold has_space_to_vec,
+ext,
+simp, unfold has_scalar.smul,
+simp,
+conv
+  begin
+  to_rhs,
+  rw [vector.nth_map],
+  end,
+unfold smul,
+simp,
+refl,
+end
+
+#print @smul_M
+
+lemma smul_eq_smul_two {F : Type} {n : ℕ} [ring F] (fn : has_space F n) :
+∀ a : F, (smul a fn) = (mat_to_has_space (smul_M a vec_to_mat((has_space_to_vec fn)))) :=
+begin
+intro a,
+
+
+end
+
 
 def is_eigenvalue_M {F : Type*} {n : ℕ} [ring F] (M : matrix F n n ) (a : F) :=
 ∃ v : (has_space F n), (v ≠ (0 : has_space F n)) ∧ (smul' M v = smul a v)
@@ -72,7 +132,8 @@ instance {F : Type} {n : ℕ} [field F]: vector_space F (has_space F n) := {}
 open map_matrix
 
 theorem eigen_map_equiv_one {F : Type} {n : ℕ} [field F] (M : matrix F n n) :
-∀ eva : F, is_eigenvalue_M M eva ↔ @is_eigenvalue F n _ _ (@matrix_to_linear_map _ _ _ _ (Mᵀ)) eva :=
+∀ eva : F, is_eigenvalue_M M eva ↔ 
+@is_eigenvalue F n _ _ (@matrix_to_linear_map _ _ _ _ (Mᵀ)) eva :=
 begin
 intro,
 split,
@@ -162,6 +223,61 @@ have h₁ : v ≠ 0 ∧ smul' M v = smul eva v,
 end
 
 end eigen
+
+namespace Cayley_Hamilton
+
+theorem L1 {R : Type} [comm_ring R] {n : ℕ} (M : matrix R n n) (v : has_space R n):
+∀ eva : R, (smul' M v = smul eva v) ↔ 
+smul' ((M - (smul_M eva (@matrix.identity_matrix R _ n)))) v = (0 : has_space R n) :=
+begin
+intro eva,
+split,
+intro h₀,
+rw [← sub_eq_zero] at h₀,
+unfold smul' at h₀,
+unfold smul',
+-- simp only [← smul_eq_smul v eva] at h₀,
+-- show mat_to_has_space (map_matrix.mat_mul_vec M (has_space_to_vec v)) - smul eva v = 0
+-- unfold matrix.identity_matrix,
+
+-- have h₁ : smul' M v - smul eva v = smul' (M - smul_M eva (matrix.identity_matrix R)) v,
+--   unfold smul',
+--   unfold smul,
+--   unfold smul_M,
+--   unfold matrix.identity_matrix,
+
+
+
+
+
+
+
+
+
+end
+
+--v ≠ 0 ∧ smul' M v = smul eva v
+
+theorem Cayley_Hamilton {R : Type} [comm_ring R] {n : ℕ} (M : matrix R n n) :
+∀ eva : R, (@det n R _ (M - (smul_M eva (@matrix.identity_matrix R _ n))) = 0 ↔ is_eigenvalue_M M eva) :=
+begin
+intro,
+split,
+intro h₀,
+show is_eigenvalue_M M eva,
+sorry,
+
+intro h₀,
+unfold is_eigenvalue_M at h₀,
+cases h₀ with v,
+
+
+
+
+
+end
+
+end Cayley_Hamilton
 
 namespace diagonal
 

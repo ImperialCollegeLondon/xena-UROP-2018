@@ -521,7 +521,6 @@ def vec_to_mat {R : Type} [ring R] {n : nat} (vc : vector R n) :
 matrix R n 1 := λ I, λ J, vector.nth vc I
 
 
-
 def mat_mul_vec {R : Type} [ring R] {n m : nat} (M : matrix R n m) (vc : vector R m) :
 matrix R n 1 := @matrix.mul _ _ m n 1 M (vec_to_mat vc)
 
