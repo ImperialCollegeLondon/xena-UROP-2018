@@ -5,13 +5,10 @@ import tactic.interactive
 noncomputable theory 
 
 namespace Q0107
+
 def B : set ℝ := { x | x^2 < 3 ∧ ∃ y : ℤ, x = y}
+
 noncomputable def real_half : ℝ := 1/2
-
-end Q0107
-
-open Q0107 
-
 
 -- The integers, rationals and reals are all different types in Lean
 -- and the obvious inclusions between them are all denoted by ↑ . 
@@ -118,3 +115,4 @@ begin
   }
 end
 
+end Q0107
