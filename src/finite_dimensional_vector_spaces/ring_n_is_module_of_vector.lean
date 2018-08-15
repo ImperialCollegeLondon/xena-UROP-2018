@@ -127,10 +127,7 @@ def elemental_vector (i : fin n) : vector R n :=
 -- | (n+1), ⟨i+1, l⟩ := vector.cons 0 
 --     $ by exact _match n ⟨i, (nat.lt_of_succ_lt_succ l)⟩
 -- end
-vector.of_fn $ (λ j, if (i = j) then 1 else 0)
-
-#check @list.pairwise
-#check @list.of_fn_aux
+vector.of_fn (λ j, if (i = j) then 1 else 0)
 
 def basis : vector (vector R n) n :=
 vector.of_fn (elemental_vector R n)
