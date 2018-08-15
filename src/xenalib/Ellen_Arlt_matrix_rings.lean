@@ -4,7 +4,7 @@ import algebra.big_operators data.set.finite
 
 definition matrix (R: Type) (n m : nat)[ring R] :=  fin n →( fin m → R ) 
  
- namespace matrix 
+namespace matrix 
 
 definition add ( R : Type) [ring R] {n m: nat }(A:matrix R m n) ( B : matrix R m n): (matrix R m n):= 
 λ I J, A I J + B I J
