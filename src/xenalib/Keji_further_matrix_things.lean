@@ -18,7 +18,7 @@ finset.sum (finset.univ : finset (S n)) (λ (σ :S n),e(σ.1 ) * (finset.prod (f
 (λ (i:fin n), A (σ.1 (i)) i)))
 
 
-def transpose {R : Type} [ring R] {n:ℕ  }(A:matrix R n n):  matrix R n n:=
+def transpose {R : Type} [ring R] {a b:ℕ  }(A:matrix R a b):  matrix R b a:=
 λ i j, A j i
 postfix `ᵀ`:100 := transpose
 def Hermitian_conjugate  [ring ℂ ] {n:ℕ  }(A:matrix ℂ n n):  matrix ℂ n n:=
@@ -27,7 +27,7 @@ postfix `†`:100 := Hermitian_conjugate
 def GL (n:ℕ) ( R : Type) [ring R]:= units (matrix R n n)
 def Orthogornal ( n: ℕ): Type:= {A :GL n ℝ   // mul ℝ  A.1 ( A.1ᵀ)= identity_matrix ℝ  ∧ mul ℝ (A.1ᵀ) A.1 = identity_matrix ℝ  }
 def Hermitian ( n: ℕ) : Type:= {A :matrix ℂ n n //  mul ℂ A (A†)= (1 : matrix ℂ n n)}
-theorem transpose_of_product ( R : Type) [comm_ring R] {n:ℕ}(A B:matrix R n n): (mul R A B)ᵀ  = mul R (Bᵀ ) (Aᵀ) := 
+theorem transpose_of_product ( R : Type) [comm_ring R] {a b c :ℕ}( A :matrix R a b) (B: matrix R b c): (mul R A B)ᵀ  = mul R (Bᵀ ) (Aᵀ) := 
 begin
 unfold mul,
 unfold transpose,

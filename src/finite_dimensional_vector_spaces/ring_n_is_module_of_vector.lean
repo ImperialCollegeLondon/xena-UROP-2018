@@ -2,14 +2,11 @@ import algebra.module linear_algebra.basic analysis.real data.vector data.list.b
 
 universes u
 
--- def R_n_basis (n : nat) : set (vector ℝ n) :=
--- {v | ∀ i : fin n, (v.nth i = 1 ∧ ∀ j : fin n, j.val ≠ i.val → v.nth j = 0) }
-
 namespace vector
 
-variables {n : ℕ} {R : Type u }
+variables (n : ℕ) (R : Type u)
 
-instance [h : ring R]: module R (vector R n) :=
+instance to_module [h : ring R] : module R (vector R n) :=
 {
     add := map₂ h.add,
     add_assoc := by 
@@ -100,11 +97,74 @@ instance [h : ring R]: module R (vector R n) :=
         cases a; simp [list.repeat, list.map, list.map₂],
             repeat { contradiction },
             simp [nat.add_one] at la,
-            split, apply add_left_neg,
-                exact ih _ la } 
+            split, apply add_left_neg, exact ih _ la } 
 }
 
-instance [h : field R] : vector_space R (vector R n) := 
+instance to_vector_space [h : field R] : vector_space R (vector R n) := 
 vector_space.mk _ _
 
+instance [h : ring R] : has_add (vector R n) := by apply_instance
+
 end vector
+
+def matrix_space (m n : ℕ) (R :  Type u) 
+    [h : ring R] := vector R n → vector R m
+
+namespace fin_dim_ring
+
+variables (R : Type u) [h : ring R] (n : ℕ)
+
+
+-- structure fin_dim_ring extends module R (vector R n)
+include h 
+
+example : module R (vector R n) := by apply_instance
+
+def elemental_vector (i : fin n) : vector R n :=
+-- match n, i with
+-- | 0, _ := vector.nil
+-- | (n+1), ⟨0, _⟩ := vector.cons 1 (vector.repeat 0 n)
+-- | (n+1), ⟨i+1, l⟩ := vector.cons 0 
+--     $ by exact _match n ⟨i, (nat.lt_of_succ_lt_succ l)⟩
+-- end
+vector.of_fn (λ j, if (i = j) then 1 else 0)
+
+def basis : vector (vector R n) n :=
+vector.of_fn (elemental_vector R n)
+ 
+#check basis
+
+-- set_option pp.all true
+
+
+-- lemma is_spanning_set : ∀ (x : vector R n), 
+--     x ∈ span {v : vector R n | v ∈ vector.to_list (basis R n)} :=
+-- by { intro a,
+--     unfold span basis,
+--     split, swap,
+--     unfold lc, 
+--     apply @finsupp.mk (vector R n) R,
+--         { intro v, }
+-- }
+
+#check list.nodup_decidable
+-- instance : is_basis { v | v ∈ (basis R n).to_list } := 
+-- by { split,
+--     { --simp [linear_independent],
+--     unfold linear_independent basis,
+--     intros l h1 h2, simp at h1,
+--     simp [vector.eq_nil 0, finsupp.sum] at h2,
+--     -- induction n with _ ih generalizing l,
+--     cases l with ls lf lh,
+--     simp [list.of_fn, list.of_fn_aux] at h1,
+--     simp [coe_fn, has_coe_to_fun.coe] at h1 h2,
+--     simp [has_zero.zero],
+--     simp [has_zero.zero, add_monoid.zero, add_group.zero, 
+--         add_comm_group.zero, vector.repeat] at h2,
+--     cases ls with lsv lss,
+--     split,
+--     induction n with _ ih,
+    
+--      }, }
+
+end fin_dim_ring 

@@ -150,7 +150,7 @@ def path_homotopy_inverse { x y : β} (f : path x y) (g : path x y) ( F : path_h
           exact (F.path_s (par_inv s)).2.1, 
             exact (F.path_s (par_inv s)).2.2
     end,  
-    at_zero := begin intro t, simp,   end, --exact F.at_one t
+    at_zero := begin intro t,  simp [eqn_1_par_inv],    end, --exact F.at_one t
     at_one := begin intro t, simp, end,   --exact F.at_zero t 
     cont := begin 
     show continuous ((λ (st : ↥I01 × ↥I01), F.to_fun (st.fst , st.snd)) ∘ (λ (x : I01 × I01) , (( par_inv x.1 , x.2 ) : I01 × I01))), 
@@ -587,6 +587,108 @@ local attribute [instance] classical.prop_decidable
 
 -----------------------------------------------------
 
+
+--- Closure result (that I have not found in topological_structures)
+
+set_option trace.simplify.rewrite true
+--set_option pp.implicit true
+
+@[simp] lemma closure_lt_eq { α β } [topological_space α] [topological_space β] [partial_order α] [t : ordered_topology α]
+{f g : β → α} (hf : continuous f) (hg : continuous g) :
+  closure {b | f b < g b} = {b | f b ≤ g b} :=
+begin 
+refine set.eq_of_subset_of_subset _ _, 
+  refine closure_minimal _ _ , 
+   simp, intros a h₁, exact le_of_lt h₁ , 
+   exact is_closed_le hf hg, 
+
+  rw closure_eq_compl_interior_compl, 
+  rw subset_compl_iff_disjoint  ,
+  apply set.ext, intro s, split, 
+  unfold has_neg.neg boolean_algebra.neg complete_boolean_algebra.neg compl, 
+
+
+  --unfold has_sub.sub, 
+  --simp, 
+
+  /- refine (closure_subset_iff_subset_of_is_closed is_closed_closure ).1 _, 
+  --rw subset_compl_iff_disjoint  ,
+  rw subset_def, 
+  unfold closure, -/ 
+
+sorry, 
+intro H, by_contradiction, rw [mem_empty_eq s] at H,  exact H, 
+
+/-
+have h₂ : {b : β | f b ≤ g b} = closure {b : β | f b ≤ g b}, sorry, 
+rw h₂, 
+have h₃ : closure {b : β | f b < g b} = closure ( closure {b : β | f b < g b} ), sorry, 
+rw h₃, 
+refine closure_mono _  ,
+
+refine closure_su , -/
+--refine closure_mono , 
+end
+
+---[partial_order α ]
+-- [decidable linerar order α ]
+
+@[simp] lemma closure_lt_eq' { α β } [topological_space α] [topological_space β] [linear_order α ] [t : ordered_topology α]
+{f g : β → α} (hf : continuous f) (hg : continuous g) :
+  closure {b | f b < g b} = {b | f b ≤ g b} :=
+begin 
+refine set.eq_of_subset_of_subset _ _, 
+  refine closure_minimal _ _ , 
+   simp, intros a h₁, exact le_of_lt h₁ , 
+   exact is_closed_le hf hg, 
+
+  rw closure_eq_compl_interior_compl, 
+  rw subset_compl_iff_disjoint  , 
+  unfold has_neg.neg boolean_algebra.neg complete_boolean_algebra.neg compl, 
+  have h₁  : {a : β | a ∉ {b : β | f b < g b} } = {a : β | g a  ≤  f a} , 
+    refine set.ext _, intro x, 
+    simp , rw h₁ , 
+  have h₂ : interior {a : β | g a ≤ f a} = {a : β | g a < f a}, 
+    sorry  ,
+
+  rw h₂, 
+  unfold has_inter.inter set.inter,
+   simp,
+  refine set.ext _, intro s, split, intro H, 
+    rw mem_set_of_eq at H, rw mem_empty_eq, 
+    have H2 : ¬ f s ≤ g s, exact (lt_iff_not_ge (g s) (f s)).1 H.2,  cc, 
+    intro H, by_contradiction, rw [mem_empty_eq s] at H,  exact H, 
+end
+
+/- 
+lemma frontier_subset { α } [topological_space α]  [linear_order α ] [ ordered_topology α]
+{s t : set α  } ( h₁ : s ⊆ t) : frontier s ⊆ frontier t := sorry -/ 
+
+--- Generality, partial order? decidable linear_order? 
+@[simp] lemma frontier_lt_subset_frontier_le { α β } [topological_space α] [topological_space β] [linear_order α ] [t : ordered_topology α]
+{f g : β → α} (hf : continuous f) (hg : continuous g) :
+  frontier {b | f b < g b} ⊆  frontier {b | f b ≤ g b} := 
+begin
+
+sorry, 
+end 
+
+-- frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} ⊆
+    --frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val}
+
+
+
+
+
+
+
+
+
+
+
+
+------------------------------------------
+
 -- Homotopy of composition with inverse 
 ------ a⁻¹ ⬝ a ≈ c₀  
 
@@ -606,7 +708,7 @@ fb ⟨t, h₂⟩ -/
 
 
 def par_aux_a : I01 × I01 → I01 := 
-λ st, if ((1 : ℝ ) - st.1.1) < st.2.1 then st.1 else st.2
+λ st, if ((1 : ℝ ) - st.1.1) < st.2.1 then st.1 else par_inv st.2
 
 -- dite or ite? 
 
@@ -616,15 +718,15 @@ have H : st.2.1 < ((1 : ℝ ) - st.1.1), exact not_le.1 h₁ , exact st.2,
 end -/ 
 
 
-
-lemma continuous_par_aux_a  : continuous par_aux_a := 
+/-
+lemma continuous_par_aux_a' : continuous par_aux_a := 
 begin 
 unfold par_aux_a, 
 by_cases h : ∀ (st : I01 × I01), ((1 : ℝ ) - ((st.1).1 )) < (st.snd).val , 
 simp [h, continuous_fst], 
 
-rw [not_forall] at h, 
-cases h with x h₂ , simp [h₂ , if_false , continuous_snd], 
+rw [not_forall] at h, --rw if_neg, 
+cases h with x h₂ ,  simp [h₂ , if_neg, continuous_snd], -/
 
  -- does not finish off
 /- 
@@ -642,8 +744,68 @@ have h₂ : ∃ (st : ↥I01 × ↥I01), ¬ 1 - (st.fst).val ≤ (st.snd).val,
           exact T2_of_not_T1 H3, -/
 
 --split_ifs, 
-sorry
+--sorry
+--end
+
+lemma cont_help_1 : continuous (λ (a : ↥I01 × ↥I01), 1 - (a.fst).val ) := 
+begin 
+ have h : continuous ( λ (r : ℝ ), 1 - r ),  conv in ( (1:ℝ)-_) begin rw help_inv, end,  
+  exact continuous.comp (real.continuous_mul_const (-1) ) (real.continuous_add_const 1), 
+ exact continuous.comp (continuous.comp continuous_fst continuous_subtype_val) h, 
 end
+
+lemma continuous_par_aux_a  : continuous par_aux_a := 
+begin 
+unfold par_aux_a, 
+refine continuous_if _ continuous_fst _ , 
+  { intros st F, 
+    have H : frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} = {a : ↥I01 × ↥I01 | 1 - (a.fst).val = (a.snd).val }, 
+        { unfold frontier , 
+        have H2 : interior {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} = {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val}, 
+          refine interior_eq_iff_open.2 _, refine is_open_lt  _ _,  
+          exact cont_help_1, 
+          exact continuous.comp continuous_snd continuous_subtype_val, 
+        rw H2, 
+        have H3 : closure {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} = {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val}, 
+          exact closure_lt_eq cont_help_1 (continuous.comp continuous_snd continuous_subtype_val) , --USE closure_lt_eq 
+        rw H3, 
+        unfold has_sdiff.sdiff set.diff, simp [-sub_eq_add_neg], 
+          apply set.ext, intro x, split, 
+            rw [set.mem_sep_eq, mem_set_of_eq] ,  intro a , exact le_antisymm  a.1 a.2, 
+            simp [-sub_eq_add_neg], intro a, refine ⟨ le_of_eq a, _⟩, exact ge_of_eq a, 
+        }, 
+    rw [H, mem_set_of_eq] at F, unfold par_inv, refine subtype.eq _, 
+    show (st.fst).val = 1 -(st.snd).val, 
+    have H4 : (st.snd).val = 1 - (st.fst).val, exact eq.symm F, 
+    simp [H4], 
+  }, 
+exact continuous.comp continuous_snd continuous_par_inv, 
+end
+
+lemma continuous_par_aux_a'  : continuous par_aux_a := 
+begin 
+unfold par_aux_a, 
+refine continuous_if _ continuous_fst (continuous.comp continuous_snd continuous_par_inv) , 
+  { intros st F, 
+    have H : frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} ⊆ frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤  (a.snd).val},  
+      --refine frontier_lt_subset_frontier_le cont_help_1 (continuous.comp continuous_snd continuous_subtype_val), 
+      sorry, 
+    have H2 : frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val} ⊆  {a : ↥I01 × ↥I01 | 1 - (a.fst).val = (a.snd).val}, 
+      exact frontier_le_subset_eq cont_help_1 (continuous.comp continuous_snd continuous_subtype_val) , 
+    have h₁ : frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} ⊆ {a : ↥I01 × ↥I01 | 1 - (a.fst).val = (a.snd).val}, 
+      exact set.subset.trans H H2, 
+    have h₂ : st ∈ {a : ↥I01 × ↥I01 | 1 - (a.fst).val = (a.snd).val}, 
+      refine set.mem_of_mem_of_subset F h₁  , rw mem_set_of_eq at h₂ , 
+    unfold par_inv, refine subtype.eq _, 
+    show (st.fst).val = 1 -(st.snd).val, 
+    have H4 : (st.snd).val = 1 - (st.fst).val, exact eq.symm h₂ , 
+    simp [H4], 
+  }, 
+end
+
+
+#print prefix set
+
 
 
 
@@ -669,31 +831,109 @@ end
 
 
 def fa_inv_comp {α : Type*} [topological_space α ] {x y : α } (f : path x y) : set.prod T1 I → α := 
-λ st, f.to_fun ( par_inv ( repar_stop_a st  )) 
+λ st, f.to_fun  ( repar_stop_a st  )
 
 
 lemma cont_fa_inv_comp {α : Type*} [topological_space α ] {x y : α } (f : path x y) : 
 continuous (fa_inv_comp f) := 
-begin unfold fa_inv_comp, exact continuous.comp (continuous.comp cont_r_stop_a continuous_par_inv) f.cont, end 
+begin unfold fa_inv_comp, exact continuous.comp  cont_r_stop_a  f.cont, end 
 
 
-
+#print tendsto
 ----- 
 
 -- To shrink path f 
 def par_aux_b : I01 × I01 → I01 := 
 λ st, if st.2.1 < st.1.1 then st.1 else st.2
 
+/- lemma continuous_par_aux_b'  : continuous par_aux_b := 
+begin 
+unfold par_aux_b, assume U H, 
+by_cases h : ∀  (st : I01 × I01), (st.snd).val < (st.fst).val , 
+simp [h, continuous_fst], sorry,
+
+rw [not_forall] at h, 
+cases h with x h₂ , simp [h₂ , if_neg , continuous_snd], 
+sorry
+end -/
+
+
+
 lemma continuous_par_aux_b  : continuous par_aux_b := 
 begin 
 unfold par_aux_b, 
-by_cases h : ∀ (st : I01 × I01), (st.snd).val < (st.fst).val , 
-simp [h, continuous_fst], 
-
-rw [not_forall] at h, 
-cases h with x h₂ , --simp [h₂ , if_false , continuous_snd], 
-sorry
+refine continuous_if _ _ _ , 
+ { --rw frontier_eq_closure_inter_closure , rw has_neg.neg , 
+     
+  intros st F, 
+  have H : frontier {a : ↥I01 × ↥I01 | (a.snd).val < (a.fst).val} = {a : ↥I01 × ↥I01 | (a.fst).val = (a.snd).val}, 
+    {unfold frontier , 
+        have H2 : interior {a : ↥I01 × ↥I01 | (a.snd).val < (a.fst).val} = {a : ↥I01 × ↥I01 | (a.snd).val < (a.fst).val}, 
+          refine interior_eq_iff_open.2 _, refine is_open_lt _ _, 
+          exact continuous.comp continuous_snd continuous_subtype_val, 
+          exact continuous.comp continuous_fst continuous_subtype_val, 
+        rw H2,
+        have H3 : closure {a : ↥I01 × ↥I01 | (a.snd).val < (a.fst).val} = {a : ↥I01 × ↥I01 | (a.snd).val ≤  (a.fst).val}, 
+          {  exact closure_lt_eq (continuous.comp continuous_snd continuous_subtype_val) 
+                (continuous.comp continuous_fst continuous_subtype_val), --- USE closure_lt_eq 
+          }, 
+        rw H3, unfold has_sdiff.sdiff set.diff, simp,  
+          apply set.ext, intro x, split, simp , intros a b, exact le_antisymm  b a,
+          simp, intro a, refine ⟨ _, le_of_eq a⟩, exact ge_of_eq a, 
+    }      , 
+  rw H at F, rw mem_set_of_eq at F, exact subtype.eq F,
+ }, 
+exact continuous_fst, 
+exact continuous_snd, 
 end
+
+
+lemma continuous_par_aux_b'  : continuous par_aux_b := 
+begin 
+unfold par_aux_b, 
+refine continuous_if _ continuous_fst continuous_snd , 
+  { intros st F, 
+    have H : frontier {a : ↥I01 × ↥I01 | (a.snd).val < (a.fst).val} ⊆ frontier {a : ↥I01 × ↥I01 | (a.snd).val ≤ (a.fst).val},  
+      --refine frontier_lt_subset_frontier_le (continuous.comp continuous_snd continuous_subtype_val) (continuous.comp continuous_fst continuous_subtype_val), 
+      sorry,  
+    have H2 : frontier {a : ↥I01 × ↥I01 | (a.snd).val ≤ (a.fst).val}  ⊆  {a : ↥I01 × ↥I01 | (a.snd).val = (a.fst).val} , 
+      exact frontier_le_subset_eq (continuous.comp continuous_snd continuous_subtype_val) (continuous.comp continuous_fst continuous_subtype_val), 
+    have h₂ : st ∈ {a : ↥I01 × ↥I01 | (a.snd).val = (a.fst).val}, 
+      refine set.mem_of_mem_of_subset F (set.subset.trans H H2)  , 
+    rw mem_set_of_eq at h₂ , simp [subtype.eq h₂] ,  
+  }, 
+
+end 
+
+
+/- lemma continuous_par_aux_a'  : continuous par_aux_a := 
+begin 
+unfold par_aux_a, 
+refine continuous_if _ continuous_fst (continuous.comp continuous_snd continuous_par_inv) , 
+  { intros st F, 
+    have H : frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} ⊆ frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤  (a.snd).val},  
+      --refine frontier_lt_sub_frontier_le cont_help_1 (continuous.comp continuous_snd continuous_subtype_val), 
+      sorry, 
+    have H2 : frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val} ⊆  {a : ↥I01 × ↥I01 | 1 - (a.fst).val = (a.snd).val}, 
+      exact frontier_le_subset_eq cont_help_1 (continuous.comp continuous_snd continuous_subtype_val) , 
+    have h₁ : frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} ⊆ {a : ↥I01 × ↥I01 | 1 - (a.fst).val = (a.snd).val}, 
+      exact set.subset.trans H H2, 
+    have h₂ : st ∈ {a : ↥I01 × ↥I01 | 1 - (a.fst).val = (a.snd).val}, 
+      refine set.mem_of_mem_of_subset F h₁  , rw mem_set_of_eq at h₂ , 
+    unfold par_inv, refine subtype.eq _, 
+    show (st.fst).val = 1 -(st.snd).val, 
+    have H4 : (st.snd).val = 1 - (st.fst).val, exact eq.symm h₂ , 
+    simp [H4], 
+  }, 
+end-/
+
+
+
+
+
+
+
+
 
 /- def par_stop_b : I01 × I01 → I01 × I01 := 
 λ st, (st.1, ps_aux_b st )
@@ -738,15 +978,16 @@ lemma f_inv_comp_start_pt {α : Type*} [topological_space α ] {x y : α } (f : 
 begin intro s, 
  unfold f_inv_comp fa_inv_comp fb_inv_comp, unfold repar_stop_a repar_stop_b shift_order par_aux_a par_aux_b paste, simp [-sub_eq_add_neg], 
  rw [dif_pos ], 
- have H : (ite (1 - s.val < (par T1._proof_1 ⟨0, help_T1⟩).val) s (par T1._proof_1 ⟨0, help_T1⟩)) = (0 : I01), 
+ have H : ite (1 - s.val < (par T1._proof_1 ⟨0, help_T1⟩).val) s (par_inv (par T1._proof_1 ⟨0, help_T1⟩)) = (1 : I01), 
     split_ifs,   have H2 : s.val + (0 : I01).val = s.val, show s.val + (0:ℝ ) = s.val, exact  add_zero s.val, 
       have H3 : s.val ≤ (1:I01).val, exact s.2.2, have H4 : 1 - (0:I01).val = 1, exact sub_zero 1, 
       rw [ eqn_start ] at h, rw [sub_lt] at h, have H5 : 1 < s.val, rw H4 at h,  exact h,
       --[sub_lt] at h,    rw [H2] at h, 
-      by_contradiction, have G : s.val < s.val, exact lt_of_le_of_lt H3 h, sorry, --exact ⟨ G ⟩ , 
-      exact eqn_start, 
- show f.to_fun (par_inv (ite (1 - s.val < (par T1._proof_1 ⟨0, help_T1⟩).val) s (par T1._proof_1 ⟨0, help_T1⟩))) = y, 
- rw [H], rw eqn_1_par_inv, exact f.at_one,
+      by_contradiction, have G : s.val < s.val, exact lt_of_le_of_lt H3 h, 
+        simp [lt_iff_le_and_ne] at G, trivial,
+      simp,  
+ show f.to_fun (ite (1 - s.val < (par T1._proof_1 ⟨0, help_T1⟩).val) s (par_inv (par T1._proof_1 ⟨0, help_T1⟩))) = y, 
+ rw [H], exact f.at_one,
  simp, exact help_T1, 
 end
 
@@ -757,7 +998,7 @@ begin
  intro s, unfold f_inv_comp, unfold paste, rw dif_neg, unfold fb_inv_comp repar_stop_b shift_order par_aux_b, simp [-sub_eq_add_neg], 
  have H : ite ((par T2._proof_1 ⟨1, help_T2⟩).val < s.val) s (par T2._proof_1 ⟨1, help_T2⟩) = 1,
     split_ifs, {  by_contradiction, rw eqn_end at h, have H2 : s.val ≤ (1:I01).val, exact s.2.2, 
-      have G : s.val < s.val, exact lt_of_le_of_lt H2 h, sorry, --exact ⟨ G ⟩ , 
+      have G : s.val < s.val, exact lt_of_le_of_lt H2 h, simp [lt_iff_le_and_ne] at G, trivial, 
       },  
       exact eqn_end, 
  show f.to_fun (ite ((par T2._proof_1 ⟨1, help_T2⟩).val < s.val) s (par T2._proof_1 ⟨1, help_T2⟩ )) = y, 
@@ -765,38 +1006,70 @@ begin
  unfold shift_order, simp [help_02], 
 end 
 
+#check lt_iff_le_and_ne
+
 lemma f_inv_comp_at_zero {α : Type*} [topological_space α ] {x y : α } (f : path x y) :
-∀ (y_1 : I01), f_inv_comp f (0, y_1) = (comp_of_path (inv_of_path f) f).to_fun y_1 := sorry 
+∀ (y_1 : I01), f_inv_comp f (0, y_1) = (comp_of_path (inv_of_path f) f).to_fun y_1 := 
+begin 
+ intro t, unfold f_inv_comp fa_inv_comp fb_inv_comp repar_stop_a repar_stop_b,  
+ unfold paste, unfold shift_order, split_ifs, 
+   unfold shift_order at h, simp at h, unfold par_inv comp_of_path paste,  simp [h], 
+   unfold fa_path par_aux_a inv_of_path, simp [-sub_eq_add_neg], 
+   show f.to_fun (ite (1 - 0< (par T1._proof_1 ⟨t, _⟩).val) 0 (par_inv (par T1._proof_1 ⟨t, _⟩))) =
+    f.to_fun (par_inv (par T1._proof_1 ⟨t, _⟩)), 
+    simp, rw if_neg, refl, refine not_lt.2 _, exact (par T1._proof_1 ⟨t, _⟩).2.2, 
+   unfold shift_order at h, simp at h, unfold comp_of_path paste fb_path, 
+   unfold par_aux_b, rw if_neg, simpa [h], 
+   refine not_lt.2 _, simp, exact (par T2._proof_1 ⟨t, _⟩).2.1, 
+end
 
 lemma f_inv_comp_at_one {α : Type*} [topological_space α ] {x y : α } (f : path x y) :
-∀ (y_1 : I01), f_inv_comp f (1, y_1) = (loop_const y).to_fun y_1 := sorry
+∀ (y_1 : I01), f_inv_comp f (1, y_1) = (loop_const y).to_fun y_1 :=
+begin  
+ intro t, unfold f_inv_comp fa_inv_comp fb_inv_comp repar_stop_a repar_stop_b,  
+ unfold paste, unfold shift_order, split_ifs, 
+   unfold shift_order at h, simp at h, unfold loop_const, unfold par_aux_a, split_ifs with h₂ , 
+     exact f.at_one, 
+     simp [not_lt,  -sub_eq_add_neg] at h₂ ,
+     have H :  (par T1._proof_1 ⟨t, _⟩).val ≤ 1 - 1,  exact h₂ , rw [sub_self] at H, 
+     have h₃ : (par T1._proof_1 ⟨t, h⟩).val = 0, --
+        exact le_antisymm H ((par T1._proof_1 ⟨t, h⟩).2.1), 
+     have H2 : (par T1._proof_1 ⟨t, h⟩) = (0: I01), 
+        exact subtype.eq h₃ , 
+     show f.to_fun (par_inv (par T1._proof_1 ⟨t, h⟩)) = y, rw H2, simp, 
+   unfold shift_order at h, simp at h, unfold par_aux_b, unfold loop_const, split_ifs with h₂, 
+     exact f.at_one, 
+     simp [not_lt,  -sub_eq_add_neg] at h₂, 
+     have H : (par T2._proof_1 ⟨t, _⟩).val = (1:I01).val, 
+       apply eq.symm, exact le_antisymm h₂ (par T2._proof_1 ⟨t, _⟩).2.2, 
+     have H2 : (par T2._proof_1 ⟨t, _⟩) = (1: I01), exact subtype.eq H, 
+     simp [H2], 
+end
+
+
 
 lemma f_inv_comp_cont {α : Type*} [topological_space α ] {x y : α } (f : path x y) :
 continuous (f_inv_comp f) := 
 begin 
   unfold f_inv_comp, refine continuous.comp continuous_shift_order _,  
-  refine cont_of_paste prod_T1_is_closed prod_T2_is_closed _ _ _, 
+  refine cont_of_paste prod_T1_is_closed prod_T2_is_closed _ 
+    (cont_fa_inv_comp f) (cont_fb_inv_comp f), 
   { unfold match_of_fun, intros w B1 B2, -- can strip out this..? 
     have Int : w ∈ set.inter (set.prod T1 I) (set.prod T2 I), exact ⟨ B1 , B2 ⟩ , rwa [prod_inter_T] at Int, 
     have V : w.1.1 = 1/2, rwa [set.prod, mem_set_of_eq] at Int, rwa [mem_set_of_eq] at Int, exact Int.1, cases w, 
-    have xeq : w_fst = ⟨ 1/2 , help_01 ⟩ , apply subtype.eq, rw V,
+    have xeq : w_fst = ⟨ 1/2 , help_01 ⟩ , apply subtype.eq, rw V, --
     simp [xeq, -one_div_eq_inv], unfold  fa_inv_comp fb_inv_comp, 
-    unfold repar_stop_a repar_stop_b shift_order par_aux_a par_aux_b, --simp [-sub_eq_add_neg,-one_div_eq_inv], 
+    unfold repar_stop_a repar_stop_b shift_order par_aux_a par_aux_b, simp [-sub_eq_add_neg,-one_div_eq_inv], 
     show f.to_fun
-      (par_inv
-         (ite (1 - w_snd.val < (par T1._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T1 ⟩).val) w_snd
-            (par T1._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T1 ⟩))) =
+      (ite (1 - w_snd.val < (par T1._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T1⟩).val) w_snd
+         (par_inv (par T1._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T1⟩))) =
     f.to_fun
-      (ite ((par T2._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T2 ⟩).val < w_snd.val) w_snd
-         (par T2._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T2 ⟩)), 
-    rw [eqn_1, eqn_2],   sorry, 
-    /- split_ifs, 
-      { by_contradiction, simp at h_1,   }, 
-
-  sorry -/ 
+      (ite ((par T2._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T2⟩).val < w_snd.val) w_snd
+         (par T2._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T2 ⟩)),  
+    rw [eqn_1, eqn_2, eqn_2_par_inv], rw sub_lt, 
+    show f.to_fun (ite (1 - (1:ℝ ) < w_snd.val) w_snd 0) = 
+    f.to_fun (ite ((0:ℝ)  < w_snd.val) w_snd 0), rw sub_self, 
   }, 
-sorry, 
-sorry 
 end
 
 
