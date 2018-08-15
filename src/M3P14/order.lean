@@ -4,7 +4,7 @@ open zmod nat
 
 /- Gives actual number when evaluating (e.g. #5 becomes 5) -/
 instance (n : ℕ) : has_repr (zmod n) := ⟨repr ∘ fin.val⟩ 
-instance  {α : Type*} [monoid α] [has_repr α] : has_repr (units α) := ⟨repr ∘ units.val⟩ 
+--instance  {α : Type*} [monoid α] [has_repr α] : has_repr (units α) := ⟨repr ∘ units.val⟩ 
 
 -- Thanks Chris
 lemma order_of_dvd_of_pow_eq_one {d n : ℕ} [pos_nat n]  (a : units (zmod n)) (h : a ^ d = 1) : order_of a ∣ d :=
@@ -30,8 +30,12 @@ theorem not_coprime_pow_mod (a d n : ℕ) (h1 : a ^ d ≡ 1 [MOD n]) (h2 : ¬cop
 -- is that true?
 theorem zmod_card_pow (a n d : ℕ) (h : coprime a n) [pos_nat n] : a^fintype.card (units (zmod n)) ≡ 1 [MOD n] := sorry
 
+@[simp] lemma units.coe_pow {α : Type*} [monoid α] (u : units α) (n : ℕ) : (↑(u ^ n) : α) = u ^ n :=
+by induction n; simp [*, _root_.pow_succ]
 
 -- can we prove it without h?
+--set_option pp.implicit true
+--set_option pp.notation false
 theorem order_zmod_div (a n d : ℕ) (h : coprime a n) [pos_nat n] : a^d ≡ 1 [MOD n] → order_of_zmod a n ∣ d := 
 begin
     intro h2,
@@ -41,13 +45,25 @@ begin
         rw dif_pos h,
         rw eq_iff_modeq_nat.symm at h2,
         
-        have pow : units_zmod_mk a n h ^ d  = 1, sorry, 
+        have pow : (units_zmod_mk a n h) ^ d  = 1,
+        { apply units.ext,
+          suffices : (↑(units_zmod_mk a n h ^ d) : zmod n) = 1,
+            simp [this],
+          have h2' : (↑(a ^ d) : zmod n) = 1,
+            rw h2,
+            simp,
+          clear h2,
+          rw ←h2',
+          suffices : (↑(units_zmod_mk a n h) : zmod n) = a,
+            simp [this],
+          refl,
+        },
         exact order_of_dvd_of_pow_eq_one (units_zmod_mk a n h) pow,
-        assumption,
     },
     exact absurd h h_1,
 end
 
+#print units
 --lemma to prove phi and fincard are the same
 
 
@@ -77,8 +93,7 @@ end
 theorem pow_order_units_zmod_eq_one (a n : ℕ) [pos_nat n] (h : coprime a n) : (units_zmod_mk a n h) ^ order_of (units_zmod_mk a n h) = 1 :=
 pow_order_of_eq_one (units_zmod_mk a n h)
 
-@[simp] lemma units.coe_pow {α : Type*} [monoid α] (u : units α) (n : ℕ) : (↑(u ^ n) : α) = u ^ n :=
-by induction n; simp [*, _root_.pow_succ]
+
 
 theorem pow_order_zmod_eq_one (a n : ℕ) [pos_nat n] : (a : zmod n) ^ order_of_zmod a n = (1 : zmod n) :=
 begin
