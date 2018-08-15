@@ -36,19 +36,17 @@ by { split, swap,
     
      }
 
-#reduce finset.sizeof _ (basis_as_finset R n)
-#check list.nodup_erase_dup
-#print list.pairwise_pw_filter
+#check finset
 
-instance : is_basis (basis_as_finset R n).to_set :=
-by { split, swap,
-        { intro v,
-        split, swap,
-        unfold lc, split,
-        swap, exact basis_as_finset R n,
-        swap, 
-         }
-}
+-- instance : is_basis (basis_as_finset R n).to_set :=
+-- by { split, swap,
+--         { intro v,
+--         split, swap,
+--         unfold lc, split,
+--         swap, exact basis_as_finset R n,
+--         swap, 
+--          }
+-- }
 
 -- instance : is_basis { v | v ∈ (basis R n).to_list } := 
 -- by { split,
