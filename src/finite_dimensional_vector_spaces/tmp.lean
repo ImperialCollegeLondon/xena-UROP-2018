@@ -38,7 +38,8 @@ def basis_as_finset : finset (vector R n) :=
         simp [list.of_fn_aux],
         
         unfold list.of_fn_aux elemental_vector,
-        simp,        
+        simp,  
+              
          }
 }
 
