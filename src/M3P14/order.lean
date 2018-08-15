@@ -7,7 +7,7 @@ instance (n : ℕ) : has_repr (zmod n) := ⟨repr ∘ fin.val⟩
 instance  {α : Type*} [monoid α] [has_repr α] : has_repr (units α) := ⟨repr ∘ units.val⟩ 
 
 --set_option pp.all true
-/- define a function that given (a : zmod n) and a n coprime, give back (a : units (zmod n)) -/
+/- define a function that given a n nats and coprime, gives back (a : units (zmod n)) -/
 def units_zmod_mk (a n : ℕ ) (h : nat.coprime a n) [pos_nat n] : units (zmod n) := 
 {
     val := a,
@@ -22,26 +22,18 @@ def units_to_zmod {n : ℕ} [monoid (zmod n)] (a : units (zmod n)) : zmod n :=
     is_lt := a.val.2,
 }
 
-def order_of_zmod (a n : ℕ) [pos_nat n] : ℕ := if h : nat.coprime a n then @order_of (units (zmod n)) _ _ _ (units_zmod_mk a n h) else 0
 
-theorem pow_order_zmod_of_eq_one (a n : ℕ) [pos_nat n] : (a : zmod n) ^ order_of_zmod a n = 1 :=
-begin
-    have em : nat.coprime a n ∨ ¬ nat.coprime a n, from (classical.em (nat.coprime a n)),
-    unfold order_of_zmod,
-    cases em,
-    {
-        rw dif_pos em,
-        have eq : (units_zmod_mk a n em) ^ order_of (units_zmod_mk a n em) = 1, from pow_order_of_eq_one (units_zmod_mk a n em),
-        --have eq2 : (a : zmod n) ^ order_of (a : zmod n) = 1, from pow_order_of_eq_one (units_zmod_mk a n em),
-        have eq3 : (units_zmod_mk a n em).val.val = (a : zmod n).val, unfold units_zmod_mk,
-        --have eq4 : (units_zmod_mk a n em) = (a : zmod n), sorry,
-        unfold units_zmod_mk at eq,
-        --unfold units_to_zmod at eq,
-        sorry,
-    },
-    rw dif_neg em,
-    refl,
-end
+/- TEST -/
+def zmod_to_units {n : ℕ} [monoid (zmod n)] (a : zmod n) (h : nat.coprime a.val n) [pos_nat n]: units (zmod n) := 
+{
+    val := a.val,
+    inv := a⁻¹.val,
+    val_inv := sorry,--by rw [mul_inv_eq_gcd n a, coprime.gcd_eq_one h];dsimp;rw zero_add,
+    inv_val := sorry --by rw [mul_comm, mul_inv_eq_gcd n a, coprime.gcd_eq_one h];dsimp;rw zero_add,
+}
+
+
+def order_of_zmod (a n : ℕ) [pos_nat n] : ℕ := if h : nat.coprime a n then @order_of (units (zmod n)) _ _ _ (units_zmod_mk a n h) else 0
 
 theorem order_zmod_div (a n d : ℕ) (h : coprime a n) [pos_nat n] : a^d ≡ 1 [MOD n] → order_of_zmod a n ∣ d := 
 begin
@@ -57,11 +49,31 @@ begin
     exact order_zmod_div a n (phi n) h this,
 end
 
+theorem pow_order_units_zmod_eq_one (a n : ℕ) [pos_nat n] (h : coprime a n) : (units_zmod_mk a n h) ^ order_of (units_zmod_mk a n h) = 1 :=
+pow_order_of_eq_one (units_zmod_mk a n h)
+
 @[simp] lemma units.coe_pow {α : Type*} [monoid α] (u : units α) (n : ℕ) : (↑(u ^ n) : α) = u ^ n :=
 by induction n; simp [*, _root_.pow_succ]
 
-theorem pow_order_zmod_eq_one (a n : ℕ) (h: coprime a n) [pos_nat n] : (a : zmod n) ^ (order_of_zmod a n) = (1 : zmod n) := sorry
---by rw [units.coe_inj, ← units.coe_pow, pow_order_of_eq_one]
+/-
+theorem pow_order_zmod_eq_one (a n : ℕ) (h : coprime a n) [pos_nat n] : (a : zmod n) ^ (order_of_zmod a n) = (1 : zmod n) :=
+by rw [units.coe_inj, ← units.coe_pow, pow_order_of_eq_one]
+-/
+
+theorem pow_order_zmod_eq_one (a n : ℕ) [pos_nat n] : (a : zmod n) ^ order_of_zmod a n = (1 : zmod n) :=
+begin
+    have em : nat.coprime a n ∨ ¬ nat.coprime a n, from (classical.em (nat.coprime a n)),
+    unfold order_of_zmod,
+    cases em,
+    have one_eq : (1 : zmod n) = (1 : units (zmod n)), by simp,
+    rw [dif_pos em,units_zmod_mk, one_eq,←(pow_order_units_zmod_eq_one a n em)],
+    show ↑(units_zmod_mk a n em) ^ order_of (units_zmod_mk a n em) = ↑(units_zmod_mk a n em ^ order_of (units_zmod_mk a n em)),
+    simp,
+    rw dif_neg em,
+    refl,
+end
+
+
 
 def primitive_root (a n : ℕ) [pos_nat n] := coprime a n ∧ order_of_zmod a n = phi n
 

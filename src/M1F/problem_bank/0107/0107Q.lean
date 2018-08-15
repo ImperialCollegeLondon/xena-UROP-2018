@@ -2,7 +2,8 @@
 import data.real.basic
 
 -- useful lemmas
-import xenalib.M1F.Q0107
+import xenalib.M1F.help_for_0107
+
 noncomputable theory
 
 def A : set ℝ := { x | x^2 < 3}
@@ -12,8 +13,11 @@ def C : set ℝ := { x | x^3 < 3}
 definition real_half := (1 / 2 : ℝ)
 -- useful lemmas
 
-#check (B_is_minus_one_zero_one : ∀ (x : ℝ), x ∈ B ↔ x = -1 ∨ x = 0 ∨ x = 1)
-#check (real_half_not_in_B : real_half ∉ B)
+definition B_is_minus_one_zero_one : ∀ {x : ℝ}, x ∈ B ↔ x = -1 ∨ x = 0 ∨ x = 1
+:= Q0107.B_is_minus_one_zero_one
+
+definition real_half_not_in_B : real_half ∉ B
+:= Q0107.real_half_not_in_B
 
 -- For each part x, prove exactly one of part_x_true and
 -- part_x_false, and comment out the other one!
