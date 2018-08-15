@@ -223,13 +223,18 @@ end
 
 -- Associativity 
 
+
+
+
 theorem mul_assoc {α : Type*} [topological_space α ] {x : α } (F G H: space_π₁ x) : 
 fg_mul (fg_mul F G) H = fg_mul F (fg_mul G H) :=  
 begin 
  unfold fundamental_group.mul, rw [quotient.out_eq' F ,quotient.out_eq' G , quotient.out_eq' H], 
- apply quotient.sound, existsi _,
-
+ apply quotient.sound, existsi _, exact hom_comp_f_g_h (quotient.out F) (quotient.out G) (quotient.out H)
 end
+
+
+
 
 
 -- Group π₁ (α  , x)

@@ -593,7 +593,7 @@ local attribute [instance] classical.prop_decidable
 set_option trace.simplify.rewrite true
 --set_option pp.implicit true
 
-@[simp] lemma closure_lt_eq { α β } [topological_space α] [topological_space β] [partial_order α] [t : ordered_topology α]
+@[simp] lemma closure_lt_eq' { α β } [topological_space α] [topological_space β] [partial_order α] [t : ordered_topology α]
 {f g : β → α} (hf : continuous f) (hg : continuous g) :
   closure {b | f b < g b} = {b | f b ≤ g b} :=
 begin 
@@ -633,8 +633,9 @@ end
 ---[partial_order α ]
 -- [decidable linerar order α ]
 
-@[simp] lemma closure_lt_eq' { α β } [topological_space α] [topological_space β] [linear_order α ] [t : ordered_topology α]
-{f g : β → α} (hf : continuous f) (hg : continuous g) :
+@[simp] lemma closure_lt_eq { α β } [topological_space α] [topological_space β]
+ [linear_order α ] [t : ordered_topology α] [orderable_topology α ]
+{f g : β → α} (hf : continuous f) (hg : continuous g) ( he : ∃ (a : β ) , f a ≠ g a ) :
   closure {b | f b < g b} = {b | f b ≤ g b} :=
 begin 
 refine set.eq_of_subset_of_subset _ _, 
@@ -649,7 +650,15 @@ refine set.eq_of_subset_of_subset _ _,
     refine set.ext _, intro x, 
     simp , rw h₁ , 
   have h₂ : interior {a : β | g a ≤ f a} = {a : β | g a < f a}, 
-    sorry  ,
+    refine set.eq_of_subset_of_subset _ _, 
+    { unfold interior, simp, intro a, 
+    --wlog f a ≠ g a, 
+    intros U Hopen Hsub Ha, by_contradiction , 
+    have h : f a ≤ g a, exact not_lt.1 a_1, 
+    sorry},
+    have h₃ : {a : β | g a < f a} = interior {a : β | g a < f a}, apply eq.symm, 
+      refine interior_eq_iff_open.2 ( is_open_lt hg hf), 
+    rw h₃, refine interior_mono _ , simp, intros a H, exact le_of_lt H, 
 
   rw h₂, 
   unfold has_inter.inter set.inter,
@@ -672,6 +681,8 @@ begin
 
 sorry, 
 end 
+
+#print prefix set
 
 -- frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} ⊆
     --frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val}
@@ -747,6 +758,10 @@ have h₂ : ∃ (st : ↥I01 × ↥I01), ¬ 1 - (st.fst).val ≤ (st.snd).val,
 --sorry
 --end
 
+lemma frontier_lt_eq {f g : I01 × I01 → I01}  (h₁ : continuous f) (h₂ : continuous g) : 
+frontier {a : ↥I01 × ↥I01 | (f a ).val < (g a).val } = {a : ↥I01 × ↥I01 | f a = g a} := 
+sorry 
+
 lemma cont_help_1 : continuous (λ (a : ↥I01 × ↥I01), 1 - (a.fst).val ) := 
 begin 
  have h : continuous ( λ (r : ℝ ), 1 - r ),  conv in ( (1:ℝ)-_) begin rw help_inv, end,  
@@ -805,7 +820,24 @@ refine continuous_if _ continuous_fst (continuous.comp continuous_snd continuous
 end
 
 
-#print prefix set
+
+lemma continuous_par_aux_a''  : continuous par_aux_a := 
+begin 
+unfold par_aux_a, 
+refine continuous_if _ continuous_fst _ , 
+  { intros st F, 
+    have H : frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} = {a : ↥I01 × ↥I01 | 1 - (a.fst).val = (a.snd).val }, 
+      refine frontier_lt_eq _ _, 
+
+
+
+  }
+
+end
+
+
+--frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val}
+
 
 
 
