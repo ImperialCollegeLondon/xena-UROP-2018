@@ -212,30 +212,23 @@ end
 -- Inverse 
 
 
-
---instance : @topological_semiring I01 (by apply_instance )  := 
-/-
-lemma comp_inv_eqv_const {α : Type*} [topological_space α ] {x : α } (F : space_π₁  x) : is_homotopic_to (comp_of_path (out_loop (inv_eq_class F)) (out_loop F) ) (loop_const x) := 
-begin 
-unfold is_homotopic_to, 
-sorry,
-
-end  -/ 
-
-
-
-/- α : Type u_1,
-_inst_2 : topological_space α,
-x : α,
-F : space_π₁ x
-⊢ path_homotopy (comp_of_path (inv_of_path (quotient.out F)) (quotient.out F)) (loop_const x) -/
-
-
-
 theorem mul_left_inv {α : Type*} [topological_space α ] {x : α } (F : space_π₁ x) : fg_mul (inv_eq_class F) F = id_eq_class x := 
 begin 
  unfold fundamental_group.mul, unfold id_eq_class eq_class inv_eq_class, rw [quotient.out_eq' F],
  apply quotient.sound, existsi _, exact hom_inv_comp_to_const (quotient.out F)
+end
+
+
+---------------------------------------------------
+
+-- Associativity 
+
+theorem mul_assoc {α : Type*} [topological_space α ] {x : α } (F G H: space_π₁ x) : 
+fg_mul (fg_mul F G) H = fg_mul F (fg_mul G H) :=  
+begin 
+ unfold fundamental_group.mul, rw [quotient.out_eq' F ,quotient.out_eq' G , quotient.out_eq' H], 
+ apply quotient.sound, existsi _,
+
 end
 
 
