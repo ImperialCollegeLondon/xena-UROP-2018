@@ -11,13 +11,13 @@ variables (R : Type u) [h : ring R] (n : ℕ)
 include h 
 
 def elemental_vector (i : fin n) : vector R n :=
--- vector.of_fn (λ j, if (j = i) then 1 else 0)
-match n, i with
-| 0, _ := vector.nil
-| (n+1), ⟨0, _⟩ := vector.cons 1 (vector.repeat 0 n)
-| (n+1), ⟨i+1, l⟩ := vector.cons 0 
-    $ by exact _match _ ⟨_, (nat.lt_of_succ_lt_succ l)⟩
-end
+vector.of_fn (λ j, if (j = i) then 1 else 0)
+-- match n, i with
+-- | 0, _ := vector.nil
+-- | (n+1), ⟨0, _⟩ := vector.cons 1 (vector.repeat 0 n)
+-- | (n+1), ⟨i+1, l⟩ := vector.cons 0 
+--     $ by exact _match _ ⟨_, (nat.lt_of_succ_lt_succ l)⟩
+-- end
 
 def basis : vector (vector R n) n :=
 vector.of_fn (elemental_vector R n)
