@@ -1,4 +1,4 @@
-import algebra.module linear_algebra.basic analysis.real data.vector data.list.basic
+import finite_dimensional_vector_spaces.ring_n_is_module
 
 universes u
 
@@ -14,9 +14,7 @@ variables (R : Type u) [h : ring R] (n : ℕ)
 -- structure fin_dim_ring extends module R (vector R n)
 include h 
 
-example : module R (vector R n) := by apply_instance
-
-def elemental_vector : fin n → vector R n :=
+def elemental_vector (i : fin n) : vector R n :=
 -- vector.of_fn (λ j, if (j = i) then 1 else 0)
 match n with
 | 0, _ := vector.nil
@@ -25,22 +23,13 @@ match n with
     $ by exact _match _ ⟨_, (nat.lt_of_succ_lt_succ l)⟩
 end
 
-#check list.pairwise
-
 def basis : vector (vector R n) n :=
 vector.of_fn (elemental_vector R n)
- 
-def basis_as_finset : finset (vector R n) :=
-{
-    val := (basis R n).to_list,
-    nodup := by { 
-        unfold list.nodup basis list.of_fn,
-        induction n with n ih,
-        -- simp [list.of_fn_aux],
-        -- unfold elemental_vector,
-        
-     }
-}
+
+-- def basis_as_finset : finset (vector R n) :=
+-- by {
+--     have := @multiset.to_finset,
+-- }
 
 -- set_option pp.all true
 
