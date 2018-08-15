@@ -11,7 +11,7 @@ variables (R : Type u) [h : ring R] (n : ℕ)
 include h 
 
 def elemental_vector (i : fin n) : vector R n :=
-vector.of_fn (λ j, if (j = i) then 1 else 0)
+vector.of_fn (λ j, if (j.val = i.val) then 1 else 0)
 -- match n, i with
 -- | 0, _ := vector.nil
 -- | (n+1), ⟨0, _⟩ := vector.cons 1 (vector.repeat 0 n)
@@ -22,18 +22,33 @@ vector.of_fn (λ j, if (j = i) then 1 else 0)
 def basis : vector (vector R n) n :=
 vector.of_fn (elemental_vector R n)
 
-noncomputable def basis_as_finset : finset (vector R n) :=
-by {
-    apply @multiset.to_finset _ _,
-    exact (basis R n).to_list,
-    exact classical.dec_eq _
+-- noncomputable def basis_as_finset : finset (vector R n) :=
+-- by {
+--     apply @multiset.to_finset _ _,
+--     exact (basis R n).to_list,
+--     exact classical.dec_eq _
+-- }
+
+def basis_as_finset : finset (vector R n) :=
+{
+    val := (basis R n).to_list,
+    nodup := by 
+        { simp [basis, list.nodup, list.of_fn],
+        induction n with n ih,
+        simp [list.of_fn_aux],
+        
+        unfold list.of_fn_aux elemental_vector,
+        simp,        
+         }
 }
+
+#check fin 
 
 def lc_basis : lc R (vector R n) :=
 by { split, swap, 
     exact basis_as_finset R n,
     swap, intro v,
-    
+
      }
 
 #check finset
