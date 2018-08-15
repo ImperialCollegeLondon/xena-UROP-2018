@@ -320,7 +320,7 @@ end
 def square_free_int (n : ℕ) := ∀ p : ℕ, prime p ∧ (p ∣ n → ¬ (p^2 ∣ n))
 theorem fermat_little_theorem_extension:  ∀ a p : ℕ, prime p → a ^ (p-1) ≡ 1 [MOD p] := sorry
 
-theorem q9 : ∀ n p a : ℕ , n ≠ 0 ∧ square_free_int n ∧ prime p ∧ p ∣ n → (p-1)∣(n - 1) → gcd a n = 1 → a^n ≡ a [MOD n] := 
+theorem q9 : ∀ n p a : ℕ , n ≠ 0 ∧ square_free_int n ∧ prime p ∧ p ∣ n → (p-1)∣(n - 1) → gcd a n = 1 → a^n ≡ a [MOD n] := sorry
 --begin
 --intros n p a,
 --intro hn,
@@ -332,8 +332,6 @@ theorem q9 : ∀ n p a : ℕ , n ≠ 0 ∧ square_free_int n ∧ prime p ∧ p �
 --have d_eq_1: d=1, sorry 
 
 --end 
- 
- --def square_free (n : ℕ) := ∀ p : ℕ, prime p → (p ∣ n → ¬ (p ^ 2 ∣ n)) 
  
  
 lemma pos_of_square_free (n : ℕ) : square_free_int n → n > 0 := 
