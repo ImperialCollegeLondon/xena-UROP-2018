@@ -2,21 +2,17 @@ import finite_dimensional_vector_spaces.ring_n_is_module
 
 universes u
 
-
-def matrix_space (m n : ℕ) (R :  Type u) 
-    [h : ring R] := vector R n → vector R m
-
 namespace fin_dim_ring
 
 variables (R : Type u) [h : ring R] (n : ℕ)
 
-
 -- structure fin_dim_ring extends module R (vector R n)
+
 include h 
 
 def elemental_vector (i : fin n) : vector R n :=
 -- vector.of_fn (λ j, if (j = i) then 1 else 0)
-match n with
+match n, i with
 | 0, _ := vector.nil
 | (n+1), ⟨0, _⟩ := vector.cons 1 (vector.repeat 0 n)
 | (n+1), ⟨i+1, l⟩ := vector.cons 0 
@@ -26,24 +22,34 @@ end
 def basis : vector (vector R n) n :=
 vector.of_fn (elemental_vector R n)
 
--- def basis_as_finset : finset (vector R n) :=
--- by {
---     have := @multiset.to_finset,
--- }
+noncomputable def basis_as_finset : finset (vector R n) :=
+by {
+    apply @multiset.to_finset _ _,
+    exact (basis R n).to_list,
+    exact classical.dec_eq _
+}
 
--- set_option pp.all true
+def lc_basis : lc R (vector R n) :=
+by { split, swap, 
+    exact basis_as_finset R n,
+    swap, intro v,
+    
+     }
 
--- lemma is_spanning_set : ∀ (x : vector R n), 
---     x ∈ span {v : vector R n | v ∈ vector.to_list (basis R n)} :=
--- by { intro a,
---     unfold span basis,
---     split, swap,
---     unfold lc, 
---     apply @finsupp.mk (vector R n) R,
---         { intro v, }
--- }
+#reduce finset.sizeof _ (basis_as_finset R n)
+#check list.nodup_erase_dup
+#print list.pairwise_pw_filter
 
-#check list.nodup_decidable
+instance : is_basis (basis_as_finset R n).to_set :=
+by { split, swap,
+        { intro v,
+        split, swap,
+        unfold lc, split,
+        swap, exact basis_as_finset R n,
+        swap, 
+         }
+}
+
 -- instance : is_basis { v | v ∈ (basis R n).to_list } := 
 -- by { split,
 --     { --simp [linear_independent],
