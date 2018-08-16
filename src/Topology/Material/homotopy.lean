@@ -15,8 +15,8 @@ namespace homotopy
 open path
 
 variables {α  : Type*} [topological_space α ] 
-variables {β  : Type*} [topological_space β ] ( x y : β  )
-variables ( z w x0 : β  )
+variables {β  : Type*} [topological_space β ] { x y  z w : β  }
+variables ( x0 : β  )
 variable s : I01 
 
 noncomputable theory
@@ -75,8 +75,8 @@ structure path_homotopy3 {β} [topological_space β] { x y : β } ( f : path x y
 (cont : continuous to_fun) -/ 
 
 
-variables (f : path x y) (g : path x y)
-variable F : path_homotopy f g 
+variables ( l : path x y) (k : path x y)
+variable F : path_homotopy l k
 
 def path_homotopy.mk' {β} [topological_space β] { x y : β } { f : path x y} { g : path x y}  
 (F : I01 × I01 →  β) (start_pt : ∀ s : I01, F (s, 0) = x) (end_pt : ∀ s : I01, F (s, 1) = y) 
@@ -142,7 +142,7 @@ def path_homotopy_id { x y : β} (f : path x y) : path_homotopy f f :=
 lemma help_hom_inv : (λ (st : ↥I01 × ↥I01), F.to_fun (par_inv (st.fst), st.snd)) = ((λ (st : ↥I01 × ↥I01), F.to_fun (st.fst , st.snd)) ∘ (λ (x : I01 × I01) , (( par_inv x.1 , x.2 ) : I01 × I01))) := 
 begin trivial, end 
 
-def path_homotopy_inverse { x y : β} (f : path x y) (g : path x y) ( F : path_homotopy f g) : path_homotopy g f := 
+def path_homotopy_inverse { x y : β} {f : path x y} {g : path x y} ( F : path_homotopy f g) : path_homotopy g f := 
 {   to_fun :=   λ st  , F.to_fun ( par_inv st.1 , st.2 ),
     path_s := begin 
     intro s, unfold is_path, split, 
@@ -298,7 +298,7 @@ end
 theorem is_symmetric {β  : Type*} [topological_space β ] { x y : β  } : @symmetric (path x y)  (is_homotopic_to) :=
 begin
     unfold symmetric, intros f g H, unfold is_homotopic_to,
-    cases H with F, exact ⟨path_homotopy_inverse f g F⟩,
+    cases H with F, exact ⟨path_homotopy_inverse  F⟩,
 end
 
 theorem is_transitive {β  : Type*} [topological_space β ] { x y : β  } : @transitive (path x y)  (is_homotopic_to) := 
@@ -587,7 +587,7 @@ local attribute [instance] classical.prop_decidable
 
 ----------------------------------------------------
 
---- Extra Result needd later 
+--- Extra Result needed later 
 
 lemma frontier_lt_subset_eq [topological_space α] [decidable_linear_order α] [t : ordered_topology α]
   [topological_space β] {f g : β → α} (hf : continuous f) (hg : continuous g) : 
@@ -612,7 +612,10 @@ begin
   exact set.subset.trans g₁ g₂,  
 end
 
-
+lemma mem_frontier_lt [topological_space α] [decidable_linear_order α] [t : ordered_topology α]
+  [topological_space β] {f g : β → α} (hf : continuous f) (hg : continuous g) { s : β  }: 
+s ∈ frontier {b | f b < g b}  → s ∈  {b | f b = g b} := 
+begin intro h, exact  set.mem_of_mem_of_subset h (frontier_lt_subset_eq hf hg), end 
 
 
 
@@ -622,8 +625,6 @@ end
 -- Homotopy of composition with inverse 
 ------ a⁻¹ ⬝ a ≈ c₀  
 
-set_option trace.simplify.rewrite true
---set_option pp.implicit true
 
 
 -- To shrink path f⁻¹ 
@@ -809,7 +810,6 @@ begin
  unfold shift_order, simp [help_02], 
 end 
 
-#check lt_iff_le_and_ne
 
 lemma f_inv_comp_at_zero {α : Type*} [topological_space α ] {x y : α } (f : path x y) :
 ∀ (y_1 : I01), f_inv_comp f (0, y_1) = (comp_of_path (inv_of_path f) f).to_fun y_1 := 
@@ -888,12 +888,17 @@ path_homotopy.mk' (f_inv_comp f) (f_inv_comp_start_pt f) (f_inv_comp_end_pt f)
 -- Homotopy of three paths (associativity)
 ------ (f ⬝ g) ⬝ h ≈ f ⬝ ( g ⬝ h)  
 
+
+
+--- Reparametrisation on [1/2, 1]
+
 lemma help_p3_aux₁  (s : T2) : (s.val).val - 1 / 4 ∈ I01 := 
 begin 
-
-sorry 
-
+unfold I01, rw mem_set_of_eq, split, 
+ refine  le_sub_iff_add_le.2 _,  rw [add_comm, add_zero], refine le_trans _ s.2.1, norm_num,
+ refine le_trans s.2.2 _, norm_num, 
 end
+
 
 lemma help_p3_aux₂  ( s : T2) :  2 * (s.val).val - 1 ∈ I01 := 
 begin 
@@ -915,30 +920,213 @@ def p3_aux : T2 → I01 :=
 λ s, if s.1.1 < (3/4: ℝ ) then ⟨ s.1.1 - 1/4 , help_p3_aux₁ s ⟩  else ⟨ ( 2 : ℝ )*s.1.1 - (1: ℝ) , help_p3_aux₂  s ⟩ 
 
 lemma help_cont_p3_aux₁ : continuous (λ (s : ↥T2), (s.val).val - 1 / 4) := 
-begin 
-refine continuous.comp (continuous.comp continuous_subtype_val continuous_subtype_val) 
-(real.continuous_sub_const (- (1/4) ),  
-end 
+continuous.comp  (continuous.comp continuous_subtype_val continuous_subtype_val) (real.continuous_sub_const  (1/4) )
+
+lemma help_cont_p3_aux₂  : continuous (λ (s : ↥T2), 2 * (s.val).val - 1) := 
+continuous.comp  (continuous.comp continuous_subtype_val continuous_subtype_val) (real.continuous_linear 2 (-1) )
+
 
 lemma cont_p3_aux : continuous p3_aux := 
 begin 
 unfold p3_aux, 
 refine continuous_if _ _ _, 
   intros x h, 
-sorry,
-refine continuous_subtype_mk _ _, 
-
-
+ have h₂ := mem_frontier_lt (continuous.comp continuous_subtype_val continuous_subtype_val) (continuous_const) h, 
+ simp at h₂ , refine subtype.eq _, norm_num [h₂ ], 
+ exact continuous_subtype_mk _ help_cont_p3_aux₁,  
+ refine continuous_subtype_mk _ help_cont_p3_aux₂,
 end
 
+-----------------------------
+
+-- Reparametrisation on [0, 1/2]
+
+lemma help_p3_T1_aux (x : T1) : 1 / 2 * (x.val).val ∈ I01 :=
+begin 
+  unfold I01, rw mem_set_of_eq, split, 
+   refine mul_nonneg _ x.2.1, {norm_num}, 
+   --norm_num [x.2.2], 
+   have h :  x.val.val ≤ 1/2 , exact x.2.2, 
+   have h₂ : 1 / 2 * (x.val).val ≤ (1/2 : ℝ )* (1/2:ℝ ), have g₁ : (1/ 2 : ℝ)  ≤ 1/2, refine @le_of_eq _ _ (1/2:ℝ ) (1/2:ℝ ) (refl (1/2:ℝ )), 
+   refine mul_le_mul g₁ h x.2.1 _ , {norm_num}, 
+   refine le_trans h₂ _  ,
+   norm_num, 
+end
+
+def p3_T1_aux : T1 → I01 := λ x, ⟨ (1/2:ℝ ) * x.1.1 , help_p3_T1_aux x ⟩ 
+
+lemma cont_p3_T1_aux : continuous p3_T1_aux := 
+begin 
+ unfold p3_T1_aux, 
+ refine continuous_subtype_mk _ ( continuous.comp 
+  (continuous.comp continuous_subtype_val continuous_subtype_val) (real.continuous_mul_const (1/2)) ) , 
+end
+
+
+
 noncomputable def p3 : repar_I01 := 
+{ to_fun := paste cover_I01 p3_T1_aux p3_aux, 
+
+  at_zero := 
+  begin unfold paste, rw dif_pos, unfold p3_T1_aux, dsimp, refine subtype.eq _, 
+  exact help_T1, dsimp, exact mul_zero _,  end, 
+
+  at_one := 
+  begin unfold paste, rw dif_neg, unfold p3_aux, rw if_neg, refine subtype.eq _, exact help_02, 
+  dsimp, show 2 * (1:ℝ) + -1 = 1, {norm_num}, dsimp, rw not_lt, show 3 / 4 ≤ ( 1:ℝ ), norm_num, end, 
+
+  cont := 
+  begin 
+  refine cont_of_paste T1_is_closed T2_is_closed _ cont_p3_T1_aux cont_p3_aux , 
+  unfold match_of_fun,  intros x B1 B2,
+    have Int : x ∈ set.inter T1 T2, exact ⟨ B1 , B2 ⟩ , 
+    rwa [inter_T] at Int, 
+    have V : x.val = 1/2, rwa [mem_set_of_eq] at Int, 
+    unfold p3_aux p3_T1_aux, dsimp, rw if_pos, rw subtype.ext , dsimp, norm_num [V], 
+  end, 
+
+}
+
+section 
+variables {f : path x y} {g : path y z} {h : path z w}
+
+
+
+lemma step_assoc_1 {t : {x // x ∈ I01}} { h_1 : t ∈ T1 } { h_2 : p3.to_fun t ∈ T1} {h_3 : par T1._proof_1 ⟨p3.to_fun t, h_2 ⟩ ∈ T1} : 
+f.to_fun (par T1._proof_1 ⟨t, h_1⟩) = f.to_fun (par T1._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_2⟩, h_3⟩) :=
+begin 
+ unfold p3, dsimp, 
+ unfold paste,  simp [dif_pos, h_1],
+ unfold p3_T1_aux, dsimp, 
+ unfold par, dsimp, simp [subtype.ext], 
+ show  f.to_fun ⟨↑t / 2⁻¹, _⟩ = f.to_fun ⟨((2⁻¹ * t.val )/ 2⁻¹ )/ 2⁻¹, _⟩, 
+ have h₁ : ((2⁻¹ * t.val) / 2⁻¹) / 2⁻¹ = ↑t / 2⁻¹, 
+  rw mul_div_assoc, 
+  show 2⁻¹ * (t.val / 2⁻¹ )/ 2⁻¹ = ↑t / 2⁻¹, 
+  have h₂ : 2⁻¹ * (t.val / 2⁻¹) = t.val, refine mul_div_cancel' t.val _ , {norm_num},
+  rw h₂ , refl, 
+ show  f.to_fun ⟨↑t / 2⁻¹, _⟩ = f.to_fun ⟨((2⁻¹ * t.val )/ 2⁻¹ )/ 2⁻¹, _⟩, 
+ simp [h₁] , 
+end 
+
+
+lemma help_step_assoc_2 {t : {x // x ∈ I01}} (h_1 : t ∈ T1 ) { h_2 : p3.to_fun t ∈ T1} (h_3 : par T1._proof_1 ⟨p3.to_fun t, h_2⟩ ∉ T1) : 
+par T1._proof_1 ⟨p3.to_fun t, h_2⟩ ∈  T2 :=  T2_of_not_T1 h_3 
+
+---par T1._proof_1 ⟨p3.to_fun t, h_2⟩ ∉ T1
+
+lemma p3_ineq_T1 {t : {x // x ∈ I01}} (h_1 : t ∈ T1 )  : p3.to_fun t ∈ {x : I01 | 0 ≤ x.val ∧ x.val ≤ 1 / 4 } :=
 sorry 
 
-noncomputable def hom_comp_f_g_h {α : Type*} [topological_space α ] {x y z w : α } ( f : path x y) ( g : path y z) ( h : path z w)  : 
-path_homotopy (comp_of_path (comp_of_path f g) h ) ( comp_of_path f (comp_of_path g h)) := 
-begin 
+lemma par_T1_ineq₁ {s : {x // x ∈ I01}} {h_1 : s ∈ T1 } (h : s ∈ {x : ↥I01 | 0 ≤ x.val ∧ x.val ≤ 1 / 4 } ) :
+par T1._proof_1 ⟨ s , h_1 ⟩ ∈ T1 := 
 sorry
+
+-- t ∈ T1 p3.to_fun t ≤ 1/4
+
+lemma step_assoc_2 {t : {x // x ∈ I01}} { h_1 : t ∈ T1 } { h_2 : p3.to_fun t ∈ T1} (h_3 : par T1._proof_1 ⟨p3.to_fun t, h_2⟩ ∉ T1) : 
+f.to_fun (par T1._proof_1 ⟨t, h_1⟩) = g.to_fun (par T2._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_2⟩, help_step_assoc_2 h_1 h_3 ⟩) :=
+begin 
+by_contradiction, unfold T1 T at h_2, 
+rw [mem_set_of_eq] at h_2, 
+unfold T1 T at h_3, rw [mem_set_of_eq] at h_3, 
+simp [-one_div_eq_inv] at h_3, 
+have H := h_3 (par T1._proof_1 ⟨p3.to_fun t, h_2⟩).2.1, 
+have G : par T1._proof_1 ⟨p3.to_fun t, h_2⟩ ∈ T1, 
+exact par_T1_ineq₁ (p3_ineq_T1 h_1), cc, 
 end 
+
+lemma step_assoc_3 {t : {x // x ∈ I01}} { h_1 : t ∈ T1 } { h_2 : p3.to_fun t ∉ T1} : 
+f.to_fun (par T1._proof_1 ⟨t, h_1⟩) = h.to_fun (par T2._proof_1 ⟨p3.to_fun t, T2_of_not_T1 h_2 ⟩) := 
+sorry
+
+
+
+
+
+/- 
+
+
+α : Type ?,
+_inst_3 : topological_space α,
+x y z w : α,
+f : path x y,
+g : path y z,
+h : path z w,
+t : {x // x ∈ I01},
+h_1 : t ∈ T1,
+h_2 : p3.to_fun t ∉ T1
+⊢ f.to_fun (par T1._proof_1 ⟨t, h_1⟩) = h.to_fun (par T2._proof_1 ⟨p3.to_fun t, _⟩) 
+
+α : Type ?,
+_inst_3 : topological_space α,
+x y z w : α,
+f : path x y,
+g : path y z,
+h : path z w,
+t : {x // x ∈ I01},
+h_1 : t ∉ T1,
+h_2 : par T2._proof_1 ⟨t, _⟩ ∈ T1,
+h_3 : p3.to_fun t ∈ T1,
+h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∈ T1
+⊢ g.to_fun (par T1._proof_1 ⟨par T2._proof_1 ⟨t, _⟩, h_2⟩) =
+    f.to_fun (par T1._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_3⟩, h_4⟩)
+
+α : Type ?,
+_inst_3 : topological_space α,
+x y z w : α,
+f : path x y,
+g : path y z,
+h : path z w,
+t : {x // x ∈ I01},
+h_1 : t ∉ T1,
+h_2 : par T2._proof_1 ⟨t, _⟩ ∈ T1,
+h_3 : p3.to_fun t ∈ T1,
+h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∉ T1
+⊢ g.to_fun (par T1._proof_1 ⟨par T2._proof_1 ⟨t, _⟩, h_2⟩) =
+    g.to_fun (par T2._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_3⟩, _⟩)
+
+-/
+
+set_option trace.simplify.rewrite true
+--set_option pp.implicit true
+
+noncomputable def hom_comp_f_g_h {α : Type*} [topological_space α ] {x y z w : α } ( f : path x y) ( g : path y z) ( h : path z w)  : 
+path_homotopy  ( comp_of_path f (comp_of_path g h)) (comp_of_path (comp_of_path f g) h ) := 
+begin 
+  have h₁ : ( comp_of_path f (comp_of_path g h)) = repar_path (comp_of_path (comp_of_path f g) h )  p3, 
+   { unfold repar_path, dsimp, refine path_equal.2 _ ,  dsimp, unfold comp_of_path, dsimp, 
+     unfold paste fa_path fb_path fgen_path, dsimp,  unfold paste, funext, unfold paste, 
+     split_ifs, 
+      exact step_assoc_1,  
+      exact step_assoc_2 h_3, 
+      exact step_assoc_3, 
+      /- 
+      { 
+
+        sorry, 
+      }
+     by_cases H : t ∈ T1, simp [H], 
+       { 
+
+sorry
+       },
+    --refine path_equal.2 _ ,
+
+     sorry -/ sorry, 
+   },
+rw h₁ , exact hom_repar_path_to_path (comp_of_path (comp_of_path f g) h ) p3, 
+end 
+
+
+/- noncomputable def hom_const_f_to_f {α : Type*} [topological_space α ] {x y : α } ( f : path x y) : path_homotopy (comp_of_path (loop_const x) f ) f:= 
+begin 
+have H : comp_of_path (loop_const x) f = repar_path f p2, 
+  { apply path_equal.2, unfold comp_of_path repar_path, simp, unfold fa_path fb_path fgen_path loop_const p2, simp, unfold par, funext,  
+  unfold paste,  split_ifs, simp [-one_div_eq_inv], 
+     }, 
+rw H, exact hom_repar_path_to_path f p2, 
+end -/
 
 
 /- noncomputable def p2 : repar_I01 := 
@@ -974,4 +1162,5 @@ end-/
 
 /-  path_homotopy (comp_of_path (comp_of_path (quotient.out F) (quotient.out G)) (quotient.out H))
     (comp_of_path (quotient.out F) (comp_of_path (quotient.out G) (quotient.out H)))  -/
+
 end homotopy
