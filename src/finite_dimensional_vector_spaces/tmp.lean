@@ -11,37 +11,38 @@ variables (R : Type u) [h : ring R] (n : ℕ)
 include h 
 
 def elemental_vector (i : fin n) : vector R n :=
-vector.of_fn (λ j, if (j.val = i.val) then 1 else 0)
--- match n, i with
--- | 0, _ := vector.nil
--- | (n+1), ⟨0, _⟩ := vector.cons 1 (vector.repeat 0 n)
--- | (n+1), ⟨i+1, l⟩ := vector.cons 0 
---     $ by exact _match _ ⟨_, (nat.lt_of_succ_lt_succ l)⟩
--- end
+-- vector.of_fn (λ j, @decidable.by_cases (j = i) R _ (λ _, 1) (λ _, 0))
+-- vector.of_fn (λ j, if (j.val = i.val) then 1 else 0)
+match n, i with
+| 0, _ := vector.nil
+| (n+1), ⟨0, _⟩ := vector.cons 1 (vector.repeat 0 n)
+| (n+1), ⟨i+1, l⟩ := vector.cons 0 
+    $ by exact _match _ ⟨_, (nat.lt_of_succ_lt_succ l)⟩
+end
 
 def basis : vector (vector R n) n :=
 vector.of_fn (elemental_vector R n)
-
--- noncomputable def basis_as_finset : finset (vector R n) :=
--- by {
---     apply @multiset.to_finset _ _,
---     exact (basis R n).to_list,
---     exact classical.dec_eq _
--- }
 
 def basis_as_finset : finset (vector R n) :=
 {
     val := (basis R n).to_list,
     nodup := by 
-        { rw [multiset.coe_nodup, list.nodup, basis,
-            vector.to_list_of_fn, list.of_fn],
-        induction n with n ih,
-        unfold list.of_fn_aux,
-                
+        { rw [multiset.coe_nodup, basis,
+            vector.to_list_of_fn],-- list.of_fn],
+        rw [list.nodup_iff_nth_le_inj],
+        intros i j h1 h2,
+        rw [list.length_of_fn] at h1 h2,
+        rw [list.nth_le_of_fn (elemental_vector R n) ⟨i, h1⟩],
+        rw [list.nth_le_of_fn (elemental_vector R n) ⟨j, h2⟩],
+        intro a,
+        cases n,
+        exact (nat.le_lt_antisymm (i.zero_le) h1).elim,
+        cases i; cases j,
+        refl, 
          }
 }
 
-#check list
+#check nat
 
 -- def lc_basis : lc R (vector R n) :=
 -- by { split, swap, 
