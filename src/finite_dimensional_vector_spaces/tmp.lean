@@ -37,13 +37,10 @@ def basis_as_finset : finset (vector R n) :=
         induction n with n ih,
         simp [list.of_fn_aux],
         
-        unfold list.of_fn_aux elemental_vector,
-        simp,  
-              
          }
 }
 
-#check fin 
+#check nodup
 
 def lc_basis : lc R (vector R n) :=
 by { split, swap, 
