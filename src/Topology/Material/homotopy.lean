@@ -585,114 +585,14 @@ end
 
 local attribute [instance] classical.prop_decidable
 
------------------------------------------------------
+----------------------------------------------------
 
+--- Extra Result needd later 
 
---- Closure result (that I have not found in topological_structures)
-
-set_option trace.simplify.rewrite true
---set_option pp.implicit true
-
-@[simp] lemma closure_lt_eq' { α β } [topological_space α] [topological_space β] [partial_order α] [t : ordered_topology α]
-{f g : β → α} (hf : continuous f) (hg : continuous g) :
-  closure {b | f b < g b} = {b | f b ≤ g b} :=
-begin 
-refine set.eq_of_subset_of_subset _ _, 
-  refine closure_minimal _ _ , 
-   simp, intros a h₁, exact le_of_lt h₁ , 
-   exact is_closed_le hf hg, 
-
-  rw closure_eq_compl_interior_compl, 
-  rw subset_compl_iff_disjoint  ,
-  apply set.ext, intro s, split, 
-  unfold has_neg.neg boolean_algebra.neg complete_boolean_algebra.neg compl, 
-
-
-  --unfold has_sub.sub, 
-  --simp, 
-
-  /- refine (closure_subset_iff_subset_of_is_closed is_closed_closure ).1 _, 
-  --rw subset_compl_iff_disjoint  ,
-  rw subset_def, 
-  unfold closure, -/ 
-
-sorry, 
-intro H, by_contradiction, rw [mem_empty_eq s] at H,  exact H, 
-
-/-
-have h₂ : {b : β | f b ≤ g b} = closure {b : β | f b ≤ g b}, sorry, 
-rw h₂, 
-have h₃ : closure {b : β | f b < g b} = closure ( closure {b : β | f b < g b} ), sorry, 
-rw h₃, 
-refine closure_mono _  ,
-
-refine closure_su , -/
---refine closure_mono , 
-end
-
----[partial_order α ]
--- [decidable linerar order α ]
-
-@[simp] lemma closure_lt_eq { α β } [topological_space α] [topological_space β]
- [linear_order α ] [t : ordered_topology α] [orderable_topology α ]
-{f g : β → α} (hf : continuous f) (hg : continuous g) ( he : ∃ (a : β ) , f a ≠ g a ) :
-  closure {b | f b < g b} = {b | f b ≤ g b} :=
-begin 
-refine set.eq_of_subset_of_subset _ _, 
-  refine closure_minimal _ _ , 
-   simp, intros a h₁, exact le_of_lt h₁ , 
-   exact is_closed_le hf hg, 
-
-  rw closure_eq_compl_interior_compl, 
-  rw subset_compl_iff_disjoint  , 
-  unfold has_neg.neg boolean_algebra.neg complete_boolean_algebra.neg compl, 
-  have h₁  : {a : β | a ∉ {b : β | f b < g b} } = {a : β | g a  ≤  f a} , 
-    refine set.ext _, intro x, 
-    simp , rw h₁ , 
-  have h₂ : interior {a : β | g a ≤ f a} = {a : β | g a < f a}, 
-    refine set.eq_of_subset_of_subset _ _, 
-    { unfold interior, simp, intro a, 
-    --wlog f a ≠ g a, 
-    intros U Hopen Hsub Ha, by_contradiction , 
-    have h : f a ≤ g a, exact not_lt.1 a_1, 
-    sorry},
-    have h₃ : {a : β | g a < f a} = interior {a : β | g a < f a}, apply eq.symm, 
-      refine interior_eq_iff_open.2 ( is_open_lt hg hf), 
-    rw h₃, refine interior_mono _ , simp, intros a H, exact le_of_lt H, 
-
-  rw h₂, 
-  unfold has_inter.inter set.inter,
-   simp,
-  refine set.ext _, intro s, split, intro H, 
-    rw mem_set_of_eq at H, rw mem_empty_eq, 
-    have H2 : ¬ f s ≤ g s, exact (lt_iff_not_ge (g s) (f s)).1 H.2,  cc, 
-    intro H, by_contradiction, rw [mem_empty_eq s] at H,  exact H, 
-end
-
-/- 
-lemma frontier_subset { α } [topological_space α]  [linear_order α ] [ ordered_topology α]
-{s t : set α  } ( h₁ : s ⊆ t) : frontier s ⊆ frontier t := sorry -/ 
-
---- Generality, partial order? decidable linear_order? 
-@[simp] lemma frontier_lt_subset_frontier_le { α β } [topological_space α] [topological_space β] [linear_order α ] [t : ordered_topology α]
-{f g : β → α} (hf : continuous f) (hg : continuous g) :
-  frontier {b | f b < g b} ⊆  frontier {b | f b ≤ g b} := 
-begin
-
-sorry, 
-end 
-
-#print prefix set
-
--- frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} ⊆
-    --frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val}
-
-
-
-
-
-
-
+lemma frontier_lt_subset_eq [topological_space α] [decidable_linear_order α] [t : ordered_topology α]
+  [topological_space β] {f g : β → α} (hf : continuous f) (hg : continuous g) : 
+frontier {b | f b < g b} ⊆ {b | f b = g b} :=
+sorry  
 
 
 
@@ -723,44 +623,6 @@ def par_aux_a : I01 × I01 → I01 :=
 
 -- dite or ite? 
 
-/- if h₁ : ((1 : ℝ ) - st.1.1) ≤ st.2.1 then st.1 else st.2
-begin 
-have H : st.2.1 < ((1 : ℝ ) - st.1.1), exact not_le.1 h₁ , exact st.2,
-end -/ 
-
-
-/-
-lemma continuous_par_aux_a' : continuous par_aux_a := 
-begin 
-unfold par_aux_a, 
-by_cases h : ∀ (st : I01 × I01), ((1 : ℝ ) - ((st.1).1 )) < (st.snd).val , 
-simp [h, continuous_fst], 
-
-rw [not_forall] at h, --rw if_neg, 
-cases h with x h₂ ,  simp [h₂ , if_neg, continuous_snd], -/
-
- -- does not finish off
-/- 
- simp [h, if_false ],   
-let x := λ (y : I01 × I01) ,  ¬1 - (y.fst).val ≤ (y.snd).val, 
-
-have h₂ : ¬1 - (x.fst).val ≤ (st.snd).val , 
-
-
-have h₂ : ∃ (st : ↥I01 × ↥I01), ¬ 1 - (st.fst).val ≤ (st.snd).val, 
-  exact not_forall.1 h, -/
-
-/-           have H3:  s ∉ T1, simp [not_forall] at H, exact H.2,
-          simp [H3], refine (G.path_s (par T2._proof_1 ⟨ s, _ ⟩  )).2.2,        
-          exact T2_of_not_T1 H3, -/
-
---split_ifs, 
---sorry
---end
-
-lemma frontier_lt_eq {f g : I01 × I01 → I01}  (h₁ : continuous f) (h₂ : continuous g) : 
-frontier {a : ↥I01 × ↥I01 | (f a ).val < (g a).val } = {a : ↥I01 × ↥I01 | f a = g a} := 
-sorry 
 
 lemma cont_help_1 : continuous (λ (a : ↥I01 × ↥I01), 1 - (a.fst).val ) := 
 begin 
@@ -774,69 +636,56 @@ begin
 unfold par_aux_a, 
 refine continuous_if _ continuous_fst _ , 
   { intros st F, 
-    have H : frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} = {a : ↥I01 × ↥I01 | 1 - (a.fst).val = (a.snd).val }, 
+    have H : frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} ⊆  {a : ↥I01 × ↥I01 | 1 - (a.fst).val = (a.snd).val }, 
         { unfold frontier , 
         have H2 : interior {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} = {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val}, 
           refine interior_eq_iff_open.2 _, refine is_open_lt  _ _,  
           exact cont_help_1, 
           exact continuous.comp continuous_snd continuous_subtype_val, 
         rw H2, 
-        have H3 : closure {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} = {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val}, 
-          exact closure_lt_eq cont_help_1 (continuous.comp continuous_snd continuous_subtype_val) , 
-          --USE closure_lt_eq 
-        rw H3, 
-        unfold has_sdiff.sdiff set.diff, simp [-sub_eq_add_neg], 
-          apply set.ext, intro x, split, 
-            rw [set.mem_sep_eq, mem_set_of_eq] ,  intro a , exact le_antisymm  a.1 a.2, 
-            simp [-sub_eq_add_neg], intro a, refine ⟨ le_of_eq a, _⟩, exact ge_of_eq a, 
+        have H3 : closure {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} ⊆ closure {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val}, 
+          refine closure_mono _  , rw set.set_of_subset_set_of, intros x h, exact le_of_lt h,   
+        have H4 : closure {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val} = {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val}, 
+          refine closure_eq_iff_is_closed.2 _ ,
+          refine is_closed_le cont_help_1 (continuous.comp continuous_snd continuous_subtype_val), 
+        rw H4 at H3,  
+        have G1 : closure {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} \ 
+          {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} ⊆ 
+          {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val} \ {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val}, 
+          { unfold has_sdiff.sdiff set.diff, intros a Ha, simp [-add_neg_le_iff_le_add', -sub_eq_add_neg] at Ha, 
+          simp [-add_neg_le_iff_le_add', -sub_eq_add_neg], cases Ha with h₁ h₂ , 
+          have h₃ : a ∈ {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val}, exact set.mem_of_mem_of_subset h₁ H3, 
+          rw mem_set_of_eq at h₃ , exact ⟨  h₃ , h₂ ⟩ , 
         }, 
-    rw [H, mem_set_of_eq] at F, unfold par_inv, refine subtype.eq _, 
+
+       have G2 : {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val} \ {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} ⊆ 
+        {a : ↥I01 × ↥I01 | 1 - (a.fst).val = (a.snd).val}, 
+       unfold has_sdiff.sdiff set.diff, intros a Ha, simp [-add_neg_le_iff_le_add', -sub_eq_add_neg] at Ha, 
+       rw mem_set_of_eq, exact le_antisymm Ha.1 Ha.2, 
+       exact set.subset.trans G1 G2, 
+      }, 
+    have h : st ∈ {a : ↥I01 × ↥I01 | 1 - (a.fst).val = (a.snd).val}, 
+      exact set.mem_of_mem_of_subset F H , 
+    rw [ mem_set_of_eq] at h, unfold par_inv, refine subtype.eq _, 
     show (st.fst).val = 1 -(st.snd).val, 
-    have H4 : (st.snd).val = 1 - (st.fst).val, exact eq.symm F, 
+    have H4 : (st.snd).val = 1 - (st.fst).val, exact eq.symm h, 
     simp [H4], 
   }, 
 exact continuous.comp continuous_snd continuous_par_inv, 
 end
 
-lemma continuous_par_aux_a'  : continuous par_aux_a := 
-begin 
-unfold par_aux_a, 
-refine continuous_if _ continuous_fst (continuous.comp continuous_snd continuous_par_inv) , 
-  { intros st F, 
-    have H : frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} ⊆ frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤  (a.snd).val},  
-      --refine frontier_lt_subset_frontier_le cont_help_1 (continuous.comp continuous_snd continuous_subtype_val), 
-      sorry, 
-    have H2 : frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val} ⊆  {a : ↥I01 × ↥I01 | 1 - (a.fst).val = (a.snd).val}, 
-      exact frontier_le_subset_eq cont_help_1 (continuous.comp continuous_snd continuous_subtype_val) , 
-    have h₁ : frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} ⊆ {a : ↥I01 × ↥I01 | 1 - (a.fst).val = (a.snd).val}, 
-      exact set.subset.trans H H2, 
-    have h₂ : st ∈ {a : ↥I01 × ↥I01 | 1 - (a.fst).val = (a.snd).val}, 
-      refine set.mem_of_mem_of_subset F h₁  , rw mem_set_of_eq at h₂ , 
-    unfold par_inv, refine subtype.eq _, 
-    show (st.fst).val = 1 -(st.snd).val, 
-    have H4 : (st.snd).val = 1 - (st.fst).val, exact eq.symm h₂ , 
-    simp [H4], 
-  }, 
-end
+/- variables [topological_space α] [decidable_linear_order α] [t : ordered_topology α]
+  [topological_space β] {f g : β → α}
+include t
+
+section
+variables (hf : continuous f) (hg : continuous g)
+include hf hg -/
 
 
 
-lemma continuous_par_aux_a''  : continuous par_aux_a := 
-begin 
-unfold par_aux_a, 
-refine continuous_if _ continuous_fst _ , 
-  { intros st F, 
-    have H : frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} = {a : ↥I01 × ↥I01 | 1 - (a.fst).val = (a.snd).val }, 
-      refine frontier_lt_eq _ _, 
 
-
-
-  }
-
-end
-
-
---frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val}
+#check frontier_le_subset_eq
 
 
 
