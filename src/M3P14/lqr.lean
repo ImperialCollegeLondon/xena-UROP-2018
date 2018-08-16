@@ -14,6 +14,9 @@ import data.int.basic
 open nat 
 
 
+-- TODO: make an algorithm that calculates the legendre symbol with jacobi symbol
+
+
 definition prime_int (p : ℤ) := nat.prime(int.nat_abs p) 
 --theorem prime_int_to_nat {p : ℤ} (h : prime_int p) : prime p := sorry
 definition quadratic_res (a n : ℤ) := ∃ x : ℤ, a ≡ x^2 [ZMOD (int.nat_abs n)]

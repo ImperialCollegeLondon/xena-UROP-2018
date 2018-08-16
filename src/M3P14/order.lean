@@ -1,10 +1,9 @@
-import data.nat.prime data.nat.gcd data.nat.modeq data.nat.gcd algebra.group chris_hughes_various.zmod group_theory.order_of_element M3P14.order_zmodn_kmb M3P14.phi
+import data.nat.prime data.nat.gcd data.nat.modeq data.nat.gcd algebra.group chris_hughes_various.zmod group_theory.order_of_element M3P14.order_zmodn_kmb M3P14.Arithmetic_functions.phi
 
 open zmod nat
 
 /- Gives actual number when evaluating (e.g. #5 becomes 5) -/
 instance (n : ℕ) : has_repr (zmod n) := ⟨repr ∘ fin.val⟩ 
---instance  {α : Type*} [monoid α] [has_repr α] : has_repr (units α) := ⟨repr ∘ units.val⟩ 
 
 -- Thanks Chris
 lemma order_of_dvd_of_pow_eq_one {d n : ℕ} [pos_nat n]  (a : units (zmod n)) (h : a ^ d = 1) : order_of a ∣ d :=

@@ -96,7 +96,18 @@ end
 --      - d divides both m and n, and
 --      - if x divides both m and n, then x divides d.
 theorem q3 : ∀ m n : ℕ, ∃! d : ℕ, ∀ x : ℕ, gcd m n = d → d ∣ m → d ∣ n → x ∣ m → x ∣ n → x ∣ d
-                                    := sorry
+                                    := 
+begin
+  intros m n,
+  apply exists_unique.intro (gcd m n),
+  {
+    intros x h1 h2 h3 h4 h5,
+
+    sorry
+  },
+  intros y x,
+  sorry
+end
 
 
 -- Let a and b be nonzero integers. Show that there is a unique positive integer m with the following two properties:
@@ -251,16 +262,14 @@ have  eq3 : a'*b'*d = m,
 }
 end
 
-def lcm_mathlib (i j : ℤ) : ℕ := int.nat_abs(i * j) / (int.gcd i j)
+def int_lcm (i j : ℤ) : ℕ := int.nat_abs(i * j) / (int.gcd i j)
 
 -- Show that the least common multiple of a and b is given by |ab|/(a,b)
-theorem q4b : ∀ a b : ℤ, lcm_mathlib a b = int.nat_abs (a*b) /(int.gcd a b) := sorry
-/-begin
+theorem q4b : ∀ a b : ℤ, int_lcm a b = int.nat_abs (a*b) /(int.gcd a b) := 
+begin
   intros a b,
-  exact gcd_mul_lcm a b,
-  sorry
+  refl,
 end
--/
 
 -- Let m and n be positive integers, and let K be the kernel of the map:
 --      ℤ/mnℤ → ℤ/mℤ x ℤ/nℤ 
@@ -271,13 +280,12 @@ end
 -- -- Show that the equation ax = b (mod n) has no solutions if b is not divisible by (a, n), and exactly (a, n) solutions in ℤ/n otherwise.
 -- theorem q6 :
 -- Show that the equation ax = b (mod n) has no solutions if b is not divisible by (a, n), and exactly (a, n) solutions in ℤ/n otherwise.
--- TODO: how to specify "there are exactly n solutions to an equation"?
+
 --theorem q6 :  ¬(gcd a n ∣ b) → ¬(∃ x, a*x ≡ b [MOD n])
 
 -- -- For n a positive integer, let σ(n) denote the sum Σ d for d∣n and d>0, of the positive divisors of n.
 -- -- Show that the function n ↦ σ(n) is multiplicative.
 -- theorem q7 :
---finset.range
 
 -- Let p be a prime, and a be any integer. Show that a^(p²+p+1) is congruent to a^3 modulo p.
 lemma nat.pow_mul (a b c : ℕ) : a ^ (b * c) = (a ^ b) ^ c :=
@@ -339,20 +347,13 @@ begin
   intro H, 
   apply nat.pos_of_ne_zero, 
   intro Hn, 
-  refine H 2 _ _ _, 
-  exact prime_two, 
-  { rw Hn, 
-    exact dec_trivial, 
-  }, 
-  rw Hn, 
-  exact dec_trivial 
+  rw square_free_int at H,
+  rw Hn at H,
+  have h3 : ¬2 ^ 2 ∣ 0, from (H 2).right (dvd_zero 2),
+  norm_num at h3,
+  exact h3,
 end  
  
- 
-#check list.prod  
- 
- 
-set_option trace.simplify.rewrite true  
 lemma list.div_prod_of_mem (l : list ℕ) (d : ℕ) (Hd : d ∈ l) : d ∣ list.prod l :=  
 begin 
   induction l with a m IH, 
@@ -400,15 +401,19 @@ begin
     exact list.count_pos.2 Hpn, 
   cases (le_iff_lt_or_eq.1 Hge1) with H2 H2, 
   { exfalso, 
+    /-
     apply Hs p Hp, 
     { rw ←(nat.prod_factors (pos_of_square_free n Hs)), 
       apply list.div_prod_of_mem, 
       assumption 
     }, 
+    
     show (1 * p) * p ∣ n, 
     rw one_mul, 
     rw ←(nat.prod_factors (pos_of_square_free n Hs)), 
     exact prod_list_count_2 (factors n) p H2, 
+    -/
+    sorry,
   }, 
   exact H2.symm 
 end  
