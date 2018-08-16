@@ -2,9 +2,9 @@ import finite_dimensional_vector_spaces.ring_n_is_module
 
 universes u
 
-namespace fin_dim_ring
+namespace fin_vector_space
 
-variables (R : Type u) [h : ring R] (n : ℕ)
+variables (R : Type u) [h : field R] (n : ℕ)
 
 -- structure fin_dim_ring extends module R (vector R n)
 
@@ -27,22 +27,37 @@ def basis_as_finset : finset (vector R n) :=
 {
     val := (basis R n).to_list,
     nodup := by 
-        { rw [multiset.coe_nodup, basis,
-            vector.to_list_of_fn],-- list.of_fn],
-        rw [list.nodup_iff_nth_le_inj],
+        { rw [basis, vector.to_list_of_fn, 
+            multiset.coe_nodup, list.nodup_iff_nth_le_inj],
         intros i j h1 h2,
         rw [list.length_of_fn] at h1 h2,
-        rw [list.nth_le_of_fn (elemental_vector R n) ⟨i, h1⟩],
-        rw [list.nth_le_of_fn (elemental_vector R n) ⟨j, h2⟩],
+        rw [list.nth_le_of_fn (elemental_vector R n) ⟨i, h1⟩,
+            list.nth_le_of_fn (elemental_vector R n) ⟨j, h2⟩],
         intro a,
-        cases n,
+        induction n with n ih generalizing i j,
         exact (nat.le_lt_antisymm (i.zero_le) h1).elim,
-        cases i; cases j,
-        refl, 
-         }
+        cases i; cases j; unfold elemental_vector at a,
+            { replace a := @congr _ _ (vector.head) _ _ _ rfl a,
+            rw [vector.head_cons, vector.head_cons] at a,
+            by_contradiction, 
+            apply (not_not_intro a),
+            exact h.zero_ne_one.symm },
+            { replace a := @congr _ _ (vector.head) _ _ _ rfl a,
+            rw [vector.head_cons, vector.head_cons] at a,
+            by_contradiction, 
+            apply (not_not_intro a),
+            exact h.zero_ne_one },
+            { rw [list.length_of_fn] at ih,
+            have hi := nat.lt_of_succ_lt_succ h1_1,
+            have hj := nat.lt_of_succ_lt_succ h2_1,
+            apply congr rfl,
+            apply ih _ _ hi hj hj hi,
+            replace a := @congr _ _ (vector.tail) _ _ _ rfl a,
+            rw [vector.tail_cons, vector.tail_cons] at a,
+            exact a } }
 }
 
-#check nat
+#check nat.lt_of_add_lt_add_left
 
 -- def lc_basis : lc R (vector R n) :=
 -- by { split, swap, 
@@ -82,4 +97,4 @@ def basis_as_finset : finset (vector R n) :=
     
 --      }, }
 
-end fin_dim_ring 
+end fin_vector_space
