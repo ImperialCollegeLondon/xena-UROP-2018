@@ -33,19 +33,15 @@ def basis_as_finset : finset (vector R n) :=
 {
     val := (basis R n).to_list,
     nodup := by 
-        { 
-        rw [multiset.coe_nodup],
-        unfold basis list.nodup,
-        rw [vector.to_list_of_fn],
-        unfold list.of_fn,
-        -- simp [basis, list.nodup, list.of_fn],
+        { rw [multiset.coe_nodup, list.nodup, basis,
+            vector.to_list_of_fn, list.of_fn],
         induction n with n ih,
         unfold list.of_fn_aux,
-        
+                
          }
 }
 
-#check list.pairwise
+#check list
 
 -- def lc_basis : lc R (vector R n) :=
 -- by { split, swap, 
