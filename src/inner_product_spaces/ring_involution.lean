@@ -2,22 +2,6 @@ import algebra.ring data.equiv.basic
 
 open ring
 
-/-
-structure is_ring_isom (φ : R → F) extends is_ring_hom φ := 
-(isom_one : function.bijective φ)
-
-def is_ring_auto (φ : R → R) := is_ring_isom φ   
-
-structure is_ring_invo (φ : R → R) extends is_ring_isom φ :=
-(invo_comp_self : ∀ (x : R), φ (φ x) = x)
-
-open is_ring_invo
-
-variables (invo : R → R) [is_ring_invo invo]
-
-instance invo_hom (φ : R → R) [is_ring_invo φ] : is_ring_hom φ := (is_ring_invo.to_is_ring_isom _).to_is_ring_hom 
--/  
-
 structure ring_isom (R : Type*) (F : Type*) [ring R] [ring F] extends equiv R F := 
 (isom_is_hom : is_ring_hom (equiv.to_fun to_equiv))
 
