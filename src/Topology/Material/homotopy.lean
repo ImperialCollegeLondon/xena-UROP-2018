@@ -990,30 +990,9 @@ noncomputable def p3 : repar_I01 :=
 section 
 variables {f : path x y} {g : path y z} {h : path z w}
 
+-- To prove associativity need to show the reparametrisation of path 
 
-
-lemma step_assoc_1 {t : {x // x ∈ I01}} { h_1 : t ∈ T1 } { h_2 : p3.to_fun t ∈ T1} {h_3 : par T1._proof_1 ⟨p3.to_fun t, h_2 ⟩ ∈ T1} : 
-f.to_fun (par T1._proof_1 ⟨t, h_1⟩) = f.to_fun (par T1._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_2⟩, h_3⟩) :=
-begin 
- unfold p3, dsimp, 
- unfold paste,  simp [dif_pos, h_1],
- unfold p3_T1_aux, dsimp, 
- unfold par, dsimp, simp [subtype.ext], 
- show  f.to_fun ⟨↑t / 2⁻¹, _⟩ = f.to_fun ⟨((2⁻¹ * t.val )/ 2⁻¹ )/ 2⁻¹, _⟩, 
- have h₁ : ((2⁻¹ * t.val) / 2⁻¹) / 2⁻¹ = ↑t / 2⁻¹, 
-  rw mul_div_assoc, 
-  show 2⁻¹ * (t.val / 2⁻¹ )/ 2⁻¹ = ↑t / 2⁻¹, 
-  have h₂ : 2⁻¹ * (t.val / 2⁻¹) = t.val, refine mul_div_cancel' t.val _ , {norm_num},
-  rw h₂ , refl, 
- show  f.to_fun ⟨↑t / 2⁻¹, _⟩ = f.to_fun ⟨((2⁻¹ * t.val )/ 2⁻¹ )/ 2⁻¹, _⟩, 
- simp [h₁] , 
-end 
-
-
-lemma help_step_assoc_2 {t : {x // x ∈ I01}} (h_1 : t ∈ T1 ) { h_2 : p3.to_fun t ∈ T1} (h_3 : par T1._proof_1 ⟨p3.to_fun t, h_2⟩ ∉ T1) : 
-par T1._proof_1 ⟨p3.to_fun t, h_2⟩ ∈  T2 :=  T2_of_not_T1 h_3 
-
----par T1._proof_1 ⟨p3.to_fun t, h_2⟩ ∉ T1
+-- Lemmas for 2
 
 lemma p3_ineq_T1 {t : {x // x ∈ I01}} (h_1 : t ∈ T1 )  : p3.to_fun t ∈ {x : I01 | 0 ≤ x.val ∧ x.val ≤ 1 / 4 } :=
 begin 
@@ -1036,6 +1015,68 @@ begin
    exact h.2, 
 end
 
+-- Lemmas for 4
+
+lemma p3_not_T1 {t : {x // x ∈ I01}} (h : t ∉  T1 ) :  1/4 < (p3.to_fun t ).val := 
+begin  
+ have h₁ : 1/2 < t.val, 
+  { unfold T1 T at h,
+   by_contradiction, rw [not_lt] at a, 
+   suffices a₁ : t ∈  {x : ↥I01 | 0 ≤ x.val ∧ x.val ≤ 1 / 2}, cc, 
+   exact ⟨ t.2.1, a ⟩ , 
+  }, 
+  unfold p3, dsimp, unfold paste, simp [h, -one_div_eq_inv], unfold p3_aux, split_ifs, 
+  { refine lt_sub_iff_add_lt.2 _, have a₁ : 1 / 4 + 1 / 4 = (1/2:ℝ ), {norm_num}, rw a₁ , exact h₁ },
+  simp at h_1, 
+  have a₁ : 5 / 4 < 2 * t.val, 
+    { have H : 5 / 4 = (5 /3 )*(3/4:ℝ ), {norm_num}, rw H, 
+    refine mul_lt_mul _ h_1 _ _, norm_num }, 
+  norm_num [a₁ ] , 
+end
+
+
+lemma p3_impl₁ {t : {x // x ∈ I01}} (h : (p3.to_fun t ).val ≤ 1/4 )  : t ∈ T1 :=
+begin 
+ by_contradiction, 
+  have h₂  : 1/4 < (p3.to_fun t ).val, exact p3_not_T1 a, 
+  --have g₁ : (1/4:ℝ )< 1/4 , 
+  suffices g₁ : ¬  (p3.to_fun t).val ≤ 1 / 4, cc, 
+  exact (le_not_le_of_lt h₂).2  , 
+end
+
+lemma par_impl_T1  {t : {x // x ∈ I01}} {h_3 : p3.to_fun t ∈ T1} (h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∈ T1) : 
+(p3.to_fun t ).val ≤ 1/4 := 
+begin 
+ unfold par T1 T at h_4, rw mem_set_of_eq at h_4, cases h_4 with h₁ h₂ , simp [-one_div_eq_inv] at h₂, 
+ have H :  (0: ℝ )<(1 / 2) , {norm_num}, 
+ have H2 :  1 / 4 = (1/2:ℝ )* (1/2), {norm_num}, rw H2, 
+ exact (div_le_iff H).1 h₂ ,  
+end
+
+-- 1
+
+lemma step_assoc_1 {t : {x // x ∈ I01}} { h_1 : t ∈ T1 } { h_2 : p3.to_fun t ∈ T1} {h_3 : par T1._proof_1 ⟨p3.to_fun t, h_2 ⟩ ∈ T1} : 
+f.to_fun (par T1._proof_1 ⟨t, h_1⟩) = f.to_fun (par T1._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_2⟩, h_3⟩) :=
+begin 
+ unfold p3, dsimp, 
+ unfold paste,  simp [dif_pos, h_1],
+ unfold p3_T1_aux, dsimp, 
+ unfold par, dsimp, simp [subtype.ext], 
+ show  f.to_fun ⟨↑t / 2⁻¹, _⟩ = f.to_fun ⟨((2⁻¹ * t.val )/ 2⁻¹ )/ 2⁻¹, _⟩, 
+ have h₁ : ((2⁻¹ * t.val) / 2⁻¹) / 2⁻¹ = ↑t / 2⁻¹, 
+  rw mul_div_assoc, 
+  show 2⁻¹ * (t.val / 2⁻¹ )/ 2⁻¹ = ↑t / 2⁻¹, 
+  have h₂ : 2⁻¹ * (t.val / 2⁻¹) = t.val, refine mul_div_cancel' t.val _ , {norm_num},
+  rw h₂ , refl, 
+ show  f.to_fun ⟨↑t / 2⁻¹, _⟩ = f.to_fun ⟨((2⁻¹ * t.val )/ 2⁻¹ )/ 2⁻¹, _⟩, 
+ simp [h₁] , 
+end 
+
+-- 2
+
+lemma help_step_assoc_2 {t : {x // x ∈ I01}} (h_1 : t ∈ T1 ) { h_2 : p3.to_fun t ∈ T1} (h_3 : par T1._proof_1 ⟨p3.to_fun t, h_2⟩ ∉ T1) : 
+par T1._proof_1 ⟨p3.to_fun t, h_2⟩ ∈  T2 :=  T2_of_not_T1 h_3 
+
 
 lemma step_assoc_2 {t : {x // x ∈ I01}} { h_1 : t ∈ T1 } { h_2 : p3.to_fun t ∈ T1} (h_3 : par T1._proof_1 ⟨p3.to_fun t, h_2⟩ ∉ T1) : 
 f.to_fun (par T1._proof_1 ⟨t, h_1⟩) = g.to_fun (par T2._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_2⟩, help_step_assoc_2 h_1 h_3 ⟩) :=
@@ -1049,6 +1090,8 @@ have G : par T1._proof_1 ⟨p3.to_fun t, h_2⟩ ∈ T1,
 exact par_T1_ineq₁ (p3_ineq_T1 h_1), cc, 
 end 
 
+--3
+
 lemma step_assoc_3 {t : {x // x ∈ I01}} ( h_1 : t ∈ T1 ) ( h_2 : p3.to_fun t ∉ T1) : 
 f.to_fun (par T1._proof_1 ⟨t, h_1⟩) = h.to_fun (par T2._proof_1 ⟨p3.to_fun t, T2_of_not_T1 h_2 ⟩) := 
 begin 
@@ -1059,6 +1102,7 @@ by_contradiction, -- as p3.to_fun t ∈ {x : ↥I01 | 0 ≤ x.val ∧ x.val ≤ 
  intros x H , refine ⟨ H.1, le_trans H.2 _ ⟩ , {norm_num}
 end
 
+--4
 
 lemma step_assoc_4 {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) ( h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∈ T1) 
 ( h_3 : p3.to_fun t ∈ T1) (h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∈ T1) : 
@@ -1069,43 +1113,73 @@ by_cases H : t.val = (1/2),
   { unfold p3, dsimp, unfold paste p3_aux, simp [h_1, -one_div_eq_inv, -sub_eq_add_neg], 
   have h₁ : t.val < 3 / 4, rw H, {norm_num}, simp [h₁, -one_div_eq_inv, -sub_eq_add_neg, H ],  
   have a₁ : 1 / 2 - 1 / 4 = (1/4 : ℝ ), {norm_num}, simp [-one_div_eq_inv, -sub_eq_add_neg, a₁], 
-  /-have g₁ : (⟨par T1._proof_1 ⟨⟨1 / 4, _⟩, _⟩, _⟩: I01).val = 1/2, sorry, 
-  have g₂ : f.to_fun (par T1._proof_1 ⟨par T1._proof_1 ⟨⟨1 / 4, _⟩, _⟩, _⟩) = 
-  f.to_fun (par T1._proof_1 ⟨ (⟨ 1/2, _ ⟩  ) , _⟩), simp [g₁ ], 
-  simp [subtype.ext, g₁], -/
   unfold par, simp [-sub_eq_add_neg, -one_div_eq_inv, sub_zero, H],  
   show g.to_fun ⟨((↑t - 1 / 2) / (1 - 1 / 2)) / (1 / 2), _⟩ = f.to_fun ⟨1 / 4 / (1 / 2) / (1 / 2), _⟩, 
-  --have a₂ : (1 / 4 / (1 / 2)) / (1 / 2) = 1, sorry, 
   have a₃  : ↑t = (1/2:ℝ ), exact H, simp [a₃, -one_div_eq_inv  ], simp [div_div_eq_div_mul, -one_div_eq_inv] , 
   norm_num , show g.to_fun 0 = f.to_fun 1,  simp  [ f.at_one, g.at_zero],   }, 
-  
 
-
-  have a₂ : (4 * (1 / 2) * (1 / 2) = (1:ℝ ), sorry, 
-
-  have g₁ : ((↑t - 1 / 2) / (1 - 1 / 2)) / (1 / 2) = (0:ℝ ), sorry, 
-  rw if_pos, 
-  simp [H], 
-sorry
+  by_contradiction, 
+  suffices G : t ∈ T1, cc, 
+  exact p3_impl₁ (par_impl_T1 h_4), 
 end  
+
+-- 5
+
+--set_option trace.simplify.rewrite true
+--set_option pp.implicit true
+lemma p3_image_not_T1 (t : {x // x ∈ I01}) (h_1 : t ∉ T1) (a_1 : 3 / 4 < t.val) : p3.to_fun t ∉  T1 := 
+begin 
+ unfold T1 T, rw mem_set_of_eq, simp [-one_div_eq_inv], intro H, unfold p3, dsimp, unfold paste p3_aux, 
+ simp [h_1, -one_div_eq_inv, -sub_eq_add_neg], 
+ have h : ¬ t.val < 3/4, refine not_lt_of_ge (le_of_lt a_1),  simp [h, -one_div_eq_inv, -sub_eq_add_neg], 
+ have a₁ : 1 + 1 / 2 = (3/4:ℝ )*2 , {norm_num}, rw mul_comm, 
+ simp [-one_div_eq_inv, a₁ ],refine mul_lt_mul a_1 (le_of_eq (refl(2:ℝ ))) _ t.2.1, {norm_num}
+end
+
+lemma step_assoc_5  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) ( h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∈ T1) 
+( h_3 : p3.to_fun t ∈ T1) (h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∉ T1) : 
+g.to_fun (par T1._proof_1 ⟨par T2._proof_1 ⟨t, T2_of_not_T1 h_1⟩, h_2⟩) =
+    g.to_fun (par T2._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_3⟩, T2_of_not_T1 h_4 ⟩) := 
+begin 
+ unfold p3,  dsimp, unfold paste, simp [h_1],  unfold p3_aux,
+ by_cases a : t.val = 3/4 , 
+  { have a₂ : ¬ t.val < 3/4, exact not_lt_of_ge (ge_of_eq a), simp [a₂], 
+   unfold par, dsimp [-one_div_eq_inv, -sub_eq_add_neg],   simp [sub_zero, -one_div_eq_inv, -sub_eq_add_neg],
+   have g₁ : (1 - 1 / 2) = (1/2:ℝ ), {norm_num}, simp [g₁, -one_div_eq_inv, -sub_eq_add_neg], 
+   have g₂ : ↑t = t.val, trivial, simp [g₂, -one_div_eq_inv, -sub_eq_add_neg] , 
+   have g₃ : ((-1 + 2 * t.val) / (1 / 2) - 1 / 2) = (t.val - 1 / 2) / (1 / 2), rw a, {norm_num}, 
+   simp [g₃ , -one_div_eq_inv, -sub_eq_add_neg], 
+  },
+   have l₁ : t.val ≤ 3/4, 
+    { by_contradiction, rw not_le at a_1, suffices G : p3.to_fun t ∉  T1, cc, 
+     exact p3_image_not_T1 t h_1 a_1, }, 
+   have l₂ : t.val < 3 / 4, exact lt_of_le_of_ne l₁ a ,
+   simp [l₂ , -one_div_eq_inv, -sub_eq_add_neg], unfold par, dsimp [-one_div_eq_inv, -sub_eq_add_neg],
+   simp [-sub_eq_add_neg, -one_div_eq_inv, sub_zero], 
+   have g₁ : (1 - 1 / 2) = (1/2:ℝ ), {norm_num}, have g₂ : ↑t = t.val, trivial, 
+   simp [g₁ , g₂ , -one_div_eq_inv, -sub_eq_add_neg] ,
+   suffices G1 : ((t.val - 1 / 4) / (1 / 2) - 1 / 2) = (t.val - 1 / 2) / (1 / 2), 
+     simp [-one_div_eq_inv, -sub_eq_add_neg, G1], 
+   show ((t.val - 1 / 4) / (1 / 2)) - (1 / 2) = (t.val - 1 / 2) / (1 / 2), 
+   have H1 : (t.val - 1 / 4) / (1 / 2) - (1 / 2) = (t.val - 1 / 4) / (1 / 2) - (1 / 4 ) / (1/2:ℝ ), 
+     have h₁ : - (1 / 2 : ℝ ) = - (1 / 4 ) / (1/2:ℝ ), {norm_num}, simp [-one_div_eq_inv, -sub_eq_add_neg, h₁], {norm_num}, 
+   rw H1, rw div_sub_div_same, 
+   have H2 : (t.val - 1 / 4 - 1 / 4) = (t.val - 1 / 2) , {norm_num}, 
+   simp [-one_div_eq_inv, -sub_eq_add_neg, H2], 
+end
+
+
+-- 6 
+
+
+
+
+
 
 
 /- 
 
 
-α : Type ?,
-_inst_3 : topological_space α,
-x y z w : α,
-f : path x y,
-g : path y z,
-h : path z w,
-t : {x // x ∈ I01},
-h_1 : t ∉ T1,
-h_2 : par T2._proof_1 ⟨t, _⟩ ∈ T1,
-h_3 : p3.to_fun t ∈ T1,
-h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∈ T1
-⊢ g.to_fun (par T1._proof_1 ⟨par T2._proof_1 ⟨t, _⟩, h_2⟩) =
-    f.to_fun (par T1._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_3⟩, h_4⟩)
 
 α : Type ?,
 _inst_3 : topological_space α,
@@ -1121,7 +1195,66 @@ h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∉ T1
 ⊢ g.to_fun (par T1._proof_1 ⟨par T2._proof_1 ⟨t, _⟩, h_2⟩) =
     g.to_fun (par T2._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_3⟩, _⟩)
 
+6
+α : Type ?,
+_inst_3 : topological_space α,
+x y z w : α,
+f : path x y,
+g : path y z,
+h : path z w,
+t : {x // x ∈ I01},
+h_1 : t ∉ T1,
+h_2 : par T2._proof_1 ⟨t, _⟩ ∈ T1,
+h_3 : p3.to_fun t ∉ T1
+⊢ g.to_fun (par T1._proof_1 ⟨par T2._proof_1 ⟨t, _⟩, h_2⟩) = h.to_fun (par T2._proof_1 ⟨p3.to_fun t, _⟩)
+
+α : Type ?,
+_inst_3 : topological_space α,
+x y z w : α,
+f : path x y,
+g : path y z,
+h : path z w,
+t : {x // x ∈ I01},
+h_1 : t ∉ T1,
+h_2 : par T2._proof_1 ⟨t, _⟩ ∉ T1,
+h_3 : p3.to_fun t ∈ T1,
+h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∈ T1
+⊢ h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, _⟩, _⟩) =
+    f.to_fun (par T1._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_3⟩, h_4⟩)
+
+α : Type ?,
+_inst_3 : topological_space α,
+x y z w : α,
+f : path x y,
+g : path y z,
+h : path z w,
+t : {x // x ∈ I01},
+h_1 : t ∉ T1,
+h_2 : par T2._proof_1 ⟨t, _⟩ ∉ T1,
+h_3 : p3.to_fun t ∈ T1,
+h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∉ T1
+⊢ h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, _⟩, _⟩) =
+    g.to_fun (par T2._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_3⟩, _⟩)
+
+α : Type ?,
+_inst_3 : topological_space α,
+x y z w : α,
+f : path x y,
+g : path y z,
+h : path z w,
+t : {x // x ∈ I01},
+h_1 : t ∉ T1,
+h_2 : par T2._proof_1 ⟨t, _⟩ ∉ T1,
+h_3 : p3.to_fun t ∉ T1
+⊢ h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, _⟩, _⟩) = h.to_fun (par T2._proof_1 ⟨p3.to_fun t, _⟩)
+
 -/
+
+
+
+
+
+
 
 set_option trace.simplify.rewrite true
 --set_option pp.implicit true
@@ -1137,6 +1270,7 @@ begin
       exact step_assoc_2 h_3, 
       exact step_assoc_3 h_1 h_2, 
       exact step_assoc_4 h_1 h_2 h_3 h_4, 
+      exact step_assoc_5 h_1 h_2 h_3 h_4, 
       /- 
       { 
 
