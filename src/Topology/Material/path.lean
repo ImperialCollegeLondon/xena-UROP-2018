@@ -124,12 +124,9 @@ begin
   exact continuous.comp H₁ continuous_add', 
 end 
 
-<<<<<<< HEAD
-=======
 theorem real.continuous_sub_const (r : ℝ) : continuous (λ x : ℝ, x - r) := continuous_sub continuous_id continuous_const, 
 
 
->>>>>>> c3504272d0240e63f334affd3df6f7b27df51adf
 theorem real.continuous_div_const (r : ℝ) : continuous (λ x : ℝ, x / r) :=
 begin
   conv in (_ / r) begin
