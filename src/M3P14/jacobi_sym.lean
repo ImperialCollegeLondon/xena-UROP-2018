@@ -1,13 +1,7 @@
 import data.nat.basic M3P14.order_zmodn_kmb data.int.basic M3P14.lqr
 
 private theorem aux1 (a : ℕ): 
-    1 < nat.succ (nat.succ a) := 
-begin
-    suffices : 1 < (nat.succ a) + 1, by simp [this],
-    suffices : 0 < (nat.succ a), rwa lt_add_iff_pos_left,
-    suffices : 0 ≠ (nat.succ a), from (nat.pos_iff_ne_zero.mpr this.symm),
-    trivial,
-end
+    1 < nat.succ (nat.succ a) := dec_trivial
 
 private theorem aux2 (a b : ℕ) (h : a + 3 ≥ int.nat_abs ↑b) : 
     (a + 3) % (nat.succ b) < nat.succ (nat.succ (nat.succ a)) := 
@@ -27,21 +21,14 @@ end
 #check nat.succ_le_of_lt
 #check nat.lt_of_add_lt_add_left
 
-
 private theorem aux3 (a b : ℕ) (h : ¬a + 3 ≥ int.nat_abs ↑b) : 
-    2 < nat.succ (nat.succ (nat.succ a)) := 
-begin
-    suffices : 2 < (nat.succ a) + 2, by simp [this],
-    suffices : 0 < (nat.succ a), rwa lt_add_iff_pos_left,
-    suffices : 0 ≠ (nat.succ a), from (nat.pos_iff_ne_zero.mpr this.symm),
-    trivial,
-end
+    2 < nat.succ (nat.succ (nat.succ a)) := dec_trivial
 
 private theorem aux4 (a b : ℕ) : 
     (a + 3) / 2 < nat.succ (nat.succ (nat.succ a)) := 
 begin
-    suffices : (a + 3) / 2 < (a+3), by simp [this],
-    sorry,
+    suffices : (a+3)/2 < a+3, by simp [this], 
+    exact nat.div_lt_self dec_trivial dec_trivial,
 end
 
 private theorem aux5 (a b : ℕ) (h : ¬a + 3 ≥ int.nat_abs ↑b) : 
