@@ -8,13 +8,13 @@ open nat
 def square_free_int (n : ℕ) := ∀ p : ℕ, prime p ∧ (p ∣ n → ¬ (p^2 ∣ n))
 
 -- number of prime divisors of n, not counting multiplicities
-def primes_div_no_mult (n : ℕ) := n.factors.erase_dup.length
-local notation `ω` := primes_div_no_mult
+def primes_div_nodup (n : ℕ) := n.factors.erase_dup.length
+local notation `ω` := primes_div_nodup
 --#eval ω 30
 
 --number of prime divisors of n, counting multiplicities
-def primes_div_mult (n : ℕ) := n.factors.length
-local notation `Ω` := primes_div_mult
+def primes_div_dup (n : ℕ) := n.factors.length
+local notation `Ω` := primes_div_dup
 --#eval Ω 300
 
 local attribute [instance] classical.prop_decidable

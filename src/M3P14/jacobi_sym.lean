@@ -69,5 +69,3 @@ using_well_founded{rel_tac:= λ _ _, `[exact ⟨_, measure_wf (int.nat_abs∘ ps
 #eval jacobi_sym (-2 : ℤ) 15
 
 #eval jacobi_sym (-5 : ℤ) 8
-
-
