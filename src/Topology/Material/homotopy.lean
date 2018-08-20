@@ -1125,7 +1125,7 @@ end
 
 -- 5
 
---set_option trace.simplify.rewrite true
+set_option trace.simplify.rewrite true
 --set_option pp.implicit true
 lemma p3_image_not_T1 (t : {x // x ∈ I01}) (h_1 : t ∉ T1) (a_1 : 3 / 4 < t.val) : p3.to_fun t ∉  T1 := 
 begin 
@@ -1145,14 +1145,12 @@ begin
  by_cases a : t.val = 3/4 , 
   { have a₂ : ¬ t.val < 3/4, exact not_lt_of_ge (ge_of_eq a), simp [a₂], 
    unfold par, dsimp [-one_div_eq_inv, -sub_eq_add_neg],   simp [sub_zero, -one_div_eq_inv, -sub_eq_add_neg],
-   have g₁ : (1 - 1 / 2) = (1/2:ℝ ), {norm_num}, simp [g₁, -one_div_eq_inv, -sub_eq_add_neg], 
-   have g₂ : ↑t = t.val, trivial, simp [g₂, -one_div_eq_inv, -sub_eq_add_neg] , 
-   have g₃ : ((-1 + 2 * t.val) / (1 / 2) - 1 / 2) = (t.val - 1 / 2) / (1 / 2), rw a, {norm_num}, 
-   simp [g₃ , -one_div_eq_inv, -sub_eq_add_neg], 
+   have g₂ : ↑t = t.val, trivial, {norm_num [ g₂ ,a]},  ---simp [g₂ , a]
   },
    have l₁ : t.val ≤ 3/4, 
-    { by_contradiction, rw not_le at a_1, suffices G : p3.to_fun t ∉  T1, cc, 
-     exact p3_image_not_T1 t h_1 a_1, }, 
+    { by_contradiction, rw not_le at a_1, suffices G : p3.to_fun t ∉  T1, 
+    --cc,   
+    sorry, exact p3_image_not_T1 t h_1 a_1, },
    have l₂ : t.val < 3 / 4, exact lt_of_le_of_ne l₁ a ,
    simp [l₂ , -one_div_eq_inv, -sub_eq_add_neg], unfold par, dsimp [-one_div_eq_inv, -sub_eq_add_neg],
    simp [-sub_eq_add_neg, -one_div_eq_inv, sub_zero], 
@@ -1169,58 +1167,115 @@ begin
 end
 
 
+
+
 -- 6 
 
+local attribute [instance] classical.prop_decidable 
+
+lemma help_step_assoc_6₁  {t : {x // x ∈ I01}} {h_1 : t ∉ T1} (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∈ T1) : 
+t.val ≤ 3/4 :=
+begin 
+ by_contradiction, rw not_le at a, unfold T1 T at h_2, cases h_2 with g₁ g₂ , 
+ have G1 : 1/2 < (par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩).val, unfold par, dsimp [-one_div_eq_inv, -sub_eq_add_neg], 
+  have a₁ : ↑t = t.val, trivial, have a₂ : (1 - 1 / 2) = (1/2:ℝ ), {norm_num}, rw [a₁, a₂ ], 
+  refine (lt_div_iff _).2 _, {norm_num}, 
+  have h₁ : 1 / 2 * (1 / 2) ≤ (3/4:ℝ ) - 1/2, {norm_num}, 
+  have h₂ : (3/4:ℝ ) - 1/2 < t.val -1/2, refine lt_sub_iff_add_lt.2 _ , 
+  have a₂ : 3 / 4 - 1 / 2 + 1 / 2 = (3/4:ℝ ), {norm_num}, rw a₂ , exact a, 
+  exact lt_of_le_of_lt h₁ h₂ , 
+ have NG1 : ¬ 1/2 < (par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩).val, 
+ exact not_lt_of_le g₂ , cc, 
+end 
+
+lemma T1_of_p3₁    {t : {x // x ∈ I01}} (h_1 : t ∉ T1) (l₂ : t.val <  3 / 4) : 
+ p3.to_fun t ∈  T1 := 
+begin 
+ unfold p3, dsimp, unfold paste, simp [h_1], unfold p3_aux, simp [l₂, -sub_eq_add_neg, -one_div_eq_inv] , 
+ have a₁ : t ∈ T2, exact T2_of_not_T1 h_1, 
+ unfold T1 T, dsimp [-sub_eq_add_neg], split, 
+  refine sub_nonneg.2 _  , refine le_trans _ a₁.1 , {norm_num}, 
+  norm_num [l₂, -one_div_eq_inv, le_of_lt l₂ ], 
+end 
+
+---h_2 : par T2._proof_1 ⟨t, _⟩ ∈ T1
+
+lemma step_assoc_6  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) ( h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∈ T1) 
+(h_3 : p3.to_fun t ∉ T1) : 
+ g.to_fun (par T1._proof_1 ⟨par T2._proof_1 ⟨t, _⟩, h_2⟩) 
+    = h.to_fun (par T2._proof_1 ⟨p3.to_fun t, T2_of_not_T1 h_3 ⟩) := 
+begin 
+ unfold p3,  dsimp, unfold paste, simp [h_1],  unfold p3_aux,
+ by_cases a : t.val = 3/4, 
+   { have a₂ : ¬ t.val < 3/4, exact not_lt_of_ge (ge_of_eq a), simp [a₂, -sub_eq_add_neg, -one_div_eq_inv], 
+     unfold par, dsimp [-one_div_eq_inv, -sub_eq_add_neg], have g₂ : ↑t = t.val, trivial, 
+     simp [g₂ , a, subtype.ext], {norm_num, show g.to_fun 1 = h.to_fun 0, simp, }, 
+   },
+ have a₁ : t.val ≤ 3/4, exact help_step_assoc_6₁  h_2, 
+ have l₂  : t.val < 3/4, exact lt_of_le_of_ne a₁ a, 
+ by_contradiction, 
+ suffices g :  p3.to_fun t ∈  T1,  sorry, --cc
+ exact T1_of_p3₁  h_1  l₂ , 
+end
+
+-- 7
+
+lemma help_step_assoc_7₁  {t : {x // x ∈ I01}} {h_1 : t ∉ T1} (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉  T1) : 
+3/4 < t.val := 
+begin 
+  unfold T1 T at h_2, simp [(par T2._proof_1 ⟨t, _⟩).2.1, -one_div_eq_inv] at h_2, 
+  unfold par at h_2, dsimp [-one_div_eq_inv, -sub_eq_add_neg] at h_2, 
+  have a₁ : ↑t = t.val, trivial, have a₂  : (1 - 1 / 2) = (1/2:ℝ ), {norm_num}, rw [a₁, a₂] at h_2, 
+  have H : 1 / 2 * (1 / 2) < (t.val - 1 / 2), refine (lt_div_iff _).1 h_2, {norm_num}, 
+  rw lt_sub_iff_add_lt at H, have g₁ : 1 / 2 * (1 / 2) + 1 / 2 = (3/4:ℝ ), {norm_num}, rw g₁ at H, 
+  exact H, 
+end 
+
+lemma help_step_assoc_7₂   {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_3 : p3.to_fun t ∈ T1) : 
+t.val ≤ 3/4 := 
+begin 
+ by_contradiction, rw not_le at a, unfold p3 at h_3, dsimp at h_3, unfold paste at h_3, 
+ simp [h_1] at h_3, unfold p3_aux at h_3, 
+ have a₂ :  ¬  t.val < 3/4, exact not_lt_of_gt a, simp [a₂ , -one_div_eq_inv, -sub_eq_add_neg] at h_3, 
+ unfold T1 T at h_3, --simp at h_3, 
+ have g₁ : 2 * t.val - 1 ≤ 1/2, exact h_3.2, 
+ have g₂ : t.val ≤ 3/4, rw sub_le_iff_le_add at g₁  ,   
+   have aux₁ : 1 / 2 + 1 = (3/2:ℝ ), {norm_num}, rw aux₁ at g₁, rw mul_comm at g₁ , 
+   have aux₂ : t.val ≤ (3 / 2 ) / 2, refine le_div_of_mul_le _ g₁ ,{norm_num}, 
+   have aux₃ : 3 / 2 / 2 = (3/4:ℝ), {norm_num}, rw aux₃ at aux₂ , exact aux₂, 
+ have g₃ : ¬  3 / 4 < t.val, exact not_lt_of_ge g₂,
+ cc, 
+end
+
+lemma step_assoc_7  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
+( h_3 : p3.to_fun t ∈ T1) (h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∈ T1) : 
+h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, T2_of_not_T1 h_1⟩, T2_of_not_T1 h_2⟩) =
+    f.to_fun (par T1._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_3⟩, h_4⟩) := 
+begin 
+ by_contradiction, 
+ have g₁ : 3/4 < t.val, exact help_step_assoc_7₁ h_2, 
+ have g₂  : ¬ 3/4 < t.val, exact not_lt_of_ge (help_step_assoc_7₂  h_1 h_3), 
+ cc, 
+end
 
 
+-- 8
+lemma step_assoc_8  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
+( h_3 : p3.to_fun t ∈ T1) (h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∉ T1) : 
+h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, T2_of_not_T1 h_1⟩, T2_of_not_T1 h_2 ⟩) =
+    g.to_fun (par T2._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_3⟩, T2_of_not_T1 h_4 ⟩) :=
+  sorry
 
 
-
+-- 9 
+lemma step_assoc_9  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
+( h_3 : p3.to_fun t ∉ T1) :
+h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, T2_of_not_T1 h_1⟩, T2_of_not_T1 h_2⟩) = 
+h.to_fun (par T2._proof_1 ⟨p3.to_fun t, T2_of_not_T1 h_3⟩) := 
+sorry 
 
 /- 
 
-
-
-α : Type ?,
-_inst_3 : topological_space α,
-x y z w : α,
-f : path x y,
-g : path y z,
-h : path z w,
-t : {x // x ∈ I01},
-h_1 : t ∉ T1,
-h_2 : par T2._proof_1 ⟨t, _⟩ ∈ T1,
-h_3 : p3.to_fun t ∈ T1,
-h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∉ T1
-⊢ g.to_fun (par T1._proof_1 ⟨par T2._proof_1 ⟨t, _⟩, h_2⟩) =
-    g.to_fun (par T2._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_3⟩, _⟩)
-
-6
-α : Type ?,
-_inst_3 : topological_space α,
-x y z w : α,
-f : path x y,
-g : path y z,
-h : path z w,
-t : {x // x ∈ I01},
-h_1 : t ∉ T1,
-h_2 : par T2._proof_1 ⟨t, _⟩ ∈ T1,
-h_3 : p3.to_fun t ∉ T1
-⊢ g.to_fun (par T1._proof_1 ⟨par T2._proof_1 ⟨t, _⟩, h_2⟩) = h.to_fun (par T2._proof_1 ⟨p3.to_fun t, _⟩)
-
-α : Type ?,
-_inst_3 : topological_space α,
-x y z w : α,
-f : path x y,
-g : path y z,
-h : path z w,
-t : {x // x ∈ I01},
-h_1 : t ∉ T1,
-h_2 : par T2._proof_1 ⟨t, _⟩ ∉ T1,
-h_3 : p3.to_fun t ∈ T1,
-h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∈ T1
-⊢ h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, _⟩, _⟩) =
-    f.to_fun (par T1._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_3⟩, h_4⟩)
 
 α : Type ?,
 _inst_3 : topological_space α,
@@ -1271,19 +1326,10 @@ begin
       exact step_assoc_3 h_1 h_2, 
       exact step_assoc_4 h_1 h_2 h_3 h_4, 
       exact step_assoc_5 h_1 h_2 h_3 h_4, 
-      /- 
-      { 
-
-        sorry, 
-      }
-     by_cases H : t ∈ T1, simp [H], 
-       { 
-
-sorry
-       },
-    --refine path_equal.2 _ ,
-
-     sorry -/ sorry, 
+      exact step_assoc_6 h_1 h_2 h_3, 
+      exact step_assoc_7 h_1 h_2 h_3 h_4, 
+      exact step_assoc_8 h_1 h_2 h_3 h_4, 
+      exact step_assoc_9 h_1 h_2 h_3, 
    },
 rw h₁ , exact hom_repar_path_to_path (comp_of_path (comp_of_path f g) h ) p3, 
 end 

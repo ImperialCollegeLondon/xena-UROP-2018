@@ -233,7 +233,6 @@ begin
  apply quotient.sound, 
   existsi _, exact path_homotopy_inverse (
   hom_comp_f_g_h (quotient.out F) (quotient.out G) (quotient.out H)), 
-
 end
 
 
@@ -245,7 +244,7 @@ end
 noncomputable def π₁_group {α : Type*} [topological_space α ] (x : α ) : group ( space_π₁ x) := 
 {   mul := fundamental_group.mul ,  
     
-    mul_assoc := begin sorry end, 
+    mul_assoc := fundamental_group.mul_assoc, 
     
     
     one := id_eq_class x , 
@@ -255,10 +254,6 @@ noncomputable def π₁_group {α : Type*} [topological_space α ] (x : α ) : g
 
     inv :=  inv_eq_class  ,
     mul_left_inv := fundamental_group.mul_left_inv 
-    /- begin 
-    intro F, unfold fundamental_group.mul, unfold inv_eq_class eq_class, rw [quotient.out_eq' F],apply quotient.sound, 
-    existsi _, 
-    end -/ 
 
 }
 
