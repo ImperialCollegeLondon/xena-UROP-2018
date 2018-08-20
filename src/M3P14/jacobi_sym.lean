@@ -14,10 +14,18 @@ private theorem aux2 (a b : ℕ) (h : a + 3 ≥ int.nat_abs ↑b) :
 begin
     simp at h,
     have neg : (nat.succ b) ≠ 0, trivial,
-    have : (a + 3) % (nat.succ b) < (nat.succ b), from nat.mod_lt (a + 3) (nat.pos_iff_ne_zero.mpr neg),
-    --suffices : b < nat.succ (nat.succ (nat.succ a)), from 
-    sorry,
+    suffices : (nat.succ b) < nat.succ (nat.succ (nat.succ a)), from lt_trans (nat.mod_lt (a + 3) (nat.pos_iff_ne_zero.mpr neg)) this,
+    suffices : b + 1 < a + 3, by simp [this],
+    suffices : b ≤ a + 3, sorry,
+    exact h,
 end
+
+#print notation ≥
+#
+#check nat.lt_iff_le_not_le.mp
+#check nat.lt_of_succ_le
+#check nat.succ_le_of_lt
+#check nat.lt_of_add_lt_add_left
 
 
 private theorem aux3 (a b : ℕ) (h : ¬a + 3 ≥ int.nat_abs ↑b) : 
