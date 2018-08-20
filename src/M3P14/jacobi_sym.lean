@@ -1,4 +1,4 @@
-import data.nat.basic M3P14.order_zmodn_kmb data.int.basic
+import data.nat.basic M3P14.order_zmodn_kmb data.int.basic M3P14.lqr
 
 private theorem aux1 (a : ℕ): 
     1 < nat.succ (nat.succ a) := 
@@ -84,5 +84,24 @@ def jacobi_sym : ℤ → ℤ → ℤ
 #eval jacobi_sym (-5 : ℤ) 8
 #eval jacobi_sym 1236 200011
 
+-- Properties of Jacobi symbol (taken from Wikipedia) --
 
+theorem jacobi_sym_eq_legendre_sym (a n : ℤ) (hn : prime_int n ∧ (int.nat_abs n) ≠ 2) : jacobi_sym a n = legendre_sym a hn := sorry
 
+theorem jacobi_sym_refl (a b n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) : a ≡ b [ZMOD n] → jacobi_sym a n = jacobi_sym b n := sorry
+
+theorem jacobi_sym_not_coprime (a n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) : int.gcd a n ≠ 1 → jacobi_sym a n = 0 := sorry
+
+theorem jacobi_sym_num_mul (a b n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) : jacobi_sym (a*b) n = jacobi_sym a n * jacobi_sym b n := sorry
+
+theorem jacobi_sym_denom_mul (a m n : ℤ) (m_pos_odd : m > 0 ∧ int.gcd 2 m = 1) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) : jacobi_sym a m*n = jacobi_sym a m * jacobi_sym a n := sorry
+
+theorem jacobi_sym_quadratic_res (m n : ℤ) (m_pos_odd : m > 0 ∧ int.gcd 2 m = 1) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) [has_pow ℤ ℤ] : int.gcd m n = 1 → jacobi_sym m n * jacobi_sym n m = (-1)^(((m-1)/2)*((n-1)/2)) := sorry
+
+theorem jacobi_num_zero (n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1): if n = 1 then jacobi_sym 0 n = 1 else jacobi_sym 0 n = 0 := sorry 
+
+theorem jacobi_num_neg_one (n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) [has_pow ℤ ℤ] : jacobi_sym (-1) n = (-1)^((n-1)/2) := sorry
+
+theorem jacobi_num_two (n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) [has_pow ℤ ℤ] : jacobi_sym 2 n = (-1)^(((n^2)-1)/8) := sorry
+
+theorem jacobi_denom_one (a : ℤ) : jacobi_sym a 1 = 1 := sorry

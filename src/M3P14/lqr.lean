@@ -6,7 +6,7 @@ import tactic.norm_num
 import algebra.group_power
 import M3P14.order
 import chris_hughes_various.zmod
-import M3P14.sheet1
+import M3P14.Problem_sheets.sheet1
 import tactic.ring
 import logic.basic
 import data.int.basic
@@ -14,20 +14,12 @@ import data.int.basic
 open nat 
 
 
-<<<<<<< HEAD
 definition prime_int (p : ℤ) := prime(int.nat_abs p) 
 theorem prime_int_to_nat {p : ℤ} (h : prime_int p) : prime (int.nat_abs p) :=
 begin
 exact (show prime(int.nat_abs p), from h),
 end
 
-=======
--- TODO: make an algorithm that calculates the legendre symbol with jacobi symbol
-
-
-definition prime_int (p : ℤ) := nat.prime(int.nat_abs p) 
---theorem prime_int_to_nat {p : ℤ} (h : prime_int p) : prime p := sorry
->>>>>>> c3504272d0240e63f334affd3df6f7b27df51adf
 definition quadratic_res (a n : ℤ) := ∃ x : ℤ, a ≡ x^2 [ZMOD (int.nat_abs n)]
 --definition quadratic_res' (p : ℤ) (hp : prime_int_int p ∧ p ≠ 2) (a n : zmod p) := ∃ x : ℕ, a ≡ x^2 [ZMOD n]
 
