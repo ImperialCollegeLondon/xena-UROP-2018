@@ -15,13 +15,8 @@ namespace homotopy
 open path
 
 variables {α  : Type*} [topological_space α ] 
-<<<<<<< HEAD
-variables {β  : Type*} [topological_space β ] ( x y : β  )
-variables ( z w x0 : β  )
-=======
 variables {β  : Type*} [topological_space β ] { x y  z w : β  }
 variables ( x0 : β  )
->>>>>>> c3504272d0240e63f334affd3df6f7b27df51adf
 variable s : I01 
 
 noncomputable theory
@@ -80,10 +75,6 @@ structure path_homotopy3 {β} [topological_space β] { x y : β } ( f : path x y
 (cont : continuous to_fun) -/ 
 
 
-<<<<<<< HEAD
-variables (f : path x y) (g : path x y)
-variable F : path_homotopy f g 
-=======
 variables ( l : path x y) (k : path x y)
 variable F : path_homotopy l k
 
@@ -101,7 +92,6 @@ path_homotopy f g :=
 
 }
 
->>>>>>> c3504272d0240e63f334affd3df6f7b27df51adf
 
 
 def hom_to_path { x y : β } { f g : path x y } 
@@ -152,11 +142,7 @@ def path_homotopy_id { x y : β} (f : path x y) : path_homotopy f f :=
 lemma help_hom_inv : (λ (st : ↥I01 × ↥I01), F.to_fun (par_inv (st.fst), st.snd)) = ((λ (st : ↥I01 × ↥I01), F.to_fun (st.fst , st.snd)) ∘ (λ (x : I01 × I01) , (( par_inv x.1 , x.2 ) : I01 × I01))) := 
 begin trivial, end 
 
-<<<<<<< HEAD
-def path_homotopy_inverse { x y : β} (f : path x y) (g : path x y) ( F : path_homotopy f g) : path_homotopy g f := 
-=======
 def path_homotopy_inverse { x y : β} {f : path x y} {g : path x y} ( F : path_homotopy f g) : path_homotopy g f := 
->>>>>>> c3504272d0240e63f334affd3df6f7b27df51adf
 {   to_fun :=   λ st  , F.to_fun ( par_inv st.1 , st.2 ),
     path_s := begin 
     intro s, unfold is_path, split, 
@@ -164,11 +150,7 @@ def path_homotopy_inverse { x y : β} {f : path x y} {g : path x y} ( F : path_h
           exact (F.path_s (par_inv s)).2.1, 
             exact (F.path_s (par_inv s)).2.2
     end,  
-<<<<<<< HEAD
-    at_zero := begin intro t, simp,   end, --exact F.at_one t
-=======
     at_zero := begin intro t,  simp [eqn_1_par_inv],    end, --exact F.at_one t
->>>>>>> c3504272d0240e63f334affd3df6f7b27df51adf
     at_one := begin intro t, simp, end,   --exact F.at_zero t 
     cont := begin 
     show continuous ((λ (st : ↥I01 × ↥I01), F.to_fun (st.fst , st.snd)) ∘ (λ (x : I01 × I01) , (( par_inv x.1 , x.2 ) : I01 × I01))), 
@@ -292,11 +274,8 @@ path_homotopy f h :=
     end 
 }  
 
-<<<<<<< HEAD
-=======
 ---------------------------------
 
->>>>>>> c3504272d0240e63f334affd3df6f7b27df51adf
 ------------------------------------------------------
 
 ---- EQUIVALENCE OF HOMOTOPY
@@ -305,36 +284,21 @@ path_homotopy f h :=
 
 definition is_homotopic_to { x y : β } (f : path x y) ( g : path x y) : Prop := nonempty ( path_homotopy f g) 
 
-<<<<<<< HEAD
-
-theorem is_reflexive {β  : Type*} [topological_space β ] { x y : β  } : @reflexive (path x y) ( is_homotopic_to ) := 
-begin 
-  unfold reflexive, intro f, unfold is_homotopic_to, 
-=======
 --definition is_homotopic_to' { x y : β } (f : path x y) ( g : path x y) : Prop := ∃ (F : Type*) , F = path_homotopy f g -- without nonempty
 
 theorem is_reflexive {β  : Type*} [topological_space β ] { x y : β  } : @reflexive (path x y) ( is_homotopic_to ) := 
 begin 
   unfold reflexive, intro f, unfold is_homotopic_to,   
->>>>>>> c3504272d0240e63f334affd3df6f7b27df51adf
     have H : path_homotopy f f, 
         exact path_homotopy_id f , 
     exact ⟨ H ⟩ 
 end
 
 
-<<<<<<< HEAD
-
-theorem is_symmetric {β  : Type*} [topological_space β ] { x y : β  } : @symmetric (path x y)  (is_homotopic_to) :=
-begin
-    unfold symmetric, intros f g H, unfold is_homotopic_to,
-    cases H with F, exact ⟨path_homotopy_inverse f g F⟩,
-=======
 theorem is_symmetric {β  : Type*} [topological_space β ] { x y : β  } : @symmetric (path x y)  (is_homotopic_to) :=
 begin
     unfold symmetric, intros f g H, unfold is_homotopic_to,
     cases H with F, exact ⟨path_homotopy_inverse  F⟩,
->>>>>>> c3504272d0240e63f334affd3df6f7b27df51adf
 end
 
 theorem is_transitive {β  : Type*} [topological_space β ] { x y : β  } : @transitive (path x y)  (is_homotopic_to) := 
@@ -350,13 +314,10 @@ theorem is_equivalence : @equivalence (path x y)  (is_homotopic_to) :=
 
 -----------------------------------------------------
 
-<<<<<<< HEAD
-=======
 -----------------------------------------------------
 
 ---- OTHER RESULTS (for FUNDAMETAL GROUP)
 
->>>>>>> c3504272d0240e63f334affd3df6f7b27df51adf
 
 ---- Reparametrisation of path and homotopies 
 
@@ -381,13 +342,6 @@ def repar_path {α : Type*} [topological_space α ] {x y : α } ( f : path x y)(
     cont := continuous.comp φ.cont f.cont
 }
 
-<<<<<<< HEAD
---set_option trace.simplify.rewrite true
---set_option pp.implicit true
-
-
-=======
->>>>>>> c3504272d0240e63f334affd3df6f7b27df51adf
 
 def rep_hom (φ : repar_I01) : I01 × I01 → I01 := λ st, ⟨ ((1 : ℝ ) - st.1.1)*(φ.to_fun st.2).1 + st.1.1 * st.2.1,  
 begin unfold I01, rw mem_set_of_eq, split, 
@@ -472,10 +426,6 @@ def hom_repar_path_to_path {α : Type*} [topological_space α ] {x y : α } ( f 
     cont :=  continuous.comp (cont_rep_hom φ ) f.cont
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> c3504272d0240e63f334affd3df6f7b27df51adf
 -- Prove f φ ≈ f (they are homotopic)
 theorem repar_path_is_homeq {α : Type*} [topological_space α ] {x y : α } ( f : path x y)( φ : repar_I01 ) 
 : is_homotopic_to (repar_path f φ ) f := 
@@ -483,11 +433,6 @@ begin unfold is_homotopic_to, exact nonempty.intro (hom_repar_path_to_path f φ 
 
 ------------------------------
 
-<<<<<<< HEAD
-
-
-
-=======
 -- Homotopy of path inverses
 ------  a ≈ b  →  a⁻¹ ≈ b⁻¹ 
 
@@ -1446,6 +1391,5 @@ end
 
 /-  path_homotopy (comp_of_path (comp_of_path (quotient.out F) (quotient.out G)) (quotient.out H))
     (comp_of_path (quotient.out F) (comp_of_path (quotient.out G) (quotient.out H)))  -/
->>>>>>> c3504272d0240e63f334affd3df6f7b27df51adf
 
 end homotopy
