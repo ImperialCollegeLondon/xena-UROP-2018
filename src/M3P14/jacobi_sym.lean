@@ -68,7 +68,10 @@ def jacobi_sym : ℤ → ℤ → ℤ
 #eval jacobi_sym (-1 : ℤ) 9
 #eval jacobi_sym (-2 : ℤ) 15
 #eval jacobi_sym (-5 : ℤ) 8
+<<<<<<< HEAD
 #eval jacobi_sym 1236 200011
 
 
 
+=======
+>>>>>>> 9cce1c3fd3b33926532e1529538b587a49075b65

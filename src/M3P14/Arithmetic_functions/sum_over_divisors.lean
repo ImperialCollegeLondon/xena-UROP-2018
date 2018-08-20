@@ -14,22 +14,8 @@ definition factors_new (d : ℕ+) : list ℕ :=
 #eval factors_new 6 -- [1, 2, 3, 6]
 
 lemma mem_factors_iff_divides (d : ℕ+) (e : ℕ) : e ∈ factors_new d ↔ e ∣ d :=
-begin
-  unfold factors_new,
-  rw mem_filter,
-  split,
-  { -- easy direction
-    intro H, exact H.2
-  },
-  { -- this is the "hard direction" :-)
-    intro H,
-    have He_le_d : e ≤ ↑d := le_of_dvd d.property H,
-    split,
-      rw mem_range,
-      exact lt_of_le_of_lt He_le_d (lt_succ_self _),
-    exact H
-  }
-end
+ by simp [factors_new, -add_comm, nat.lt_succ_iff];
+    exact and_iff_right_of_imp (le_of_dvd d.2)
 
 lemma nodup_factors (d : ℕ+) : nodup (factors_new d) :=
 nodup_filter _ (nodup_range (d+1) : nodup (range (d+1)))
@@ -52,14 +38,13 @@ theorem divisor_sum_phi (n : ℕ+) : divisor_sum (phi) n = n := sorry
 #eval (perfect_num 5 : bool)
 
 --dirichlet convolution
-def conv (f : ℕ → ℕ) (g : ℕ → ℕ) := λ (n : pnat), divisor_sum (λ d, f d * g (n / d)) n
+def conv (f g : ℕ → ℕ) := λ (n : pnat), divisor_sum (λ d, f d * g (n / d)) n
 
 --#eval conv phi id
 
 -- lemmas about conv
 
 lemma conv_is_comm (f g : ℕ → ℕ) : conv f g = conv g f := sorry
-
 --lemma conv_is_assoc (f g h : ℕ → ℕ) : conv (conv f g) h = conv f (conv g h) := sorry
 
 --lemma conv_is_add_dist (f g h : ℕ → ℕ) : conv f (g + h) = conv f g + conv f h
