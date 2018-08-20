@@ -76,10 +76,10 @@ def check_pts_of_path ( x y : α ) ( h : path z w ) := check_pts x y h.to_fun
 
 def equal_of_path  : Prop := g1.to_fun = g2.to_fun  -- == ? 
 
-theorem equal {α} [topological_space α ] { x y : α } {f  g: path x y} : f = g ↔ f.to_fun = g.to_fun := 
-begin 
-split, intro H, rw H, intro H2, cases f, cases g, cc,  end --constructor_mathching H2,   
+------
 
+theorem path_equal {α} [topological_space α ] { x y : α } {f  g: path x y} : f = g ↔ f.to_fun = g.to_fun := 
+begin split, intro H, rw H, intro H2, cases f, cases g, cc,  end 
 
 
 -- for later paths homotopy (do not Remove)
@@ -208,7 +208,7 @@ have Int : int_clos Hrs =  R ∩ L,
     unfold has_inter.inter set.inter , unfold int_clos, simp,  
 rw Int, exact is_closed_inter C2 C1, 
 end 
-#check subtype.topological_space
+
 lemma is_closed_I01 : is_closed I01 := 
 begin exact @is_closed_int_clos 0 1 (by norm_num) end 
 
@@ -448,8 +448,6 @@ definition par_inv : I01 → I01 :=  λ x, ⟨ 1 - x.val , inv_in_I01 x ⟩
 
 @[simp] lemma eqn_2_par_inv : par_inv 1 = 0 := by refl 
 
-#check mul_one
-
 lemma help_inv (y : ℝ ) : ( 1 - y) = (-1) * y + 1 := by simp 
 
 theorem continuous_par_inv : continuous (par_inv ) := 
@@ -576,12 +574,11 @@ F.to_fun (s, 0) = x :=  begin exact (F.2 s).1 end
 lemma at_pt_one_hom {β} [topological_space β] { x y : β } { f : path x y} { g : path x y} {F : path_homotopy f g} (s : I01) :
 F.to_fun (s, 1) = y :=  begin exact (F.2 s).2.1  end 
 
---F.to_fun (par T1._proof_1 ⟨s, _⟩, 1) = y
 
 /- Alternative definitions
 structure path_homotopy2 {β} [topological_space β] { x y : β } ( f : path x y) ( g : path x y) := 
-(to_fun : I01 → I01 →  β )
-(path_s : ∀ s : I01, is_path x y ( λ t, to_fun s t ) ) 
+(to_fun : I01 ×  I01 →  β )
+(path_s : ∀ s : I01,  to_fun (s ,0) = x ∧ to_fun (s, 1) = y  ) 
 (at_zero : ∀ y, to_fun 0 y = f.to_fun y ) 
 (at_one :  ∀ y, to_fun 1 y = g.to_fun y)
 (cont : continuous to_fun)
@@ -668,8 +665,6 @@ def path_homotopy_inverse { x y : β} (f : path x y) (g : path x y) ( F : path_h
 ---- Composition of homotopy
 
 local notation `I` := @set.univ I01
-#check I 
-
 
 lemma cover_prod_I01 : ( (set.prod T1 (@set.univ I01)) ∪  (set.prod T2 (@set.univ I01)) ) = @set.univ (I01 × I01) := 
 begin apply set.ext, intro x, split, 
@@ -702,7 +697,7 @@ def fb_hom { x y : α }{f g: path x y } ( F : path_homotopy f g) : (set.prod T2 
 
 lemma CB_hom { x y : α }{f g: path x y } ( F : path_homotopy f g) : continuous (fb_hom F) := p_hom_cont T2._proof_1 F 
 
-lemma help_hom_1 {s t : I01} (H : s ∈ T1) : (s, t) ∈ set.prod T1 I := begin simp, exact H   end
+lemma help_hom_1 {s t : I01} (H : s ∈ T1) : (s, t) ∈ set.prod T1 I := by simpa
 
 lemma prod_T1_is_closed : is_closed (set.prod T1 I) := begin simp [T1_is_closed, is_closed_prod]  end
 
@@ -715,7 +710,6 @@ begin unfold T1 T2 T set.inter set.prod, simp [mem_set_of_eq, -one_div_eq_inv], 
   }, { rw mem_set_of_eq , rw mem_set_of_eq, intro H, rw H, norm_num }
 end
 
---set_option trace.simplify.rewrite false
 
 local attribute [instance] classical.prop_decidable 
 
@@ -739,7 +733,7 @@ begin intro H, have H2 : T1 ∪ T2 = @set.univ I01, exact cover_I01, unfold T1 T
  exact ⟨ le_of_lt H3, s.2.2⟩ , 
 end
 
-
+--set_option trace.simplify.rewrite true
 def path_homotopy_comp { x y : β} {f : path x y} {g : path x y} {h : path x y} ( F : path_homotopy f g) ( G : path_homotopy g h) : 
 path_homotopy f h :=
 {   to_fun := λ st, ( @paste (I01 × I01) β (set.prod T1 I) (set.prod T2 I)  cover_prod_I01 ( λ st , (fa_hom F ) st ) ) ( λ st, (fb_hom G ) st  )  st  , 
@@ -798,95 +792,27 @@ begin
     exact ⟨ H ⟩ 
 end
 
-theorem is_symmetric {β  : Type*} [topological_space β ] { x y : β  } : @symmetric (path x y)  (is_homotopic_to) := 
-begin 
-    unfold symmetric, intros f g H, unfold is_homotopic_to, 
-    have HF : path_homotopy g f, 
-        unfold is_homotopic_to at H, 
-        let F : path_homotopy f g, 
-            exact classical.choice H, 
-        exact path_homotopy_inverse f g F, 
-    exact ⟨ HF ⟩ 
-end 
+
+
+theorem is_symmetric {β  : Type*} [topological_space β ] { x y : β  } : @symmetric (path x y)  (is_homotopic_to) :=
+begin
+    unfold symmetric, intros f g H, unfold is_homotopic_to,
+    cases H with F, exact ⟨path_homotopy_inverse f g F⟩,
+end
 
 theorem is_transitive {β  : Type*} [topological_space β ] { x y : β  } : @transitive (path x y)  (is_homotopic_to) := 
 begin 
-    unfold transitive, intros f g h Hfg Hgh, unfold is_homotopic_to, 
-    have HF : path_homotopy f h, 
-        unfold is_homotopic_to at *, 
-        let F : path_homotopy f g, 
-            exact classical.choice Hfg, 
-        let G : path_homotopy g h,
-            exact classical.choice Hgh,
-        exact path_homotopy_comp  F G, 
-    exact ⟨ HF ⟩ 
+    unfold transitive, intros f g h Hfg Hgh, unfold is_homotopic_to at *, 
+      cases Hfg  with F,  cases Hgh with G,  
+    exact ⟨ path_homotopy_comp F G⟩ , 
 end 
 
 theorem is_equivalence : @equivalence (path x y)  (is_homotopic_to) := 
 ⟨ is_reflexive, is_symmetric, is_transitive⟩ 
 
---local notation `≈` := is_homotopic_to _ _ 
 
-end homotopy
+---- Reparametrisation of path and homotopies 
 
----------------------------------------------------
----------------------------------------------------
-
----- FUNDAMENTAL GROUP 
-
-
-namespace fundamental_group
-open homotopy
-open path 
-variables {α  : Type*} [topological_space α ] {x : α }
-
-
---- Underlying Notions 
-
-lemma setoid_hom {α : Type*} [topological_space α ] (x : α )  : setoid (loop x) := setoid.mk is_homotopic_to (is_equivalence x x)
-
---@[simp]
-def space_π_1 {α : Type*} [topological_space α ] (x : α ) := quotient (setoid_hom x)
-#print prefix quotient
-
-/- def hom_eq_class2 {α : Type*} [topological_space α ] {x : α } ( f : loop x ) : set (path x x) := 
-{ g : path x x | is_homotopic_to f g } -/ 
-
-def eq_class {α : Type*} [topological_space α ] {x : α } ( f : loop x ) : space_π_1 x := @quotient.mk (loop x) (setoid_hom x) f 
-
-def out_loop {α : Type*} [topological_space α ] {x : α } ( F : space_π_1 x ) : loop x := @quotient.out (loop x) (setoid_hom x)  F 
-
-
-def id_eq_class {α : Type*} [topological_space α ] (x : α )  : space_π_1 x := eq_class (loop_const x)
-
-
-def inv_eq_class {α : Type*} [topological_space α ] {x : α } (F : space_π_1 x) : space_π_1 x := eq_class (inv_of_path (out_loop F))
-
-
--- Multiplication 
-
-def und_mul {α : Type*} [topological_space α ] (x : α )  ( f : loop x ) ( g : loop x ) :  space_π_1 x := 
-eq_class (comp_of_path f g) 
-
-
-def mul2 {α : Type*} [topological_space α ] {x : α }  : space_π_1 x → space_π_1 x → space_π_1 x := 
-begin 
-intros F G, let f := out_loop F , let g := out_loop G, 
-exact eq_class ( comp_of_path f g )  
-end 
-
-def mul {α : Type*} [topological_space α ] {x : α } : space_π_1 x → space_π_1 x → space_π_1 x := 
-λ F G,  und_mul x (out_loop  F) (out_loop  G)
-
-#print mul2 
-
-#print prefix quotient 
-#print ≈ 
-#print has_equiv.equiv
-#print setoid.r 
-
---------
----- Repar 
 -- (Formalise paragraph 2 pg 27 of AT, https://pi.math.cornell.edu/~hatcher/AT/AT.pdf )
 
 structure repar_I01  := 
@@ -916,7 +842,10 @@ begin unfold I01, rw mem_set_of_eq, split,
       suffices H2 : 0 ≤ (st.fst).val * (st.snd).val, exact add_le_add H1 H2, 
         refine mul_nonneg _ _, exact st.1.2.1, exact st.2.2.1, 
         refine mul_nonneg _ _, show 0 ≤ 1 - (st.fst).val , refine sub_nonneg.2  _ , exact st.1.2.2, exact (φ.to_fun (st.snd)).2.1, 
-    }, rw (@mul_comm _ _ (1 - (st.fst).val)  (φ.to_fun (st.snd)).val), simp [@mul_add ℝ _ ((φ.to_fun (st.snd)).val )  (1:ℝ ) (- st.fst.val) ], rw mul_comm ((φ.to_fun (st.snd)).val ) ((st.fst).val), 
+    }, rw (@mul_comm _ _ (1 - (st.fst).val)  (φ.to_fun (st.snd)).val), 
+    simp [@mul_add ℝ _ ((φ.to_fun (st.snd)).val )  (1:ℝ ) (- st.fst.val) ], rw mul_comm ((φ.to_fun (st.snd)).val ) ((st.fst).val), 
+    simpa, 
+    
       sorry, --rw mul_add 
     --have H1: (φ.to_fun (st.snd)).val + ((st.fst).val * (st.snd).val + -((φ.to_fun (st.snd)).val * (st.fst).val)) ≤ 
 
@@ -985,9 +914,73 @@ begin unfold is_homotopic_to, exact nonempty.intro (hom_repar_path_to_path f φ 
 
 
 
+
+
+end homotopy
+
+---------------------------------------------------
+---------------------------------------------------
+
+---- FUNDAMENTAL GROUP 
+
+
+namespace fundamental_group
+open homotopy
+open path 
+variables {α  : Type*} [topological_space α ] {x : α }
+
+
+--- Underlying Notions 
+
+def setoid_hom {α : Type*} [topological_space α ] (x : α )  : setoid (loop x) := setoid.mk is_homotopic_to (is_equivalence x x)
+
+--@[simp]
+def space_π_1 {α : Type*} [topological_space α ] (x : α ) := quotient (setoid_hom x)
+
+---#print prefix quotient
+
+/- def hom_eq_class2 {α : Type*} [topological_space α ] {x : α } ( f : loop x ) : set (path x x) := 
+{ g : path x x | is_homotopic_to f g } -/ 
+
+def eq_class {α : Type*} [topological_space α ] {x : α } ( f : loop x ) : space_π_1 x := @quotient.mk _ (setoid_hom x) f 
+
+def out_loop {α : Type*} [topological_space α ] {x : α } ( F : space_π_1 x ) : loop x := @quotient.out (loop x) (setoid_hom x)  F 
+
+
+def id_eq_class {α : Type*} [topological_space α ] (x : α )  : space_π_1 x := eq_class (loop_const x)
+
+
+def inv_eq_class {α : Type*} [topological_space α ] {x : α } (F : space_π_1 x) : space_π_1 x := eq_class (inv_of_path (out_loop F))
+
+
+-- Multiplication 
+
+def und_mul {α : Type*} [topological_space α ] (x : α )  ( f : loop x ) ( g : loop x ) :  space_π_1 x := 
+eq_class (comp_of_path f g) 
+
+
+def mul2 {α : Type*} [topological_space α ] {x : α }  : space_π_1 x → space_π_1 x → space_π_1 x := 
+begin 
+intros F G, let f := out_loop F , let g := out_loop G, 
+exact eq_class ( comp_of_path f g )  
+end 
+
+def mul {α : Type*} [topological_space α ] {x : α } : space_π_1 x → space_π_1 x → space_π_1 x := 
+λ F G,  und_mul x (out_loop  F) (out_loop  G)
+
+
+/- 
+#print prefix quotient 
+#print ≈ 
+#print has_equiv.equiv
+#print setoid.r -/
+
+--------
+
+
+
 -- Identity Elememt 
 
-#print prefix path
 
 -- right identity - mul_one
 
@@ -1014,11 +1007,10 @@ local attribute [instance] classical.prop_decidable
 def hom_f_to_f_const {α : Type*} [topological_space α ] {x y : α } ( f : path x y) : path_homotopy (comp_of_path f (loop_const y)) f:= 
 begin 
 have H : comp_of_path f (loop_const y) = repar_path f p1, 
-  { apply equal.2, unfold comp_of_path repar_path, simp, unfold fa_path fb_path fgen_path loop_const p1, simp, unfold par, funext,  
+  { apply path_equal.2, unfold comp_of_path repar_path, simp, unfold fa_path fb_path fgen_path loop_const p1, simp, unfold par, funext,  
   unfold paste,  split_ifs, simp [-one_div_eq_inv], simp,
      }, 
 rw H, exact hom_repar_path_to_path f p1, 
-
 end
 
 
@@ -1026,11 +1018,11 @@ end
 lemma path_const_homeq_path {α : Type*} [topological_space α ] {x y : α } ( f : path x y)  : is_homotopic_to (comp_of_path f (loop_const y)) f := 
 begin  unfold is_homotopic_to, refine nonempty.intro (hom_f_to_f_const f), end 
 
-
+/- 
 #check quotient.exists_rep
 #check quotient.induction_on
 #check quotient.out_eq
-#check setoid
+#check setoid -/ 
 
 
 -- Now prove [f][c] = [f]
@@ -1083,9 +1075,6 @@ def π_1_group {α : Type*} [topological_space α ] (x : α ) : group (space_π_
 
 }
 
-
-
-#print group
 
 
 --------------------- Next things after identity for π_1 group 
@@ -1142,18 +1131,7 @@ def space_π_1 {α : Type*} [topological_space α ] {x : α } : set (set (path x
 { ∀ f : loop3 x,  hom_eq_class ( f)   } -/ 
 
 
-
-#check continuous
-#print prefix equiv
-#print prefix quotient 
-#print notation  ≈ 
-
-#print has_equiv.equiv 
     
-
-#check @is_refl
-#check @reflexive 
-#check nonempty  
 
 /- {   to_fun := sorry, 
     path_s := sorry, 
