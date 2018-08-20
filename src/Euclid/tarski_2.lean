@@ -1,4 +1,3 @@
-import data.set
 import Euclid.tarski_1
 open classical set
 namespace Euclidean_plane
@@ -47,6 +46,48 @@ cases h5,
   exact five1 h2.symm h3 h5,
 right,
 exact three6b h5 h3
+end
+
+theorem six10 {a b c p q r : point} : sided a b c → sided p q r → eqd a b p q → eqd a c p r → cong a b c p q r :=
+begin
+intro h,
+revert p q r,
+wlog h4 : distle a b a c,
+    exact (five10 a b a c),
+  introv h1 h2 h3,
+  repeat {split};
+  try {assumption},
+  have h5 : distle p q p r,
+    exact five6 h4 h2 h3,  
+  have h6 : B a b c,
+    exact (six12 h).1 h4,
+  have h7 : B p q r,
+    exact (six12 h1).1 h5,
+  exact (four3 h6.symm h7.symm h3.flip h2.flip).flip,
+let h1 := this h.symm a_1.symm a_3 a_2,
+repeat {split},
+    exact h1.2.2,
+  exact h1.2.1.flip,
+exact h1.1
+end
+
+theorem six10a {a b c a' b' c' : point} : sided a b c → cong a b c a' b' c' → sided a' b' c' :=
+begin
+intro h,
+revert a' b' c',
+wlog h1 : B a b c := (h.2.2) using b c,
+  introv h2,
+  split,
+    intro h_1,
+    subst b',
+    exact h.1.symm (id_eqd a b a' h2.1),
+  split,
+    intro h_1,
+    subst c',
+    exact h.2.1.symm (id_eqd a c a' h2.2.2),
+  exact or.inl (four6 h1 h2),
+apply (this h.symm _).symm,
+exact ⟨a_1.2.2, a_1.2.1.flip, a_1.1⟩
 end
 
 def l (a b : point) : set point := {x | col a b x}
@@ -106,8 +147,7 @@ cases h3,
     right, left,
     exact h5.symm,
   have : x = p,
-    simp at *,
-    exact h3,
+    simpa using h3,
   right, left,
   rw this,
   exact three1 q p,
@@ -142,6 +182,8 @@ intro h1,
 exact (four11 h1).2.1
 end
 
+theorem line.symm {a b : point} (h : line (l a b)) : line (l b a) := (six17 a b) ▸ h
+
 @[simp] theorem six17a (p q : point) : p ∈ l p q := (four11 (four12 p q)).1
 
 @[simp] theorem six17b (p q : point) : q ∈ l p q := (four11 (four12 q p)).2.2.2.1
@@ -172,8 +214,7 @@ split,
   simp,
 intro h1,
 subst a,
-apply h,
-simp
+simpa using h
 end
 
 theorem six19 {a b : point} : a ≠ b → ∃! L : set point, line L ∧ a ∈ L ∧ b ∈ L :=
@@ -188,7 +229,7 @@ split,
       exact h,
     refl,
   split;
-    simp,
+  simp,
 intros y hy,
 exact six18 hy.1 h hy.2.1 hy.2.2
 end
@@ -201,6 +242,8 @@ apply unique_of_exists_unique (six19 h),
   assumption,
 assumption
 end
+
+def is (x : point) (A B : set point) : Prop := line A ∧ line B ∧ A ≠ B ∧ x ∈ A ∧ x ∈ B
 
 theorem six22 {x : point} {A : set point} : line A → x ∈ A → ∃ y, x ≠ y ∧ A = l x y :=
 begin
@@ -220,8 +263,6 @@ have : u ∈ A,
   simp,
 exact six18 h2 (ne.symm h) h1 this
 end
-
-def is (x : point) (A B : set point) : Prop := line A ∧ line B ∧ A ≠ B ∧ x ∈ A ∧ x ∈ B
 
 theorem six23 {a b c : point} : col a b c ↔ ∃ (L : set point), line L ∧ a ∈ L ∧ b ∈ L ∧ c ∈ L :=
 begin
@@ -243,8 +284,7 @@ split,
   existsi l a b,
   split,
     exact six14 h_1,
-  simp,
-  exact h,
+  simpa using h,
 intro h,
 cases h with L h,
 cases em (a = b),
@@ -311,7 +351,9 @@ apply six13a a,
 exact h
 end
 
-theorem six26 {a b c : point} : ¬col a b c → a ≠ b ∧ b ≠ c ∧ a ≠ c :=
+def diff (a b c : point) : Prop := a ≠ b ∧ b ≠ c ∧ a ≠ c
+
+theorem six26 {a b c : point} : ¬col a b c → diff a b c :=
 begin
 intro h,
 split,
@@ -453,6 +495,12 @@ apply unique_of_exists_unique (seven8 a p'),
 rw ←h
 end
 
+theorem seven9a {a b : point} (p : point) : a ≠ b → S p a ≠ S p b :=
+begin
+intros h h1,
+exact h (seven9 h1)
+end
+
 theorem seven10 {a p : point} : S a p = p ↔ p = a :=
 begin
 split,
@@ -565,35 +613,32 @@ theorem seven15 (a : point) {p q r : point} : B p q r ↔ B (S a p) (S a q) (S a
 begin
 split,
   intro h,
-  have h1 : cong p q r (S a p) (S a q) (S a r),
-    split,
-      exact seven13 a p q,
-    split,
-      exact seven13 a q r,
-    exact seven13 a p r,
-  exact four6 h h1,
+  apply four6 h,
+  repeat {split};
+  exact seven13 a _ _, 
 intro h,
 rw ←(seven7 a p),
 rw ←(seven7 a q),
 rw ←(seven7 a r),
-have h1 : cong (S a p) (S a q) (S a r) (S a (S a p)) (S a (S a q)) (S a (S a r)),
-  split,
-    exact seven13 a (S a p) (S a q),
-  split,
-    exact seven13 a (S a q) (S a r),
-  exact seven13 a (S a p) (S a r),
-exact four6 h h1
+apply four6 h,
+repeat {split};
+exact seven13 a _ _, 
 end
 
 theorem seven16 (a : point) {p q r s : point}: eqd p q r s ↔ eqd (S a p) (S a q) (S a r) (S a s) :=
 begin
 split,
   intro h,
-  exact eqd.trans (seven13 a p q).symm (eqd.trans h (seven13 a r s)),
+  exact (seven13 a p q).symm.trans (h.trans (seven13 a r s)),
 intro h,
 let h1 := eqd.trans (seven13 a (S a p) (S a q)).symm (eqd.trans h (seven13 a (S a r) (S a s))),
-simp at h1,
-exact h1
+simpa using h1
+end
+
+theorem seven16a (a : point) {p q r : point} : cong p q r (S a p) (S a q) (S a r) :=
+begin
+repeat {split};
+exact seven13 a _ _
 end
 
 theorem seven14 (a : point) {p q r : point} : M p q r ↔ M (S a p) (S a q) (S a r) :=
@@ -736,7 +781,8 @@ have h17 : p = q,
 rw h17 at *,
 split,
   cases seven20 h4 h9,
-    exact false.elim ((six26 h).2.2 h_1),
+    exfalso,
+    exact ((six26 h).2.2 h_1),
   assumption,
 cases seven20 h5 (hq.2.2).flip,
   contradiction,

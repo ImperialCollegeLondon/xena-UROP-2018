@@ -1,14 +1,12 @@
-import chris_hughes_various.zmod data.fintype data.nat.prime data.nat.gcd data.nat.modeq algebra.ring
+import chris_hughes_various.zmod data.fintype data.nat.prime data.nat.gcd data.nat.modeq algebra.ring M3P14.order_zmodn_kmb
 
 open nat 
 open fintype
-
 
 --defining the phi function
 
 definition phi (n : ℕ) := ((finset.range n).filter (nat.coprime n)).card
 local notation `φ`  := phi 
-instance {α : Type*} [fintype α] [monoid α] : fintype (units α) := sorry
 
 -- theorems
 

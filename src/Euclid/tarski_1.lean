@@ -1,4 +1,4 @@
-import euclid.axioms
+import euclid.axioms data.set tactic.interactive
 open classical
 namespace Euclidean_plane
 
@@ -32,7 +32,7 @@ quotient (@Euclidean_plane.point_setoid point _)
 
 theorem refl_dist (a b : point) : (a,b) ≈ (b,a) := eqd_refl a b
 
-theorem two8 (a b : point) : (a,a) ≈ (b,b) := 
+theorem two8 (a b : point) : eqd a a b b := 
 let ⟨x, h⟩ := seg_cons a b b b in
 have a = x, from id_eqd a x b h.2,
 by rw ←this at h; exact h.2
@@ -83,7 +83,7 @@ split,
 intros y hy,
 cases h1 with h2 h3,
 cases hy with h4 h5,
-apply by_contradiction,
+apply classical.by_contradiction,
 intro h1,
 have h6 : eqd a x a y,
   exact eqd_trans b c a x a y h3.symm h5.symm,
@@ -309,6 +309,32 @@ exact (four2 this).flip
 end
 
 def cong (a b c a' b' c' : point) : Prop := eqd a b a' b' ∧ eqd b c b' c' ∧ eqd a c a' c'
+
+@[simp] theorem cong.refl (a b c : point) : cong a b c a b c :=
+begin
+repeat {split};
+exact eqd.refl _ _
+end
+
+theorem cong.symm {a b c a' b' c' : point} : cong a b c a' b' c' → cong a' b' c' a b c :=
+begin
+intro h,
+split,
+  exact h.1.symm,
+split,
+  exact h.2.1.symm,
+exact h.2.2.symm
+end
+
+theorem cong.trans {a b c a' b' c' a'' b'' c'' : point} : cong a b c a' b' c' → cong a' b' c' a'' b'' c'' → cong a b c a'' b'' c'' :=
+begin
+intros h h1,
+split,
+  exact eqd.trans h.1 h1.1,
+split,
+  exact eqd.trans h.2.1 h1.2.1,
+exact eqd.trans h.2.2 h1.2.2
+end
 
 lemma four4 {a b c a' b' c' : point} : cong a b c a' b' c' → cong b c a b' c' a' :=
 begin
@@ -1101,6 +1127,13 @@ have h3 : c ≠ p,
 have : B c p q,
   exact (six2 h2 h3 hq.1 hq.2.2).2 h,
 exact (six2 h1 h3 hq.1 hq.2.1).1 this
+end
+
+theorem six7a {a b c p : point} : B p a b → sided p a c → sided p b c :=
+begin
+intros h h1,
+apply sided.trans _ h1,
+exact (six7 h h1.1).symm
 end
 
 theorem six8 {a b c p q : point} : sided b p a → sided b q c → B a b c → B p b q :=
