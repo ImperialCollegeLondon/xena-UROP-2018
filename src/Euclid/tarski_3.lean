@@ -317,10 +317,10 @@ rw h_2 at hb,
 exact hb
 end
 
-theorem eight15 {x : point} {A B : set point} : x ∈ A → x ∈ B → perp A B → xperp x A B :=
+theorem eight15 {x : point} {A B : set point} : perp A B → x ∈ A → x ∈ B → xperp x A B :=
 begin
 intros h h1 h2,
-cases h2 with y hy,
+cases h with y hy,
 suffices : x = y,
   subst x,
   exact hy,
@@ -329,8 +329,8 @@ apply eight14b hy,
 apply six21 h_1,
   exact hy.1,
   exact hy.2.1,
-  exact h,
   exact h1,
+  exact h2,
   exact hy.2.2.1,
 exact hy.2.2.2.1
 end
@@ -342,7 +342,7 @@ intros h1 h2 h3,
 split,
   intro h4,
   have h5 : xperp x (l a b) (l c x),
-    exact eight15 h1 (six17b c x) h4.2, 
+    exact eight15 h4.2 h1 (six17b c x), 
   split,
     intro h_1,
     apply eight14b h5,
@@ -557,7 +557,7 @@ have h20 : c ≠ x',
   rw ←h_1 at hx',
   exact hx'.1,
 have h21 : xperp x' (l a b) (l c x'),
-  exact eight15 hx'.1 (six17b c x') hx'.2,
+  exact eight15 hx'.2 hx'.1 (six17b c x'),
 have h22 : R c x x',
   apply (h18.symm).2.2.2.2 c x',
     simp,
@@ -672,7 +672,7 @@ cases em (col a b c) with habc h,
     rw h_1 at *,
     exact h hx.1.1,
   have h2 : xperp x (l a b) (l c' x),
-    exact eight15 hx.1.1 (six17b c' x) hx.1.2,
+    exact eight15 hx.1.2 hx.1.1 (six17b c' x),
   unfold xperp at h2,
   let h3 := h2.2.2.2.2 a c' (six17a a b) (six17a c' x),
   unfold R at h3,
@@ -730,7 +730,7 @@ have h1 : c ≠ x,
   rw h_1 at *,
   exact h hx.1.1,
 have h2 : xperp x (l a b) (l c x),
-  exact eight15 hx.1.1 (six17b c x) hx.1.2,
+  exact eight15 hx.1.2 hx.1.1 (six17b c x),
 unfold xperp at h2,
 let h3 := h2.2.2.2.2 a c (six17a a b) (six17a c x),
 unfold R at h3,
@@ -812,9 +812,9 @@ have h1 : col a b x,
     exact three1 a b,
   exact (four11 (five4 h_2 (four11 ht.2.1).1 h_1)).2.1,
 have h2 : xperp a (l a b) (l p a),
-  exact eight15 (four11 (four12 a b)).1 (six17b p a) hp.1,
+  exact eight15 hp.1 (four11 (four12 a b)).1 (six17b p a),
 have h3 : xperp b (l b a) (l q b),
-  exact eight15 (four11 (four12 b a)).1 (six17b q b) ht.1,
+  exact eight15 ht.1 (four11 (four12 b a)).1 (six17b q b),
 let h4 := h2.2.2.2.2 b p (six17b a b) (six17a p a),
 let h5 := h3.2.2.2.2 a q (six17b b a) (six17a q b),
 have h6 : R a b r,
@@ -1066,6 +1066,14 @@ have ht : ((l b a) ⊥ l q b) ∧ col b a t ∧ B p t q,
 have hr : B b r q ∧ eqd a p b r,
   exact ⟨g7, g8⟩,
 exact eight23 hp ht hr
+end
+
+theorem eight25 {a b : point} : a ≠ b → ∃ c, R a b c ∧ c ≠ b :=
+begin
+intro h,
+rcases eight21 h.symm a with ⟨c, p, h1⟩,
+refine ⟨c, (eight15 h1.1 (six17a b a) (six17b c b)).2.2.2.2 a c (six17b b a) (six17a c b), _⟩,
+exact six13 (eight14e h1.1).2
 end
 
 end Euclidean_plane
