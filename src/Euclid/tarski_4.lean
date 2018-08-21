@@ -1,4 +1,4 @@
-import Euclid.tarski_3 tactic.interactive
+import Euclid.tarski_3
 open classical set
 namespace Euclidean_plane
 variables {point : Type} [Euclidean_plane point]
@@ -706,6 +706,17 @@ split,
 exact nine5 hc h1 h3.1
 end
 
+theorem nine19a {a b c p : point} {A : set point} : side A a b → p ∈ A → sided p c a → side A c b :=
+begin
+intros h h1 h2,
+apply side.trans _ h,
+apply side.symm,
+apply (nine19 (nine11 h).1 h1 (four11 (six4.1 h2.symm).1).1).2,
+split,
+  exact h2.symm,
+exact (nine11 h).2.1
+end
+
 def pl (A : set point) (a : point) : set point := {x | side A x a ∨ x ∈ A ∨ Bl a A x}
 
 def plane (P : set point) : Prop := ∃ p q r, ¬col p q r ∧ P = pl (l p q) r
@@ -1183,6 +1194,50 @@ intros h h1 h2 h3 h4,
 cases (nine25 h1 h2 h3 (six26 h).1).2 with c' hc',
 subst P,
 exact nine21b h4 h
+end
+
+theorem nine27 (a b c : point) : a ∈ planeof a b c ∧ b ∈ planeof a b c ∧ c ∈ planeof a b c :=
+begin
+split,
+  right, left,
+  simp,
+split,
+  right, left,
+  simp,
+by_cases h : a = b,
+  subst b,
+  right, left, left,
+  exact three3 a c,
+by_cases h1 : c ∈ l a b,
+  right, left,
+  exact h1,
+left,
+exact side.refl (six14 h) h1
+end
+
+theorem nine28 {p : point} {A : set point} : line A → plane (pl A p) → p ∉ A :=
+begin
+intros h h1 h2,
+rcases h1 with ⟨x, y, z, h1⟩,
+apply h1.1,
+suffices : pl A p = A,
+  rw this at h1,
+  let h3 := nine27 x y z,
+  rw [planeof, h1.2.symm] at h3,
+  exact six23.2 ⟨A, h, h3⟩,
+ext t,
+split,
+  intro h3,
+  cases h3,
+    exfalso,
+    exact (nine11 h3).2.2 h2,
+  cases h3,
+    exact h3,
+  exfalso,
+  exact h3.2.1 h2,
+intro h3,
+right, left,
+exact h3
 end
 
 theorem nine31 {p q r s : point} : side (l p q) s r → side (l p r) s q → Bl q (l p s) r :=

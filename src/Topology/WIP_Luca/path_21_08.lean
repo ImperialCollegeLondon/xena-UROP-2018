@@ -1,3 +1,4 @@
+
 import analysis.topology.continuity
 import analysis.topology.topological_space
 import analysis.topology.infinite_sum
@@ -124,7 +125,7 @@ begin
   exact continuous.comp H₁ continuous_add', 
 end 
 
-theorem real.continuous_sub_const (r : ℝ) : continuous (λ x : ℝ, x - r) := continuous_sub continuous_id continuous_const, 
+theorem real.continuous_sub_const (r : ℝ) : continuous (λ x : ℝ, x - r) := continuous_sub continuous_id continuous_const
 
 
 theorem real.continuous_div_const (r : ℝ) : continuous (λ x : ℝ, x / r) :=
@@ -492,4 +493,3 @@ def loop_const {α} [topological_space α] (x0 : α) : loop x0 :=
 
 
 end path 
-

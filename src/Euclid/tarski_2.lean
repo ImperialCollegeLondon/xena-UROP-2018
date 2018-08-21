@@ -1,4 +1,3 @@
-import data.set
 import Euclid.tarski_1
 open classical set
 namespace Euclidean_plane
@@ -47,6 +46,48 @@ cases h5,
   exact five1 h2.symm h3 h5,
 right,
 exact three6b h5 h3
+end
+
+theorem six10 {a b c p q r : point} : sided a b c → sided p q r → eqd a b p q → eqd a c p r → cong a b c p q r :=
+begin
+intro h,
+revert p q r,
+wlog h4 : distle a b a c,
+    exact (five10 a b a c),
+  introv h1 h2 h3,
+  repeat {split};
+  try {assumption},
+  have h5 : distle p q p r,
+    exact five6 h4 h2 h3,  
+  have h6 : B a b c,
+    exact (six12 h).1 h4,
+  have h7 : B p q r,
+    exact (six12 h1).1 h5,
+  exact (four3 h6.symm h7.symm h3.flip h2.flip).flip,
+let h1 := this h.symm a_1.symm a_3 a_2,
+repeat {split},
+    exact h1.2.2,
+  exact h1.2.1.flip,
+exact h1.1
+end
+
+theorem six10a {a b c a' b' c' : point} : sided a b c → cong a b c a' b' c' → sided a' b' c' :=
+begin
+intro h,
+revert a' b' c',
+wlog h1 : B a b c := (h.2.2) using b c,
+  introv h2,
+  split,
+    intro h_1,
+    subst b',
+    exact h.1.symm (id_eqd a b a' h2.1),
+  split,
+    intro h_1,
+    subst c',
+    exact h.2.1.symm (id_eqd a c a' h2.2.2),
+  exact or.inl (four6 h1 h2),
+apply (this h.symm _).symm,
+exact ⟨a_1.2.2, a_1.2.1.flip, a_1.1⟩
 end
 
 def l (a b : point) : set point := {x | col a b x}
@@ -193,6 +234,15 @@ intros y hy,
 exact six18 hy.1 h hy.2.1 hy.2.2
 end
 
+theorem six20 {a b c : point} {A : set point} : line A → a ∈ A → b ∈ A → a ≠ b → col a b c → c ∈ A :=
+begin
+intros h h1 h2 h3 h4,
+suffices : A = l a b,
+  subst A,
+  exact h4,
+exact six18 h h3 h1 h2
+end
+
 theorem six21 {a b : point} {A B : set point} : a ≠ b → line A → line B → a ∈ A → a ∈ B → b ∈ A → b ∈ B → A = B :=
 begin
 intros h h1 h2 h3 h4 h5 h6,
@@ -201,6 +251,8 @@ apply unique_of_exists_unique (six19 h),
   assumption,
 assumption
 end
+
+def is (x : point) (A B : set point) : Prop := line A ∧ line B ∧ A ≠ B ∧ x ∈ A ∧ x ∈ B
 
 theorem six22 {x : point} {A : set point} : line A → x ∈ A → ∃ y, x ≠ y ∧ A = l x y :=
 begin
@@ -220,8 +272,6 @@ have : u ∈ A,
   simp,
 exact six18 h2 (ne.symm h) h1 this
 end
-
-def is (x : point) (A B : set point) : Prop := line A ∧ line B ∧ A ≠ B ∧ x ∈ A ∧ x ∈ B
 
 theorem six23 {a b c : point} : col a b c ↔ ∃ (L : set point), line L ∧ a ∈ L ∧ b ∈ L ∧ c ∈ L :=
 begin
@@ -310,7 +360,9 @@ apply six13a a,
 exact h
 end
 
-theorem six26 {a b c : point} : ¬col a b c → a ≠ b ∧ b ≠ c ∧ a ≠ c :=
+def tri (a b c : point) : Prop := a ≠ b ∧ b ≠ c ∧ a ≠ c
+
+theorem six26 {a b c : point} : ¬col a b c → tri a b c :=
 begin
 intro h,
 split,
@@ -450,6 +502,12 @@ let p' := S a p,
 apply unique_of_exists_unique (seven8 a p'),
   simp,
 rw ←h
+end
+
+theorem seven9a {a b : point} (p : point) : a ≠ b → S p a ≠ S p b :=
+begin
+intros h h1,
+exact h (seven9 h1)
 end
 
 theorem seven10 {a p : point} : S a p = p ↔ p = a :=
@@ -732,7 +790,8 @@ have h17 : p = q,
 rw h17 at *,
 split,
   cases seven20 h4 h9,
-    exact false.elim ((six26 h).2.2 h_1),
+    exfalso,
+    exact ((six26 h).2.2 h_1),
   assumption,
 cases seven20 h5 (hq.2.2).flip,
   contradiction,

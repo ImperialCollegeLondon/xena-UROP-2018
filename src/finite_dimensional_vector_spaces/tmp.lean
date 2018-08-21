@@ -1,60 +1,83 @@
-import algebra.module linear_algebra.basic analysis.real data.vector data.list.basic
+import finite_dimensional_vector_spaces.ring_n_is_module
 
 universes u
 
+namespace fin_vector_space
 
-def matrix_space (m n : ℕ) (R :  Type u) 
-    [h : ring R] := vector R n → vector R m
-
-namespace fin_dim_ring
-
-variables (R : Type u) [h : ring R] (n : ℕ)
-
+variables (R : Type u) [h : field R] (n : ℕ)
 
 -- structure fin_dim_ring extends module R (vector R n)
+
 include h 
 
-example : module R (vector R n) := by apply_instance
-
-def elemental_vector : fin n → vector R n :=
--- vector.of_fn (λ j, if (j = i) then 1 else 0)
-match n with
+def elemental_vector (i : fin n) : vector R n :=
+-- vector.of_fn (λ j, @decidable.by_cases (j = i) R _ (λ _, 1) (λ _, 0))
+-- vector.of_fn (λ j, if (j.val = i.val) then 1 else 0)
+match n, i with
 | 0, _ := vector.nil
 | (n+1), ⟨0, _⟩ := vector.cons 1 (vector.repeat 0 n)
 | (n+1), ⟨i+1, l⟩ := vector.cons 0 
     $ by exact _match _ ⟨_, (nat.lt_of_succ_lt_succ l)⟩
 end
 
-#check list.pairwise
-
 def basis : vector (vector R n) n :=
 vector.of_fn (elemental_vector R n)
- 
+
 def basis_as_finset : finset (vector R n) :=
 {
     val := (basis R n).to_list,
-    nodup := by { 
-        unfold list.nodup basis list.of_fn,
-        induction n with n ih,
-        -- simp [list.of_fn_aux],
-        -- unfold elemental_vector,
-        
-     }
+    nodup := by 
+        { rw [basis, vector.to_list_of_fn, 
+            multiset.coe_nodup, list.nodup_iff_nth_le_inj],
+        intros i j h1 h2,
+        rw [list.length_of_fn] at h1 h2,
+        rw [list.nth_le_of_fn (elemental_vector R n) ⟨i, h1⟩,
+            list.nth_le_of_fn (elemental_vector R n) ⟨j, h2⟩],
+        intro a,
+        induction n with n ih generalizing i j,
+        exact (nat.le_lt_antisymm (i.zero_le) h1).elim,
+        cases i; cases j; unfold elemental_vector at a,
+            { replace a := @congr _ _ (vector.head) _ _ _ rfl a,
+            rw [vector.head_cons, vector.head_cons] at a,
+            by_contradiction, 
+            apply (not_not_intro a),
+            exact h.zero_ne_one.symm },
+            { replace a := @congr _ _ (vector.head) _ _ _ rfl a,
+            rw [vector.head_cons, vector.head_cons] at a,
+            by_contradiction, 
+            apply (not_not_intro a),
+            exact h.zero_ne_one },
+            { rw [list.length_of_fn] at ih,
+            have hi := nat.lt_of_succ_lt_succ h1_1,
+            have hj := nat.lt_of_succ_lt_succ h2_1,
+            apply congr rfl,
+            apply ih _ _ hi hj hj hi,
+            replace a := @congr _ _ (vector.tail) _ _ _ rfl a,
+            rw [vector.tail_cons, vector.tail_cons] at a,
+            exact a } }
 }
 
--- set_option pp.all true
+#check nat.lt_of_add_lt_add_left
 
--- lemma is_spanning_set : ∀ (x : vector R n), 
---     x ∈ span {v : vector R n | v ∈ vector.to_list (basis R n)} :=
--- by { intro a,
---     unfold span basis,
---     split, swap,
---     unfold lc, 
---     apply @finsupp.mk (vector R n) R,
---         { intro v, }
+-- def lc_basis : lc R (vector R n) :=
+-- by { split, swap, 
+--     exact basis_as_finset R n,
+--     swap, intro v,
+
+--      }
+
+-- #check finset
+
+-- instance : is_basis (basis_as_finset R n).to_set :=
+-- by { split, swap,
+--         { intro v,
+--         split, swap,
+--         unfold lc, split,
+--         swap, exact basis_as_finset R n,
+--         swap, 
+--          }
 -- }
 
-#check list.nodup_decidable
 -- instance : is_basis { v | v ∈ (basis R n).to_list } := 
 -- by { split,
 --     { --simp [linear_independent],
@@ -74,4 +97,4 @@ def basis_as_finset : finset (vector R n) :=
     
 --      }, }
 
-end fin_dim_ring 
+end fin_vector_space

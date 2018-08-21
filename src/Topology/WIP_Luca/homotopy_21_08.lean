@@ -21,11 +21,9 @@ variable s : I01
 
 noncomputable theory
 
+def P := topological_space (I01 × α )
 
 -- HOMOTOPY 
-
-
-local attribute [instance] classical.prop_decidable 
 
 -- General Homotopy 
 structure homotopy {α} {β} [topological_space α] [topological_space β] (f : α → β)
@@ -68,7 +66,6 @@ structure path_homotopy2 {β} [topological_space β] { x y : β } ( f : path x y
 (at_zero : ∀ y, to_fun 0 y = f.to_fun y ) 
 (at_one :  ∀ y, to_fun 1 y = g.to_fun y)
 (cont : continuous to_fun)
-
 structure path_homotopy3 {β} [topological_space β] { x y : β } ( f : path x y) ( g : path x y) := 
 (to_fun : I01 → I01 →  β )
 (path_s : ∀ s : I01, is_path x y ( λ t, to_fun s t ) )  -- ∀ s, points match and continuous (λ t, to_fun s t )
@@ -91,6 +88,7 @@ path_homotopy f g :=
     at_zero := at_zero, 
     at_one := at_one, 
     cont := F_cont
+
 }
 
 
@@ -210,7 +208,8 @@ begin unfold T1 T2 T set.inter set.prod, simp [mem_set_of_eq, -one_div_eq_inv], 
   }, { rw mem_set_of_eq , rw mem_set_of_eq, intro H, rw H, norm_num }
 end
 
----
+
+local attribute [instance] classical.prop_decidable 
 
 @[simp]
 lemma cond_start { x y : β} {f : path x y} {g : path x y} {h : path x y} 
@@ -232,7 +231,7 @@ begin intro H, have H2 : T1 ∪ T2 = @set.univ I01, exact cover_I01, unfold T1 T
  exact ⟨ le_of_lt H3, s.2.2⟩ , 
 end
 
-
+--set_option trace.simplify.rewrite true
 def path_homotopy_comp { x y : β} {f : path x y} {g : path x y} {h : path x y} ( F : path_homotopy f g) ( G : path_homotopy g h) : 
 path_homotopy f h :=
 {   to_fun := λ st, ( @paste (I01 × I01) β (set.prod T1 I) (set.prod T2 I)  cover_prod_I01 ( λ st , (fa_hom F ) st ) ) ( λ st, (fb_hom G ) st  )  st  , 
@@ -307,7 +306,6 @@ begin
       cases Hfg  with F,  cases Hgh with G,  
     exact ⟨ path_homotopy_comp F G⟩ , 
 end 
-
 
 theorem is_equivalence : @equivalence (path x y)  (is_homotopic_to) := 
 ⟨ is_reflexive, is_symmetric, is_transitive⟩ 
@@ -432,7 +430,7 @@ theorem repar_path_is_homeq {α : Type*} [topological_space α ] {x y : α } ( f
 : is_homotopic_to (repar_path f φ ) f := 
 begin unfold is_homotopic_to, exact nonempty.intro (hom_repar_path_to_path f φ ),  end 
 
------------------------------
+------------------------------
 
 -- Homotopy of path inverses
 ------  a ≈ b  →  a⁻¹ ≈ b⁻¹ 
@@ -589,7 +587,6 @@ local attribute [instance] classical.prop_decidable
 
 --- Extra Result needed later 
 
--- Now in Mathlib
 lemma frontier_lt_subset_eq [topological_space α] [decidable_linear_order α] [t : ordered_topology α]
   [topological_space β] {f g : β → α} (hf : continuous f) (hg : continuous g) : 
 frontier {b | f b < g b} ⊆ {b | f b = g b} :=
@@ -626,20 +623,23 @@ begin intro h, exact  set.mem_of_mem_of_subset h (frontier_lt_subset_eq hf hg), 
 -- Homotopy of composition with inverse 
 ------ a⁻¹ ⬝ a ≈ c₀  
 
--- continuity lemma employed later
+
+
+-- To shrink path f⁻¹ 
+
+
+def par_aux_a : I01 × I01 → I01 := 
+λ st, if ((1 : ℝ ) - st.1.1) < st.2.1 then st.1 else par_inv st.2
+
+-- dite or ite? 
+
+
 lemma cont_help_1 : continuous (λ (a : ↥I01 × ↥I01), 1 - (a.fst).val ) := 
 begin 
  have h : continuous ( λ (r : ℝ ), 1 - r ),  conv in ( (1:ℝ)-_) begin rw help_inv, end,  
   exact continuous.comp (real.continuous_mul_const (-1) ) (real.continuous_add_const 1), 
  exact continuous.comp (continuous.comp continuous_fst continuous_subtype_val) h, 
 end
-
-
--- To shrink path f⁻¹ 
-
-def par_aux_a : I01 × I01 → I01 := 
-λ st, if ((1 : ℝ ) - st.1.1) < st.2.1 then st.1 else par_inv st.2
-
 
 lemma continuous_par_aux_a'  : continuous par_aux_a := 
 begin 
@@ -904,13 +904,13 @@ begin
  rw mem_set_of_eq, split, 
   have h₁ : 1/2 ≤ (s.val).val, exact s.2.1, 
   refine le_sub_iff_add_le.2 _, rw [add_comm, add_zero], 
-  have H : (2 : ℝ) > 0, {norm_num}, rw mul_comm, 
+  have H : (2 : ℝ) > 0, norm_num, rw mul_comm, 
   refine (div_le_iff H).1 _, exact h₁, 
   have h₂ : (s.val).val ≤ (1:ℝ ), exact s.2.2, 
   have H2 : 2*(s.val).val ≤ 2 * 1, 
-  have HH : 0 < (2 : ℝ), {norm_num}, 
-  refine (@mul_le_mul_left _ _ s.1.1 1 2 HH ).2 _, exact h₂, 
-  rw [mul_one] at H2, norm_num [H2], 
+  have HH : 0 < (2 : ℝ), norm_num, 
+  refine (@mul_le_mul_left _ _ s.1.1 1 2 HH ).2 _, exact h₂,
+  rw [mul_one] at H2, exact H2, 
 end
 
 
@@ -1319,44 +1319,14 @@ end
 
 -- 9 
 
-set_option trace.simplify.rewrite true
-set_option pp.implicit true
-
 lemma step_assoc_9  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
 ( h_3 : p3.to_fun t ∉ T1) :
 h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, T2_of_not_T1 h_1⟩, T2_of_not_T1 h_2⟩) = 
 h.to_fun (par T2._proof_1 ⟨p3.to_fun t, T2_of_not_T1 h_3⟩) := 
 begin
- unfold p3, dsimp, unfold paste, simp [dif_neg h_1], 
+ unfold p3, dsimp, unfold paste, simp [h_1, not_false_iff, dif_neg], 
  have a₁ : ¬ t.val < 3/4, exact not_lt_of_gt (help_step_assoc_8₁ h_1 h_2), 
  unfold p3_aux, simp [a₁, -one_div_eq_inv, -sub_eq_add_neg], unfold par, dsimp [-one_div_eq_inv, -sub_eq_add_neg],
- have a₂ : ↑t = t.val, trivial, have g₁ : (1 - 1 / 2) = (1/2:ℝ ), {norm_num},
- simp [a₂, g₁, -one_div_eq_inv, -sub_eq_add_neg],
- suffices H : ((t.val - 1 / 2) / (1 / 2) - 1 / 2) = (2 * t.val - 1 - 1 / 2), 
-   simp [H, -one_div_eq_inv, -sub_eq_add_neg],
- have a₃ : (t.val - 1 / 2) / (1 / 2) = (t.val ) / (1 / 2) - ( 1 / 2) / (1 / 2), apply eq.symm, 
- refine div_sub_div_same t.val (1/2:ℝ) (1/2:ℝ), rw div_self at a₃, rw a₃ , rw div_eq_inv_mul, 
- have a₄ : (1 / 2 : ℝ )⁻¹ = 2, {norm_num}, rw a₄, {norm_num}, 
-end 
-
-
-
-
-
-lemma step_assoc_9'  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
-( h_3 : p3.to_fun t ∉ T1) :
-h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, T2_of_not_T1 h_1⟩, T2_of_not_T1 h_2⟩) = 
-h.to_fun (par T2._proof_1 ⟨p3.to_fun t, T2_of_not_T1 h_3⟩) := 
-begin
- unfold p3, dsimp, unfold paste, 
- have A : dite (t ∈ T1) (λ (h₁ : t ∈ T1), p3_T1_aux ⟨t, h₁⟩) (λ (h₁ : t ∉ T1), p3_aux ⟨t, T2_of_not_T1 h₁ ⟩) = 
- p3_aux ⟨t, T2_of_not_T1 h_1 ⟩ , simp [h_1], simp [A], 
- have a₁ : ¬ t.val < 3/4, exact not_lt_of_gt (help_step_assoc_8₁ h_1 h_2), 
- unfold p3_aux, 
- /-have B : (⟨ite (((⟨t, _⟩:T2).val).val < 3 / 4) ⟨((⟨t, _⟩:T2).val).val - 1 / 4, _⟩
-            ⟨2 * ((⟨t, _⟩:T2).val).val - 1, _⟩,
-          _⟩ : T2) = (⟨ (2 : ℝ ) * ((⟨t, _⟩:T2).val).val -(1:ℝ) , _⟩ : T2), -/
-  simp [a₁, -one_div_eq_inv, -sub_eq_add_neg], unfold par, dsimp [-one_div_eq_inv, -sub_eq_add_neg],
  have a₂ : ↑t = t.val, trivial, have g₁ : (1 - 1 / 2) = (1/2:ℝ ), {norm_num},
  simp [a₂, g₁, -one_div_eq_inv, -sub_eq_add_neg],
  suffices H : ((t.val - 1 / 2) / (1 / 2) - 1 / 2) = (2 * t.val - 1 - 1 / 2), 
