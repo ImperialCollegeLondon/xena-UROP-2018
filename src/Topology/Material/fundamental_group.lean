@@ -28,7 +28,7 @@ variables {α  : Type*} [topological_space α ] {x : α }
 
 -- life seems easier if you have both these instances, for some reason
 instance setoid_hom_path {α : Type*} [topological_space α] (x : α)  :
-setoid (path x x) := setoid.mk is_homotopic_to (is_equivalence x x)
+setoid (path x x) := setoid.mk is_homotopic_to (is_equivalence)
 
 instance setoid_hom_loop {α : Type*} [topological_space α] (x : α)  :
 setoid (loop x) := by unfold loop; apply_instance
@@ -45,9 +45,6 @@ quotient.mk f
 
 def id_eq_class {α : Type*} [topological_space α ] (x : α )  : space_π₁ x := ⟦ loop_const x ⟧ 
 
---def inv_eq_class {α : Type*} [topological_space α ] {x : α } (F : space_π₁  x) : space_π_1 x := eq_class (inv_of_path (out_loop F))
-
-def inv_eq_class' {α : Type*} [topological_space α ] {x : α } ( f : loop x ) : space_π₁  x := eq_class (inv_of_path f)
 
 lemma inv_eq_class_aux {α : Type*} [topological_space α] {x : α} : 
 ∀ (a b : path x x),
@@ -224,8 +221,6 @@ end
 -- Associativity 
 
 
-
-
 theorem mul_assoc {α : Type*} [topological_space α ] {x : α } (F G H: space_π₁ x) : 
 fg_mul (fg_mul F G) H = fg_mul F (fg_mul G H) :=  
 begin 
@@ -234,7 +229,6 @@ begin
   existsi _, exact path_homotopy_inverse (
   hom_comp_f_g_h (quotient.out F) (quotient.out G) (quotient.out H)), 
 end
-
 
 
 
@@ -257,47 +251,5 @@ noncomputable def π₁_group {α : Type*} [topological_space α ] (x : α ) : g
 
 }
 
-
---------------------- Next things after identity for π_1 group 
--- Not Compiling 
-
-
-
-
-
-
---- out lemma , 
-
--- (or define multiplication given loops (mul_1) )
-
-
-
--- Ignore below
-
-/- def space_π_1 {α : Type*} [topological_space α ] {x : α } :=  --: set (hom_eq_class x)
-{ h : hom_eq_class ( path x x) } -/ 
-
-/- 
-def space_π_1 {α : Type*} [topological_space α ] {x : α } : set (set (path x x)) := 
-{ ∀ f : loop3 x,  hom_eq_class ( f)   } -/ 
-
-
-    
-
-/- {   to_fun := sorry, 
-    path_s := sorry, 
-    at_zero := sorry, 
-    at_one := sorry, 
-    cont := sorry-/
-
-
---set_option trace.simplify.rewrite true
---set_option pp.implicit true
-
-
--- Associativity of homotopy 
-
-
--- Homotopy as a class ????
 
 end fundamental_group
