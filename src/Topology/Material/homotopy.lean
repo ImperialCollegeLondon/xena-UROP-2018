@@ -1290,9 +1290,9 @@ end
 -- 9 
 
 set_option trace.simplify.rewrite true
-set_option pp.implicit true
+--set_option pp.implicit true
 
-lemma step_assoc_9  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
+lemma step_assoc_9_original  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
 ( h_3 : p3.to_fun t ∉ T1) :
 h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, T2_of_not_T1 h_1⟩, T2_of_not_T1 h_2⟩) = 
 h.to_fun (par T2._proof_1 ⟨p3.to_fun t, T2_of_not_T1 h_3⟩) := 
@@ -1310,6 +1310,47 @@ begin
 end 
 
 
+lemma help_step_assoc_9₁ : (1 / 2 : ℝ )⁻¹ = 2 := by norm_num
+
+
+lemma help_step_assoc_9₂  : (1 - 1 / 2) = (1/2:ℝ ) := by norm_num
+
+lemma help_step_assoc_9 : (1 / 2 : ℝ ) ≠ 0 := by norm_num
+
+
+lemma step_assoc_9  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
+( h_3 : p3.to_fun t ∉ T1) :
+h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, T2_of_not_T1 h_1⟩, T2_of_not_T1 h_2⟩) = 
+h.to_fun (par T2._proof_1 ⟨p3.to_fun t, T2_of_not_T1 h_3⟩) := 
+begin
+ unfold p3, dsimp, unfold paste, unfold p3_aux, unfold par, 
+ have a₁ : ¬ t.val < 3/4, exact not_lt_of_gt (help_step_assoc_8₁ h_1 h_2), 
+ have a₂ : ↑t = t.val, trivial, have g₁ : (1 - 1 / 2) = (1/2:ℝ ), exact  help_step_assoc_9₂, 
+ simp [h_1, a₁, a₂, g₁, -one_div_eq_inv, -sub_eq_add_neg],
+ suffices H : ((t.val - 1 / 2) / (1 / 2) - 1 / 2) = (2 * t.val - 1 - 1 / 2), 
+    simp [H, -one_div_eq_inv, -sub_eq_add_neg], 
+ have a₃ : (t.val - 1 / 2) / (1 / 2) = (t.val ) / (1 / 2) - ( 1 / 2) / (1 / 2), apply eq.symm, 
+ refine div_sub_div_same t.val (1/2:ℝ) (1/2:ℝ), rw div_self at a₃, rw [a₃, div_eq_inv_mul],
+ have a₄ : (1 / 2 : ℝ )⁻¹ = 2, exact help_step_assoc_9₁ , rw a₄, exact help_step_assoc_9, 
+end
+
+/- simp to break down dite seems to cause deterministic timeout 
+lemma step_assoc_9'  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
+( h_3 : p3.to_fun t ∉ T1) :
+h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, T2_of_not_T1 h_1⟩, T2_of_not_T1 h_2⟩) = 
+h.to_fun (par T2._proof_1 ⟨p3.to_fun t, T2_of_not_T1 h_3⟩) := 
+begin
+ unfold p3, dsimp, unfold paste, simp [dif_neg h_1], 
+ have a₁ : ¬ t.val < 3/4, exact not_lt_of_gt (help_step_assoc_8₁ h_1 h_2), 
+ unfold p3_aux, simp [a₁, -one_div_eq_inv, -sub_eq_add_neg], unfold par, dsimp [-one_div_eq_inv, -sub_eq_add_neg],
+ have a₂ : ↑t = t.val, trivial, have g₁ : (1 - 1 / 2) = (1/2:ℝ ), {norm_num},
+ simp [a₂, g₁, -one_div_eq_inv, -sub_eq_add_neg],
+ suffices H : ((t.val - 1 / 2) / (1 / 2) - 1 / 2) = (2 * t.val - 1 - 1 / 2), 
+   simp [H, -one_div_eq_inv, -sub_eq_add_neg],
+ have a₃ : (t.val - 1 / 2) / (1 / 2) = (t.val ) / (1 / 2) - ( 1 / 2) / (1 / 2), apply eq.symm, 
+ refine div_sub_div_same t.val (1/2:ℝ) (1/2:ℝ), rw div_self at a₃, rw a₃ , rw div_eq_inv_mul, 
+ have a₄ : (1 / 2 : ℝ )⁻¹ = 2, {norm_num}, rw a₄, {norm_num}, 
+end
 
 
 
@@ -1336,23 +1377,9 @@ begin
  have a₄ : (1 / 2 : ℝ )⁻¹ = 2, {norm_num}, rw a₄, {norm_num}, 
 end
 
-/- simp to break down dite seems to cause deterministic timeout 
-lemma step_assoc_9'  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
-( h_3 : p3.to_fun t ∉ T1) :
-h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, T2_of_not_T1 h_1⟩, T2_of_not_T1 h_2⟩) = 
-h.to_fun (par T2._proof_1 ⟨p3.to_fun t, T2_of_not_T1 h_3⟩) := 
-begin
- unfold p3, dsimp, unfold paste, simp [dif_neg h_1], 
- have a₁ : ¬ t.val < 3/4, exact not_lt_of_gt (help_step_assoc_8₁ h_1 h_2), 
- unfold p3_aux, simp [a₁, -one_div_eq_inv, -sub_eq_add_neg], unfold par, dsimp [-one_div_eq_inv, -sub_eq_add_neg],
- have a₂ : ↑t = t.val, trivial, have g₁ : (1 - 1 / 2) = (1/2:ℝ ), {norm_num},
- simp [a₂, g₁, -one_div_eq_inv, -sub_eq_add_neg],
- suffices H : ((t.val - 1 / 2) / (1 / 2) - 1 / 2) = (2 * t.val - 1 - 1 / 2), 
-   simp [H, -one_div_eq_inv, -sub_eq_add_neg],
- have a₃ : (t.val - 1 / 2) / (1 / 2) = (t.val ) / (1 / 2) - ( 1 / 2) / (1 / 2), apply eq.symm, 
- refine div_sub_div_same t.val (1/2:ℝ) (1/2:ℝ), rw div_self at a₃, rw a₃ , rw div_eq_inv_mul, 
- have a₄ : (1 / 2 : ℝ )⁻¹ = 2, {norm_num}, rw a₄, {norm_num}, 
-end -/ 
+
+
+ -/ 
 
 
 
