@@ -635,54 +635,17 @@ begin
 end
 
 
--- To shrink path f⁻¹ 
+/- To prove for a path f that f⁻¹ ⬝ f ≈ c₀ (constant loop at given basepoint), 
+need 2 continuous function that are (2) piecewise-linear applied as reparamatrization of path φ(s) (similar to above),
+such that the composition (f⁻¹ ⬝ f) φ(1) = c₀ and (f⁻¹ ⬝ f) φ(0) = f⁻¹ ⬝ f - as depicted in AT pg 27. 
+-/ 
+
+-- "Reparametrisation" to shrink path f⁻¹ 
 
 def par_aux_a : I01 × I01 → I01 := 
 λ st, if ((1 : ℝ ) - st.1.1) < st.2.1 then st.1 else par_inv st.2
 
 
-lemma continuous_par_aux_a'  : continuous par_aux_a := 
-begin 
-unfold par_aux_a, 
-refine continuous_if _ continuous_fst _ , 
-  { intros st F, 
-    have H : frontier {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} ⊆  {a : ↥I01 × ↥I01 | 1 - (a.fst).val = (a.snd).val }, 
-      { unfold frontier , 
-        have H2 : interior {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} = {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val}, 
-          refine interior_eq_iff_open.2 _, refine is_open_lt  _ _,  
-          exact cont_help_1, 
-          exact continuous.comp continuous_snd continuous_subtype_val, 
-        rw H2, 
-        have H3 : closure {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} ⊆ closure {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val}, 
-          refine closure_mono _  , rw set.set_of_subset_set_of, intros x h, exact le_of_lt h,   
-        have H4 : closure {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val} = {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val}, 
-          refine closure_eq_iff_is_closed.2 _ ,
-          refine is_closed_le cont_help_1 (continuous.comp continuous_snd continuous_subtype_val), 
-        rw H4 at H3,  
-        have G1 : closure {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} \ 
-          {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} ⊆ 
-          {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val} \ {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val}, 
-          { unfold has_sdiff.sdiff set.diff, intros a Ha, simp [-add_neg_le_iff_le_add', -sub_eq_add_neg] at Ha, 
-          simp [-add_neg_le_iff_le_add', -sub_eq_add_neg], cases Ha with h₁ h₂ , 
-          have h₃ : a ∈ {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val}, exact set.mem_of_mem_of_subset h₁ H3, 
-          rw mem_set_of_eq at h₃ , exact ⟨  h₃ , h₂ ⟩ , 
-          }, 
-
-        have G2 : {a : ↥I01 × ↥I01 | 1 - (a.fst).val ≤ (a.snd).val} \ {a : ↥I01 × ↥I01 | 1 - (a.fst).val < (a.snd).val} ⊆ 
-        {a : ↥I01 × ↥I01 | 1 - (a.fst).val = (a.snd).val}, 
-        unfold has_sdiff.sdiff set.diff, intros a Ha, simp [-add_neg_le_iff_le_add', -sub_eq_add_neg] at Ha, 
-        rw mem_set_of_eq, exact le_antisymm Ha.1 Ha.2, 
-        exact set.subset.trans G1 G2, 
-      }, 
-    have h : st ∈ {a : ↥I01 × ↥I01 | 1 - (a.fst).val = (a.snd).val}, 
-      exact set.mem_of_mem_of_subset F H , 
-    rw [ mem_set_of_eq] at h, unfold par_inv, refine subtype.eq _, 
-    show (st.fst).val = 1 -(st.snd).val, 
-    have H4 : (st.snd).val = 1 - (st.fst).val, exact eq.symm h, 
-    simp [H4], 
-  }, 
-exact continuous.comp continuous_snd continuous_par_inv, 
-end
 
 lemma continuous_par_aux_a  : continuous par_aux_a := 
 begin 
@@ -702,7 +665,7 @@ end
 
 def repar_stop_a : set.prod T1 I → I01 := 
 λ st, par_aux_a ( shift (  par T1._proof_1 ⟨ st.1.1, (mem_prod.1 st.2).1⟩ , st.1.2 ) )
---- need shift to have st.2 double speed (and re-shift starting domain to keep ordering when constructing homotopy)
+
 
 
 lemma cont_r_stop_a : continuous repar_stop_a := 
@@ -714,7 +677,7 @@ begin
  refine continuous_subtype_mk _ _, exact continuous.comp continuous_subtype_val continuous_fst, 
 end
 
-
+-- This will be the actual function that will make up the left part of the homotopy (see f_inv_comp)
 def fa_inv_comp {α : Type*} [topological_space α ] {x y : α } (f : path x y) : set.prod T1 I → α := 
 λ st, f.to_fun  ( repar_stop_a st  )
 
@@ -726,7 +689,7 @@ begin unfold fa_inv_comp, exact continuous.comp  cont_r_stop_a  f.cont, end
 
 --------------
 
--- To shrink path f 
+-- "Reparametrisation" to shrink path f 
 
 
 def par_aux_b : I01 × I01 → I01 := 
@@ -769,11 +732,12 @@ begin unfold fb_inv_comp, exact continuous.comp cont_r_stop_b  f.cont, end
 
 
 
----- Combine 
+---- Combine the two reparametrisation 
+---- Set up function and lemmas for path_homotopy.mk' 
 
 def f_inv_comp {α : Type*} [topological_space α ] {x y : α } (f : path x y) : I01 × I01 → α := 
 λ st, ( paste cover_prod_I01  ( λ st, (fa_inv_comp f ) st ) ( λ st, (fb_inv_comp f ) st ) ) (shift st)
--- see repar_stop_a
+
 
 lemma f_inv_comp_start_pt {α : Type*} [topological_space α ] {x y : α } (f : path x y) :
  ∀ (s : I01), f_inv_comp f (s, 0) = y := 
@@ -784,7 +748,6 @@ begin intro s,
     split_ifs,   have H2 : s.val + (0 : I01).val = s.val, show s.val + (0:ℝ ) = s.val, exact  add_zero s.val, 
       have H3 : s.val ≤ (1:I01).val, exact s.2.2, have H4 : 1 - (0:I01).val = 1, exact sub_zero 1, 
       rw [ eqn_start ] at h, rw [sub_lt] at h, have H5 : 1 < s.val, rw H4 at h,  exact h,
-      --[sub_lt] at h,    rw [H2] at h, 
       by_contradiction, have G : s.val < s.val, exact lt_of_le_of_lt H3 h, 
         simp [lt_iff_le_and_ne] at G, trivial,
       simp,  
@@ -848,14 +811,13 @@ begin
 end
 
 
-
 lemma f_inv_comp_cont {α : Type*} [topological_space α ] {x y : α } (f : path x y) :
 continuous (f_inv_comp f) := 
 begin 
   unfold f_inv_comp, refine continuous.comp continuous_shift_order _,  
   refine cont_of_paste prod_T1_is_closed prod_T2_is_closed _ 
     (cont_fa_inv_comp f) (cont_fb_inv_comp f), 
-  { unfold match_of_fun, intros w B1 B2, -- can strip out this..? 
+  { unfold match_of_fun, intros w B1 B2, 
     have Int : w ∈ set.inter (set.prod T1 I) (set.prod T2 I), exact ⟨ B1 , B2 ⟩ , rwa [prod_inter_T] at Int, 
     have V : w.1.1 = 1/2, rwa [set.prod, mem_set_of_eq] at Int, rwa [mem_set_of_eq] at Int, exact Int.1, cases w, 
     have xeq : w_fst = ⟨ 1/2 , help_01 ⟩ , apply subtype.eq, rw V, --
@@ -874,11 +836,11 @@ begin
 end
 
 
-
 noncomputable def hom_inv_comp_to_const {α : Type*} [topological_space α ] {x y : α } (f : path x y) : 
 path_homotopy (comp_of_path (inv_of_path f) f) (loop_const y) := 
 path_homotopy.mk' (f_inv_comp f) (f_inv_comp_start_pt f) (f_inv_comp_end_pt f) 
 (f_inv_comp_at_zero f) (f_inv_comp_at_one f) (f_inv_comp_cont f)  
+
 
 
 ----------------------------------------------------------------------
@@ -886,9 +848,11 @@ path_homotopy.mk' (f_inv_comp f) (f_inv_comp_start_pt f) (f_inv_comp_end_pt f)
 -- Homotopy of three paths (associativity)
 ------ (f ⬝ g) ⬝ h ≈ f ⬝ ( g ⬝ h)  
 
+/-  For this define a (3) piecewise linear function φ (repar_I01), 
+whose corresponding homotopy will serve for associativity proof.
+-/
 
-
---- Reparametrisation on [1/2, 1]
+--- Reparametrisation on [1/2, 1] ( 2 piecewise linear funtion : [1/2, 1] → [1/4, 1] )
 
 lemma help_p3_aux₁  (s : T2) : (s.val).val - 1 / 4 ∈ I01 := 
 begin 
@@ -960,7 +924,9 @@ begin
   (continuous.comp continuous_subtype_val continuous_subtype_val) (real.continuous_mul_const (1/2)) ) , 
 end
 
+--
 
+-- Define the 3 p.w.l function φ needed for the homotopy 
 
 noncomputable def p3 : repar_I01 := 
 { to_fun := paste cover_I01 p3_T1_aux p3_aux, 
@@ -985,73 +951,21 @@ noncomputable def p3 : repar_I01 :=
 
 }
 
+
+-----------
+
+---- Following section is to implement this and prove that 
+-- hom_repar_path_to_path (( f ⬝ g ) ⬝ h) φ is indeed a homotopy  f ⬝ (g ⬝ h) ≈ ( f ⬝ g ) ⬝ h 
+
 section 
 variables {f : path x y} {g : path y z} {h : path z w}
 
--- To prove associativity need to show the reparametrisation of path 
+-- To prove associativity need to show equality with the reparametrisation of path 
+-- i.e (( f ⬝ g ) ⬝ h) φ = (f ⬝ (g ⬝ h)), so that can use previous results regarding repar_I01
+-- This will involve proving 9 subgoals for the different values (t : I01) can take
 
 lemma contr_T1 {x : I01} ( h₁ : x ∈ T1 ) (h₂ : x ∉ T1) : false := by cc
 
--- Lemmas for 2
-
-lemma p3_ineq_T1 {t : {x // x ∈ I01}} (h_1 : t ∈ T1 )  : p3.to_fun t ∈ {x : I01 | 0 ≤ x.val ∧ x.val ≤ 1 / 4 } :=
-begin 
-  rw mem_set_of_eq, split, 
-    unfold p3, dsimp, unfold paste p3_T1_aux, simp [h_1, -one_div_eq_inv], refine mul_nonneg _ t.2.1 , {norm_num},
-    unfold p3, dsimp, unfold paste p3_T1_aux, simp [h_1, -one_div_eq_inv], 
-    have h₂ : (1/4 : ℝ) = (1/2)*(1/2), {norm_num}, rw h₂, unfold T1 T at h_1,  
-    have h₃ := h_1.2, 
-    refine mul_le_mul _ h₃ t.2.1 _ , exact le_of_eq (refl (1/2)), {norm_num}, 
-end 
-
-lemma par_T1_ineq₁ {s : {x // x ∈ I01}} {h_1 : s ∈ T1 } (h : s ∈ {x : ↥I01 | 0 ≤ x.val ∧ x.val ≤ 1 / 4 } ) :
-par T1._proof_1 ⟨ s , h_1 ⟩ ∈ T1 := 
-begin 
- unfold T1 T, rw mem_set_of_eq, split,
-   { unfold par, dsimp [-sub_eq_add_neg], rw sub_zero, rw sub_zero, refine (le_div_iff _ ).2 _, {norm_num}, 
-   rw [mul_comm, mul_zero], exact s.2.1, }, 
-   unfold par, dsimp [-sub_eq_add_neg], rw sub_zero, rw sub_zero, refine (le_div_iff _ ).1 _ ,{norm_num}, 
-   have h₂ : 1 / 2 / (1 / 2)⁻¹ = (1/4 : ℝ ), {norm_num}, rw h₂, 
-   exact h.2, 
-end
-
--- Lemmas for 4
-
-lemma p3_not_T1 {t : {x // x ∈ I01}} (h : t ∉  T1 ) :  1/4 < (p3.to_fun t ).val := 
-begin  
- have h₁ : 1/2 < t.val, 
-  { unfold T1 T at h,
-   by_contradiction, rw [not_lt] at a, 
-   suffices a₁ : t ∈  {x : ↥I01 | 0 ≤ x.val ∧ x.val ≤ 1 / 2}, cc, 
-   exact ⟨ t.2.1, a ⟩ , 
-  }, 
-  unfold p3, dsimp, unfold paste, simp [h, -one_div_eq_inv], unfold p3_aux, split_ifs, 
-  { refine lt_sub_iff_add_lt.2 _, have a₁ : 1 / 4 + 1 / 4 = (1/2:ℝ ), {norm_num}, rw a₁ , exact h₁ },
-  simp at h_1, 
-  have a₁ : 5 / 4 < 2 * t.val, 
-    { have H : 5 / 4 = (5 /3 )*(3/4:ℝ ), {norm_num}, rw H, 
-    refine mul_lt_mul _ h_1 _ _, norm_num }, 
-  norm_num [a₁ ] , 
-end
-
-
-lemma p3_impl₁ {t : {x // x ∈ I01}} (h : (p3.to_fun t ).val ≤ 1/4 )  : t ∈ T1 :=
-begin 
- by_contradiction, 
-  have h₂  : 1/4 < (p3.to_fun t ).val, exact p3_not_T1 a, 
-  --have g₁ : (1/4:ℝ )< 1/4 , 
-  suffices g₁ : ¬  (p3.to_fun t).val ≤ 1 / 4, cc, 
-  exact (le_not_le_of_lt h₂).2  , 
-end
-
-lemma par_impl_T1  {t : {x // x ∈ I01}} {h_3 : p3.to_fun t ∈ T1} (h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∈ T1) : 
-(p3.to_fun t ).val ≤ 1/4 := 
-begin 
- unfold par T1 T at h_4, rw mem_set_of_eq at h_4, cases h_4 with h₁ h₂ , simp [-one_div_eq_inv] at h₂, 
- have H :  (0: ℝ )<(1 / 2) , {norm_num}, 
- have H2 :  1 / 4 = (1/2:ℝ )* (1/2), {norm_num}, rw H2, 
- exact (div_le_iff H).1 h₂ ,  
-end
 
 -- 1
 
@@ -1073,6 +987,27 @@ begin
 end 
 
 -- 2
+
+lemma p3_ineq_T1 {t : {x // x ∈ I01}} (h_1 : t ∈ T1 )  : p3.to_fun t ∈ {x : I01 | 0 ≤ x.val ∧ x.val ≤ 1 / 4 } :=
+begin 
+  rw mem_set_of_eq, split, 
+    unfold p3, dsimp, unfold paste p3_T1_aux, simp [h_1, -one_div_eq_inv], refine mul_nonneg _ t.2.1 , {norm_num},
+    unfold p3, dsimp, unfold paste p3_T1_aux, simp [h_1, -one_div_eq_inv], 
+    have h₂ : (1/4 : ℝ) = (1/2)*(1/2), {norm_num}, rw h₂, unfold T1 T at h_1,  
+    have h₃ := h_1.2, 
+    refine mul_le_mul _ h₃ t.2.1 _ , exact le_of_eq (refl (1/2)), {norm_num}, 
+end 
+
+lemma par_T1_ineq₁ {s : {x // x ∈ I01}} {h_1 : s ∈ T1 } (h : s ∈ {x : ↥I01 | 0 ≤ x.val ∧ x.val ≤ 1 / 4 } ) :
+par T1._proof_1 ⟨ s , h_1 ⟩ ∈ T1 := 
+begin 
+ unfold T1 T, rw mem_set_of_eq, split,
+   { unfold par, dsimp [-sub_eq_add_neg], rw sub_zero, rw sub_zero, refine (le_div_iff _ ).2 _, {norm_num}, 
+   rw [mul_comm, mul_zero], exact s.2.1, }, 
+   unfold par, dsimp [-sub_eq_add_neg], rw sub_zero, rw sub_zero, refine (le_div_iff _ ).1 _ ,{norm_num}, 
+   have h₂ : 1 / 2 / (1 / 2)⁻¹ = (1/4 : ℝ ), {norm_num}, rw h₂, 
+   exact h.2, 
+end
 
 lemma help_step_assoc_2 {t : {x // x ∈ I01}} (h_1 : t ∈ T1 ) { h_2 : p3.to_fun t ∈ T1} (h_3 : par T1._proof_1 ⟨p3.to_fun t, h_2⟩ ∉ T1) : 
 par T1._proof_1 ⟨p3.to_fun t, h_2⟩ ∈  T2 :=  T2_of_not_T1 h_3 
@@ -1103,6 +1038,41 @@ by_contradiction, -- as p3.to_fun t ∈ {x : ↥I01 | 0 ≤ x.val ∧ x.val ≤ 
 end
 
 --4
+
+lemma p3_not_T1 {t : {x // x ∈ I01}} (h : t ∉  T1 ) :  1/4 < (p3.to_fun t ).val := 
+begin  
+ have h₁ : 1/2 < t.val, 
+  { unfold T1 T at h,
+   by_contradiction, rw [not_lt] at a, 
+   suffices a₁ : t ∈  {x : ↥I01 | 0 ≤ x.val ∧ x.val ≤ 1 / 2}, cc, 
+   exact ⟨ t.2.1, a ⟩ , 
+  }, 
+  unfold p3, dsimp, unfold paste, simp [h, -one_div_eq_inv], unfold p3_aux, split_ifs, 
+  { refine lt_sub_iff_add_lt.2 _, have a₁ : 1 / 4 + 1 / 4 = (1/2:ℝ ), {norm_num}, rw a₁ , exact h₁ },
+  simp at h_1, 
+  have a₁ : 5 / 4 < 2 * t.val, 
+    { have H : 5 / 4 = (5 /3 )*(3/4:ℝ ), {norm_num}, rw H, 
+    refine mul_lt_mul _ h_1 _ _, norm_num }, 
+  norm_num [a₁ ] , 
+end
+
+
+lemma p3_impl₁ {t : {x // x ∈ I01}} (h : (p3.to_fun t ).val ≤ 1/4 )  : t ∈ T1 :=
+begin 
+ by_contradiction, 
+  have h₂  : 1/4 < (p3.to_fun t ).val, exact p3_not_T1 a, 
+  suffices g₁ : ¬  (p3.to_fun t).val ≤ 1 / 4, cc, 
+  exact (le_not_le_of_lt h₂).2  , 
+end
+
+lemma par_impl_T1  {t : {x // x ∈ I01}} {h_3 : p3.to_fun t ∈ T1} (h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∈ T1) : 
+(p3.to_fun t ).val ≤ 1/4 := 
+begin 
+ unfold par T1 T at h_4, rw mem_set_of_eq at h_4, cases h_4 with h₁ h₂ , simp [-one_div_eq_inv] at h₂, 
+ have H :  (0: ℝ )<(1 / 2) , {norm_num}, 
+ have H2 :  1 / 4 = (1/2:ℝ )* (1/2), {norm_num}, rw H2, 
+ exact (div_le_iff H).1 h₂ ,  
+end
 
 lemma step_assoc_4 {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) ( h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∈ T1) 
 ( h_3 : p3.to_fun t ∈ T1) (h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∈ T1) : 

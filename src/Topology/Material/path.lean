@@ -418,7 +418,6 @@ definition par_inv : I01 → I01 :=  λ x, ⟨ 1 - x.val , inv_in_I01 x ⟩
 
 @[simp] lemma eqn_2_par_inv : par_inv 1 = 0 := by refl 
 
---#check mul_one
 
 lemma help_inv (y : ℝ ) : ( 1 - y) = (-1) * y + 1 := by simp 
 
@@ -445,39 +444,17 @@ definition inv_of_path {α} [topological_space α] { x y : α } ( f : path x y )
 
 }
 
-
-
-
-
-
+------------------------------------
 
 -- LOOP 
-
--- Definition of loop 
---- (Extends path?)
-------------
-
-/- 
-structure loop {α} [topological_space α] (x : α) { y : α } extends  path x y  := 
-(base_pt : to_fun 0 = x ∧ to_fun 1 = x) -/ 
-
-/- structure loop {α} [topological_space α] (x : α) :=
-(to_fun : I01 → α)
-(base_pt : to_fun 0 = x ∧ to_fun 1 = x)
-(cont : continuous to_fun)
--/
 
 
 def is_loop ( g : path x y) : Prop := x = y -- function to check loop
 
-/- 
-structure loop3 {α} [topological_space α] (x : α) extends path x x := 
-(base_pt : to_fun 0 = x ∧ to_fun 1 = x) -/ 
---(base_pt : is_loop )
-
 
 --@[simp]
 def loop {α} [topological_space α] (x0 : α) : Type* := path x0 x0 
+
 
 def loop_const {α} [topological_space α] (x0 : α) : loop x0 := 
 {   to_fun:= λ t, x0 ,  
@@ -487,9 +464,4 @@ def loop_const {α} [topological_space α] (x0 : α) : loop x0 :=
 } 
 
 
--- lemma 
--- instance loop_is_path (l1 : loop3 x0) : path x0 x0  := l1.to_path 
-
-
 end path 
-
