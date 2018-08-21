@@ -66,7 +66,6 @@ structure path_homotopy2 {β} [topological_space β] { x y : β } ( f : path x y
 (at_zero : ∀ y, to_fun 0 y = f.to_fun y ) 
 (at_one :  ∀ y, to_fun 1 y = g.to_fun y)
 (cont : continuous to_fun)
-
 structure path_homotopy3 {β} [topological_space β] { x y : β } ( f : path x y) ( g : path x y) := 
 (to_fun : I01 → I01 →  β )
 (path_s : ∀ s : I01, is_path x y ( λ t, to_fun s t ) )  -- ∀ s, points match and continuous (λ t, to_fun s t )
@@ -89,6 +88,7 @@ path_homotopy f g :=
     at_zero := at_zero, 
     at_one := at_one, 
     cont := F_cont
+
 }
 
 
@@ -306,7 +306,6 @@ begin
       cases Hfg  with F,  cases Hgh with G,  
     exact ⟨ path_homotopy_comp F G⟩ , 
 end 
-
 
 theorem is_equivalence : @equivalence (path x y)  (is_homotopic_to) := 
 ⟨ is_reflexive, is_symmetric, is_transitive⟩ 

@@ -19,6 +19,16 @@ theorem midtoS (a b : point) : S (mid a b) a = b := (seven6 $ ten1 a b).symm
 
 theorem midofS (a b : point) : mid b (S a b) = a := seven17 (ten1 b (S a b)) (seven5 a b)
 
+theorem mid.neq {a b : point} : a ≠ b → mid a b ≠ a := --λ h h1, h ((seven11 a) ▸ h1 ▸ midtoS a b)
+begin
+intros h h1,
+apply h,
+suffices : eqd (mid a b) a (mid a b) b,
+  rw h1 at this,
+  exact id_eqd a b a this.symm,
+exact (ten1 a b).2
+end
+
 theorem ten2 {p : point} {A : set point} (h : line A) (h_1 : p ∉ A) : ∃! q, mid p q ∈ A ∧ perp A (l p q) :=
 begin
 rcases h with ⟨a, b, h₁, h₂⟩,
@@ -219,7 +229,7 @@ have h9 : R z x p,
     simp,
   have h_2 : xperp x A (l p x),
     rw ←h1,
-    exact eight15 (ten3e h p) (six17b p (mid p (Sl h p))) (ten9 h h_1),
+    exact eight15 (ten9 h h_1) (ten3e h p) (six17b p (mid p (Sl h p))),
   apply h_2.2.2.2.2,
     apply six27 h,
       exact ten3e h p,
@@ -235,7 +245,7 @@ have h10 : R z y q,
     simp,
   have h_2 : xperp y A (l q y),
     rw ←h2,
-    exact eight15 (ten3e h q) (six17b q (mid q (Sl h q))) (ten9 h h_1),
+    exact eight15 (ten9 h h_1) (ten3e h q) (six17b q (mid q (Sl h q))),
   apply h_2.2.2.2.2,
     apply six27 h,
       exact ten3e h q,
@@ -542,10 +552,10 @@ apply exists_unique_of_exists_of_unique,
     split,
       exact h2,
     have h5 : xperp x (l a b) (l c x),
-      exact eight15 hx.1.1 (six17b c x) hx.1.2,
+      exact eight15 hx.1.2 hx.1.1 (six17b c x),
     have h6 : xperp x' (l a' b') (l c' x'),
       suffices : perp (l a' b') (l c' x'),
-        exact eight15 h3 (six17b c' x') this,
+        exact eight15 this h3 (six17b c' x'),
       suffices : l q x' = l c' x',
         rw this at hq,
         exact hq.1,
@@ -757,22 +767,24 @@ end
 
 theorem eleven3 {a b c d e f : point} : eqa a b c d e f ↔ ∃ a' c' d' f', sided b a' a ∧ 
 sided b c' c ∧ sided e d' d ∧ sided e f' f ∧ cong a' b c' d' e f' :=
-begin
-split,
-  intro h,
-  exact eleven3a h,
-intro h,
-exact eleven2a (eleven4a h)
-end
+⟨λ h, eleven3a h, λ h, eleven2a (eleven4a h)⟩
 
 theorem eleven4 {a b c d e f : point} : eqa a b c d e f ↔ a ≠ b ∧ c ≠ b ∧ d ≠ e ∧ f ≠ e ∧
 ∀ a' c' d' f', sided b a' a → sided b c' c → sided e d' d → sided e f' f → eqd b a' e d' → eqd b c' e f' → eqd a' c' d' f' :=
+⟨λ h, eleven4a (eleven3a h), λ h, eleven2a h⟩
+
+lemma eleven5 {a b c d e f : point} : eqa a b c d e f ↔ ∃ d' f', sided e d' d ∧ sided e f' f ∧ cong a b c d' e f' :=
 begin
 split,
   intro h,
-  exact eleven4a (eleven3a h),
-intro h,
-exact eleven2a h
+  cases exists_of_exists_unique (six11 h.2.2.1 h.1.symm) with d' hd,
+  cases exists_of_exists_unique (six11 h.2.2.2.1 h.2.1.symm) with f' hf,
+  refine ⟨d', f', hd.1, hf.1, _⟩,
+  exact ⟨hd.2.symm.flip, hf.2.symm, (eleven4.1 h).2.2.2.2 a c d' f' (six5 h.1) (six5 h.2.1) hd.1 hf.1 hd.2.symm hf.2.symm⟩,
+rintros ⟨d', f', h, h1, h2⟩,
+apply eleven3.2 ⟨a, c, d', f', _, _, h, h1, h2⟩,
+  exact six5 (two7 h2.1.symm h.1),
+exact six5 (two7 h2.2.1.symm.flip h1.1)
 end
 
 theorem eqa.refl {a b c : point} : a ≠ b → c ≠ b → eqa a b c a b c :=
@@ -789,8 +801,7 @@ unfold eqa,
 rintros ⟨h, h1, h2, h3, a', c', d', f', h4, h5, h6, h7, h8, h9, h10, h11, h12⟩,
 simp [*, -exists_and_distrib_left],
 existsi [d', f', a', c'],
-simp *,
-exact h12.symm
+simp [*, h12.symm]
 end
 
 theorem eqa.trans {a b c d e f p q r : point} : eqa a b c d e f → eqa d e f p q r → eqa a b c p q r :=
@@ -839,7 +850,7 @@ rw eleven4 at h,
 exact h.2.2.2.2 a₁ c₁ d₁ f₁ h12 h13 h14 h15 h8 h9
 end
 
-theorem eqa.flip {a b c : point} : a ≠ b → c ≠ b → eqa a b c c b a :=
+theorem eleven8 {a b c : point} : a ≠ b → c ≠ b → eqa a b c c b a :=
 begin
 intros h h1,
 cases seg_cons a c b b with a' ha,
@@ -857,6 +868,9 @@ split,
 exact two5 (eqd.refl a' c')
 end
 
+theorem eqa.flip {a b c d e f : point} : eqa a b c d e f → eqa c b a f e d := assume h,
+(eleven8 h.2.1 h.1).trans (h.trans (eleven8 h.2.2.1 h.2.2.2.1))
+
 theorem eleven9 {a b c a' c' : point} : sided b a' a → sided b c' c → eqa a b c a' b c' :=
 begin
 intros h h1,
@@ -871,6 +885,9 @@ begin
 intros h h1 h2 h3 h4,
 exact (eleven9 h1 h2).symm.trans (h.trans (eleven9 h3 h4))
 end
+
+theorem eleven11 {a b c d e f : point} : a ≠ b → c ≠ b → cong a b c d e f → eqa a b c d e f :=
+λ h h1 h2, eleven3.2 ⟨a, c, d, f, (six5 h), (six5 h1), (six5 (two7 h2.1 h)), (six5 (two7 h2.2.1.flip h1)), h2⟩
 
 theorem eleven12 {a b c : point} (p : point): a ≠ b → c ≠ b → eqa a b c (S p a) (S p b) (S p c) :=
 begin
@@ -1042,25 +1059,22 @@ subst f₂,
 exact h9.1.symm.trans h10.1
 end
 
-theorem eleven16 {a b c a' b' c' : point} : a ≠ b → c ≠ b → R a b c → a' ≠ b' → c' ≠ b' → R a' b' c' → 
+theorem eleven16 {a b c a' b' c' : point} : a ≠ b → c ≠ b → a' ≠ b' → c' ≠ b' → R a b c → R a' b' c' → 
 eqa a b c a' b' c' :=
 begin
 intros h h1 h2 h3 h4 h5,
-cases exists_of_exists_unique (six11 h3 h.symm) with a₁ ha,
-cases exists_of_exists_unique (six11 h4 h1.symm) with c₁ hc,
+cases exists_of_exists_unique (six11 h2 h.symm) with a₁ ha,
+cases exists_of_exists_unique (six11 h3 h1.symm) with c₁ hc,
 rw eleven3,
 existsi [a, c, a₁, c₁],
 simp [six5 h, six5 h1, ha.1, hc.1],
-split,
-  exact ha.2.symm.flip,
-split,
-  exact hc.2.symm,
-apply ten12 h2,
+refine ⟨ha.2.symm.flip, hc.2.symm, _⟩,
+apply ten12 h4,
     suffices : R a' b' c₁,
-      apply eight3 this h3,
+      apply eight3 this h2,
       exact (four11 (six4.1 ha.1).1).2.2.1,
     apply R.symm,
-    apply eight3 h5.symm h4,
+    apply eight3 h5.symm h3,
     exact (four11 (six4.1 hc.1).1).2.2.1,
   exact ha.2.symm.flip,
 exact hc.2.symm
@@ -1069,24 +1083,9 @@ end
 theorem eleven17 {a b c a' b' c' : point} : R a b c → eqa a b c a' b' c' → R a' b' c' :=
 begin
 intros h h1,
-rw eleven4 at h1,
-rcases h1 with ⟨h1, h2, h3, h4, h5⟩,
-cases exists_of_exists_unique (six11 h3 h1.symm) with a₁ ha,
-cases exists_of_exists_unique (six11 h4 h2.symm) with c₁ hc,
-suffices : R a₁ b' c₁,
-  have h6 : R a' b' c₁,
-    apply eight3 this ha.1.1,
-    exact (four11 (six4.1 ha.1).1).2.1,
-  apply R.symm,
-  apply eight3 h6.symm hc.1.1,
-  exact (four11 (six4.1 hc.1).1).2.1,
-suffices : cong a b c a₁ b' c₁,
-  exact eight10 h this,
-split,
-  exact ha.2.symm.flip,
-split,
-  exact hc.2.symm,
-exact h5 a c a₁ c₁ (six5 h1) (six5 h2) ha.1 hc.1 ha.2.symm hc.2.symm
+rcases eleven5.1 h1 with ⟨a₁, c₁, ha, hc, h2⟩,
+apply eight3 _ ha.1 (four11 (six4.1 ha).1).2.1,
+exact (eight3 (eight10 h h2).symm hc.1 (four11 (six4.1 hc).1).2.1).symm
 end
 
 theorem eleven18 {a b c d : point} : B c b d → c ≠ b → d ≠ b → a ≠ b → (R a b c ↔ eqa a b c a b d) :=
@@ -1098,7 +1097,7 @@ split,
     apply (eight3 h4.symm h1 _).symm,
     right, right,
     exact h.symm,
-  exact eleven16 h3 h1 h4 h3 h2 h5,
+  exact eleven16 h3 h1 h3 h2 h4 h5,
 intro h4,
 rw eleven3 at h4,
 rcases h4 with ⟨a', c', a₁, d', h4⟩,
@@ -1136,7 +1135,7 @@ have h4 : ¬col b a q,
 apply (eleven15b h3 h3),
       exact eqa.refl (six26 h3).1 (six26 h3).2.1.symm,
     exact side.refl (nine11 h2).1 (nine11 h2).2.1,
-  exact eleven16 (six26 h3).1 (six26 h3).2.1.symm h (six26 h4).1 (six26 h4).2.1.symm h1,
+  exact eleven16 (six26 h3).1 (six26 h3).2.1.symm (six26 h4).1 (six26 h4).2.1.symm h h1,
 exact h2.symm
 end
 
@@ -1161,7 +1160,7 @@ have h5 : c ∈ P,
 apply exists_unique.intro (l c a),
   split,
     exact (nine25 h1 h5 (h3 h2) (six13 (eight14e hc.1).2)).1,
-  exact eight15 (six17a a b) (six17b c a) hc.1,
+  exact eight15 hc.1 (six17a a b) (six17b c a),
 intros Y h6,
 have h7 : c ∉ l a b,
   intro h_1,
@@ -1173,7 +1172,7 @@ have h8 : P = planeof a b c,
   exact h3 (six17b a b),
 cases (six22 h6.2.2.1 h6.2.2.2.2.1) with y hy,
 have h9 : R b a c,
-  exact (eight15 (six17a a b) (six17b c a) hc.1).2.2.2.2 b c (six17b a b) (six17a c a),
+  exact (eight15 hc.1 (six17a a b) (six17b c a)).2.2.2.2 b c (six17b a b) (six17a c a),
 rw h8 at h6,
 have h10 : y ∈ Y,
   rw hy.2,
@@ -1207,12 +1206,11 @@ theorem eleven21a {a b c a' b' c' : point} (h : sided b a c) : eqa a b c a' b' c
 begin
 split,
   intro h1,
-    cases exists_of_exists_unique (six11 h1.2.2.1 h1.1.symm) with a₁ ha,
-    cases exists_of_exists_unique (six11 h1.2.2.2.1 h1.2.1.symm) with c₁ hc,
+    rcases eleven5.1 h1 with ⟨a₁, c₁, ha, hc, h2⟩,
     suffices : sided b' a₁ c₁,
-      exact ha.1.symm.trans (this.trans hc.1),
-    apply six10a h ⟨ha.2.symm, _, hc.2.symm⟩,
-    exact (eleven4.1 h1).2.2.2.2 a c a₁ c₁ (six5 h1.1) (six5 h1.2.1) ha.1 hc.1 ha.2.symm hc.2.symm,
+      exact ha.symm.trans (this.trans hc),
+    apply six10a h ⟨h2.1.flip, _, h2.2.1⟩,
+    exact (eleven4.1 h1).2.2.2.2 a c a₁ c₁ (six5 h1.1) (six5 h1.2.1) ha hc h2.1.flip h2.2.1,
 intro h1,
 cases exists_of_exists_unique (six11 h1.1 h.1.symm) with a₁ ha,
 apply eleven3.2 ⟨a, a, a₁, a₁, _ ⟩,
@@ -1220,23 +1218,28 @@ simp [six5 h.1, h, ha.1, ha.1.trans h1],
 exact ⟨ha.2.symm.flip, ha.2.symm, two8 a a₁⟩
 end
 
-theorem eleven21b {a b c a' b' c' : point} : a ≠ b → c ≠ b → B a b c → (eqa a b c a' b' c' ↔ a' ≠ b' ∧ c' ≠ b' ∧ B a' b' c') :=
+theorem eleven21b {a b c a' b' c' : point} : B a b c → eqa a b c a' b' c' → B a' b' c' :=
 begin
-intros h h1 h2,
-split,
-  intro h3,
-  refine ⟨h3.2.2.1, h3.2.2.2.1, _⟩,
-  cases exists_of_exists_unique (six11 h3.2.2.1 h3.1.symm) with a₁ ha,
-  cases exists_of_exists_unique (six11 h3.2.2.2.1 h3.2.1.symm) with c₁ hc,
-  suffices : B a₁ b' c₁,
-    exact six8 ha.1.symm hc.1.symm this,
-  apply four6 h2 ⟨ha.2.symm.flip, hc.2.symm, _⟩,
-  apply (eleven4.1 h3).2.2.2.2 a c a₁ c₁ (six5 h) (six5 h1) ha.1 hc.1 ha.2.symm hc.2.symm,
-rintros ⟨h3, h4, h5⟩,
-cases exists_of_exists_unique (six11 h3 h.symm) with a₁ ha,
-cases exists_of_exists_unique (six11 h4 h1.symm) with c₁ hc,
+intros h h1,
+rcases eleven5.1 h1 with ⟨a₁, c₁, ha, hc, h2⟩,
+exact six8 ha.symm hc.symm (four6 h h2)
+end
+
+theorem eleven21c {a b c a' b' c' : point} : a ≠ b → c ≠ b → a' ≠ b' → c' ≠ b' → B a b c → B a' b' c' → eqa a b c a' b' c' :=
+begin
+intros h h1 h2 h3 h4 h5,
+cases exists_of_exists_unique (six11 h2 h.symm) with a₁ ha,
+cases exists_of_exists_unique (six11 h3 h1.symm) with c₁ hc,
 apply eleven3.2 ⟨a, c, a₁, c₁, (six5 h), (six5 h1), ha.1, hc.1, ha.2.symm.flip, hc.2.symm, _⟩,
-exact two11 h2 (six8 ha.1 hc.1 h5) ha.2.symm.flip hc.2.symm
+exact two11 h4 (six8 ha.1 hc.1 h5) ha.2.symm.flip hc.2.symm
+end
+
+theorem eleven21d {a b c a' b' c' : point} : col a b c  → eqa a b c a' b' c' → col a' b' c' :=
+begin
+intros h h1,
+cases six1 h,
+  exact or.inl (eleven21b h_1 h1),
+exact (six4.1 ((eleven21a h_1).1 h1)).1
 end
 
 end Euclidean_plane

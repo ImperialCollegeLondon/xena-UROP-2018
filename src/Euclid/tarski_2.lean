@@ -234,6 +234,15 @@ intros y hy,
 exact six18 hy.1 h hy.2.1 hy.2.2
 end
 
+theorem six20 {a b c : point} {A : set point} : line A → a ∈ A → b ∈ A → a ≠ b → col a b c → c ∈ A :=
+begin
+intros h h1 h2 h3 h4,
+suffices : A = l a b,
+  subst A,
+  exact h4,
+exact six18 h h3 h1 h2
+end
+
 theorem six21 {a b : point} {A B : set point} : a ≠ b → line A → line B → a ∈ A → a ∈ B → b ∈ A → b ∈ B → A = B :=
 begin
 intros h h1 h2 h3 h4 h5 h6,
@@ -351,9 +360,9 @@ apply six13a a,
 exact h
 end
 
-def diff (a b c : point) : Prop := a ≠ b ∧ b ≠ c ∧ a ≠ c
+def tri (a b c : point) : Prop := a ≠ b ∧ b ≠ c ∧ a ≠ c
 
-theorem six26 {a b c : point} : ¬col a b c → diff a b c :=
+theorem six26 {a b c : point} : ¬col a b c → tri a b c :=
 begin
 intro h,
 split,

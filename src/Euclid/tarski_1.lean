@@ -32,6 +32,13 @@ quotient (@Euclidean_plane.point_setoid point _)
 
 theorem refl_dist (a b : point) : (a,b) ≈ (b,a) := eqd_refl a b
 
+theorem two7 {a b c d : point} : eqd a b c d → a ≠ b → c ≠ d :=
+begin
+intros h h1 h2,
+subst d,
+exact h1 (id_eqd a b c h)
+end
+
 theorem two8 (a b : point) : eqd a a b b := 
 let ⟨x, h⟩ := seg_cons a b b b in
 have a = x, from id_eqd a x b h.2,
@@ -125,9 +132,9 @@ rw ←this at hx,
 exact hx.2
 end
 
-theorem three2 {a b c : point} : B a b c ↔ B c b a :=
+theorem three2 (a b c : point) : B a b c ↔ B c b a :=
 begin
-apply iff.intro,
+split,
   exact B.symm,
 intro h,
 exact h.symm
@@ -786,11 +793,9 @@ end
 
 def distle (a b c d : point) : Prop := ∃ y, B c y d ∧ eqd a b c y
 
-def distge (a b c d : point) : Prop := distle c d a b
-
 theorem five5 {a b c d : point} : distle a b c d ↔ ∃ x, B a b x ∧ eqd a x c d :=
 begin
-apply iff.intro,
+split,
   intro h,
   cases h with y hy,
   have : col c y d,
@@ -916,10 +921,12 @@ split,
 exact hx.2.symm
 end
 
+def distlt (a b c d : point) : Prop := distle a b c d ∧ ¬eqd a b c d
+
 theorem five12 {a b c : point} : col a b c → (B a b c ↔ distle a b a c ∧ distle b c a c) :=
 begin
 intro h,
-apply iff.intro,
+split,
   intro h1,
   split,
     constructor,
@@ -981,10 +988,25 @@ end
 
 def sided (p a b : point) : Prop := a ≠ p ∧ b ≠ p ∧ (B p a b ∨ B p b a)
 
+theorem six1 {a b p : point} : col a p b → B a p b ∨ sided p a b :=
+begin
+intro h,
+cases em (B a p b),
+  exact or.inl h_1,
+unfold col at h,
+simp * at *,
+rw [three2 b a p] at h,
+refine ⟨_, _, h.symm⟩;
+intro h_1;
+subst p,
+  exact h_1 (three3 a b),
+exact h_1 (three1 a b)
+end
+
 theorem six2 {a b c p : point} : a ≠ p → b ≠ p → c ≠ p → B a p c → (B b p c ↔ sided p a b) :=
 begin
 intros h h1 h2 h3,
-apply iff.intro,
+split,
   intro h4,
     unfold sided; repeat {split}; try {assumption},
   exact five2 h2 h3.symm h4.symm,
@@ -998,7 +1020,7 @@ end
 
 theorem six3 {a b p : point} : sided p a b ↔ a ≠ p ∧ b ≠ p ∧ ∃ c, c ≠ p ∧ B a p c ∧ B b p c :=
 begin
-apply iff.intro,
+split,
   intro h,
   cases h with h h1,
   cases h1 with h1 h2,
@@ -1022,45 +1044,31 @@ end
 
 theorem six4 {a b p : point} : sided p a b ↔ col a p b ∧ ¬B a p b :=
 begin
-apply iff.intro,
-  intro h,
-  cases h with h h1,
-  cases h1 with h1 h2,
+split,
+  rintros ⟨h, h1, h2⟩,
   cases h2 with ha hb,
     split,
       unfold col,
       simp [ha.symm],
     intro h2,
-    have : a = p,
-      exact three4 h2 ha,
-    contradiction,
+    exact h (three4 h2 ha),
   split,
     unfold col,
     simp [hb],
   intro h2,
-  have : b = p,
-    exact three4 h2.symm hb,
-  contradiction,
-intro h,
-unfold sided,
+  exact h1 (three4 h2.symm hb),
+rintros ⟨h, h1⟩,
 split,
-  intro ha,
-  rw ha at *,
-  have : B p p b,
-    exact three3 p b,
-  exact h.2 this,
+  intro h1,
+  subst p,
+  exact h1 (three3 a b),
 split,
-  intro hb,
-  rw hb at *,
-  have : B a p p,
-    exact three1 a p,
-  exact h.2 this,
-cases h with h h1,
-cases h,
-  contradiction,
-cases h,
-  right, exact h,
-left,
+  intro h1,
+  subst p,
+  exact h1 (three1 a b),
+unfold col at h,
+simp [h1] at h,
+rw [three2 b a p] at h,
 exact h.symm
 end
 
@@ -1069,12 +1077,10 @@ begin
 intro h,
 apply six4.2,
 split,
-right, left,
-exact three1 p a,
+  right, left,
+  exact three1 p a,
 intro h1,
-have : a = p,
-  exact bet_same a p h1,
-contradiction
+exact h (bet_same a p h1)
 end
 
 theorem six6 {a b c d : point} : B a b c → sided b c d → B a b d :=
@@ -1088,15 +1094,10 @@ end
 theorem six7 {a b p : point} : B p a b → a ≠ p → sided p a b :=
 begin
 intros h h1,
-split,
-  exact h1,
-split,
-  intro h_1,
-  subst h_1,
-  apply h1.symm,
-  exact bet_same b a h,
-left,
-exact h
+refine ⟨h1, _, or.inl h⟩,
+intro h_1,
+subst h_1,
+exact h1.symm (bet_same b a h)
 end
 
 theorem sided.symm {a b p : point} : sided p a b → sided p b a :=
@@ -1127,6 +1128,14 @@ have h3 : c ≠ p,
 have : B c p q,
   exact (six2 h2 h3 hq.1 hq.2.2).2 h,
 exact (six2 h1 h3 hq.1 hq.2.1).1 this
+end
+
+theorem six6a {a b c d : point} : sided a b c → B b d c → sided a b d :=
+begin
+intros h h1,
+cases h.2.2,
+  exact six7 (three5a h_1 h1) h.1,
+exact h.trans (six7 (three5a h_1 h1.symm) h.2.1)
 end
 
 theorem six7a {a b c p : point} : B p a b → sided p a c → sided p b c :=
@@ -1183,7 +1192,7 @@ theorem six12 {a b p : point} : sided p a b → (distle p a p b ↔ B p a b) :=
 begin
 intro h1,
 have hp : sided p a b, exact h1,
-apply iff.intro,
+split,
   intro h,
   cases h1 with h1 h2,
   cases h2 with h2 h3,

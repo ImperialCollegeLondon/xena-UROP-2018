@@ -24,6 +24,14 @@ if quadratic_res a p ∧ ¬ ((p : ℤ) ∣ a) then 1 else
 if ¬ quadratic_res a p then -1 
 else 0
 
+-- lemmas
+
+lemma legendre_strong_mul {p : ℤ} (a b : ℤ) (H1 : prime_int p ∧ p ≠ 2) : legendre_sym (a*b) H1 = (legendre_sym a H1) * (legendre_sym b H1)  := sorry
+
+lemma if_cong_legendre_eq {p : ℤ} (a b : ℤ) (H1 : prime_int p ∧ p ≠ 2) : a % p = b → legendre_sym a H1 = legendre_sym b H1 := sorry
+
+lemma euler_criterion {p : ℤ} (a : ℤ) (H1 : prime_int p ∧ p ≠ 2) : legendre_sym a H1 = a^(int.nat_abs p-1) % p := sorry
+
 theorem legendre_sym_one_implies_quadratic_res {p : ℤ} (a : ℤ)(H1 : prime_int p ∧ p ≠ 2): legendre_sym a H1 = 1 → quadratic_res a p :=
 begin 
 intro h,
