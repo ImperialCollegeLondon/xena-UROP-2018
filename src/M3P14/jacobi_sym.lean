@@ -3,31 +3,39 @@ import data.nat.basic M3P14.order_zmodn_kmb data.int.basic M3P14.lqr
 private theorem aux1 (a : ℕ): 
     1 < nat.succ (nat.succ a) := dec_trivial
 
-private theorem aux2 (a b : ℕ) (h : a + 3 ≥ int.nat_abs ↑b) : 
+private theorem aux2_bis (a : ℕ) : 
+    0 < nat.succ a := dec_trivial
+
+private theorem aux2_ter (a b : ℕ) (h : ¬a + 3 = b + 1) : 
+    b + 1 ≠ a + 3 := 
+begin
+    suffices : b + 1 = a + 3 → false, by simp [this],
+    intro h2,
+    exact absurd h2.symm h,
+end
+
+private theorem aux2 (a b : ℕ) (h : a + 3 ≥ int.nat_abs ↑(nat.succ b)) : 
     (a + 3) % (nat.succ b) < nat.succ (nat.succ (nat.succ a)) := 
 begin
     simp at h,
-    have neg : (nat.succ b) ≠ 0, trivial,
-    suffices : (nat.succ b) < nat.succ (nat.succ (nat.succ a)), from lt_trans (nat.mod_lt (a + 3) (nat.pos_iff_ne_zero.mpr neg)) this,
+    suffices : (a + 3) % (b + 1) < (a + 3), by simp [this],
+    cases (classical.em (a + 3 = b + 1)),
+    rw [h_1.symm, nat.mod_self],
+    exact aux2_bis (nat.succ (nat.succ a)),
+    have eq : int.nat_abs (1 + ↑b) = 1 + b, from int.nat_abs_of_nat (1 + b),
+    have h2 : a + 3 ≥ b + 1, rw eq at h, rwa add_comm b 1,
+    suffices : (nat.succ b) < nat.succ (nat.succ (nat.succ a)), from lt_trans (nat.mod_lt (a + 3) (nat.pos_iff_ne_zero.mpr (by trivial))) this,
     suffices : b + 1 < a + 3, by simp [this],
-    suffices : b ≤ a + 3, sorry,
-    exact h,
+    suffices : b + 1 ≤ a + 3, from lt_of_le_of_ne this (aux2_ter a b h_1),
+    exact h2,
 end
 
-#print notation ≥
-#
-#check nat.lt_iff_le_not_le.mp
-#check nat.lt_of_succ_le
-#check nat.succ_le_of_lt
-#check nat.lt_of_add_lt_add_left
-
-private theorem aux3 (a b : ℕ) (h : ¬a + 3 ≥ int.nat_abs ↑b) : 
+private theorem aux3 (a : ℕ) : 
     2 < nat.succ (nat.succ (nat.succ a)) := dec_trivial
 
 private theorem aux4 (a b : ℕ) : 
     (a + 3) / 2 < nat.succ (nat.succ (nat.succ a)) := 
 begin
-    suffices : (a+3)/2 < a+3, by simp [this], 
     exact nat.div_lt_self dec_trivial dec_trivial,
 end
 
@@ -47,10 +55,10 @@ private def jacobi_sym_pos : ℕ → ℕ → ℤ
 | 2          (nat.succ b) := if (nat.succ b) % 8 = 1 ∨ (nat.succ b) % 8 = 7 then 1 else -1
 | (nat.succ (nat.succ (nat.succ a))) (nat.succ b) := 
                 if h1 : (a+3) ≥ int.nat_abs (nat.succ b) then 
-                have (a + 3) % (nat.succ b) < nat.succ (nat.succ (nat.succ a)), from aux2 a b h1, 
+                have (a + 3) % (nat.succ b) < nat.succ (nat.succ (nat.succ a)), begin sorry end, 
                 jacobi_sym_pos ((a+3)%(nat.succ b)) (nat.succ b) else
                 (if h2 : (a+3) % 2 = 0 then 
-                have 2 < nat.succ (nat.succ (nat.succ a)), from aux3 a (nat.succ b) h1, 
+                have 2 < nat.succ (nat.succ (nat.succ a)), from aux3 a, 
                 have (a + 3) / 2 < nat.succ (nat.succ (nat.succ a)), from aux4 a (nat.succ b), 
                 jacobi_sym_pos 2 (nat.succ b) * jacobi_sym_pos ((a+3)/2) (nat.succ b) else 
                 have (nat.succ b) % (a + 3) < nat.succ (nat.succ (nat.succ a)), begin sorry end,
