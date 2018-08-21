@@ -3,7 +3,6 @@ import data.nat.basic M3P14.order_zmodn_kmb data.int.basic M3P14.lqr
 private theorem aux1 (a b : ℕ) (h : ¬a + 3 = b + 1) : 
     b + 1 ≠ a + 3 := 
 begin
-    suffices : b + 1 = a + 3 → false, by simp [this],
     intro h2,
     exact absurd h2.symm h,
 end
@@ -29,8 +28,7 @@ private theorem aux3 (a b : ℕ) (h : ¬a + 3 ≥ int.nat_abs ↑b) :
 begin
     simp at h,
     suffices : (a+3) > 0, from nat.mod_lt b this,
-    suffices : 0 ≠ (a+3), from (nat.pos_iff_ne_zero.mpr this.symm),
-    trivial,
+    from dec_trivial,
 end
 
 private def jacobi_sym_pos : ℕ → ℕ → ℤ
@@ -68,11 +66,11 @@ def jacobi_sym : ℤ → ℤ → ℤ
 local notation {a|b} := jacobi_sym a b 
 
 #eval {8|1}
--- #eval {-5|0}
--- #eval {-1|0}
--- #eval {-2|15}
--- #eval {-5|8}
--- #eval {1236|200011}
+#eval {-5|0}
+#eval {-1|0}
+#eval {-2|15}
+#eval {-5|8}
+#eval {1236|200011}
 
 -- Properties of Jacobi symbol (taken from Wikipedia) --
 
@@ -94,7 +92,7 @@ theorem jacobi_num_neg_one (n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) [ha
 
 theorem jacobi_num_two (n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) [has_pow ℤ ℤ] :  {2|n} = (-1)^(((n^2)-1)/8) := sorry
 
+theorem jacobi_denom_one (a : ℤ) : {a|1} = 1 := by refl
+
 --trying to state that jacobi_sym is equal to the product of legendre symbols, with prime factors p the prime factorisation of n
 --lemma jacobi_eq_prod (a n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) : prod (factors pmap n) = jacobi_sym a n 
-
-theorem jacobi_denom_one (a : ℤ) : jacobi_sym a 1 = 1 := by refl
