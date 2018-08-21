@@ -1,11 +1,7 @@
 import data.nat.basic M3P14.order_zmodn_kmb data.int.basic M3P14.lqr
 
 private theorem aux1 (a b : ℕ) (h : ¬a + 3 = b + 1) : 
-    b + 1 ≠ a + 3 := 
-begin
-    intro h2,
-    exact absurd h2.symm h,
-end
+    b + 1 ≠ a + 3 := by {intro h2, exact absurd h2.symm h}
 
 private theorem aux2 (a b : ℕ) (h : a + 3 ≥ int.nat_abs ↑(nat.succ b)) : 
     (a + 3) % (nat.succ b) < nat.succ (nat.succ (nat.succ a)) := 
@@ -18,7 +14,6 @@ begin
     have eq : int.nat_abs (1 + ↑b) = 1 + b, from int.nat_abs_of_nat (1 + b),
     have h2 : a + 3 ≥ b + 1, rw eq at h, rwa add_comm b 1,
     suffices : (nat.succ b) < nat.succ (nat.succ (nat.succ a)), from lt_trans (nat.mod_lt (a + 3) (nat.pos_iff_ne_zero.mpr (by trivial))) this,
-    suffices : b + 1 < a + 3, by simp [this],
     suffices : b + 1 ≤ a + 3, from lt_of_le_of_ne this (aux1 a b h_1),
     exact h2,
 end
@@ -26,7 +21,6 @@ end
 private theorem aux3 (a b : ℕ) (h : ¬a + 3 ≥ int.nat_abs ↑b) : 
     b % (a + 3) < nat.succ (nat.succ (nat.succ a)) := 
 begin
-    simp at h,
     suffices : (a+3) > 0, from nat.mod_lt b this,
     from dec_trivial,
 end
