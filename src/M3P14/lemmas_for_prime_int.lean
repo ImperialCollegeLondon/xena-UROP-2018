@@ -73,16 +73,22 @@ have b5 := int.modeq.modeq_add b3_h b4,
 have b6 : (-1 :ℤ) + 1 = 0, by simp,
 rw b6 at b5, 
 have b7 := int.modeq.symm b5,
---rw nat_abs_of_nonneg at b7,
-
-
---rw int.nat_abs_of_nonneg at b7,
---have b8 := int.modeq.modeq_zero_iff.1 b7
---exists_eq_mul_right_of_dvd
-sorry 
+rw int.nat_abs_of_nonneg at b7,
+have b8:= int.modeq.modeq_zero_iff.1 b7,
+have b9 := exists_eq_mul_right_of_dvd b8,
+rcases b9 with r,
+have c : (1 ≤ r) ∧ (r < p), 
+begin
+split, 
+sorry, 
+have c1 : x < p, sorry,
+sorry, 
+end,   
+sorry,
+exact H,
 end 
  
-
+#check exists_eq_mul_right_of_dvd
 --inductive less_than_or_equal (a : ℤ) : ℤ → Prop
 --| refl : less_than_or_equal a
 --| step : Π {b}, less_than_or_equal b → less_than_or_equal (succ b)
