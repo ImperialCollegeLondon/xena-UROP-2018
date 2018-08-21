@@ -1106,6 +1106,8 @@ begin
  simp [-one_div_eq_inv, a₁ ],refine mul_lt_mul a_1 (le_of_eq (refl(2:ℝ ))) _ t.2.1, {norm_num}
 end
 
+
+
 lemma step_assoc_5  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) ( h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∈ T1) 
 ( h_3 : p3.to_fun t ∈ T1) (h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∉ T1) : 
 g.to_fun (par T1._proof_1 ⟨par T2._proof_1 ⟨t, T2_of_not_T1 h_1⟩, h_2⟩) =
@@ -1126,16 +1128,33 @@ begin
    simp [-sub_eq_add_neg, -one_div_eq_inv, sub_zero], 
    have g₁ : (1 - 1 / 2) = (1/2:ℝ ), {norm_num}, have g₂ : ↑t = t.val, trivial, 
    simp [g₁ , g₂ , -one_div_eq_inv, -sub_eq_add_neg] ,
-   suffices G1 : ((t.val - 1 / 4) / (1 / 2) - 1 / 2) = (t.val - 1 / 2) / (1 / 2), 
+
+   suffices G1 : ((t.val - 1 / 4) / (1 / 2) - 1 / 2) = (t.val - 1 / 2) / (1 / 2),
+     apply congr_arg,
+     apply subtype.eq,
+     show (t.val - 1 / 2) / (1 / 2) / (1 / 2) = ((t.val - 1 / 4) / (1 / 2) - 1 / 2) / (1 / 2),
+     rw G1,
+   show ((t.val - 1 / 4) / (1 / 2)) - (1 / 2) = (t.val - 1 / 2) / (1 / 2),
+    have h₁ : ((t.val - 1 / 4) / (1 / 2)) - (1 / 2) = ((t.val - 1 / 4) / (1 / 2)) - (1 / 4 ) / (1/2:ℝ ),
+      have h₂  : - (1 / 2 : ℝ ) =  - (1 / 4 ) / (1/2:ℝ ), {norm_num}, 
+      have h₃   : (1 / 2 : ℝ ) =  (1 / 4 ) / (1/2:ℝ ), {norm_num},
+      simpa [h₂, -one_div_eq_inv, -sub_eq_add_neg], 
+    rw [h₁,  div_sub_div_same], 
+    have H2 : (t.val - 1 / 4 - 1 / 4) = (t.val - 1 / 2) , {norm_num}, 
+    simp [-one_div_eq_inv, -sub_eq_add_neg, H2],
+
+end
+
+
+
+  /- suffices G1 : ((t.val - 1 / 4) / (1 / 2) - 1 / 2) = (t.val - 1 / 2) / (1 / 2), 
      simp [-one_div_eq_inv, -sub_eq_add_neg, G1], 
    show ((t.val - 1 / 4) / (1 / 2)) - (1 / 2) = (t.val - 1 / 2) / (1 / 2), 
    have H1 : (t.val - 1 / 4) / (1 / 2) - (1 / 2) = (t.val - 1 / 4) / (1 / 2) - (1 / 4 ) / (1/2:ℝ ), 
      have h₁ : - (1 / 2 : ℝ ) = - (1 / 4 ) / (1/2:ℝ ), {norm_num}, simp [-one_div_eq_inv, -sub_eq_add_neg, h₁], {norm_num}, 
    rw H1, rw div_sub_div_same, 
    have H2 : (t.val - 1 / 4 - 1 / 4) = (t.val - 1 / 2) , {norm_num}, 
-   simp [-one_div_eq_inv, -sub_eq_add_neg, H2], 
-end
-
+   simp [-one_div_eq_inv, -sub_eq_add_neg, H2], -/
 /-
 lemma step_assoc_5'  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) ( h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∈ T1) 
 ( h_3 : p3.to_fun t ∈ T1) (h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∉ T1) : 
@@ -1292,7 +1311,7 @@ end
 set_option trace.simplify.rewrite true
 --set_option pp.implicit true
 
-lemma step_assoc_9_original  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
+lemma step_assoc_9  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
 ( h_3 : p3.to_fun t ∉ T1) :
 h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, T2_of_not_T1 h_1⟩, T2_of_not_T1 h_2⟩) = 
 h.to_fun (par T2._proof_1 ⟨p3.to_fun t, T2_of_not_T1 h_3⟩) := 
@@ -1302,22 +1321,18 @@ begin
  unfold p3_aux, simp [a₁, -one_div_eq_inv, -sub_eq_add_neg], unfold par, dsimp [-one_div_eq_inv, -sub_eq_add_neg],
  have a₂ : ↑t = t.val, trivial, have g₁ : (1 - 1 / 2) = (1/2:ℝ ), {norm_num},
  simp [a₂, g₁, -one_div_eq_inv, -sub_eq_add_neg],
- suffices H : ((t.val - 1 / 2) / (1 / 2) - 1 / 2) = (2 * t.val - 1 - 1 / 2), 
-   simp [H, -one_div_eq_inv, -sub_eq_add_neg],
+ suffices H : ((t.val - 1 / 2) / (1 / 2) - 1 / 2) = (2 * t.val - 1 - 1 / 2),
+  apply congr_arg,
+  apply subtype.eq,
+  show ((t.val - 1 / 2) / (1 / 2) - 1 / 2) / (1 / 2) = (2 * t.val - 1 - 1 / 2) / (1 / 2),
+  rw H,
  have a₃ : (t.val - 1 / 2) / (1 / 2) = (t.val ) / (1 / 2) - ( 1 / 2) / (1 / 2), apply eq.symm, 
  refine div_sub_div_same t.val (1/2:ℝ) (1/2:ℝ), rw div_self at a₃, rw a₃ , rw div_eq_inv_mul, 
  have a₄ : (1 / 2 : ℝ )⁻¹ = 2, {norm_num}, rw a₄, {norm_num}, 
 end 
 
 
-lemma help_step_assoc_9₁ : (1 / 2 : ℝ )⁻¹ = 2 := by norm_num
-
-
-lemma help_step_assoc_9₂  : (1 - 1 / 2) = (1/2:ℝ ) := by norm_num
-
-lemma help_step_assoc_9 : (1 / 2 : ℝ ) ≠ 0 := by norm_num
-
-
+/--/
 lemma step_assoc_9  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
 ( h_3 : p3.to_fun t ∉ T1) :
 h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, T2_of_not_T1 h_1⟩, T2_of_not_T1 h_2⟩) = 
@@ -1332,59 +1347,11 @@ begin
  have a₃ : (t.val - 1 / 2) / (1 / 2) = (t.val ) / (1 / 2) - ( 1 / 2) / (1 / 2), apply eq.symm, 
  refine div_sub_div_same t.val (1/2:ℝ) (1/2:ℝ), rw div_self at a₃, rw [a₃, div_eq_inv_mul],
  have a₄ : (1 / 2 : ℝ )⁻¹ = 2, exact help_step_assoc_9₁ , rw a₄, exact help_step_assoc_9, 
-end
-
-/- simp to break down dite seems to cause deterministic timeout 
-lemma step_assoc_9'  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
-( h_3 : p3.to_fun t ∉ T1) :
-h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, T2_of_not_T1 h_1⟩, T2_of_not_T1 h_2⟩) = 
-h.to_fun (par T2._proof_1 ⟨p3.to_fun t, T2_of_not_T1 h_3⟩) := 
-begin
- unfold p3, dsimp, unfold paste, simp [dif_neg h_1], 
- have a₁ : ¬ t.val < 3/4, exact not_lt_of_gt (help_step_assoc_8₁ h_1 h_2), 
- unfold p3_aux, simp [a₁, -one_div_eq_inv, -sub_eq_add_neg], unfold par, dsimp [-one_div_eq_inv, -sub_eq_add_neg],
- have a₂ : ↑t = t.val, trivial, have g₁ : (1 - 1 / 2) = (1/2:ℝ ), {norm_num},
- simp [a₂, g₁, -one_div_eq_inv, -sub_eq_add_neg],
- suffices H : ((t.val - 1 / 2) / (1 / 2) - 1 / 2) = (2 * t.val - 1 - 1 / 2), 
-   simp [H, -one_div_eq_inv, -sub_eq_add_neg],
- have a₃ : (t.val - 1 / 2) / (1 / 2) = (t.val ) / (1 / 2) - ( 1 / 2) / (1 / 2), apply eq.symm, 
- refine div_sub_div_same t.val (1/2:ℝ) (1/2:ℝ), rw div_self at a₃, rw a₃ , rw div_eq_inv_mul, 
- have a₄ : (1 / 2 : ℝ )⁻¹ = 2, {norm_num}, rw a₄, {norm_num}, 
-end
+end -/
 
 
 
-lemma step_assoc_9'  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
-( h_3 : p3.to_fun t ∉ T1) :
-h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, T2_of_not_T1 h_1⟩, T2_of_not_T1 h_2⟩) = 
-h.to_fun (par T2._proof_1 ⟨p3.to_fun t, T2_of_not_T1 h_3⟩) := 
-begin
- unfold p3, dsimp, unfold paste, 
- have A : dite (t ∈ T1) (λ (h₁ : t ∈ T1), p3_T1_aux ⟨t, h₁⟩) (λ (h₁ : t ∉ T1), p3_aux ⟨t, T2_of_not_T1 h₁ ⟩) = 
- p3_aux ⟨t, T2_of_not_T1 h_1 ⟩ , simp [h_1], simp [A], 
- have a₁ : ¬ t.val < 3/4, exact not_lt_of_gt (help_step_assoc_8₁ h_1 h_2), 
- unfold p3_aux, 
- /-have B : (⟨ite (((⟨t, _⟩:T2).val).val < 3 / 4) ⟨((⟨t, _⟩:T2).val).val - 1 / 4, _⟩
-            ⟨2 * ((⟨t, _⟩:T2).val).val - 1, _⟩,
-          _⟩ : T2) = (⟨ (2 : ℝ ) * ((⟨t, _⟩:T2).val).val -(1:ℝ) , _⟩ : T2), -/
-  simp [a₁, -one_div_eq_inv, -sub_eq_add_neg], unfold par, dsimp [-one_div_eq_inv, -sub_eq_add_neg],
- have a₂ : ↑t = t.val, trivial, have g₁ : (1 - 1 / 2) = (1/2:ℝ ), {norm_num},
- simp [a₂, g₁, -one_div_eq_inv, -sub_eq_add_neg],
- suffices H : ((t.val - 1 / 2) / (1 / 2) - 1 / 2) = (2 * t.val - 1 - 1 / 2), 
-   simp [H, -one_div_eq_inv, -sub_eq_add_neg],
- have a₃ : (t.val - 1 / 2) / (1 / 2) = (t.val ) / (1 / 2) - ( 1 / 2) / (1 / 2), apply eq.symm, 
- refine div_sub_div_same t.val (1/2:ℝ) (1/2:ℝ), rw div_self at a₃, rw a₃ , rw div_eq_inv_mul, 
- have a₄ : (1 / 2 : ℝ )⁻¹ = 2, {norm_num}, rw a₄, {norm_num}, 
-end
-
-
-
- -/ 
-
-
-
-
-
+-- Homotopy for associativity
 
 
 noncomputable def hom_comp_f_g_h {α : Type*} [topological_space α ] {x y z w : α } ( f : path x y) ( g : path y z) ( h : path z w)  : 
@@ -1404,9 +1371,8 @@ begin
       exact step_assoc_8 h_1 h_2 h_3 h_4, 
       exact step_assoc_9 h_1 h_2 h_3, 
    },
-rw h₁ , exact hom_repar_path_to_path (comp_of_path (comp_of_path f g) h ) p3, 
+  rw h₁ , exact hom_repar_path_to_path (comp_of_path (comp_of_path f g) h ) p3, 
 end 
-
 
 
 

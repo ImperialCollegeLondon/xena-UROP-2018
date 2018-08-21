@@ -84,9 +84,6 @@ quotient.lift₂ (λ f g, ⟦comp_of_path f g⟧) mul_aux
 
 instance coe_loop_π₁ : has_coe (loop x) (space_π₁ x) := ⟨eq_class⟩
 
-instance : has_one (space_π₁ x) := ⟨ id_eq_class x ⟩ 
----Similarly to Zmod37 should do nstances for identity/inverse elements  ? 
-
 -- To break down mul proofs and use quotient.sound
 lemma quotient.out_eq'  {α : Type*} [topological_space α ] {x : α } ( F : space_π₁ x) 
 : F = ⟦ quotient.out F ⟧ := 
@@ -197,16 +194,12 @@ begin
   exact hom_const_f_to_f (quotient.out F),
 end
 
+--------------------------
+
 ----------------------------------------------------
 
 -- Inverse Element
 
-
---set_option trace.simplify.rewrite true
---set_option pp.implicit true
-
-
--- Inverse 
 
 
 theorem mul_left_inv {α : Type*} [topological_space α ] {x : α } (F : space_π₁ x) : fg_mul (inv_eq_class F) F = id_eq_class x := 
@@ -231,7 +224,7 @@ begin
 end
 
 
-
+-------------
 
 -- Group π₁ (α  , x)
 
@@ -240,9 +233,7 @@ noncomputable def π₁_group {α : Type*} [topological_space α ] (x : α ) : g
     
     mul_assoc := fundamental_group.mul_assoc, 
     
-    
     one := id_eq_class x , 
-
     one_mul := fundamental_group.one_mul , 
     mul_one := fundamental_group.mul_one , 
 
@@ -251,5 +242,8 @@ noncomputable def π₁_group {α : Type*} [topological_space α ] (x : α ) : g
 
 }
 
+
+--set_option trace.simplify.rewrite true
+--set_option pp.implicit true
 
 end fundamental_group
