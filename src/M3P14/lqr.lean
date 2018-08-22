@@ -86,12 +86,22 @@ lemma yet_to_prove (x : ℤ) (p : ℤ) (hp : prime_int p ∧ int.nat_abs p ≠ 2
 lemma odd_prime_int_is_odd {p : ℤ} (hp : prime_int p ∧ int.nat_abs p ≠ 2) : p % 2 = 1 := 
 begin
 unfold prime_int at hp,
-sorry,
+have h1 : ¬ (p % 2  = 0), 
+begin
+  unfold prime at hp,
+  intro,
+  have h2 := int.dvd_of_mod_eq_zero a,
+  have h3 := int.dvd_nat_abs.2 h2,
+  have h4 : 2 ∣ (int.nat_abs p), from int.coe_nat_dvd.1 h3,
+  have h5 := hp.1.2 2 h4,
+  have h6 := or_iff_not_imp_left.1 h5 (show ¬ 2=1, by norm_num),
+  have h7 : ¬ 2 = int.nat_abs p, rw eq_comm,
+  exact hp.2,
+  contradiction,
+end,
+have h2 : (p % 2 = 0) ∨ (p % 2 = 1), from int.mod_two_eq_zero_or_one p,
+exact or_iff_not_imp_left.1 h2 h1,
 end
-
-variable p : ℤ
-variable hp : prime_int p ∧ int.nat_abs p ≠ 2
-#check hp.1
 
 
 theorem euler_c_1 (a p : ℤ) (hp : prime_int p ∧ int.nat_abs p ≠ 2) (ha : ¬ p ∣ a) : quadratic_res a p → a^int.nat_abs((p-1)/2) ≡ 1 [ZMOD (int.nat_abs p)] := 
@@ -162,14 +172,18 @@ have h1 : ¬ ((p:ℤ)∣(-1:ℤ)),
   have h2 : p = 1, from int.eq_one_of_dvd_one hpp (show ((p:ℤ)∣1), from int.dvd_nat_abs.2 h),
   exact not_prime_int_one (show prime_int 1, from eq.subst h2 hp.1),
 },
-have h6 : (-1)^int.nat_abs((p - 1) / 2) ≡ legendre_sym (-1) hp [ZMOD (int.nat_abs p)] , from euler_criterion p (-1) hp h1,
+have h3 : (-1)^int.nat_abs((p - 1) / 2) ≡ legendre_sym (-1) hp [ZMOD (int.nat_abs p)] , from euler_criterion p (-1) hp h1,
 haveI : pos_nat(int.nat_abs p) := sorry,
+have h4:= zmod.eq_iff_modeq_int.2 h3,
+rw eq_comm, 
 --exact ((int.coe_nat_eq_coe_nat_iff ((-1) ^ int.nat_abs ((p - 1) / 2)) (legendre_sym (-1) hp)).2 eq.symm(zmod.eq_iff_modeq_int.2 h6)),
 sorry,
 end 
+
+#check int.coe_nat_eq
 #check int.coe_nat_eq_coe_nat_iff
 --theorem Jason_and_partly_Guy_did_it {p : ℕ} (hp : prime_int p ∧ p ≠ 2) : ∃ A : finset (zmod p), ∀ a : zmod p, (quadratic_res' a p ↔ a ∈ A) ∧ finset.card A = (p-1)/2 := sorry
-
+#check zmod.eq_iff_modeq_int
 theorem Guy_suggested_this_but_i_am_not_sure {p : ℕ} (hp : prime_int p ∧ p ≠ 2) : ∃ A : finset ℕ, ∀ a : ℕ, (¬quadratic_res a p ↔ a ∈ A) ∧ finset.card A = (p-1)/2 := sorry
 --Let p be an odd prime_int. Then there are exactly (p - 1) /2 quadratic residues modulo p and exactly (p - 1) /2 nonresidues modulo p. 
 --theorem quad_res_sol {p : ℕ} (hp : prime_int p) : 

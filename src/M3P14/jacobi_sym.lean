@@ -1,4 +1,4 @@
-import data.nat.basic M3P14.order_zmodn_kmb data.int.basic M3P14.lqr
+import data.nat.basic M3P14.order_zmodn_kmb data.int.basic M3P14.lqr data.nat.prime 
 
 private theorem aux1 (a b : ℕ) (h : ¬a + 3 = b + 1) : 
     b + 1 ≠ a + 3 := by {intro h2, exact absurd h2.symm h}
@@ -65,6 +65,19 @@ local notation {a|b} := jacobi_sym a b
 #eval {-2|15}
 #eval {-5|8}
 #eval {1236|200011}
+
+-- New definition of Jacobi symbol for positive and odd b to prove theorems
+noncomputable definition jacobi_symbol {n : ℤ} (a : ℤ) (hn : n > 0 ∧ int.gcd 2 n = 1) := 
+list.prod ((nat.factors n.nat_abs).pmap (λ (p : ℕ) hp, @legendre_sym p a hp)
+begin
+intros,
+have h1: prime_int ↑a_1 = nat.prime a_1, refl,
+have h2: int.nat_abs ↑a_1 = a_1, refl,
+rw [h1, h2],
+have h3: nat.prime a_1, from nat.mem_factors H,
+have h4: a_1 ≠ 2, from sorry,
+exact ⟨h3,h4⟩,
+end)
 
 -- Properties of Jacobi symbol (taken from Wikipedia) --
 set_option trace.check true
