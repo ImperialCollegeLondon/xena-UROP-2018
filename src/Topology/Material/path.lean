@@ -124,7 +124,7 @@ begin
   exact continuous.comp H₁ continuous_add', 
 end 
 
-theorem real.continuous_sub_const (r : ℝ) : continuous (λ x : ℝ, x - r) := continuous_sub continuous_id continuous_const, 
+theorem real.continuous_sub_const (r : ℝ) : continuous (λ x : ℝ, x - r) := continuous_sub continuous_id continuous_const 
 
 
 theorem real.continuous_div_const (r : ℝ) : continuous (λ x : ℝ, x / r) :=
@@ -323,6 +323,12 @@ intro B, simp [has_mem.mem] at B, unfold set.mem at B, --unfold I01 at x,
 have H : 0≤ x.val ∧ x.val ≤ 1, exact x.property, simp [or_iff_not_imp_left, -one_div_eq_inv], 
 intro nL, have H2 : (1 / 2 :ℝ )< x.val, exact nL H.1, exact ⟨ le_of_lt H2, H.2 ⟩ ,
 end 
+
+lemma T2_of_not_T1 { s : I01} : (s ∉ T1) → s ∈ T2 := 
+begin intro H, have H2 : T1 ∪ T2 = @set.univ I01, exact cover_I01, unfold T1 T2 T at *, simp [-one_div_eq_inv],
+ rw mem_set_of_eq at H, rw not_and at H, have H3 : 1/2 < s.val, have H4 : ¬s.val ≤ 1 / 2, exact  H (s.2.1), exact lt_of_not_ge H4,
+ exact ⟨ le_of_lt H3, s.2.2⟩ , 
+end
 
 ---- Lemmas to simplify evaluations of par 
 @[simp]
