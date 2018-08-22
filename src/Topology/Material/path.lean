@@ -7,6 +7,7 @@ import analysis.real
 import data.real.basic tactic.norm_num
 import data.set.basic
 import Topology.Material.subsets
+import Topology.Material.real_results
 
 universe u
 
@@ -106,85 +107,8 @@ def fun_of_path {α} [topological_space α ]  { x1 x2 : α  } ( g : path x1 x2 )
 
 --- COMPOSITION OF PATHS
 
-
-variable A : set ℝ 
-variables a b : I01
-variable Hab : a.val < b.val  
-
-
--------------------------------------
--- Useful ℝ result
-
---- Continuity of linear functions 
-
-theorem real.continuous_add_const (r : ℝ) : continuous (λ x : ℝ, x + r) :=
-begin
-  have H₁ : continuous (λ x, (x,r) : ℝ → ℝ × ℝ),
-    exact continuous.prod_mk continuous_id continuous_const,
-  exact continuous.comp H₁ continuous_add', 
-end 
-
-theorem real.continuous_sub_const (r : ℝ) : continuous (λ x : ℝ, x - r) := continuous_sub continuous_id continuous_const 
-
-
-theorem real.continuous_div_const (r : ℝ) : continuous (λ x : ℝ, x / r) :=
-begin
-  conv in (_ / r) begin
-    rw div_eq_mul_inv,
-  end,
-  have H₁ : continuous (λ x, (x,r⁻¹) : ℝ → ℝ × ℝ),
-    exact continuous.prod_mk continuous_id continuous_const,
-  exact continuous.comp H₁ continuous_mul', 
-end 
-
-theorem real.continuous_scale (a b : ℝ) : continuous (λ x : ℝ, (x + a) / b) := 
-continuous.comp (real.continuous_add_const a) (real.continuous_div_const b)
-
-theorem real.continuous_mul_const (r : ℝ) : continuous (λ x : ℝ, r*x) :=
-begin 
-    have H₁ : continuous (λ x, (r,x) : ℝ → ℝ × ℝ),
-        exact continuous.prod_mk continuous_const continuous_id,
-    show continuous ( (λ p : ℝ × ℝ , p.1 * p.2)  ∘  (λ (x : ℝ), (r,x))), 
-    refine continuous.comp H₁  continuous_mul' , 
-
-end 
-
-theorem real.continuous_mul_const_right (r : ℝ) : continuous (λ x : ℝ, x*r) :=
-begin 
-    have H₁ : continuous (λ x, (x,r) : ℝ → ℝ × ℝ),
-        exact continuous.prod_mk continuous_id continuous_const,
-    refine continuous.comp H₁ continuous_mul' , 
-
-end
-
-theorem real.continuous_linear (m q : ℝ) : continuous (λ x : ℝ, m*x + q) :=
-begin 
-    exact continuous.comp (real.continuous_mul_const m) (real.continuous_add_const q), 
-end
-
-
---- Definition of closed intervals in ℝ 
-
-def int_clos { r s : ℝ } ( Hrs : r < s ) : set ℝ := {x : ℝ  | r ≤ x ∧ x ≤ s}
-
-
-theorem is_closed_int_clos { r s : ℝ } ( Hrs : r < s ) : is_closed (int_clos Hrs) := 
-begin 
-let L := {x : ℝ | x ≤ s} , 
-let R := {x : ℝ | r ≤ x} , 
-have C1 : is_closed L, exact is_closed_le' s, 
-have C2 : is_closed R, exact is_closed_ge' r, 
-have Int : int_clos Hrs =  R ∩ L, 
-    unfold has_inter.inter set.inter , unfold int_clos, simp,  
-rw Int, exact is_closed_inter C2 C1, 
-end 
---#check subtype.topological_space
 lemma is_closed_I01 : is_closed I01 := 
 begin exact @is_closed_int_clos 0 1 (by norm_num) end 
-
-
----------------------
--------------------------------------------------------
 
 -- Define closed subintervals of I01 = [0, 1] 
 definition T ( a b : ℝ ) ( Hab : a < b ) : set I01 :=  { x : I01 | a ≤ x.val ∧ x.val ≤ b }  
@@ -388,7 +312,7 @@ definition comp_of_path {α} [topological_space α] { x y z : α } ( f : path x 
     at_one := 
     begin unfold paste, rw dif_neg,  
     unfold fb_path, show @path.to_fun α _inst_2 y z g (par  T2._proof_1 (@subtype.mk ↥I01 (λ (x : ↥I01), x ∈ T2) 1 help_T2)) = z,
-    simp [eqn_end], --- exact g.at_one, 
+    simp [eqn_end], 
     exact help_02, 
     end,
     
@@ -403,7 +327,7 @@ definition comp_of_path {α} [topological_space α] { x y z : α } ( f : path x 
         have xeq : x = (⟨ 1/2 , help_01 ⟩ : I01 ) , apply subtype.eq, rw V, 
         unfold fa_path fb_path, simp [xeq, -one_div_eq_inv], 
         show f.to_fun (par T1._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T1⟩) = g.to_fun (par T2._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T2⟩),
-        simp [eqn_1, eqn_2, -one_div_eq_inv],  --rw [f.at_one, g.at_zero], 
+        simp [eqn_1, eqn_2, -one_div_eq_inv], 
     -- Use pasting lemma via closed T1, T2    
     exact cont_of_paste T1_is_closed T2_is_closed HM (CA f) (CB g),  
     end
@@ -458,7 +382,6 @@ definition inv_of_path {α} [topological_space α] { x y : α } ( f : path x y )
 def is_loop ( g : path x y) : Prop := x = y -- function to check loop
 
 
---@[simp]
 def loop {α} [topological_space α] (x0 : α) : Type* := path x0 x0 
 
 
