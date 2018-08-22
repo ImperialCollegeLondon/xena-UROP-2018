@@ -17,8 +17,6 @@ in terms of matrix way
 
 -- currently working on Cayley-Hamilton Theorem 
 - Proved e • V = (e • I) * V, with e : F, V : vector F
-- 
-
 -/
 
 import .linear_map .ring_n_is_module_of_vector

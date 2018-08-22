@@ -3,19 +3,9 @@ Copyright (c) 2018 Keji Neri, Blair Shi. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Blair Shi
 
--- This file aims to prove some theorems about eigenvalue and eigenvectors
 
-* `is_eigenvalue` `is_eigenvector`: constructed eigenvalues and eigenvectors 
-in terms of linear map way
+* `adj M` gives the adjugate matrix of M
 
-* `is_eigenvalue_M` `is_eigenvector_M`: constructed eigenvalues and eigenvectors 
-in terms of matrix way
-
--- Proved two ways are equivalent
-
-* `is_diagonal_mat` : checked whether the given matrix is diagonal
-
--- currently working on Cayley-Hamilton Theorem 
 -/
 
 import .linear_map .ring_n_is_module_of_vector
