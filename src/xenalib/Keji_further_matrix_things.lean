@@ -18,33 +18,33 @@ noncomputable def det {n:ℕ} {R : Type} [comm_ring R] (A : matrix R n n) : R :=
 finset.sum (finset.univ : finset (equiv.perm (fin n))) (λ (σ : equiv.perm (fin n)), e σ  * (finset.prod (finset.univ : finset (fin n)) 
 (λ (i:fin n), A (σ.1 i) i)))
 
-def transpose {R : Type} [ring R] {n:ℕ} (A:matrix R n n) : matrix R n n :=
+def transpose {R : Type} [ring R] {a b:ℕ  }(A:matrix R a b):  matrix R b a:=
 λ i j, A j i
 
-postfix `ᵀ` : 100 := transpose
+postfix `ᵀ`:100 := transpose
 
-def Hermitian_conjugate  [ring ℂ ] {n:ℕ  } (A:matrix ℂ n n) : matrix ℂ n n:=
+def Hermitian_conjugate  [ring ℂ ] {n:ℕ  }(A:matrix ℂ n n):  matrix ℂ n n:=
 λ i j, conj (A j i)
 
-postfix `†` : 100 := Hermitian_conjugate
+postfix `†`:100 := Hermitian_conjugate
 
-def GL (n:ℕ) (R : Type) [ring R] := units (matrix R n n)
+def GL (n:ℕ) ( R : Type) [ring R]:= units (matrix R n n)
 
-def Orthogornal (n : ℕ) : Type := {A : GL n ℝ // mul ℝ A.1 (A.1ᵀ) = identity_matrix ℝ ∧ mul ℝ (A.1ᵀ) A.1 = identity_matrix ℝ}
+def Orthogornal ( n: ℕ): Type:= {A :GL n ℝ   // mul ℝ  A.1 ( A.1ᵀ)= identity_matrix ℝ  ∧ mul ℝ (A.1ᵀ) A.1 = identity_matrix ℝ  }
 
-def Hermitian (n : ℕ) : Type := {A : matrix ℂ n n // mul ℂ A (A†) = (1 : matrix ℂ n n)}
+def Hermitian ( n: ℕ) : Type:= {A :matrix ℂ n n //  mul ℂ A (A†)= (1 : matrix ℂ n n)}
 
-theorem transpose_of_product (R : Type) [comm_ring R] {n : ℕ} (A B : matrix R n n) : (mul R A B)ᵀ  = mul R (Bᵀ ) (Aᵀ) := 
+theorem transpose_of_product ( R : Type) [comm_ring R] {a b c :ℕ}( A :matrix R a b) (B: matrix R b c): (mul R A B)ᵀ  = mul R (Bᵀ ) (Aᵀ) := 
 begin
-  unfold mul,
-  unfold transpose,
-  simp[mul_comm]
+unfold mul,
+unfold transpose,
+simp[mul_comm],
 end 
 
-instance GL_group (n:ℕ) (R : Type) [ring R] : group (GL n R):=
+instance GL_group (n:ℕ ) ( R : Type) [ring R]:group (GL n R):=
 begin
-  unfold GL,
-  apply_instance
+unfold GL,
+apply_instance,
 end 
 
 lemma matrix_prod_reorder_eq_prod {n : ℕ} {R : Type} [comm_ring R] (A : matrix R n n) (σ : equiv.perm (fin n)) (ρ : equiv.perm (fin n)) :
