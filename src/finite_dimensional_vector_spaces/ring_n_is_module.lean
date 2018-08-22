@@ -2,14 +2,11 @@ import algebra.module linear_algebra.basic analysis.real data.vector data.list.b
 
 universes u
 
--- def R_n_basis (n : nat) : set (vector ℝ n) :=
--- {v | ∀ i : fin n, (v.nth i = 1 ∧ ∀ j : fin n, j.val ≠ i.val → v.nth j = 0) }
-
 namespace vector
 
-variables {n : ℕ} {R : Type u }
+variables (n : ℕ) (R : Type u)
 
-instance [h : ring R]: module R (vector R n) :=
+instance to_module [h : ring R] : module R (vector R n) :=
 {
     add := map₂ h.add,
     add_assoc := by 
@@ -100,11 +97,12 @@ instance [h : ring R]: module R (vector R n) :=
         cases a; simp [list.repeat, list.map, list.map₂],
             repeat { contradiction },
             simp [nat.add_one] at la,
-            split, apply add_left_neg,
-                exact ih _ la } 
+            split, apply add_left_neg, exact ih _ la } 
 }
 
-instance [h : field R] : vector_space R (vector R n) := 
+instance to_vector_space [h : field R] : vector_space R (vector R n) := 
 vector_space.mk _ _
+
+instance [h : ring R] : has_add (vector R n) := by apply_instance
 
 end vector

@@ -323,6 +323,16 @@ theorem equiv_two {R : Type} [ring R] {p b : nat} (M : matrix R p b):
     simp,
     simp,
   end
+
+def matrix_transpose {R : Type} [ring R] {a b : nat} (M : matrix R a b) :
+matrix R b a := λ I, λ J, M J I
+
+definition matrix_to_map_right {R : Type} [ring R] {a b : nat} (M : matrix R a b) :
+(has_space R a) → (has_space R b) := 
+λ v, (λ I, finset.sum finset.univ (λ K, (matrix_transpose M) I K * (v K)))
+
+-- end
+
 def matrix_to_linear_map_equiv {R : Type} [ring R] {a b : nat} :
   equiv  (matrix R a b)  (@linear_map R (has_space R a)  (has_space R b) _ _ _):= 
     {to_fun := matrix_to_linear_map,
@@ -345,7 +355,7 @@ def matrix_to_linear_map_equiv {R : Type} [ring R] {a b : nat} :
     end  
    }
 
-instance  {R : Type} [ring R] {a b : nat}:  is_add_group_hom (@matrix_to_linear_map R _ a b):=
+instance {R : Type} [ring R] {a b : nat}:  is_add_group_hom (@matrix_to_linear_map R _ a b):=
   { 
   add:= 
   begin 
@@ -485,11 +495,13 @@ exact is_add_group_hom.add _,
  smul:= smul_ _,
 }
 
+
 -- definition matrix_to_map {R : Type} [ring R] {a b : nat} (M : matrix R a b) :
 -- (has_space R a) → (has_space R b) := λ v ,(λ i,finset.sum finset.univ (λ K, (v K) *M K i ) )
-
+  
 def vec_to_mat {R : Type} [ring R] {n : nat} (vc : vector R n) :
 matrix R n 1 := λ I, λ J, vector.nth vc I
+
 
 def mat_mul_vec {R : Type} [ring R] {n m : nat} (M : matrix R n m) (vc : vector R m) :
 matrix R n 1 := @matrix.mul _ _ m n 1 M (vec_to_mat vc)
@@ -502,9 +514,6 @@ begin
 apply matrix.mul_assoc,
 end
 
-def matrix_transpose {R : Type} [ring R] {a b : nat} (M : matrix R a b) :
-matrix R b a := λ I, λ J, M J I
-
 end map_matrix
 
 namespace vector_space 
@@ -514,6 +523,7 @@ variable [field k]
 variable (n : nat)
 
 --  a basis v1,v2,...,vn of a fdvs V/k is just an isomorphism k^n -> V.
+
 
 open map_matrix
 -- helper function to get basis

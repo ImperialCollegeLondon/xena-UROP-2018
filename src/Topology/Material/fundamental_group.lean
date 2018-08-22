@@ -28,7 +28,7 @@ variables {α  : Type*} [topological_space α ] {x : α }
 
 -- life seems easier if you have both these instances, for some reason
 instance setoid_hom_path {α : Type*} [topological_space α] (x : α)  :
-setoid (path x x) := setoid.mk is_homotopic_to (is_equivalence x x)
+setoid (path x x) := setoid.mk is_homotopic_to (is_equivalence)
 
 instance setoid_hom_loop {α : Type*} [topological_space α] (x : α)  :
 setoid (loop x) := by unfold loop; apply_instance
@@ -45,9 +45,6 @@ quotient.mk f
 
 def id_eq_class {α : Type*} [topological_space α ] (x : α )  : space_π₁ x := ⟦ loop_const x ⟧ 
 
---def inv_eq_class {α : Type*} [topological_space α ] {x : α } (F : space_π₁  x) : space_π_1 x := eq_class (inv_of_path (out_loop F))
-
-def inv_eq_class' {α : Type*} [topological_space α ] {x : α } ( f : loop x ) : space_π₁  x := eq_class (inv_of_path f)
 
 lemma inv_eq_class_aux {α : Type*} [topological_space α] {x : α} : 
 ∀ (a b : path x x),
@@ -86,9 +83,6 @@ quotient.lift₂ (λ f g, ⟦comp_of_path f g⟧) mul_aux
 -- Interface
 
 instance coe_loop_π₁ : has_coe (loop x) (space_π₁ x) := ⟨eq_class⟩
-
-instance : has_one (space_π₁ x) := ⟨ id_eq_class x ⟩ 
----Similarly to Zmod37 should do nstances for identity/inverse elements  ? 
 
 -- To break down mul proofs and use quotient.sound
 lemma quotient.out_eq'  {α : Type*} [topological_space α ] {x : α } ( F : space_π₁ x) 
@@ -200,35 +194,11 @@ begin
   exact hom_const_f_to_f (quotient.out F),
 end
 
+--------------------------
+
 ----------------------------------------------------
 
 -- Inverse Element
-
-
---set_option trace.simplify.rewrite true
---set_option pp.implicit true
-
-
--- Inverse 
-
-
-
---instance : @topological_semiring I01 (by apply_instance )  := 
-/-
-lemma comp_inv_eqv_const {α : Type*} [topological_space α ] {x : α } (F : space_π₁  x) : is_homotopic_to (comp_of_path (out_loop (inv_eq_class F)) (out_loop F) ) (loop_const x) := 
-begin 
-unfold is_homotopic_to, 
-sorry,
-
-end  -/ 
-
-
-
-/- α : Type u_1,
-_inst_2 : topological_space α,
-x : α,
-F : space_π₁ x
-⊢ path_homotopy (comp_of_path (inv_of_path (quotient.out F)) (quotient.out F)) (loop_const x) -/
 
 
 
@@ -239,69 +209,41 @@ begin
 end
 
 
+---------------------------------------------------
+
+-- Associativity 
+
+
+theorem mul_assoc {α : Type*} [topological_space α ] {x : α } (F G H: space_π₁ x) : 
+fg_mul (fg_mul F G) H = fg_mul F (fg_mul G H) :=  
+begin 
+ unfold fundamental_group.mul, rw [quotient.out_eq' F ,quotient.out_eq' G , quotient.out_eq' H], 
+ apply quotient.sound, 
+  existsi _, exact path_homotopy_inverse (
+  hom_comp_f_g_h (quotient.out F) (quotient.out G) (quotient.out H)), 
+end
+
+
+-------------
+
 -- Group π₁ (α  , x)
 
 noncomputable def π₁_group {α : Type*} [topological_space α ] (x : α ) : group ( space_π₁ x) := 
 {   mul := fundamental_group.mul ,  
     
-    mul_assoc := begin sorry end, 
-    
+    mul_assoc := fundamental_group.mul_assoc, 
     
     one := id_eq_class x , 
-
     one_mul := fundamental_group.one_mul , 
     mul_one := fundamental_group.mul_one , 
 
     inv :=  inv_eq_class  ,
     mul_left_inv := fundamental_group.mul_left_inv 
-    /- begin 
-    intro F, unfold fundamental_group.mul, unfold inv_eq_class eq_class, rw [quotient.out_eq' F],apply quotient.sound, 
-    existsi _, 
-    end -/ 
 
 }
 
 
---------------------- Next things after identity for π_1 group 
--- Not Compiling 
-
-
-
-
-
-
---- out lemma , 
-
--- (or define multiplication given loops (mul_1) )
-
-
-
--- Ignore below
-
-/- def space_π_1 {α : Type*} [topological_space α ] {x : α } :=  --: set (hom_eq_class x)
-{ h : hom_eq_class ( path x x) } -/ 
-
-/- 
-def space_π_1 {α : Type*} [topological_space α ] {x : α } : set (set (path x x)) := 
-{ ∀ f : loop3 x,  hom_eq_class ( f)   } -/ 
-
-
-    
-
-/- {   to_fun := sorry, 
-    path_s := sorry, 
-    at_zero := sorry, 
-    at_one := sorry, 
-    cont := sorry-/
-
-
 --set_option trace.simplify.rewrite true
 --set_option pp.implicit true
-
-
--- Associativity of homotopy 
-
-
--- Homotopy as a class ????
 
 end fundamental_group

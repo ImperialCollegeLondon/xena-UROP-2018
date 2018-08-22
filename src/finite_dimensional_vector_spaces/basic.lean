@@ -50,20 +50,6 @@ section basic_property
 variables (x y : V)
 variable (fvs : finite_dimensional_vector_space k V)
 
-lemma add_closed : is_in_vecsp x fvs ∧ is_in_vecsp y fvs → is_in_vecsp (x + y) fvs :=
-begin
-intro h₀,
-cases h₀ with le ri,
-have h₁ : ∃(lc₁ : lc k V), (∀x∉fvs.ordered_basis, lc₁ x = 0) 
-  ∧ x = lc₁.sum (λb a, a • b), from le,
-have h₂  : ∃ lc₂ : lc k V, (∀x∉fvs.ordered_basis, lc₂ x = 0) 
-  ∧ y = lc₂.sum (λb a, a • b), from ri,
-apply exists.elim h₁,
-apply exists.elim h₂,
-intros lc₁ h₃ lc₂ h₄,
-sorry
-end
-
 end basic_property
 
 section span_liid

@@ -47,7 +47,7 @@ equiv (units (zmod n)) {a : zmod n // ∃ b, a * b = 1} :=
     inv_val := by rw [mul_comm,mul_inv_eq_gcd,gcd_one_of_has_inv A.val A.property];dsimp;rw zero_add,
   },
   left_inv := λ u,begin apply units.ext,show (↑((u.val).val) : zmod n) = u.val,simp,end,
-  right_inv := λ A, by simp
+  right_inv := λ A, by simp,
 }
 
 instance (n : nat) : pos_nat (nat.succ n) := ⟨nat.succ_pos _⟩ 
