@@ -55,11 +55,10 @@ end
 
 --theorem num_of_quad_res {p : ℕ} (hp : prime_int p ∧ p ≠ 2) : ∃ (A : set ℕ) [finset A], ∀ x : [1, (p-1)], (legendre_sym x hp = 1 ↔ x ∈ A) ∧ finset.card A = (p-1)/2
 
-/- ALREADY DECLARED
-#check int.cast_pow
+--ALREADY DECLARED
+
 @[simp] lemma int.cast_pow {α : Type*} [ring α] (a : ℤ) (n : ℕ): ((a ^ n : ℤ) : α) = a ^ n :=
 by induction n; simp [*, _root_.pow_succ]
-
 
 @[simp] lemma nat.cast_pow {α : Type*} [semiring α] (a : nat) (n : ℕ): 
 ((a ^ n : ℕ ) : α) = a ^ n :=
@@ -75,11 +74,11 @@ match (n % 2), h, h1 with
 | (k+2 : ℕ) := λ h _, absurd h dec_trivial
 |(-[1+ a]) := λ _ h1, absurd h1 dec_trivial 
 end
--/
+
 
 lemma int.modeq.mod_modeq : ∀ (a n : ℤ), a % n ≡ a [ZMOD (int.nat_abs n)] := sorry 
 
-lemma int.add_sub_cancel_left : ∀ (n m : ℤ), n + m - n = m := sorry
+lemma int.add_sub_cancel_left (n m : ℤ) : n + m - n = m := add_sub_cancel' n m
 
 lemma yet_to_prove (x : ℤ) (p : ℤ) (hp : prime_int p ∧ int.nat_abs p ≠ 2) : (x ^ int.nat_abs (p - 1)) = (int.nat_abs x) ^ (int.nat_abs p - 1)  := sorry
 
@@ -103,16 +102,31 @@ have h2 : (p % 2 = 0) ∨ (p % 2 = 1), from int.mod_two_eq_zero_or_one p,
 exact or_iff_not_imp_left.1 h2 h1,
 end
 
-
-theorem euler_c_1 (a p : ℤ) (hp : prime_int p ∧ int.nat_abs p ≠ 2) (ha : ¬ p ∣ a) : quadratic_res a p → a^int.nat_abs((p-1)/2) ≡ 1 [ZMOD (int.nat_abs p)] := 
+lemma p_minus_one_over_two (p : ℤ) (q : 2 ∣ int.nat_abs (p - 1)) :
+int.nat_abs ((p - 1) / 2) = int.nat_abs (p - 1) / 2 :=
 begin
-intro Hqr,
-cases Hqr with x hx,
-haveI : prime_int p := hp.1,
-haveI : pos_nat(int.nat_abs p) := sorry,
-rw ← zmod.eq_iff_modeq_int,
-rw ← zmod.eq_iff_modeq_int at hx,
-have q: 2 ∣ int.nat_abs(p-1):=
+  cases q with d hd,
+  have H : ∃ e, (p - 1) = 2 * e,
+  cases (int.nat_abs_eq (p - 1)),
+    existsi (d : ℤ),
+    rw [h,hd],
+    refl,
+  existsi (- (d : ℤ)),
+    rw [h,hd],
+  rw int.coe_nat_mul,
+  rw mul_neg_eq_neg_mul_symm,refl,
+
+  cases H with e He,
+  rw He,
+  rw int.nat_abs_mul,
+  rw int.mul_div_cancel_left,
+  show _ = 2 * _ / _,
+  rw nat.mul_div_cancel_left,
+  exact dec_trivial,
+  exact dec_trivial,
+end
+
+lemma two_dvd_p_minus_one {p : ℤ} (hp: prime_int p ∧ int.nat_abs p ≠ 2) : 2 ∣ int.nat_abs (p-1) :=
 begin
   cases nat.mod_two_eq_zero_or_one (int.nat_abs p),
   have : (int.nat_abs p) % 2 ≡ int.nat_abs p [MOD 2], from nat.modeq.mod_modeq (int.nat_abs p) 2,
@@ -132,8 +146,19 @@ begin
   rw this, rw int.add_sub_cancel_left,
   have r: 2 ≠ 0, by norm_num,
   exact dvd_mul_right _ _,
-end,
-have h5 : int.nat_abs ((p-1)/2) = (int.nat_abs (p-1))/2, sorry,
+end
+
+
+theorem euler_c_1 (a p : ℤ) (hp : prime_int p ∧ int.nat_abs p ≠ 2) (ha : ¬ p ∣ a) : quadratic_res a p → a^int.nat_abs((p-1)/2) ≡ 1 [ZMOD (int.nat_abs p)] := 
+begin
+intro Hqr,
+cases Hqr with x hx,
+haveI : prime_int p := hp.1,
+haveI : pos_nat(int.nat_abs p) := sorry,
+rw ← zmod.eq_iff_modeq_int,
+rw ← zmod.eq_iff_modeq_int at hx,
+have q: 2 ∣ int.nat_abs(p-1), from two_dvd_p_minus_one hp,
+have h5 : int.nat_abs ((p-1)/2) = (int.nat_abs (p-1))/2, from p_minus_one_over_two p q,
 rw int.cast_pow, rw hx, rw int.cast_pow, rw ← pow_mul, rw h5, rw nat.mul_div_cancel' q,
 have h : prime (int.nat_abs p),{unfold prime_int at _inst; exact _inst},
 have h1 : (int.nat_abs x)^((int.nat_abs p) -1) ≡ 1 [MOD (int.nat_abs p)], from fermat_little_theorem_extension (int.nat_abs x) (int.nat_abs p) h,
