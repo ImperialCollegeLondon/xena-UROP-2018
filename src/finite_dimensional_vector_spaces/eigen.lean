@@ -15,7 +15,10 @@ in terms of matrix way
 
 * `is_diagonal_mat` : checked whether the given matrix is diagonal
 
--- currently working on Cayley-Hamilton Theorem :(
+-- currently working on Cayley-Hamilton Theorem 
+- Proved e • V = (e • I) * V, with e : F, V : vector F
+- 
+
 -/
 
 import .linear_map .ring_n_is_module_of_vector
@@ -31,8 +34,6 @@ instance mo {R : Type} {n : ℕ} [ring R] : module R (matrix R n 1) :=
   one_smul := @one_smul' _ _ 1 _,
 }
 end M_module
-
--- eigenvalue and eigenvector
 
 def mat_to_has_space {F : Type} {n : ℕ} [ring F] (M : matrix F n 1) :
 has_space F n := λ I, M I 0
@@ -81,28 +82,6 @@ end
 
 open M_module
 
-
--- did not define smul of vector
--- • does not work here
-
--- lemma smul_eq_smul_one {F : Type} {n : ℕ} [ring F] (fn : has_space F n) : 
--- ∀ a : F, (has_space_to_vec (smul a fn)) = (a • (has_space_to_vec fn)) :=
--- begin
--- intro a,
--- unfold has_space_to_vec,
--- ext,
--- simp, unfold has_scalar.smul,
--- simp,
--- conv
---   begin
---   to_rhs,
---   rw [vector.nth_map],
---   end,
--- unfold smul,
--- simp,
--- refl,
--- end
-
 open map_matrix
 
 lemma smul_eq_smul_two {F : Type} {n : ℕ} [ring F] (fn : has_space F n) :
@@ -149,7 +128,6 @@ intro,
 unfold has_space_to_vec,
 simp,
 end
-
 
 def has_space_to_row_mat {F : Type} {n : ℕ} [ring F] (fn : has_space F n) :
 matrix F 1 n := λ I, λ J, fn J
@@ -283,7 +261,6 @@ end eigen
 
 namespace Cayley_Hamilton
 
---smul_M eva (vec_to_mat (has_space_to_vec v)
 open eigen
 
 theorem L0 {F : Type} [comm_ring F] {n : ℕ} (v : has_space F n):
@@ -321,21 +298,6 @@ contradiction,
 simp,
 end
 
-theorem matrix_mul_sub_mul {R : Type} [comm_ring R] (a b c : ℕ) :
-∀ (A B: matrix R a b), ∀ C : matrix R b c,
-matrix.sub R (matrix.mul R A C) (matrix.mul R B C) = matrix.mul R (matrix.sub R A B) C :=
-begin 
-intros A B C,
-unfold matrix.sub,
-unfold matrix.mul,
-funext,
-conv in ((A _ _ - B _ _) * C _ _)
-begin
-  rw [sub_mul],
-end,
-{simp[finset.sum_add_distrib]},
-end
-
 lemma sub_eq_sub {R : Type} [ring R] {a b : ℕ} (A B : matrix R a b) :
 A - B = matrix.sub R A B :=
 begin
@@ -366,7 +328,7 @@ begin
 end,
 have h₁ : matrix.sub R (matrix.mul R M (vec_to_mat (has_space_to_vec v))) (smul_M eva (vec_to_mat (has_space_to_vec v)))
 = matrix.mul R (matrix.sub R M (smul_M eva (matrix.identity_matrix R))) (vec_to_mat (has_space_to_vec v)),
-  rw [← matrix_mul_sub_mul],
+  rw [← matrix.mul_sub_mul],
 congr,
 rw [L0],
 conv at h₀ in (matrix.mul R M _ - smul_M eva _)
@@ -383,7 +345,7 @@ unfold_coes at h₀,
 unfold mat_mul_vec at h₀,
 conv at h₀ in ((matrix.mul R (matrix.sub R _ _) _))
 begin
-  rw [← matrix_mul_sub_mul],
+  rw [← matrix.mul_sub_mul],
 end,
 unfold mat_to_has_space_is_linear at h₀,
 simp at h₀,
@@ -431,31 +393,6 @@ have h₁ :   mat_to_has_space
   exact h₀,  
 end
 
--- def Cross_out_column {R : Type} [ring R] {n : nat }
---   (A:matrix R (n+1) (n+1)) (m :fin (n+1)): matrix R n n := 
--- λ i j,
--- if j.1 < m.1 then  A (i.1+1) j.1 else 
---   A (i.1+1) (j.1+1) 
-
-def minor {R : Type} [comm_ring R] {n : ℕ} (M : matrix R (n + 1) (n + 1)) (a b : ℕ):
-matrix R n n :=
-λ I J,
-if (I.1 < a ∧ J.1 < b) 
-then M I.1 J.1 
-else 
-  if (I.1 >= a ∧ J.1 < b)
-  then M (I.1 + 1) J.1
-  else
-    if (I.1 >= a ∧ J.1 >= b)
-    then M (I.1 + 1) (J.1 + 1)
-    else M I.1 (J.1 + 1)
-
-noncomputable def cofactor {R : Type} [comm_ring R] [comm_ring R] {n : ℕ} (M : matrix R (n + 1) (n + 1)) :
-matrix R (n + 1) (n + 1) := λ I J, ((- 1) ^ (I.1 + J.1)) * (det (minor M I J))
-
-noncomputable def adj {R : Type} [comm_ring R] {n : ℕ} (M : matrix R (n + 1) (n + 1)) :
-matrix R (n + 1) (n + 1) := transpose (cofactor M)
-
 -- noncomputable def det_grl {R : Type} [comm_ring R] : Π {n : ℕ} (M : matrix R (n + 1) (n + 1)) 
 -- (a : fin (n + 1)), R 
 -- | 0 M a := M 0 0
@@ -470,8 +407,6 @@ matrix R (n + 1) (n + 1) := transpose (cofactor M)
 -- intros n M a,
 -- unfold det,
 -- unfold det_grl,
-
-
 
 -- end
 
@@ -505,7 +440,6 @@ unfold_coes,
 unfold det,
 unfold minor,
 funext,
-sorry
 sorry
 end
 
