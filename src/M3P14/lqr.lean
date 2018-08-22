@@ -20,12 +20,9 @@ begin
 exact (show prime(int.nat_abs p), from h),
 end
 
-<<<<<<< HEAD
 -----------
 -- TODO: make an algorithm that calculates the legendre symbol with jacobi symbol
 
-=======
->>>>>>> 3b8f74956c3e053d1df57ef1acfe2f9dc502832b
 definition quadratic_res (a n : ℤ) := ∃ x : ℤ, a ≡ x^2 [ZMOD (int.nat_abs n)]
 --definition quadratic_res' (p : ℤ) (hp : prime_int p ∧ p ≠ 2) (a n : zmod p) := ∃ x : ℕ, a ≡ x^2 [ZMOD n]
 
