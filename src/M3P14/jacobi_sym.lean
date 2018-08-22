@@ -52,18 +52,15 @@ private def jacobi_sym_aux : ℤ → ℤ → ℤ
 using_well_founded {rel_tac:= λ _ _, `[exact ⟨_, measure_wf (int.nat_abs ∘ psigma.fst)⟩ ]}
 
 /- Computes the Jacobi Symbol, extended to b even which will output 0, is it the Kronecker Symbol?-/
-def jacobi_sym : ℤ → ℤ → ℤ
+def jacobi_algorithm : ℤ → ℤ → ℤ
 | a          1 := 1
 | a          b := if b % 2 = 1 then jacobi_sym_aux a b else 0
 
 -- an attempt at notation for the jacobi symbol
-local notation {a|b} := jacobi_sym a b 
+local notation {a|b} := jacobi_algorithm a b 
 
 #eval {8|1}
 #eval {-5|0}
-#eval {-1|0}
-#eval {-2|15}
-#eval {-5|8}
 #eval {1236|200011}
 
 -- New definition of Jacobi symbol for positive and odd b to prove theorems
@@ -85,17 +82,19 @@ theorem jacobi_sym_eq_legendre_sym (a n : ℤ) (hn : prime_int n ∧ (int.nat_ab
 begin
     unfold legendre_sym,
     cases (classical.em (n = 1)),
-    rw h,
-    unfold jacobi_sym,
-    have p : quadratic_res a 1 ∧ ¬a ≡ 0 [ZMOD 1], {
-        sorry
-    },
-    simp [p],
-    have h2 : n ≠ 1, sorry,
-    rw [jacobi_sym.equations._eqn_2 a n h],
+    rw h at hn,
+    have : ¬prime_int 1, unfold prime_int,
+    suffices : ¬nat.prime 1, by simp [this],
+    exact dec_trivial,
+    exact absurd hn.1 this,
+    have h2 : n ≠ 1, by simp [h],
+    rw [jacobi_algorithm.equations._eqn_2 a n h],
+    cases (classical.em (n % 2 = 1)),
+    simp [h_1],
+
+
     sorry,
-
-
+    sorry,
 end
 
 theorem jacobi_sym_refl (a b n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) : a ≡ b [ZMOD n] →  {a|n} = {b|n} := sorry
