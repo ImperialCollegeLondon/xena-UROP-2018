@@ -113,11 +113,33 @@ begin
     sorry,
 end
 
-theorem jacobi_sym_refl (a b n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) : a ≡ b [ZMOD n] →  {a|n} = {b|n} := sorry
+lemma mod_eq_of_quad (a b n : ℤ) (hp: a ≡ b [ZMOD n]) : quadratic_res a n → quadratic_res b n := 
+begin
+unfold quadratic_res,
+simp,
+intros,
+sorry,
+--transitivity a_1,
+--apply int.modeq.trans,
+end
 
-theorem jacobi_sym_not_coprime (a n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) : int.gcd a n ≠ 1 → {a|n} = 0 := sorry
+theorem jacobi_sym_refl (a b n : ℤ) (hn : n > 0 ∧ int.gcd 2 n = 1) : a ≡ b [ZMOD n] → jacobi_symbol a hn = jacobi_symbol b hn := 
+begin
+intros,
+unfold jacobi_symbol,
+simp,
+sorry,
+end
 
-theorem jacobi_sym_num_mul (a b n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) : {a*b|n} = {a|n} * {b|n} := sorry
+theorem jacobi_sym_not_coprime (a n : ℤ) (hn : n > 0 ∧ int.gcd 2 n = 1) : int.gcd a n ≠ 1 → jacobi_symbol a hn = 0 := 
+begin 
+intros,
+dunfold jacobi_symbol,
+simp,
+sorry,
+end
+
+theorem jacobi_sym_num_mul (a b n : ℤ) (hn : n > 0 ∧ int.gcd 2 n = 1) : jacobi_symbol (a*b) hn = jacobi_symbol a hn * jacobi_symbol b hn := sorry
 
 theorem jacobi_sym_denom_mul (a m n : ℤ) (m_pos_odd : m > 0 ∧ int.gcd 2 m = 1) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) : {a|m*n} = {a|m} * {a|n} := sorry
 
@@ -125,11 +147,9 @@ theorem jacobi_sym_quadratic_res (m n : ℤ) (m_pos_odd : m > 0 ∧ int.gcd 2 m 
 
 theorem jacobi_num_zero (n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1): if n = 1 then {0|n} = 1 else {0|n} = 0 := sorry 
 
-theorem jacobi_num_neg_one (n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) [has_pow ℤ ℤ] : {-1|n} = (-1)^((n-1)/2) := sorry
+theorem jacobi_num_neg_one (n : ℤ) (hn : n > 0 ∧ int.gcd 2 n = 1) [has_pow ℤ ℤ] : {-1|n} = (-1)^((n-1)/2) := sorry
 
 theorem jacobi_num_two (n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) [has_pow ℤ ℤ] :  {2|n} = (-1)^(((n^2)-1)/8) := sorry
 
+-- do we really need this, considering as it's true by def?
 theorem jacobi_denom_one (a : ℤ) : {a|1} = 1 := by refl
-
---trying to state that jacobi_sym is equal to the product of legendre symbols, with prime factors p the prime factorisation of n
---lemma jacobi_eq_prod (a n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) : prod (factors pmap n) = jacobi_sym a n 
