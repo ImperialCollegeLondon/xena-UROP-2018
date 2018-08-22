@@ -63,6 +63,11 @@ local notation {a|b} := jacobi_algorithm a b
 #eval {-5|0}
 #eval {1236|200011}
 
+-- Thank you Chris
+lemma dvd_prod {α : Type*} [comm_semiring α] {a} {l : list α} (ha : a ∈ l) : a ∣ l.prod :=
+let ⟨s, t, h⟩ := list.mem_split ha in
+by rw [h, list.prod_append, list.prod_cons, mul_left_comm]; exact dvd_mul_right _ _
+
 -- New definition of Jacobi symbol for positive and odd b to prove theorems
 noncomputable definition jacobi_symbol {n : ℤ} (a : ℤ) (hn : n > 0 ∧ int.gcd 2 n = 1) := 
 list.prod ((nat.factors n.nat_abs).pmap (λ (p : ℕ) hp, @legendre_sym p a hp)
@@ -72,7 +77,18 @@ have h1: prime_int ↑a_1 = nat.prime a_1, refl,
 have h2: int.nat_abs ↑a_1 = a_1, refl,
 rw [h1, h2],
 have h3: nat.prime a_1, from nat.mem_factors H,
-have h4: a_1 ≠ 2, from sorry,
+have h4: a_1 ≠ 2,
+{
+    have j1: list.prod (nat.factors (int.nat_abs n)) = int.nat_abs n, from nat.prod_factors (int.nat_abs_pos_of_ne_zero (ne.symm (ne_of_lt hn.1))),
+    assume j2,
+    have j3: 2 = int.nat_abs 2, refl,
+    have j4: a_1 ∣ list.prod (nat.factors (int.nat_abs n)), from dvd_prod H,
+    rw [j1,j2,j3] at j4,
+    unfold int.gcd at hn,
+    have j5: nat.gcd (int.nat_abs 2) (int.nat_abs n) = int.nat_abs 2 ,from nat.gcd_eq_left j4,
+    have j6: int.nat_abs 2 ≠ 1, from dec_trivial,
+    exact absurd (hn.2) (eq.subst j5.symm j6),
+},
 exact ⟨h3,h4⟩,
 end)
 
