@@ -23,6 +23,7 @@ open set filter lattice classical
 namespace fundamental_group
 open homotopy
 open path
+section
 variables {α  : Type*} [topological_space α ] {x : α }
 
 
@@ -243,7 +244,84 @@ noncomputable def π₁_group {α : Type*} [topological_space α ] (x : α ) : g
 }
 
 
+end 
+
+
+----------------------------------------------------------------------
+constant st : I01 × I01 
+
+-- π₁ (ℝ , x )
+section 
+variable {x : ℝ }
+
+noncomputable theory 
+
+-- x in {} or ()?
+def c : loop x := loop_const x
+
+def C : space_π₁ x := id_eq_class x
+
+lemma trivial_check (x : ℝ ) : C = ⟦@c x⟧ := 
+by unfold C id_eq_class c  
+ 
+
+-- Define homotopy to show that any loop f in ℝ is homotopic to the constant loop c_x (based at x)
+def homotopy_real_fun ( f : loop x ) : I01 × I01 → ℝ := 
+λ st, (1 - st.1.1) * f.to_fun (st.2) + st.1.1 * f.to_fun (0) 
+
+lemma homotopy_real_start_pt ( f : loop x ) : ∀ (s : I01), homotopy_real_fun f (s, 0) = x :=
+begin 
+ intro s, unfold homotopy_real_fun, simp [-sub_eq_add_neg , sub_mul, add_sub, add_sub_assoc,  sub_self (s.val * x )], 
+end
+
+lemma homotopy_real_end_pt ( f : loop x ) :  ∀ (s : I01), homotopy_real_fun f (s, 1) = x :=
+begin 
+ intro s, unfold homotopy_real_fun, simp [-sub_eq_add_neg , sub_mul, add_sub, add_sub_assoc,  sub_self (s.val * x )],  
+end
+
+lemma homotopy_real_at_zero ( f : loop x ) : ∀ (y : I01), homotopy_real_fun f (0, y) = f.to_fun y  :=
+begin 
+ intro t, unfold homotopy_real_fun, have a₁ : (0:I01).val = (0:ℝ), trivial, 
+ simp [-sub_eq_add_neg , a₁ , sub_zero , zero_mul], 
+end
+
+lemma homotopy_real_at_one ( f : loop x ) : ∀ (y : I01), homotopy_real_fun f (1, y) = (@c x ).to_fun y := 
+begin 
+ intro t, unfold homotopy_real_fun c loop_const, have a₁ : (1:I01).val = (1:ℝ), trivial, 
+ simp [a₁], 
+end
+
+lemma homotopy_real_cont ( f : loop x ) : continuous (homotopy_real_fun f):= 
+begin 
+ unfold homotopy_real_fun, refine continuous_add _ _, 
+   { refine continuous_mul _ _, 
+     { refine continuous_add _ _, exact continuous_const, 
+     exact continuous.comp (continuous.comp continuous_fst continuous_subtype_val) (continuous_neg continuous_id), 
+     },
+     exact continuous.comp continuous_snd f.cont, 
+   }, 
+   refine continuous_mul _ continuous_const, 
+   exact continuous.comp continuous_fst continuous_subtype_val, 
+end
+--------
+
+definition homotopy_real ( f : loop x ) : path_homotopy f c  := 
+path_homotopy.mk' (homotopy_real_fun f) (homotopy_real_start_pt f) (homotopy_real_end_pt f) 
+(homotopy_real_at_zero f) (homotopy_real_at_one f)  (homotopy_real_cont f) 
+
+--------------------------
+
+theorem real_trivial_eq_class (F : space_π₁ x) : F = C := 
+begin 
+ rw quotient.out_eq' F, rw trivial_check, apply quotient.sound, existsi _, 
+ exact homotopy_real (quotient.out F), 
+end 
+
+
 --set_option trace.simplify.rewrite true
 --set_option pp.implicit true
+
+
+end
 
 end fundamental_group
