@@ -132,23 +132,27 @@ end
 
 open M_module
 
-lemma smul_eq_smul_one {F : Type} {n : ℕ} [ring F] (fn : has_space F n) : 
-∀ a : F, (has_space_to_vec (smul a fn)) = (a • (has_space_to_vec fn)) :=
-begin
-intro a,
-unfold has_space_to_vec,
-ext,
-simp, unfold has_scalar.smul,
-simp,
-conv
-  begin
-  to_rhs,
-  rw [vector.nth_map],
-  end,
-unfold smul,
-simp,
-refl,
-end
+
+-- did not define smul of vector
+-- • does not work here
+
+-- lemma smul_eq_smul_one {F : Type} {n : ℕ} [ring F] (fn : has_space F n) : 
+-- ∀ a : F, (has_space_to_vec (smul a fn)) = (a • (has_space_to_vec fn)) :=
+-- begin
+-- intro a,
+-- unfold has_space_to_vec,
+-- ext,
+-- simp, unfold has_scalar.smul,
+-- simp,
+-- conv
+--   begin
+--   to_rhs,
+--   rw [vector.nth_map],
+--   end,
+-- unfold smul,
+-- simp,
+-- refl,
+-- end
 
 open map_matrix
 
@@ -476,7 +480,44 @@ have h₁ :   mat_to_has_space
   exact h₀,  
 end
 
---v ≠ 0 ∧ smul' M v = smul eva v
+-- def Cross_out_column {R : Type} [ring R] {n : nat }
+--   (A:matrix R (n+1) (n+1)) (m :fin (n+1)): matrix R n n := 
+-- λ i j,
+-- if j.1 < m.1 then  A (i.1+1) j.1 else 
+--   A (i.1+1) (j.1+1) 
+
+def minor {R : Type} [comm_ring R] {n : ℕ} (M : matrix R (n + 1) (n + 1)) (a b : ℕ):
+matrix R n n :=
+λ I J,
+if (I.1 < a ∧ J.1 < b) 
+then M I.1 J.1 
+else 
+  if (I.1 >= a ∧ J.1 < b)
+  then M (I.1 + 1) J.1
+  else
+    if (I.1 >= a ∧ J.1 >= b)
+    then M (I.1 + 1) (J.1 + 1)
+    else M I.1 (J.1 + 1)
+
+noncomputable def cofactor {R : Type} [comm_ring R] [comm_ring R] {n : ℕ} (M : matrix R (n + 1) (n + 1)) :
+matrix R (n + 1) (n + 1) := λ I J, ((- 1) ^ (I.1 + J.1)) * (det (minor M I J))
+
+noncomputable def adj {R : Type} [comm_ring R] {n : ℕ} (M : matrix R (n + 1) (n + 1)) :
+matrix R (n + 1) (n + 1) := transpose (cofactor M)
+
+theorem L2 {R : Type} [comm_ring R] {n : ℕ} (M : matrix R (n + 1) (n + 1)) :
+matrix.mul R M (adj M) = smul_M (det M) (@matrix.identity_matrix _ _ (n + 1)) :=
+begin
+unfold adj,
+unfold matrix.mul,
+unfold smul_M,
+funext,
+unfold det,
+
+
+
+end
+
 
 theorem Cayley_Hamilton {R : Type} [comm_ring R] {n : ℕ} (M : matrix R n n) :
 ∀ eva : R, @det n R _ (matrix.sub R M (smul_M eva (@matrix.identity_matrix R _ n))) = 0 

@@ -5,4 +5,8 @@ lean_version = "master"
 path = "src"
 
 [dependencies]
+<<<<<<< HEAD
+mathlib = {git = "https://github.com/leanprover/mathlib", rev = "7c1d3b4d7805f3ee6d7d2bbb5bcc5bb87640fe8e"}
+=======
 mathlib = {git = "https://github.com/leanprover/mathlib", rev = "12d103c2be5228087e61f02fb3414ca10b6dc69b"}
+>>>>>>> refs/remotes/origin/master

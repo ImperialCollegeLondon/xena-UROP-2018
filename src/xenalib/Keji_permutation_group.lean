@@ -1,5 +1,7 @@
-import xenalib.Group_actions data.fintype data.set.finite data.equiv xenalib.Ellen_Arlt_matrix_rings algebra.big_operators data.set.finite group_theory.coset algebra.group
+import xenalib.Group_actions data.fintype data.set.finite data.equiv.basic xenalib.Ellen_Arlt_matrix_rings algebra.big_operators data.set.finite group_theory.coset algebra.group
+import group_theory.perm
 local attribute [instance] classical.prop_decidable
+
 
 
 
@@ -10,29 +12,29 @@ local attribute [instance] classical.prop_decidable
 
 open fintype 
 set_option pp.proofs true
-noncomputable instance {n : ℕ} : fintype {f : fin n→ fin n // function.bijective f}  := 
-set_fintype _
+-- noncomputable instance {n : ℕ} : fintype {f : fin n→ fin n // function.bijective f}  := 
+-- set_fintype _
 def S (n: ℕ ) := equiv.perm (fin n)
 instance (n : ℕ) : has_coe_to_fun (S n) := by unfold S; apply_instance
-def e {n:ℕ} {R:Type} [comm_ring R] (σ : fin n → fin n) : R:= sorry 
-theorem Sig_eq_inv {n:ℕ} {R:Type} [comm_ring R] (π: S n)  : @e n R _  π.1 = e (π.symm).1 := sorry
-theorem sig_mul  {n:ℕ} {R:Type} [comm_ring R] (σ π : fin n → fin n) : @e n R _  (σ ∘ π  )= (@e n R _  σ ) *  @e n R _   π  := sorry
-theorem sig_swap  {n:ℕ} {R:Type} [comm_ring R] (i j : fin n): e (equiv.swap i j).1 = (-1 :R) := sorry
-noncomputable instance Sn_finite {n:ℕ}: fintype (S n):=
-fintype.of_surjective 
-(λ (f : {f : fin n → fin n // function.bijective f}), equiv.of_bijective f.2) 
-begin 
-unfold function.surjective,
-simp,
-intro b,
-let f:{f : fin n → fin n // function.bijective f}:=  ⟨ b.1,b.bijective⟩,
-existsi f.1,
-existsi  f.2,
-apply equiv.ext,
-intro x,
-rw equiv.of_bijective_to_fun,
-refl,
-end
+-- def e {n:ℕ} {R:Type} [comm_ring R] (σ : fin n → fin n) : R:= sorry 
+-- theorem Sig_eq_inv {n:ℕ} {R:Type} [comm_ring R] (π: S n)  : @e n R _  π.1 = e (π.symm).1 := sorry
+-- theorem sig_mul  {n:ℕ} {R:Type} [comm_ring R] (σ π : fin n → fin n) : @e n R _  (σ ∘ π  )= (@e n R _  σ ) *  @e n R _   π  := sorry
+-- theorem sig_swap  {n:ℕ} {R:Type} [comm_ring R] (i j : fin n): e (equiv.swap i j).1 = (-1 :R) := sorry
+-- noncomputable instance Sn_finite {n:ℕ}: fintype (S n):=
+-- fintype.of_surjective 
+-- (λ (f : {f : fin n → fin n // function.bijective f}), equiv.of_bijective f.2) 
+-- begin 
+-- unfold function.surjective,
+-- simp,
+-- intro b,
+-- let f:{f : fin n → fin n // function.bijective f}:=  ⟨ b.1,b.bijective⟩,
+-- existsi f.1,
+-- existsi  f.2,
+-- apply equiv.ext,
+-- intro x,
+-- rw equiv.of_bijective_to_fun,
+-- refl,
+-- end
 instance g (n : ℕ) : is_group_action (equiv.to_fun : S n → fin n → fin n) :=
 { one := λ _, rfl,
   mul := λ _ _ _, rfl }
