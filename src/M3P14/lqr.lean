@@ -20,18 +20,12 @@ begin
 exact (show prime(int.nat_abs p), from h),
 end
 
-<<<<<<< HEAD
------------
--- TODO: make an algorithm that calculates the legendre symbol with jacobi symbol
-
-=======
->>>>>>> 3b8f74956c3e053d1df57ef1acfe2f9dc502832b
 definition quadratic_res (a n : ℤ) := ∃ x : ℤ, a ≡ x^2 [ZMOD (int.nat_abs n)]
 --definition quadratic_res' (p : ℤ) (hp : prime_int p ∧ p ≠ 2) (a n : zmod p) := ∃ x : ℕ, a ≡ x^2 [ZMOD n]
 
 attribute [instance, priority 0] classical.prop_decidable
 noncomputable definition legendre_sym {p : ℤ} (a : ℤ) (H1 : prime_int p ∧ (int.nat_abs p) ≠ 2) : ℤ := 
-if quadratic_res a p ∧ ¬ ((p : ℤ) ∣ a) then 1 else 
+if quadratic_res a p ∧ ¬ (a ≡ 0 [ZMOD p]) then 1 else 
 if ¬ quadratic_res a p then -1 
 else 0
 
@@ -61,6 +55,8 @@ end
 
 --theorem num_of_quad_res {p : ℕ} (hp : prime_int p ∧ p ≠ 2) : ∃ (A : set ℕ) [finset A], ∀ x : [1, (p-1)], (legendre_sym x hp = 1 ↔ x ∈ A) ∧ finset.card A = (p-1)/2
 
+/- ALREADY DECLARED
+#check int.cast_pow
 @[simp] lemma int.cast_pow {α : Type*} [ring α] (a : ℤ) (n : ℕ): ((a ^ n : ℤ) : α) = a ^ n :=
 by induction n; simp [*, _root_.pow_succ]
 
@@ -79,6 +75,7 @@ match (n % 2), h, h1 with
 | (k+2 : ℕ) := λ h _, absurd h dec_trivial
 |(-[1+ a]) := λ _ h1, absurd h1 dec_trivial 
 end
+-/
 
 lemma int.modeq.mod_modeq : ∀ (a n : ℤ), a % n ≡ a [ZMOD (int.nat_abs n)] := sorry 
 

@@ -67,8 +67,23 @@ local notation {a|b} := jacobi_sym a b
 #eval {1236|200011}
 
 -- Properties of Jacobi symbol (taken from Wikipedia) --
+set_option trace.check true
+theorem jacobi_sym_eq_legendre_sym (a n : ℤ) (hn : prime_int n ∧ (int.nat_abs n) ≠ 2) : {a|n} = legendre_sym a hn := 
+begin
+    unfold legendre_sym,
+    cases (classical.em (n = 1)),
+    rw h,
+    unfold jacobi_sym,
+    have p : quadratic_res a 1 ∧ ¬a ≡ 0 [ZMOD 1], {
+        sorry
+    },
+    simp [p],
+    have h2 : n ≠ 1, sorry,
+    rw [jacobi_sym.equations._eqn_2 a n h],
+    sorry,
 
-theorem jacobi_sym_eq_legendre_sym (a n : ℤ) (hn : prime_int n ∧ (int.nat_abs n) ≠ 2) : {a|n} = legendre_sym a hn := sorry
+
+end
 
 theorem jacobi_sym_refl (a b n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) : a ≡ b [ZMOD n] →  {a|n} = {b|n} := sorry
 
