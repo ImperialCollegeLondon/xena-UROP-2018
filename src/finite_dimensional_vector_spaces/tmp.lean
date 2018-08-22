@@ -51,16 +51,18 @@ def basis_as_finset : finset (vector R n) :=
 }
 
 #check @finsupp.on_finset _ _ _ _ (basis_as_finset R n)
+#check @set.finite
 
-def lc_basis [d : decidable_eq R]: lc R (vector R n) :=
-by { apply finsupp.on_finset (basis_as_finset R n),
+def fin_lc (v : vector R n) (i : fin n) : R := v.nth i
+
+def lc_basis [d : decidable_eq R] : lc R (vector R n) :=
+by { apply @finsupp.on_finset _ R _ _ (basis_as_finset R n),
     swap 2, intro a,
-    have := @finset.decidable_mem,
-    -- have := @decidable.by_cases (a ∈ basis_as_finset R n) R _,
+    have := ,
     -- intros a ha,
     -- unfold basis_as_finset basis,
-    -- simp [vector.to_list_of_fn],
-     }
+    -- simp [vector.to_list_of_fn], 
+ }
 
 -- lemma basis_is_spanning_set : ∀ (x : vector R n), 
 --     x ∈ span {v : vector R n | v ∈ basis_as_finset R n} :=
