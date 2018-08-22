@@ -11,8 +11,6 @@ variables (R : Type u) [h : field R] (n : ℕ)
 include h 
 
 def elemental_vector (i : fin n) : vector R n :=
--- vector.of_fn (λ j, @decidable.by_cases (j = i) R _ (λ _, 1) (λ _, 0))
--- vector.of_fn (λ j, if (j.val = i.val) then 1 else 0)
 match n, i with
 | 0, _ := vector.nil
 | (n+1), ⟨0, _⟩ := vector.cons 1 (vector.repeat 0 n)
@@ -31,22 +29,17 @@ def basis_as_finset : finset (vector R n) :=
             multiset.coe_nodup, list.nodup_iff_nth_le_inj],
         intros i j h1 h2,
         rw [list.length_of_fn] at h1 h2,
-        rw [list.nth_le_of_fn (elemental_vector R n) ⟨i, h1⟩,
-            list.nth_le_of_fn (elemental_vector R n) ⟨j, h2⟩],
+        rw [list.nth_le_of_fn _ ⟨i, h1⟩, list.nth_le_of_fn _ ⟨j, h2⟩],
         intro a,
         induction n with n ih generalizing i j,
         exact (nat.le_lt_antisymm (i.zero_le) h1).elim,
         cases i; cases j; unfold elemental_vector at a,
             { replace a := @congr _ _ (vector.head) _ _ _ rfl a,
             rw [vector.head_cons, vector.head_cons] at a,
-            by_contradiction, 
-            apply (not_not_intro a),
-            exact h.zero_ne_one.symm },
+            exact (not_not_intro a h.zero_ne_one.symm).elim },
             { replace a := @congr _ _ (vector.head) _ _ _ rfl a,
             rw [vector.head_cons, vector.head_cons] at a,
-            by_contradiction, 
-            apply (not_not_intro a),
-            exact h.zero_ne_one },
+            exact (not_not_intro a h.zero_ne_one).elim },
             { rw [list.length_of_fn] at ih,
             have hi := nat.lt_of_succ_lt_succ h1_1,
             have hj := nat.lt_of_succ_lt_succ h2_1,
@@ -57,31 +50,29 @@ def basis_as_finset : finset (vector R n) :=
             exact a } }
 }
 
-#check nat.lt_of_add_lt_add_left
+#check @finsupp.on_finset _ _ _ _ (basis_as_finset R n)
 
--- def lc_basis : lc R (vector R n) :=
--- by { split, swap, 
---     exact basis_as_finset R n,
---     swap, intro v,
+def lc_basis [d : decidable_eq R]: lc R (vector R n) :=
+by { apply finsupp.on_finset (basis_as_finset R n),
+    swap 2, intro a,
+    have := @finset.decidable_mem,
+    -- have := @decidable.by_cases (a ∈ basis_as_finset R n) R _,
+    -- intros a ha,
+    -- unfold basis_as_finset basis,
+    -- simp [vector.to_list_of_fn],
+     }
 
---      }
+-- lemma basis_is_spanning_set : ∀ (x : vector R n), 
+--     x ∈ span {v : vector R n | v ∈ basis_as_finset R n} :=
+-- by { intro a,
+--     rw [span, basis_as_finset], 
+--     split,  }
 
--- #check finset
 
--- instance : is_basis (basis_as_finset R n).to_set :=
--- by { split, swap,
---         { intro v,
---         split, swap,
---         unfold lc, split,
---         swap, exact basis_as_finset R n,
---         swap, 
---          }
--- }
-
--- instance : is_basis { v | v ∈ (basis R n).to_list } := 
+-- instance : is_basis { v | v ∈ basis_as_finset R n } := 
 -- by { split,
 --     { --simp [linear_independent],
---     unfold linear_independent basis,
+--     unfold linear_independent basis_as_finset,
 --     intros l h1 h2, simp at h1,
 --     simp [vector.eq_nil 0, finsupp.sum] at h2,
 --     -- induction n with _ ih generalizing l,
