@@ -331,24 +331,6 @@ definition matrix_to_map_right {R : Type} [ring R] {a b : nat} (M : matrix R a b
 (has_space R a) → (has_space R b) := 
 λ v, (λ I, finset.sum finset.univ (λ K, (matrix_transpose M) I K * (v K)))
 
-
-
--- theorem mat_to_map_equiv {R : Type} [ring R] {a b : nat} (M : matrix R a b) :
--- matrix_to_map M = matrix_to_map_right M :=
--- begin
---   unfold matrix_to_map,
---   unfold matrix_to_map_right,
---   funext,
---   congr,
---   unfold matrix_transpose,
---   funext,
---   conv
---   begin
---     to_rhs,
---     -- rw [mul_comm],
---   end  
-
-
 -- end
 
 def matrix_to_linear_map_equiv {R : Type} [ring R] {a b : nat} :
