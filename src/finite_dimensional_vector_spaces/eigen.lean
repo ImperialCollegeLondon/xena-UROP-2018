@@ -23,57 +23,6 @@ import xenalib.Ellen_Arlt_matrix_rings
 import xenalib.Keji_further_matrix_things
 
 namespace M_module
-
-def smul_M {F : Type} {n m : ℕ} [ring F] (a : F) (M : matrix F n m) :
-matrix F n m := λ I, λ J, a * (M I J)
-
-instance (F : Type) [ring F] (n m : ℕ) : has_scalar F (matrix F n m) :=
-{ 
-    smul := smul_M
-}
-
-theorem smul_add' {F : Type} {n m : ℕ} [ring F] (s : F) (m1 m2 : matrix F n m) : 
-  smul_M s (matrix.add F m1 m2) = matrix.add F (smul_M s m1) (smul_M s m2) := 
-begin
-unfold smul_M,
-funext,
-unfold matrix.add,
-rw [mul_add],
-end
-
-theorem add_smul' {F : Type} {n m : ℕ} [ring F] (s t : F) (M : matrix F n m) :
-smul_M (s + t) M = (smul_M s M) + (smul_M t M) := 
-begin
-unfold smul_M,
-simp only [add_mul],
-funext,
-congr,
-end
-
-theorem mul_smul' {F : Type} {n m : ℕ} [ring F] (s t : F) (M : matrix F n m) :
-smul_M (s * t) M = smul_M s (smul_M t M) := 
-begin
-unfold smul_M,
-funext,
-rw [mul_assoc],
-end
-
-theorem one_smul' {F : Type} {n m : ℕ} [ring F] (M : matrix F n m) :
-smul_M (1 : F) M = M :=
-begin
-  unfold smul_M,
-  funext,
-  rw [one_mul],
-end
-
-instance {R : Type} {n m : ℕ} [ring R] : module R (matrix R n m) :=
-{
-  smul_add := smul_add',
-  add_smul := add_smul',
-  mul_smul := mul_smul',
-  one_smul := one_smul',
-}
-
 instance mo {R : Type} {n : ℕ} [ring R] : module R (matrix R n 1) :=
 {
   smul_add := @smul_add' _ _ 1 _,
@@ -230,6 +179,8 @@ open vector
 instance {F : Type} {n : ℕ} [field F]: vector_space F (has_space F n) := {}
 
 open map_matrix
+
+#check transpose_of_product
 
 theorem eigen_map_equiv_one {F : Type} {n : ℕ} [field F] (M : matrix F n n) :
 ∀ eva : F, is_eigenvalue_M M eva ↔ 
@@ -505,17 +456,57 @@ matrix R (n + 1) (n + 1) := λ I J, ((- 1) ^ (I.1 + J.1)) * (det (minor M I J))
 noncomputable def adj {R : Type} [comm_ring R] {n : ℕ} (M : matrix R (n + 1) (n + 1)) :
 matrix R (n + 1) (n + 1) := transpose (cofactor M)
 
-theorem L2 {R : Type} [comm_ring R] {n : ℕ} (M : matrix R (n + 1) (n + 1)) :
-matrix.mul R M (adj M) = smul_M (det M) (@matrix.identity_matrix _ _ (n + 1)) :=
+-- noncomputable def det_grl {R : Type} [comm_ring R] : Π {n : ℕ} (M : matrix R (n + 1) (n + 1)) 
+-- (a : fin (n + 1)), R 
+-- | 0 M a := M 0 0
+-- | (n + 1) M a :=
+--   finset.sum finset.univ (λ (K : fin (n + 1)), M a K * 
+-- (((-1) ^ (a.val + K.val)) * (λ b : fin n, @det_grl n (minor M a.val K.val) b)))
+
+-- theorem det_grl_eq_det {R : Type} [comm_ring R] :
+-- ∀ n : ℕ, ∀ M : matrix R (n + 1) (n + 1), ∀ a : fin (n + 1),
+-- det_grl M a = det M := 
+-- begin
+-- intros n M a,
+-- unfold det,
+-- unfold det_grl,
+
+
+
+-- end
+
+
+theorem L3 {R : Type} [comm_ring R] {n : ℕ} :
+∀ a : R,
+smul_M a (@matrix.identity_matrix _ _ n) = λ I J, if I = J then a else 0 :=
 begin
-unfold adj,
-unfold matrix.mul,
+intro a,
 unfold smul_M,
 funext,
+unfold matrix.identity_matrix,
+split_ifs,
+rw [mul_one],
+rw [mul_zero],
+end
+
+#check equiv.perm
+
+theorem L2 {R : Type} [comm_ring R] {n : ℕ} (M : matrix R (n + 1) (n + 1)) :
+smul_M (det M) (@matrix.identity_matrix _ _ (n + 1)) = matrix.mul R M (adj M) :=
+begin
+rw [L3],
+funext,
+unfold matrix.mul,
+split_ifs,
+unfold adj,
+unfold transpose,
+unfold cofactor,
+unfold_coes,
 unfold det,
-
-
-
+unfold minor,
+funext,
+sorry
+sorry
 end
 
 
@@ -534,9 +525,7 @@ unfold is_eigenvalue_M at h₀,
 cases h₀ with v,
 cases h₀_h with h₀_hl h₀_hl,
 rw [L1] at h₀_hl,
-
-
-
+sorry
 end
 
 end Cayley_Hamilton
