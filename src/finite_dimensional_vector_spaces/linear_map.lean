@@ -3,7 +3,7 @@ Copyright (c) 2018 Keji Neri, Blair Shi. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Keji Neri, Blair Shi
 
-* `has_space R n`: the set of maps from (fin n) to R (R ^ n)
+* `finite_free_module R n`: the set of maps from (fin n) to R (R ^ n)
 
 -- Proved R^n is an abellian group and module R (R ^ n)
 
@@ -60,13 +60,13 @@ instance comp {γ} [add_comm_group γ] (g : β → γ) [is_add_group_hom g] :
 
 end is_add_group_hom
 
-definition has_space (R : Type) (n : nat) := (fin n) → R
+definition finite_free_module (R : Type) (n : nat) := (fin n) → R
 
 def add (R : Type) (n : nat) [ring R] := 
-λ (a b :has_space R n), (λ i, (a i) +(b i))
+λ (a b :finite_free_module R n), (λ i, (a i) +(b i))
 
-def smul {R : Type} {n : nat} [ring R] (s : R) (rn : has_space R n) : 
-has_space R n := λ I, s * (rn I)
+def smul {R : Type} {n : nat} [ring R] (s : R) (rn : finite_free_module R n) : 
+finite_free_module R n := λ I, s * (rn I)
 
 theorem add__assoc {R : Type} {n : nat} [ring R] (a b c :(fin n) → R) : 
   add R n (add R n a b) c = add R n a (add R n b c):=
@@ -83,9 +83,9 @@ funext,
 exact add_comm (a i) (b i),
 end
 
-def zero (R : Type) (n : nat) [ring R]: has_space R n := λ (i:fin n),(0 :R)
+def zero (R : Type) (n : nat) [ring R]: finite_free_module R n := λ (i:fin n),(0 :R)
 #check zero
-theorem zero__add {R : Type} {n : nat} [ring R] (a:has_space R n): add R n (zero R n) a = a:=
+theorem zero__add {R : Type} {n : nat} [ring R] (a:finite_free_module R n): add R n (zero R n) a = a:=
 begin 
 unfold add,
 funext,
@@ -93,8 +93,8 @@ unfold zero,
 simp,
 end
 
-def neg (R : Type) (n : nat) [ring R]:= λ (a:has_space R n),(λ i, -(a i))
-theorem add__left__neg {R : Type} {n : nat} [ring R] (a :has_space R n): add R n (neg R n a) a = zero R n:=
+def neg (R : Type) (n : nat) [ring R]:= λ (a:finite_free_module R n),(λ i, -(a i))
+theorem add__left__neg {R : Type} {n : nat} [ring R] (a :finite_free_module R n): add R n (neg R n a) a = zero R n:=
 begin 
 unfold add,
 unfold zero,
@@ -103,7 +103,7 @@ unfold neg,
 simp,
 end 
 
-def add__zero {R : Type} {n : nat} [ring R] (a :has_space R n): add R n a (zero R n) =a:=
+def add__zero {R : Type} {n : nat} [ring R] (a :finite_free_module R n): add R n a (zero R n) =a:=
 begin
 unfold add,
 funext,
@@ -115,7 +115,7 @@ lemma is_add_group_hom_right_inv {α β : Type*} [add_comm_group α] [add_comm_g
 {f: α → β} [is_add_group_hom f] (hf : injective f) { g :β → α} (h: right_inverse g f):
 is_add_group_hom g:= ⟨ λ a b, hf $ by  rw[h(a+b),is_add_group_hom.add f,h a,h b]⟩ 
 
-instance (R : Type) [ring R] (n : nat) : add_comm_group (has_space R n) := 
+instance (R : Type) [ring R] (n : nat) : add_comm_group (finite_free_module R n) := 
 {add:=add R n,
 add_assoc := add__assoc,
 zero := zero R n,
@@ -130,7 +130,7 @@ namespace R_module
 variables (R : Type) (n : nat)
 variable [ring R] 
 
-theorem smul_add (s : R) (rn rm : has_space R n) : 
+theorem smul_add (s : R) (rn rm : finite_free_module R n) : 
     smul s (add R n rn rm) = add R n (smul s rn) (smul s rm) := 
 -- s • (rn + rm) = s • rn + s • rm 
     begin
@@ -140,7 +140,7 @@ theorem smul_add (s : R) (rn rm : has_space R n) :
       apply mul_add,
     end 
 
-theorem add_smul (s t : R) (rn: has_space R n): 
+theorem add_smul (s t : R) (rn: finite_free_module R n): 
     smul (s + t) rn = add R n (smul s rn) (smul t rn) := 
     begin
       apply funext,
@@ -149,7 +149,7 @@ theorem add_smul (s t : R) (rn: has_space R n):
       apply add_mul,
     end
 
-theorem mul_smul (s t : R) (rn : has_space R n): 
+theorem mul_smul (s t : R) (rn : finite_free_module R n): 
     smul (s * t) rn = smul s (smul t rn) :=
     begin
       apply funext,
@@ -158,7 +158,7 @@ theorem mul_smul (s t : R) (rn : has_space R n):
       apply mul_assoc,
     end
 
-theorem one_smul (rn : has_space R n): 
+theorem one_smul (rn : finite_free_module R n): 
     smul (1 : R) rn = rn :=
     begin
       apply funext,
@@ -168,12 +168,12 @@ theorem one_smul (rn : has_space R n):
     end
 end R_module
 
-instance (R : Type) [ring R] (n : nat) : has_scalar R (has_space R n) :=
+instance (R : Type) [ring R] (n : nat) : has_scalar R (finite_free_module R n) :=
 { 
     smul := smul
 }
 
-instance {R : Type} {n : nat} [ring R] : module R (has_space R n) :=
+instance {R : Type} {n : nat} [ring R] : module R (finite_free_module R n) :=
 {   
     smul_add := R_module.smul_add R n,
     add_smul := R_module.add_smul R n,
@@ -184,7 +184,7 @@ instance {R : Type} {n : nat} [ring R] : module R (has_space R n) :=
 namespace map_matrix
 
 definition matrix_to_map {R : Type} [ring R] {a b : nat} (M : matrix R a b) :
-(has_space R a) → (has_space R b) := λ v ,(λ i,finset.sum finset.univ (λ K, (v K) *M K i ) )
+(finite_free_module R a) → (finite_free_module R b) := λ v ,(λ i,finset.sum finset.univ (λ K, (v K) *M K i ) )
 
 instance hg {R : Type} [ring R] {a b : nat} (M : matrix R a b) : is_add_group_hom (matrix_to_map M) := 
 ⟨begin
@@ -202,7 +202,7 @@ rw finset.sum_add_distrib,
 refl,
 end⟩ 
 
-theorem smul_ {R: Type} [ring R] {a b : nat} (M : matrix R a b): ∀ (c : R) (x : has_space R a), 
+theorem smul_ {R: Type} [ring R] {a b : nat} (M : matrix R a b): ∀ (c : R) (x : finite_free_module R a), 
 matrix_to_map M (smul c x) = smul c (matrix_to_map M x):=
 begin 
 intros,
@@ -223,13 +223,13 @@ exact is_add_group_hom.add _,
 }
 
 def matrix_to_linear_map {R : Type} [ring R] {a b : nat} (M : matrix R a b) : 
-(@linear_map R (has_space R a)  (has_space R b) _ _ _) :=
+(@linear_map R (finite_free_module R a)  (finite_free_module R b) _ _ _) :=
 ⟨matrix_to_map M, module_hom M⟩ 
 
-def e (R : Type) [ring R] (a: nat) (i: fin a): has_space R a:= λ j, if i =j then 1 else 0
+def e (R : Type) [ring R] (a: nat) (i: fin a): finite_free_module R a:= λ j, if i =j then 1 else 0
 
 definition linear_map_to_matrix {R : Type} [ring R] {a b : nat} 
-(f: @linear_map R (has_space R a) (has_space R b) _ _ _) : matrix R a b :=
+(f: @linear_map R (finite_free_module R a) (finite_free_module R b) _ _ _) : matrix R a b :=
     λ i j, f.1 (e R a i) j
 
 theorem finset.sum_single {α : Type*} [fintype α]
@@ -245,16 +245,16 @@ begin
   rw [← H, finset.sum_singleton]
 end 
 
-theorem apply_function_to_sum {R : Type}[ring R] {n p : nat} (f: fin n → has_space R p ) (i : fin p ): 
+theorem apply_function_to_sum {R : Type}[ring R] {n p : nat} (f: fin n → finite_free_module R p ) (i : fin p ): 
 (finset.sum finset.univ (λ (K : fin n),f K)) i = finset.sum finset.univ (λ (K : fin n), f K i):=
 begin
-rw finset.sum_hom (λ (v: has_space R p), v i ) _,
+rw finset.sum_hom (λ (v: finite_free_module R p), v i ) _,
 intros,
 simp,
 refl,
 end
 
-theorem span {R : Type} {n : nat} [ring R] (v : has_space R n): 
+theorem span {R : Type} {n : nat} [ring R] (v : finite_free_module R n): 
 v  = finset.sum finset.univ (λ K, smul (v K) (e R n K)):=
 begin 
 funext,
@@ -277,7 +277,7 @@ unfold smul,
   simp,  
 end 
 
-theorem equiv_one {R : Type} [ring R] {a b : nat} (f : (@linear_map R (has_space R a) (has_space R b) _ _ _)) :
+theorem equiv_one {R : Type} [ring R] {a b : nat} (f : (@linear_map R (finite_free_module R a) (finite_free_module R b) _ _ _)) :
     matrix_to_map (linear_map_to_matrix f ) = f := 
 begin
 funext,
@@ -328,13 +328,13 @@ def matrix_transpose {R : Type} [ring R] {a b : nat} (M : matrix R a b) :
 matrix R b a := λ I, λ J, M J I
 
 definition matrix_to_map_right {R : Type} [ring R] {a b : nat} (M : matrix R a b) :
-(has_space R a) → (has_space R b) := 
+(finite_free_module R a) → (finite_free_module R b) := 
 λ v, (λ I, finset.sum finset.univ (λ K, (matrix_transpose M) I K * (v K)))
 
 -- end
 
 def matrix_to_linear_map_equiv {R : Type} [ring R] {a b : nat} :
-  equiv  (matrix R a b)  (@linear_map R (has_space R a)  (has_space R b) _ _ _):= 
+  equiv  (matrix R a b)  (@linear_map R (finite_free_module R a)  (finite_free_module R b) _ _ _):= 
     {to_fun := matrix_to_linear_map,
     inv_fun := linear_map_to_matrix,
     right_inv:= 
@@ -381,8 +381,8 @@ instance {R : Type} [ring R] {a b : nat}:  is_add_group_hom (@matrix_to_linear_m
 }
 
 theorem comp_is_linear_map {R : Type} [ring R] {a b c : nat} 
-(f : (@linear_map R (has_space R b)  (has_space R a) _ _ _)) 
-(g : (@linear_map R (has_space R c)  (has_space R b) _ _ _)):
+(f : (@linear_map R (finite_free_module R b)  (finite_free_module R a) _ _ _)) 
+(g : (@linear_map R (finite_free_module R c)  (finite_free_module R b) _ _ _)):
   @is_linear_map R _ _ _ _ _ (f.1 ∘ g.1):= 
 { 
   add:= 
@@ -407,8 +407,8 @@ theorem comp_is_linear_map {R : Type} [ring R] {a b c : nat}
 }
 
 theorem comp_equal_product_one {R : Type} [ring R] {a b c : nat} 
-(f : (@linear_map R (has_space R b)  (has_space R a) _ _ _)) 
-(g : (@linear_map R (has_space R c)  (has_space R b) _ _ _)):
+(f : (@linear_map R (finite_free_module R b)  (finite_free_module R a) _ _ _)) 
+(g : (@linear_map R (finite_free_module R c)  (finite_free_module R b) _ _ _)):
   (@linear_map_to_matrix R _ c a (⟨ f.1 ∘ g.1,  comp_is_linear_map f g⟩))  
   = @matrix.mul _ _ b c a (@linear_map_to_matrix R _ c b g ) (@linear_map_to_matrix R _ b a f) :=
 begin
@@ -484,7 +484,7 @@ begin
  exact is_add_group_hom_right_inv  (injective_of_left_inverse left_inv ) right_inv,
 end
 
-def Hom {R : Type} [comm_ring R] {a b : nat} := {f: has_space R a → has_space R b // is_add_group_hom f}
+def Hom {R : Type} [comm_ring R] {a b : nat} := {f: finite_free_module R a → finite_free_module R b // is_add_group_hom f}
 
 def module_Hom {R: Type} [ring R] {a b : nat} (M : matrix R a b) : 
   @is_linear_map R _ _ _ _ _ (matrix_to_map M) :=
@@ -497,7 +497,7 @@ exact is_add_group_hom.add _,
 
 
 -- definition matrix_to_map {R : Type} [ring R] {a b : nat} (M : matrix R a b) :
--- (has_space R a) → (has_space R b) := λ v ,(λ i,finset.sum finset.univ (λ K, (v K) *M K i ) )
+-- (finite_free_module R a) → (finite_free_module R b) := λ v ,(λ i,finset.sum finset.univ (λ K, (v K) *M K i ) )
   
 def vec_to_mat {R : Type} [ring R] {n : nat} (vc : vector R n) :
 matrix R n 1 := λ I, λ J, vector.nth vc I
@@ -527,16 +527,16 @@ variable (n : nat)
 
 open map_matrix
 -- helper function to get basis
-def simp_fun (V : Type*) [vector_space k V] (n : ℕ) (lm : linear_map (has_space k n) V) :
+def simp_fun (V : Type*) [vector_space k V] (n : ℕ) (lm : linear_map (finite_free_module k n) V) :
 (fin n → V) :=
 λ I, lm (e k n I)
 
 def linear_map_to_vec (V : Type*) [vector_space k V] (n : ℕ) :
-(linear_map (has_space k n) V) → vector V n :=
+(linear_map (finite_free_module k n) V) → vector V n :=
 λ lm, vector.of_fn (simp_fun V n lm)
 
 def vec_to_map (V : Type*) [vector_space k V] (n : ℕ) (M : vector V n):
-(has_space k n) → V := 
+(finite_free_module k n) → V := 
 λ sp, finset.sum finset.univ (λ K : fin n, (sp K) • (vector.nth M K))
 
 instance vc_to_map_add_group (V : Type*) [vector_space k V] (n : ℕ) (M : vector V n) : 
@@ -554,7 +554,7 @@ end
 ⟩
 
 theorem smul' (V : Type*) [vector_space k V] (n : ℕ) (M : vector V n) :
-∀ (c : k) (x : has_space k n), @vec_to_map k _ _ _ n M (smul c x) = 
+∀ (c : k) (x : finite_free_module k n), @vec_to_map k _ _ _ n M (smul c x) = 
 c • (@vec_to_map k _ _ _ n M x):= 
 begin
 intros c x,
@@ -582,7 +582,7 @@ def module_hom' (V : Type*) [vector_space k V] (n : ℕ) (M : vector V n) :
   }
 
 def vec_to_linear_map (V : Type*) [vector_space k V] (n : ℕ) (M : vector V n):
-(linear_map (has_space k n) V) := 
+(linear_map (finite_free_module k n) V) := 
 ⟨ @vec_to_map k _ _ _ n M , @module_hom' _ _ _ _ n M⟩ 
 
 lemma ext {α : Type*} {n : ℕ} : ∀ (v w : vector α n),
@@ -616,7 +616,7 @@ contradiction,
 exact zero_smul,
 end
 
-def right_inv_ (V : Type*) [vector_space k V] (n : ℕ) (lm : linear_map (has_space k n) V) :
+def right_inv_ (V : Type*) [vector_space k V] (n : ℕ) (lm : linear_map (finite_free_module k n) V) :
 @vec_to_linear_map k _ _ _ n (@linear_map_to_vec k _ _ _ n lm) = lm :=
 begin
 unfold vec_to_linear_map,
@@ -641,7 +641,7 @@ refl,
 end
 
 def n_tuples_eq_linear_maps (V : Type*) [vector_space k V] (n : ℕ) :
-equiv (vector V n) (linear_map (has_space k n) V) := 
+equiv (vector V n) (linear_map (finite_free_module k n) V) := 
 { to_fun := vec_to_linear_map V n,
   inv_fun := linear_map_to_vec V n,
   left_inv := left_inv_ V n,
