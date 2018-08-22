@@ -6,7 +6,7 @@ import analysis.topology.uniform_space
 import analysis.real
 import data.real.basic tactic.norm_num
 import data.set.basic
-import Topology.Material.subsets
+import Topology.Material.pasting_lemma
 import Topology.Material.real_results
 
 universe u

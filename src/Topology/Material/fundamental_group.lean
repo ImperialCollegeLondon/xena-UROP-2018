@@ -6,9 +6,10 @@ import analysis.topology.uniform_space
 import analysis.real
 import data.real.basic tactic.norm_num
 import data.set.basic
-import Topology.Material.subsets
+import Topology.Material.pasting_lemma
 import Topology.Material.path 
 import Topology.Material.homotopy
+import Topology.Material.homotopy_results
 
 
 open set filter lattice classical
@@ -27,7 +28,6 @@ section
 variables {α  : Type*} [topological_space α ] {x : α }
 
 
--- life seems easier if you have both these instances, for some reason
 instance setoid_hom_path {α : Type*} [topological_space α] (x : α)  :
 setoid (path x x) := setoid.mk is_homotopic_to (is_equivalence)
 
@@ -91,22 +91,17 @@ lemma quotient.out_eq'  {α : Type*} [topological_space α ] {x : α } ( F : spa
 begin apply eq.symm, exact quotient.out_eq _, end
 
 
------
-
-
-
-----------------------------------------------
+---------------------------------------------
 
 local notation `fg_mul` := fundamental_group.mul 
 
-
+local attribute [instance] classical.prop_decidable 
 
 -----------------------------------------------
 -- Identity Elememt 
 
 
--- Right identity - mul_one
-
+---- Right identity - mul_one
 
 noncomputable def p1 : repar_I01 := 
 {   to_fun :=  λ  t, (paste cover_I01 (λ s, par T1._proof_1 s ) (λ s, 1) ) t ,  
@@ -125,7 +120,6 @@ noncomputable def p1 : repar_I01 :=
     end
 }
 
-local attribute [instance] classical.prop_decidable 
 
 --mul a (id_eq_class x) = a
 noncomputable def hom_f_const_to_f {α : Type*} [topological_space α ] {x y : α } ( f : path x y) : path_homotopy (comp_of_path f (loop_const y)) f:= 
@@ -153,9 +147,9 @@ begin
 end
 
 
---------------------------
+--------
 
--- Left identity - one_mul
+---- Left identity - one_mul
 
 noncomputable def p2 : repar_I01 := 
 {   to_fun :=  λ  t, (paste cover_I01 (λ s, 0 )(λ s, par T2._proof_1 s ) ) t ,  
@@ -198,7 +192,6 @@ end
 --------------------------
 
 ----------------------------------------------------
-
 -- Inverse Element
 
 
@@ -211,7 +204,6 @@ end
 
 
 ---------------------------------------------------
-
 -- Associativity 
 
 
@@ -248,9 +240,10 @@ end
 
 
 ----------------------------------------------------------------------
-constant st : I01 × I01 
 
--- π₁ (ℝ , x )
+
+-- Section on π₁ (ℝ , x ) to show ℝ is contractible
+
 section 
 variable {x : ℝ }
 
@@ -303,7 +296,8 @@ begin
    refine continuous_mul _ continuous_const, 
    exact continuous.comp continuous_fst continuous_subtype_val, 
 end
---------
+
+--Use the above lemmas to define homotopy with path_homotopy.mk' constructor 
 
 definition homotopy_real ( f : loop x ) : path_homotopy f c  := 
 path_homotopy.mk' (homotopy_real_fun f) (homotopy_real_start_pt f) (homotopy_real_end_pt f) 
@@ -318,10 +312,12 @@ begin
 end 
 
 
+
+end
+
+
 --set_option trace.simplify.rewrite true
 --set_option pp.implicit true
 
-
-end
 
 end fundamental_group
