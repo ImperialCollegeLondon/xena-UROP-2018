@@ -52,19 +52,21 @@ private def jacobi_sym_aux : ℤ → ℤ → ℤ
 using_well_founded {rel_tac:= λ _ _, `[exact ⟨_, measure_wf (int.nat_abs ∘ psigma.fst)⟩ ]}
 
 /- Computes the Jacobi Symbol, extended to b even which will output 0, is it the Kronecker Symbol?-/
-def jacobi_sym : ℤ → ℤ → ℤ
+def jacobi_algorithm : ℤ → ℤ → ℤ
 | a          1 := 1
 | a          b := if b % 2 = 1 then jacobi_sym_aux a b else 0
 
 -- an attempt at notation for the jacobi symbol
-local notation {a|b} := jacobi_sym a b 
+local notation {a|b} := jacobi_algorithm a b 
 
 #eval {8|1}
 #eval {-5|0}
-#eval {-1|0}
-#eval {-2|15}
-#eval {-5|8}
 #eval {1236|200011}
+
+-- Thank you Chris
+lemma dvd_prod {α : Type*} [comm_semiring α] {a} {l : list α} (ha : a ∈ l) : a ∣ l.prod :=
+let ⟨s, t, h⟩ := list.mem_split ha in
+by rw [h, list.prod_append, list.prod_cons, mul_left_comm]; exact dvd_mul_right _ _
 
 -- New definition of Jacobi symbol for positive and odd b to prove theorems
 noncomputable definition jacobi_symbol {n : ℤ} (a : ℤ) (hn : n > 0 ∧ int.gcd 2 n = 1) := 
@@ -75,7 +77,18 @@ have h1: prime_int ↑a_1 = nat.prime a_1, refl,
 have h2: int.nat_abs ↑a_1 = a_1, refl,
 rw [h1, h2],
 have h3: nat.prime a_1, from nat.mem_factors H,
-have h4: a_1 ≠ 2, from sorry,
+have h4: a_1 ≠ 2,
+{
+    have j1: list.prod (nat.factors (int.nat_abs n)) = int.nat_abs n, from nat.prod_factors (int.nat_abs_pos_of_ne_zero (ne.symm (ne_of_lt hn.1))),
+    assume j2,
+    have j3: 2 = int.nat_abs 2, refl,
+    have j4: a_1 ∣ list.prod (nat.factors (int.nat_abs n)), from dvd_prod H,
+    rw [j1,j2,j3] at j4,
+    unfold int.gcd at hn,
+    have j5: nat.gcd (int.nat_abs 2) (int.nat_abs n) = int.nat_abs 2 ,from nat.gcd_eq_left j4,
+    have j6: int.nat_abs 2 ≠ 1, from dec_trivial,
+    exact absurd (hn.2) (eq.subst j5.symm j6),
+},
 exact ⟨h3,h4⟩,
 end)
 
@@ -85,24 +98,48 @@ theorem jacobi_sym_eq_legendre_sym (a n : ℤ) (hn : prime_int n ∧ (int.nat_ab
 begin
     unfold legendre_sym,
     cases (classical.em (n = 1)),
-    rw h,
-    unfold jacobi_sym,
-    have p : quadratic_res a 1 ∧ ¬a ≡ 0 [ZMOD 1], {
-        sorry
-    },
-    simp [p],
-    have h2 : n ≠ 1, sorry,
-    rw [jacobi_sym.equations._eqn_2 a n h],
+    rw h at hn,
+    have : ¬prime_int 1, unfold prime_int,
+    suffices : ¬nat.prime 1, by simp [this],
+    exact dec_trivial,
+    exact absurd hn.1 this,
+    have h2 : n ≠ 1, by simp [h],
+    rw [jacobi_algorithm.equations._eqn_2 a n h],
+    cases (classical.em (n % 2 = 1)),
+    simp [h_1],
+
+
     sorry,
-
-
+    sorry,
 end
 
-theorem jacobi_sym_refl (a b n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) : a ≡ b [ZMOD n] →  {a|n} = {b|n} := sorry
+lemma mod_eq_of_quad (a b n : ℤ) (hp: a ≡ b [ZMOD n]) : quadratic_res a n → quadratic_res b n := 
+begin
+unfold quadratic_res,
+simp,
+intros,
+sorry,
+--transitivity a_1,
+--apply int.modeq.trans,
+end
 
-theorem jacobi_sym_not_coprime (a n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) : int.gcd a n ≠ 1 → {a|n} = 0 := sorry
+theorem jacobi_sym_refl (a b n : ℤ) (hn : n > 0 ∧ int.gcd 2 n = 1) : a ≡ b [ZMOD n] → jacobi_symbol a hn = jacobi_symbol b hn := 
+begin
+intros,
+unfold jacobi_symbol,
+simp,
+sorry,
+end
 
-theorem jacobi_sym_num_mul (a b n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) : {a*b|n} = {a|n} * {b|n} := sorry
+theorem jacobi_sym_not_coprime (a n : ℤ) (hn : n > 0 ∧ int.gcd 2 n = 1) : int.gcd a n ≠ 1 → jacobi_symbol a hn = 0 := 
+begin 
+intros,
+dunfold jacobi_symbol,
+simp,
+sorry,
+end
+
+theorem jacobi_sym_num_mul (a b n : ℤ) (hn : n > 0 ∧ int.gcd 2 n = 1) : jacobi_symbol (a*b) hn = jacobi_symbol a hn * jacobi_symbol b hn := sorry
 
 theorem jacobi_sym_denom_mul (a m n : ℤ) (m_pos_odd : m > 0 ∧ int.gcd 2 m = 1) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) : {a|m*n} = {a|m} * {a|n} := sorry
 
@@ -110,11 +147,9 @@ theorem jacobi_sym_quadratic_res (m n : ℤ) (m_pos_odd : m > 0 ∧ int.gcd 2 m 
 
 theorem jacobi_num_zero (n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1): if n = 1 then {0|n} = 1 else {0|n} = 0 := sorry 
 
-theorem jacobi_num_neg_one (n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) [has_pow ℤ ℤ] : {-1|n} = (-1)^((n-1)/2) := sorry
+theorem jacobi_num_neg_one (n : ℤ) (hn : n > 0 ∧ int.gcd 2 n = 1) [has_pow ℤ ℤ] : {-1|n} = (-1)^((n-1)/2) := sorry
 
 theorem jacobi_num_two (n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) [has_pow ℤ ℤ] :  {2|n} = (-1)^(((n^2)-1)/8) := sorry
 
+-- do we really need this, considering as it's true by def?
 theorem jacobi_denom_one (a : ℤ) : {a|1} = 1 := by refl
-
---trying to state that jacobi_sym is equal to the product of legendre symbols, with prime factors p the prime factorisation of n
---lemma jacobi_eq_prod (a n : ℤ) (n_pos_odd : n > 0 ∧ int.gcd 2 n = 1) : prod (factors pmap n) = jacobi_sym a n 

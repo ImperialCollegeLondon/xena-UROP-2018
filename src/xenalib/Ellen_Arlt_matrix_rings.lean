@@ -212,9 +212,20 @@ intro z,
 rw [right_distrib]
 end
 
-
-
-
+theorem mul_sub_mul {R : Type} [comm_ring R] (a b c : ℕ) :
+∀ (A B: matrix R a b), ∀ C : matrix R b c,
+matrix.sub R (matrix.mul R A C) (matrix.mul R B C) = matrix.mul R (matrix.sub R A B) C :=
+begin 
+intros A B C,
+unfold matrix.sub,
+unfold matrix.mul,
+funext,
+conv in ((A _ _ - B _ _) * C _ _)
+begin
+  rw [sub_mul],
+end,
+{simp[finset.sum_add_distrib]},
+end
 
 definition identity_matrix ( R : Type) [ring R] { n: nat }: (matrix R n n):= 
 λ  I J ,

@@ -3,7 +3,8 @@ Copyright (c) 2018 Blair Shi. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Author: Kevin Buzzard, Blair Shi
 
-This file is inspired by Johannes Hölzl's implementation of linear algebra in mathlib.
+This file is followed Linear Algebra Done Right and inspired by Johannes Hölzl's 
+implementation of linear algebra in mathlib.
 
 The thing we improved is this file describes finite dimentional vector spaces
 -/
