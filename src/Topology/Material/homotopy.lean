@@ -478,8 +478,9 @@ path_homotopy.mk' (f_path_inv F) (f_path_inv_start_pt F) (f_path_inv_end_pt F) (
 -- Homotopy on composition of paths 
 ------ a₁ ≈ b₁ , a₂ ≈ b₂  →  a₁ ⬝ a₂ ≈ b₁ ⬝ b₂ 
 
+-- needed to prove multiplication is well definied in fundamental group 
 
--- Define (continuous) shift function to employ results from  path_homotopy_comp
+-- Define (continuous) shift function to employ results on I01 × I01 from  path_homotopy_comp
 def shift_order ( α : Type* ) (β : Type*) [topological_space α] [topological_space β ] : α × β → β × α := λ ab, (ab.2, ab.1) 
 
 theorem continuous_shift_order {α β } [topological_space α] [topological_space β ] : continuous (shift_order α β ) := 
@@ -969,7 +970,7 @@ lemma contr_T1 {x : I01} ( h₁ : x ∈ T1 ) (h₂ : x ∉ T1) : false := by cc
 
 -- 1
 
-lemma step_assoc_1' {t : {x // x ∈ I01}} { h_1 : t ∈ T1 } { h_2 : p3.to_fun t ∈ T1} {h_3 : par T1._proof_1 ⟨p3.to_fun t, h_2 ⟩ ∈ T1} : 
+lemma step_assoc_1 {t : {x // x ∈ I01}} { h_1 : t ∈ T1 } { h_2 : p3.to_fun t ∈ T1} {h_3 : par T1._proof_1 ⟨p3.to_fun t, h_2 ⟩ ∈ T1} : 
 f.to_fun (par T1._proof_1 ⟨t, h_1⟩) = f.to_fun (par T1._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_2⟩, h_3⟩) :=
 begin 
  congr, 
