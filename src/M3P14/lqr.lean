@@ -25,7 +25,7 @@ definition quadratic_res (a n : ℤ) := ∃ x : ℤ, a ≡ x^2 [ZMOD (int.nat_ab
 
 attribute [instance, priority 0] classical.prop_decidable
 noncomputable definition legendre_sym {p : ℤ} (a : ℤ) (H1 : prime_int p ∧ (int.nat_abs p) ≠ 2) : ℤ := 
-if quadratic_res a p ∧ ¬ (a ≡ 0 [ZMOD p]) then 1 else 
+if quadratic_res a p ∧ ¬ ((p : ℤ) ∣ a) then 1 else 
 if ¬ quadratic_res a p then -1 
 else 0
 
