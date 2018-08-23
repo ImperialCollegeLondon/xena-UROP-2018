@@ -1,3 +1,9 @@
+/-
+Copyright (c) 2018 Luca Gerolla. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Luca Gerolla, Kevin Buzzard
+Fundamental Group of pointed space, inverse, reparametrisation for fundamental group. 
+-/
 import analysis.topology.continuity
 import analysis.topology.topological_space
 import analysis.topology.infinite_sum
@@ -22,62 +28,53 @@ open set filter lattice classical
 
 
 namespace fundamental_group
+open homotopy_results
 open homotopy
 open path
 section
-variables {α  : Type*} [topological_space α ] {x : α }
+variables {α  : Type*} [topological_space α ] {x y : α }
 
 
-instance setoid_hom_path {α : Type*} [topological_space α] (x : α)  :
-setoid (path x x) := setoid.mk is_homotopic_to (is_equivalence)
+instance setoid_hom_path  (x : α) : setoid (path x x) := 
+setoid.mk is_homotopic_to (is_equivalence)
 
-instance setoid_hom_loop {α : Type*} [topological_space α] (x : α)  :
-setoid (loop x) := by unfold loop; apply_instance
+instance setoid_hom_loop  (x : α) : setoid (loop x) := 
+by unfold loop; apply_instance
 
-def space_π₁  {α : Type*} [topological_space α] (x : α) :=
-quotient (fundamental_group.setoid_hom_loop x)
+def space_π₁ (x : α) := quotient (fundamental_group.setoid_hom_loop x)
 
-def eq_class {α : Type*} [topological_space α ] {x : α } ( f : loop x ) : space_π₁ x :=
-quotient.mk f
+def eq_class  ( f : loop x ) : space_π₁ x := quotient.mk f
 
 --
 
 -- Definition of identity and inverse classes 
 
-def id_eq_class {α : Type*} [topological_space α ] (x : α )  : space_π₁ x := ⟦ loop_const x ⟧ 
+def id_eq_class (x : α )  : space_π₁ x := ⟦ loop_const x ⟧ 
 
 
-lemma inv_eq_class_aux {α : Type*} [topological_space α] {x : α} : 
-∀ (a b : path x x),
+lemma inv_eq_class_aux :  ∀ (a b : path x x),
     a ≈ b → ⟦ inv_of_path a ⟧ = ⟦ inv_of_path b ⟧  := 
 begin 
-intros a b Hab, 
-apply quotient.sound, 
-cases Hab, 
-existsi _, 
-exact path_homotopy_of_inv_path Hab,
+  intros a b Hab, apply quotient.sound, 
+  cases Hab, existsi _, 
+  exact path_homotopy_of_inv_path Hab,
 end 
 
-def inv_eq_class {α : Type*} [topological_space α ] {x : α } : space_π₁ x → space_π₁ x := 
+def inv_eq_class : space_π₁ x → space_π₁ x := 
 quotient.lift ( λ f, ⟦ inv_of_path f ⟧ ) inv_eq_class_aux
 
 
 -- Definition of multiplication on π₁ 
 
-lemma mul_aux {α : Type*} [topological_space α] {x : α} :
-∀ (a₁ a₂ b₁ b₂ : loop x), a₁ ≈ b₁ → a₂ ≈ b₂ →
+lemma mul_aux  : ∀ (a₁ a₂ b₁ b₂ : loop x), a₁ ≈ b₁ → a₂ ≈ b₂ →
     ⟦comp_of_path a₁ a₂⟧ = ⟦comp_of_path b₁ b₂⟧ :=
 begin
-  intros a₁ a₂ b₁ b₂ H₁ H₂,
-  apply quotient.sound,
-  cases H₁ ,
-  cases H₂ ,
-  existsi _,
+  intros a₁ a₂ b₁ b₂ H₁ H₂, apply quotient.sound,
+  cases H₁ , cases H₂ , existsi _,
   exact path_homotopy_of_comp_path H₁ H₂, 
 end
 
-protected noncomputable def mul {α : Type*} [topological_space α] {x : α}  :
-space_π₁ x → space_π₁ x → space_π₁ x :=
+protected noncomputable def mul : space_π₁ x → space_π₁ x → space_π₁ x :=
 quotient.lift₂ (λ f g, ⟦comp_of_path f g⟧) mul_aux
 
 
@@ -86,8 +83,7 @@ quotient.lift₂ (λ f g, ⟦comp_of_path f g⟧) mul_aux
 instance coe_loop_π₁ : has_coe (loop x) (space_π₁ x) := ⟨eq_class⟩
 
 -- To break down mul proofs and use quotient.sound
-lemma quotient.out_eq'  {α : Type*} [topological_space α ] {x : α } ( F : space_π₁ x) 
-: F = ⟦ quotient.out F ⟧ := 
+lemma quotient.out_eq'  ( F : space_π₁ x)  :  F = ⟦ quotient.out F ⟧ := 
 begin apply eq.symm, exact quotient.out_eq _, end
 
 
@@ -122,24 +118,23 @@ noncomputable def p1 : repar_I01 :=
 
 
 --mul a (id_eq_class x) = a
-noncomputable def hom_f_const_to_f {α : Type*} [topological_space α ] {x y : α } ( f : path x y) : path_homotopy (comp_of_path f (loop_const y)) f:= 
+noncomputable def hom_f_const_to_f ( f : path x y) : path_homotopy (comp_of_path f (loop_const y)) f := 
 begin 
-have H : comp_of_path f (loop_const y) = repar_path f p1, 
-  { apply path_equal.2, unfold comp_of_path repar_path, simp, unfold fa_path fb_path fgen_path loop_const p1, simp, unfold par, funext,  
-  unfold paste,  split_ifs, simp [-one_div_eq_inv], simp,
-     }, 
-rw H, exact hom_repar_path_to_path f p1, 
+  have H : comp_of_path f (loop_const y) = repar_path f p1, 
+    { apply path_equal.2, unfold comp_of_path repar_path, simp, unfold fa_path fb_path fgen_path loop_const p1, simp, unfold par, funext,  
+    unfold paste,  split_ifs, simp [-one_div_eq_inv], simp,
+    }, 
+  rw H, exact hom_repar_path_to_path f p1, 
 end
 
 
 -- f ⬝ c ≈ f by using homotopy f → f ⬝ c above -- NOT NEEDED for mul_one
-lemma path_const_homeq_path {α : Type*} [topological_space α ] {x y : α } ( f : path x y)  : is_homotopic_to (comp_of_path f (loop_const y)) f := 
+lemma path_const_homeq_path  ( f : path x y)  : is_homotopic_to (comp_of_path f (loop_const y)) f := 
 begin  unfold is_homotopic_to, refine nonempty.intro (hom_f_const_to_f f), end 
 
 
 -- Now prove [f]*[c] = [f]
-theorem mul_one {α : Type*} [topological_space α ] {x : α } ( F : space_π₁ x) : 
-fg_mul F (id_eq_class x) = F := 
+theorem mul_one ( F : space_π₁ x) :  fg_mul F (id_eq_class x) = F := 
 begin 
   unfold fundamental_group.mul, unfold id_eq_class eq_class, rw [quotient.out_eq' F], 
   apply quotient.sound, existsi _, 
@@ -170,7 +165,7 @@ noncomputable def p2 : repar_I01 :=
 
 
 --mul (id_eq_class x) a = a
-noncomputable def hom_const_f_to_f {α : Type*} [topological_space α ] {x y : α } ( f : path x y) : path_homotopy (comp_of_path (loop_const x) f ) f:= 
+noncomputable def hom_const_f_to_f  ( f : path x y) : path_homotopy (comp_of_path (loop_const x) f ) f:= 
 begin 
 have H : comp_of_path (loop_const x) f = repar_path f p2, 
   { apply path_equal.2, unfold comp_of_path repar_path, simp, unfold fa_path fb_path fgen_path loop_const p2, simp, unfold par, funext,  
@@ -181,8 +176,7 @@ end
 
 
 -- Now prove [c]*[f] = [f]
-theorem one_mul {α : Type*} [topological_space α ] {x : α } ( F : space_π₁ x) : 
-fg_mul (id_eq_class x) F = F := 
+theorem one_mul ( F : space_π₁ x) : fg_mul (id_eq_class x) F = F := 
 begin 
   unfold fundamental_group.mul, unfold id_eq_class eq_class, rw [quotient.out_eq' F], 
   apply quotient.sound, existsi _, 
@@ -196,7 +190,7 @@ end
 
 
 
-theorem mul_left_inv {α : Type*} [topological_space α ] {x : α } (F : space_π₁ x) : fg_mul (inv_eq_class F) F = id_eq_class x := 
+theorem mul_left_inv  (F : space_π₁ x) : fg_mul (inv_eq_class F) F = id_eq_class x := 
 begin 
  unfold fundamental_group.mul, unfold id_eq_class eq_class inv_eq_class, rw [quotient.out_eq' F],
  apply quotient.sound, existsi _, exact hom_inv_comp_to_const (quotient.out F)
@@ -207,11 +201,10 @@ end
 -- Associativity 
 
 
-theorem mul_assoc {α : Type*} [topological_space α ] {x : α } (F G H: space_π₁ x) : 
-fg_mul (fg_mul F G) H = fg_mul F (fg_mul G H) :=  
+theorem mul_assoc (F G H: space_π₁ x) : fg_mul (fg_mul F G) H = fg_mul F (fg_mul G H) :=  
 begin 
- unfold fundamental_group.mul, rw [quotient.out_eq' F ,quotient.out_eq' G , quotient.out_eq' H], 
- apply quotient.sound, 
+  unfold fundamental_group.mul, rw [quotient.out_eq' F ,quotient.out_eq' G , quotient.out_eq' H], 
+  apply quotient.sound, 
   existsi _, exact path_homotopy_inverse (
   hom_comp_f_g_h (quotient.out F) (quotient.out G) (quotient.out H)), 
 end
@@ -221,7 +214,7 @@ end
 
 -- Group π₁ (α  , x)
 
-noncomputable def π₁_group {α : Type*} [topological_space α ] (x : α ) : group ( space_π₁ x) := 
+noncomputable def π₁_group (x : α ) : group ( space_π₁ x) := 
 {   mul := fundamental_group.mul ,  
     
     mul_assoc := fundamental_group.mul_assoc, 
@@ -234,7 +227,6 @@ noncomputable def π₁_group {α : Type*} [topological_space α ] (x : α ) : g
     mul_left_inv := fundamental_group.mul_left_inv 
 
 }
-
 
 end 
 
