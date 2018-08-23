@@ -1,4 +1,4 @@
-import algebra.order data.fintype group_theory.subgroup data.set.basic data.equiv data.rat
+import algebra.order data.fintype group_theory.subgroup data.set.basic data.rat
 
 variables {G : Type*} [group G]
 variables (H K : set G)
