@@ -55,14 +55,6 @@ end
 
 --theorem num_of_quad_res {p : ℕ} (hp : prime_int p ∧ p ≠ 2) : ∃ (A : set ℕ) [finset A], ∀ x : [1, (p-1)], (legendre_sym x hp = 1 ↔ x ∈ A) ∧ finset.card A = (p-1)/2
 
---ALREADY DECLARED
-
-@[simp] lemma int.cast_pow {α : Type*} [ring α] (a : ℤ) (n : ℕ): ((a ^ n : ℤ) : α) = a ^ n :=
-by induction n; simp [*, _root_.pow_succ]
-
-@[simp] lemma nat.cast_pow {α : Type*} [semiring α] (a : nat) (n : ℕ): 
-((a ^ n : ℕ ) : α) = a ^ n :=
-by induction n; simp [*, _root_.pow_succ, nat.pow_succ, mul_comm]
 
 lemma int.mod_two_eq_zero_or_one (n : ℤ): n % 2 = 0 ∨ n % 2 = 1 := 
 have h: n % 2 < 2 := abs_of_nonneg (show (2 : ℤ) ≥ 0, from dec_trivial) ▸
@@ -162,7 +154,7 @@ have h5 : int.nat_abs ((p-1)/2) = (int.nat_abs (p-1))/2, from p_minus_one_over_t
 rw int.cast_pow, rw hx, rw int.cast_pow, rw ← pow_mul, rw h5, rw nat.mul_div_cancel' q,
 have h : prime (int.nat_abs p),{unfold prime_int at _inst; exact _inst},
 have h1 : (int.nat_abs x)^((int.nat_abs p) -1) ≡ 1 [MOD (int.nat_abs p)], from fermat_little_theorem_extension (int.nat_abs x) (int.nat_abs p) h,
-have h2 : ↑(int.nat_abs x ^ (int.nat_abs p - 1)) ≡ ↑1 [ZMOD ↑(int.nat_abs p)], from (int.modeq.coe_nat_modeq_iff ((int.nat_abs x)^((int.nat_abs p) -1)) 1 (int.nat_abs p)).2 h1,
+have h2 : ↑(int.nat_abs x ^ (int.nat_abs p - 1)) ≡ ↑1 [ZMOD ↑(int.nat_abs p)], from int.modeq.coe_nat_modeq_iff.2 h1,
 have h3 : ↑(↑(int.nat_abs x ^ (int.nat_abs p - 1))) = ↑1, from zmod.eq_iff_modeq_int.2 h2,
 rw ← int.cast_pow,
 simp at h3,

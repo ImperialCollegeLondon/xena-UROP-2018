@@ -107,10 +107,18 @@ begin
     rw [jacobi_algorithm.equations._eqn_2 a n h],
     cases (classical.em (n % 2 = 1)),
     simp [h_1],
-
-
+    split_ifs,
     sorry,
     sorry,
+    sorry,
+    split_ifs,
+    exfalso,
+    have := odd_prime_int_is_odd hn,
+    exact absurd this h_1,
+    refl,
+    exfalso,
+    have := odd_prime_int_is_odd hn,
+    exact absurd this h_1,
 end
 
 lemma mod_eq_of_quad (a b n : ℤ) (hp: a ≡ b [ZMOD n]) : quadratic_res a n → quadratic_res b n := 
@@ -118,9 +126,10 @@ begin
 unfold quadratic_res,
 simp,
 intros,
-sorry,
---transitivity a_1,
---apply int.modeq.trans,
+have h1 := int.nat_abs_dvd.2 (int.modeq.modeq_iff_dvd.1 hp.symm),
+have h := int.modeq.trans (int.modeq.modeq_iff_dvd.2 h1) a_1,
+existsi x,
+exact h,
 end
 
 theorem jacobi_sym_refl (a b n : ℤ) (hn : n > 0 ∧ int.gcd 2 n = 1) : a ≡ b [ZMOD n] → jacobi_symbol a hn = jacobi_symbol b hn := 

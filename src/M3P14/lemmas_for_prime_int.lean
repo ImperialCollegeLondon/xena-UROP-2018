@@ -101,27 +101,30 @@ have b9 := exists_eq_mul_right_of_dvd b8,
 rcases b9 with r,
 have c : (1 ≤ r) ∧ (r < p), 
 begin
-split, 
-have c1 : 0 < y ^ 2 + 1, 
-{ 
-    rw int.lt_add_one_iff,
-    exact pow_two_nonneg y,
-},
-have c2 : p * r > 0, from eq.subst b9_h c1,  
-have c3 := pos_of_mul_pos_left c2 H, exact c3,
-have c4 : y ≥ 0 ∧ y ≤ p - 1, 
-split, 
-have c5 : x % ↑(int.nat_abs p) ≥ 0, from int.mod_nonneg _ _, 
-
---exact int.mod_nonneg x int.nat_abs p,
---have c5 : p * r ≤ (p - 1) ^ 2 + 1 , from eq.subst b9_h begin end,
-sorry, 
+    split, 
+    have c1 : 0 < y ^ 2 + 1, 
+    { 
+        rw int.lt_add_one_iff,
+        exact pow_two_nonneg y,
+    },
+    have c2 : p * r > 0, from eq.subst b9_h c1,  
+    have c3 := pos_of_mul_pos_left c2 H, exact c3,
+    have c4 : y ≥ 0 ∧ y ≤ p - 1, 
+    split, 
+    have h5 : ↑(int.nat_abs p) ≠ 0, sorry,
+    have c5 : x % ↑(int.nat_abs p) ≥ 0, sorry, --from int.mod_nonneg _ h5, 
+    --exact int.mod_nonneg x (int.nat_abs p),
+    --have c5 : p * r ≤ (p - 1) ^ 2 + 1 , from eq.subst b9_h begin end,
+    sorry,
+    sorry,
+    sorry, 
 end,   
+unfold is_sum_of_two_squares,
 sorry,
 exact H,
 end 
-#check mod_lt
-#check int.mod_nonneg
+
+
 
 --inductive less_than_or_equal (a : ℤ) : ℤ → Prop
 --| refl : less_than_or_equal a
