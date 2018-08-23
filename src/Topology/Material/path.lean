@@ -2,7 +2,7 @@
 Copyright (c) 2018 Luca Gerolla. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Luca Gerolla, Mario Carneiro, Kevin Buzzard
-Various multiplicative and additive structures.
+Definition of path, loop and basic properties. 
 -/
 import analysis.topology.continuity
 import analysis.topology.topological_space
