@@ -99,32 +99,55 @@ rw int.nat_abs_of_nonneg at b7,
 have b8:= int.modeq.modeq_zero_iff.1 b7,
 have b9 := exists_eq_mul_right_of_dvd b8,
 rcases b9 with r,
+
+have c5 : (int.nat_abs p : ℤ) ≠ 0, begin
+by_contradiction, 
+simp at a, 
+have c6 := int.eq_zero_of_nat_abs_eq_zero a, 
+have c7 : 0 ≡ 1 [ZMOD 4], from eq.subst c6 hpp,
+rw int.modeq.modeq_iff_dvd at c7, 
+revert c7,
+simp,
+norm_num,
+end, 
+
 have c : (1 ≤ r) ∧ (r < p), 
 begin
-    split, 
-    have c1 : 0 < y ^ 2 + 1, 
-    { 
-        rw int.lt_add_one_iff,
-        exact pow_two_nonneg y,
-    },
-    have c2 : p * r > 0, from eq.subst b9_h c1,  
-    have c3 := pos_of_mul_pos_left c2 H, exact c3,
-    have c4 : y ≥ 0 ∧ y ≤ p - 1, 
-    split, 
-    have h5 : ↑(int.nat_abs p) ≠ 0, sorry,
-    have c5 : x % ↑(int.nat_abs p) ≥ 0, sorry, --from int.mod_nonneg _ h5, 
-    --exact int.mod_nonneg x (int.nat_abs p),
-    --have c5 : p * r ≤ (p - 1) ^ 2 + 1 , from eq.subst b9_h begin end,
-    sorry,
-    sorry,
-    sorry, 
-end,   
-unfold is_sum_of_two_squares,
+split, 
+have c1 : 0 < y ^ 2 + 1, 
+{ 
+    rw int.lt_add_one_iff,
+    exact pow_two_nonneg y,
+},
+have c2 : p * r > 0, from eq.subst b9_h c1,  
+have c3 := pos_of_mul_pos_left c2 H, exact c3,
+have c4 : y ≥ 0 ∧ y ≤ p - 1, 
+split, 
+
+have c8 : x % ↑(int.nat_abs p) ≥ 0, from int.mod_nonneg x c5,
+exact c8,
+rw ← int.lt_add_one_iff,
+simp,
+have d1 := int.mod_lt x c5,
+conv at d1 {to_rhs, rw int.nat_abs_of_nonneg H},
+rw abs_of_nonneg H at d1, 
+exact d1,
+have d2 : y ^ 2  ≤ (p-1) ^ 2 , sorry, 
+have d3 : y ^ 2 + 1 ≤ (p-1) ^ 2 + 1, sorry, 
+have d4 : p * r ≤ (p-1) ^ 2 + 1, from eq.subst b9_h d3,  
+rw mul_comm at d4, 
+have d5 : p > 0, sorry, 
+have d6 := le_div_of_mul_le d5 d4, 
+sorry,
+end,
+
 sorry,
 exact H,
 end 
 
 
+#check abs
+#check int.nat_abs_of_nonneg
 
 --inductive less_than_or_equal (a : ℤ) : ℤ → Prop
 --| refl : less_than_or_equal a
