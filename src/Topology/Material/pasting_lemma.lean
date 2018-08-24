@@ -1,23 +1,16 @@
+/-
+Copyright (c) 2018 Luca Gerolla. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Kevin Buzzard, Mario Carneiro, Luca Gerolla
+Prove part of pasting lemma (ex 10.7 Sutherland) for continuity proofs
+-/
 import data.set.basic
 import analysis.topology.continuity
 
-definition foo (X : Type*) [topological_space X] 
-  (A : set X) : topological_space A := by apply_instance 
 
-#check subtype.topological_space
-
-#print foo 
 
 definition restriction {X Y : Type*} (f : X → Y) (A : set X) : A → Y :=
 λ a, f a.val 
-
-example (X : Type) [topological_space X] (A : set X)
-  : topological_space A := by apply_instance 
-
-#check @is_closed_induced_iff 
-
-#print notation ↔
-#check iff 
 
 
 lemma preimage_sub (X Y : Type*) (f : X → Y) (C : set Y) (A : set X) : 
@@ -31,8 +24,9 @@ theorem handy (X : Type*) (U A B : set X) :
 by simp [set.set_eq_def, and.congr_right_iff]
 
 lemma restriction_closed {X Y : Type*} (f : X → Y) [topological_space X] [topological_space Y]
-(A : set X) (C : set Y) (HAcont : continuous (restriction f A))
-(HAclosed : is_closed A) (HCclosed : is_closed C) : is_closed (f ⁻¹' C ∩ A) := begin
+  (A : set X) (C : set Y) (HAcont : continuous (restriction f A))
+  (HAclosed : is_closed A) (HCclosed : is_closed C) : is_closed (f ⁻¹' C ∩ A) := 
+begin
   have H : is_closed ((restriction f A) ⁻¹' C),
     exact continuous_iff_is_closed.1 HAcont C HCclosed,
   have H2 := is_closed_induced_iff.1 H,
@@ -49,9 +43,8 @@ lemma restriction_closed {X Y : Type*} (f : X → Y) [topological_space X] [topo
   rwa handy,
 end 
 
-theorem continuous_closed_union {X Y : Type*} [topological_space X] 
-[topological_space Y] {A B : set X} (f : X → Y) 
-(Hunion : A ∪ B = set.univ) (HAclosed : is_closed A) (HBclosed : is_closed B) : 
+theorem continuous_closed_union {X Y : Type*} [topological_space X] [topological_space Y] {A B : set X} 
+  (f : X → Y) (Hunion : A ∪ B = set.univ) (HAclosed : is_closed A) (HBclosed : is_closed B) : 
 continuous (restriction f A) → continuous (restriction f B) → continuous f := 
 begin
   intros HAcont HBcont,
@@ -68,9 +61,6 @@ begin
 end 
 
 
-------- Prof Buzzard 
---- can generalise this proving further Pasting_Lemma - Ex 10.7 Sutherland  ( Luca )
-
 
 ---- Mario Carneiro (21/07/2018) help
 
@@ -79,12 +69,13 @@ end
 
 -- check two restrictions match
 def match_of_fun {X Y} {A B : set X} (fa : A → Y) (fb : B → Y) : Prop :=
-∀ x h₁ h₂, fa ⟨x, h₁⟩ = fb ⟨x, h₂⟩
+  ∀ x h₁ h₂, fa ⟨x, h₁⟩ = fb ⟨x, h₂⟩
 
 local attribute [instance] classical.prop_decidable
 
 -- define function of pasted restrictions
-noncomputable def paste {X Y} {A B : set X} (Hunion : A ∪ B = set.univ) (fa : A → Y) (fb : B → Y) (t : X) : Y :=
+noncomputable def paste {X Y} {A B : set X} (Hunion : A ∪ B = set.univ) 
+  (fa : A → Y) (fb : B → Y) (t : X) : Y :=
 if h₁ : t ∈ A then fa ⟨t, h₁⟩ else 
 have t ∈ A ∪ B, from set.eq_univ_iff_forall.1 Hunion t,
 have h₂ : t ∈ B, from this.resolve_left h₁,
@@ -112,42 +103,30 @@ begin split,
   apply eq.symm _, simp [paste_right Hunion fa fb H x.val x.2],  
 end 
 
-#print prefix subtype
 
-#check topological_space
 -- prove continuity when pasted continuous restrictions on closed sets 
-theorem cont_of_paste2 {X : Type* } {Y : Type*} [topological_space X] [topological_space Y]  
-{ A B : set X } { Hunion : A ∪ B = set.univ} {fa : A → Y } { fb : B → Y }
-{HAclosed : is_closed A} {HBclosed : is_closed B}  { HM: match_of_fun fa fb }  
-{ f : X → Y } ( Hf : f = paste Hunion fa fb ) : 
-continuous fa → continuous fb → continuous f := 
+theorem cont_of_paste₂  {X : Type* } {Y : Type*} [topological_space X] [topological_space Y]  
+  { A B : set X } { Hunion : A ∪ B = set.univ} {fa : A → Y } { fb : B → Y }
+  {HAclosed : is_closed A} {HBclosed : is_closed B}  { HM: match_of_fun fa fb }  
+  { f : X → Y } ( Hf : f = paste Hunion fa fb ) : 
+  continuous fa → continuous fb → continuous f := 
 begin 
-intros CA CB,
-have ResA : fa = (restriction f A) , exact (rest_of_paste fa fb HM Hf ).1, 
-have ResB : fb = (restriction f B), exact (rest_of_paste fa fb  HM Hf ).2, 
-rw ResA at CA, rw ResB at CB, 
-exact continuous_closed_union f Hunion HAclosed HBclosed CA CB
+  intros CA CB,
+  have ResA : fa = (restriction f A) , exact (rest_of_paste fa fb HM Hf ).1, 
+  have ResB : fb = (restriction f B), exact (rest_of_paste fa fb  HM Hf ).2, 
+  rw ResA at CA, rw ResB at CB, 
+  exact continuous_closed_union f Hunion HAclosed HBclosed CA CB
 end 
 
 theorem cont_of_paste {X : Type* } {Y : Type*} [topological_space X] [topological_space Y]
-{ A B : set X } { Hunion : A ∪ B = set.univ} {fa : A → Y } { fb : B → Y }
-(HAclosed : is_closed A) (HBclosed : is_closed B)  ( HM : match_of_fun fa fb )
-( CA : continuous fa ) ( CB : continuous fb)  : continuous (paste Hunion fa fb) := 
+  { A B : set X } { Hunion : A ∪ B = set.univ} {fa : A → Y } { fb : B → Y }
+  (HAclosed : is_closed A) (HBclosed : is_closed B)  ( HM : match_of_fun fa fb )
+  ( CA : continuous fa ) ( CB : continuous fb)  : continuous (paste Hunion fa fb) := 
 begin 
-let f := paste Hunion fa fb, 
-have Hf : f = paste Hunion fa fb, trivial, 
-have ResA : fa = (restriction f A) , exact (rest_of_paste fa fb HM Hf ).1, 
-have ResB : fb = (restriction f B), exact (rest_of_paste fa fb  HM Hf ).2, 
-rw ResA at CA, rwa ResB at CB, 
-exact continuous_closed_union f Hunion HAclosed HBclosed CA CB
+  let f := paste Hunion fa fb, 
+  have Hf : f = paste Hunion fa fb, trivial, 
+  have ResA : fa = (restriction f A) , exact (rest_of_paste fa fb HM Hf ).1, 
+  have ResB : fb = (restriction f B), exact (rest_of_paste fa fb  HM Hf ).2, 
+  rw ResA at CA, rwa ResB at CB, 
+  exact continuous_closed_union f Hunion HAclosed HBclosed CA CB
 end 
-
-/- THEOREM
-theorem continuous_closed_union {X Y : Type*} [topological_space X] 
-[topological_space Y] {A B : set X} (f : X → Y) 
-(Hunion : A ∪ B = set.univ) (HAclosed : is_closed A) (HBclosed : is_closed B) : 
-continuous (restriction f A) → continuous (restriction f B) → continuous f   -/
-
-/- RESTRICTION
-definition restriction {X Y : Type*} (f : X → Y) (A : set X) : A → Y :=
-λ a, f a.val  -/
