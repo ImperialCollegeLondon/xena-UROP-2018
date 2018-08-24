@@ -57,7 +57,3 @@ instance decidable_eq_units_zmod (n : ℕ) [pos_nat n] [monoid (zmod n)] : decid
 #eval @order_of (units (zmod 7)) _ _ _ ⟨(2 : zmod 7), 2⁻¹, rfl, rfl⟩
 #eval @order_of (units (zmod 5)) _ _ _ ⟨(2 : zmod 5), 2⁻¹, rfl, rfl⟩
 #eval @order_of (units (zmod 7)) _ _ _ ⟨(1 : zmod 7), 1⁻¹, rfl, rfl⟩
-
-def order_of_zmod (a n : ℕ) [pos_nat n] [monoid (zmod n)] [fintype (units (zmod n))] : ℕ := @order_of (units (zmod n)) _ _ _ ⟨(a : zmod n), a⁻¹, sorry, sorry⟩ 
-
-#eval order_of_zmod 7 53

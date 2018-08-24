@@ -15,7 +15,8 @@ in terms of matrix way
 
 * `is_diagonal_mat` : checked whether the given matrix is diagonal
 
--- currently working on Cayley-Hamilton Theorem :(
+-- currently working on Cayley-Hamilton Theorem 
+- Proved e • V = (e • I) * V, with e : F, V : vector F
 -/
 
 import .linear_map .ring_n_is_module_of_vector
@@ -23,57 +24,6 @@ import xenalib.Ellen_Arlt_matrix_rings
 import xenalib.Keji_further_matrix_things
 
 namespace M_module
-
-def smul_M {F : Type} {n m : ℕ} [ring F] (a : F) (M : matrix F n m) :
-matrix F n m := λ I, λ J, a * (M I J)
-
-instance (F : Type) [ring F] (n m : ℕ) : has_scalar F (matrix F n m) :=
-{ 
-    smul := smul_M
-}
-
-theorem smul_add' {F : Type} {n m : ℕ} [ring F] (s : F) (m1 m2 : matrix F n m) : 
-  smul_M s (matrix.add F m1 m2) = matrix.add F (smul_M s m1) (smul_M s m2) := 
-begin
-unfold smul_M,
-funext,
-unfold matrix.add,
-rw [mul_add],
-end
-
-theorem add_smul' {F : Type} {n m : ℕ} [ring F] (s t : F) (M : matrix F n m) :
-smul_M (s + t) M = (smul_M s M) + (smul_M t M) := 
-begin
-unfold smul_M,
-simp only [add_mul],
-funext,
-congr,
-end
-
-theorem mul_smul' {F : Type} {n m : ℕ} [ring F] (s t : F) (M : matrix F n m) :
-smul_M (s * t) M = smul_M s (smul_M t M) := 
-begin
-unfold smul_M,
-funext,
-rw [mul_assoc],
-end
-
-theorem one_smul' {F : Type} {n m : ℕ} [ring F] (M : matrix F n m) :
-smul_M (1 : F) M = M :=
-begin
-  unfold smul_M,
-  funext,
-  rw [one_mul],
-end
-
-instance {R : Type} {n m : ℕ} [ring R] : module R (matrix R n m) :=
-{
-  smul_add := smul_add',
-  add_smul := add_smul',
-  mul_smul := mul_smul',
-  one_smul := one_smul',
-}
-
 instance mo {R : Type} {n : ℕ} [ring R] : module R (matrix R n 1) :=
 {
   smul_add := @smul_add' _ _ 1 _,
@@ -83,44 +33,42 @@ instance mo {R : Type} {n : ℕ} [ring R] : module R (matrix R n 1) :=
 }
 end M_module
 
--- eigenvalue and eigenvector
+def mat_to_finite_free_module {F : Type} {n : ℕ} [ring F] (M : matrix F n 1) :
+finite_free_module F n := λ I, M I 0
 
-def mat_to_has_space {F : Type} {n : ℕ} [ring F] (M : matrix F n 1) :
-has_space F n := λ I, M I 0
-
-def has_space_to_vec {F : Type} {n : ℕ} (fn : has_space F n) :
+def finite_free_module_to_vec {F : Type} {n : ℕ} (fn : finite_free_module F n) :
 vector F n := vector.of_fn fn
 
 instance add_hommm {F : Type} [ring F] {n : nat}   
-: is_add_group_hom (@mat_to_has_space F n _) :=
+: is_add_group_hom (@mat_to_finite_free_module F n _) :=
 {
   add :=
   begin
     intros a b,
-    unfold mat_to_has_space,refl,
+    unfold mat_to_finite_free_module,refl,
   end
 }
 
-def module_hom_mat_to_has_space {F : Type} [ring F] {n : nat} 
-  : is_linear_map (@mat_to_has_space F n _) :=
+def module_hom_mat_to_finite_free_module {F : Type} [ring F] {n : nat} 
+  : is_linear_map (@mat_to_finite_free_module F n _) :=
 { 
   smul := 
   begin
     intro c,
     intro x,
-    unfold mat_to_has_space,
+    unfold mat_to_finite_free_module,
     funext,
     refl,
   end,
   .. add_hommm
 }
 
-def mat_to_has_space_is_linear {F : Type} [ring F] {n : nat}:
-linear_map (matrix F n 1) (has_space F n) :=
-⟨mat_to_has_space, module_hom_mat_to_has_space⟩ 
+def mat_to_finite_free_module_is_linear {F : Type} [ring F] {n : nat}:
+linear_map (matrix F n 1) (finite_free_module F n) :=
+⟨mat_to_finite_free_module, module_hom_mat_to_finite_free_module⟩ 
 
-def smul' {F : Type} {n : ℕ} [ring F] (M : matrix F n n) (fn : has_space F n) :
-has_space F n := @mat_to_has_space_is_linear F _ n (map_matrix.mat_mul_vec M (has_space_to_vec fn))
+def smul' {F : Type} {n : ℕ} [ring F] (M : matrix F n n) (fn : finite_free_module F n) :
+finite_free_module F n := @mat_to_finite_free_module_is_linear F _ n (map_matrix.mat_mul_vec M (finite_free_module_to_vec fn))
 
 theorem vector.nth_map {α β : Type*} {n : ℕ} (v : vector α n) (f : α → β) (m : fin n) :
   (v.map f).nth m = f (v.nth m) := 
@@ -132,90 +80,71 @@ end
 
 open M_module
 
-lemma smul_eq_smul_one {F : Type} {n : ℕ} [ring F] (fn : has_space F n) : 
-∀ a : F, (has_space_to_vec (smul a fn)) = (a • (has_space_to_vec fn)) :=
-begin
-intro a,
-unfold has_space_to_vec,
-ext,
-simp, unfold has_scalar.smul,
-simp,
-conv
-  begin
-  to_rhs,
-  rw [vector.nth_map],
-  end,
-unfold smul,
-simp,
-refl,
-end
-
 open map_matrix
 
-lemma smul_eq_smul_two {F : Type} {n : ℕ} [ring F] (fn : has_space F n) :
+lemma smul_eq_smul_two {F : Type} {n : ℕ} [ring F] (fn : finite_free_module F n) :
 ∀ a : F, (smul a fn) = 
-mat_to_has_space_is_linear.val
-(@smul_M F _ _ _ a (vec_to_mat((has_space_to_vec fn)))) :=
+mat_to_finite_free_module_is_linear.val
+(@smul_M F _ _ _ a (vec_to_mat((finite_free_module_to_vec fn)))) :=
 begin
 intro a,
-unfold mat_to_has_space_is_linear,
+unfold mat_to_finite_free_module_is_linear,
 simp,
-unfold mat_to_has_space,
+unfold mat_to_finite_free_module,
 unfold smul,
 funext,
 unfold smul_M,
 unfold vec_to_mat,
-unfold has_space_to_vec,
+unfold finite_free_module_to_vec,
 simp,
 end
 
 def is_eigenvalue_M {F : Type*} {n : ℕ} [ring F] (M : matrix F n n ) (a : F) :=
-∃ v : (has_space F n), (v ≠ (0 : has_space F n)) ∧ (smul' M v = smul a v)
+∃ v : (finite_free_module F n), (v ≠ (0 : finite_free_module F n)) ∧ (smul' M v = smul a v)
 
-def is_eigenvector_M {F : Type*} {n : ℕ} [ring F] (M : matrix F n n) (fn : has_space F n) :=
+def is_eigenvector_M {F : Type*} {n : ℕ} [ring F] (M : matrix F n n) (fn : finite_free_module F n) :=
 ∃ a : F, smul' M fn = smul a fn
 
-def is_eigenvalue {F : Type*} {n : ℕ} [field F] [vector_space F (has_space F n)] 
-(T : linear_map (has_space F n) (has_space F n)) (a : F) :=
-∃ v : (has_space F n) , (v ≠ (0 : (has_space F n))) ∧ (T v = smul a v)
+def is_eigenvalue {F : Type*} {n : ℕ} [field F] [vector_space F (finite_free_module F n)] 
+(T : linear_map (finite_free_module F n) (finite_free_module F n)) (a : F) :=
+∃ v : (finite_free_module F n) , (v ≠ (0 : (finite_free_module F n))) ∧ (T v = smul a v)
 
-def is_eigenvector {F : Type*} {n : ℕ} [field F] [vector_space F (has_space F n)] 
-(T : linear_map (has_space F n) (has_space F n)) (v : has_space F n) (h : v ≠ (0 : has_space F n)) :=
+def is_eigenvector {F : Type*} {n : ℕ} [field F] [vector_space F (finite_free_module F n)] 
+(T : linear_map (finite_free_module F n) (finite_free_module F n)) (v : finite_free_module F n) (h : v ≠ (0 : finite_free_module F n)) :=
 ∃ a : F, T v = smul a v
 
 namespace eigen
 open function
 
--- def smul {R : Type} {n : nat} [ring R] (s : R) (rn : has_space R n) : 
--- has_space R n := λ I, s * (rn I)
+-- def smul {R : Type} {n : nat} [ring R] (s : R) (rn : finite_free_module R n) : 
+-- finite_free_module R n := λ I, s * (rn I)
 
-theorem has_space_eq_vec {F : Type} [ring F] {n : nat} (fn : has_space F n) :
-∀ K, fn K = vector.nth (@has_space_to_vec _ _ fn) K :=
+theorem finite_free_module_eq_vec {F : Type} [ring F] {n : nat} (fn : finite_free_module F n) :
+∀ K, fn K = vector.nth (@finite_free_module_to_vec _ _ fn) K :=
 begin
 intro,
-unfold has_space_to_vec,
+unfold finite_free_module_to_vec,
 simp,
 end
 
-
-def has_space_to_row_mat {F : Type} {n : ℕ} [ring F] (fn : has_space F n) :
+def finite_free_module_to_row_mat {F : Type} {n : ℕ} [ring F] (fn : finite_free_module F n) :
 matrix F 1 n := λ I, λ J, fn J
 
-def has_space_to_col_mat {F : Type} {n : ℕ} [ring F] (fn : has_space F n) :
+def finite_free_module_to_col_mat {F : Type} {n : ℕ} [ring F] (fn : finite_free_module F n) :
 matrix F n 1 := λ I, λ J, fn I
 
-theorem has_space_eq_col_mat {F : Type} [ring F] {n : nat} (fn : has_space F n) :
-∀ K, fn K = (has_space_to_col_mat fn) K 0 :=
+theorem finite_free_module_eq_col_mat {F : Type} [ring F] {n : nat} (fn : finite_free_module F n) :
+∀ K, fn K = (finite_free_module_to_col_mat fn) K 0 :=
 begin
 intro,
-unfold has_space_to_col_mat,
+unfold finite_free_module_to_col_mat,
 end
 
-theorem has_space_eq_row_mat {F : Type} [ring F] {n : nat} (fn : has_space F n) :
-∀ K, fn K = (has_space_to_row_mat fn) 0 K :=
+theorem finite_free_module_eq_row_mat {F : Type} [ring F] {n : nat} (fn : finite_free_module F n) :
+∀ K, fn K = (finite_free_module_to_row_mat fn) 0 K :=
 begin
 intro,
-unfold has_space_to_row_mat,
+unfold finite_free_module_to_row_mat,
 end
 
 -- A : matrix F n n
@@ -223,9 +152,11 @@ end
 
 open vector
 
-instance {F : Type} {n : ℕ} [field F]: vector_space F (has_space F n) := {}
+instance {F : Type} {n : ℕ} [field F]: vector_space F (finite_free_module F n) := {}
 
 open map_matrix
+
+#check transpose_of_product
 
 theorem eigen_map_equiv_one {F : Type} {n : ℕ} [field F] (M : matrix F n n) :
 ∀ eva : F, is_eigenvalue_M M eva ↔ 
@@ -242,9 +173,9 @@ have h₁: v ≠ 0 ∧ (matrix_to_linear_map (Mᵀ)) v = smul eva v,
   exact h₀_hl,
   unfold smul' at h₀_hr,
   unfold_coes at h₀_hr,
-  unfold mat_to_has_space_is_linear at h₀_hr,
+  unfold mat_to_finite_free_module_is_linear at h₀_hr,
   simp at h₀_hr,
-  unfold mat_to_has_space at h₀_hr,
+  unfold mat_to_finite_free_module at h₀_hr,
   unfold map_matrix.mat_mul_vec at h₀_hr,
   unfold matrix.mul at h₀_hr,
   unfold map_matrix.vec_to_mat at h₀_hr,
@@ -254,22 +185,22 @@ have h₁: v ≠ 0 ∧ (matrix_to_linear_map (Mᵀ)) v = smul eva v,
     unfold matrix_to_map,
     rw ←h₀_hr,
     funext,
-    simp only [(has_space_eq_vec _ _).symm],
+    simp only [(finite_free_module_eq_vec _ _).symm],
     conv in (v _ * (Mᵀ) _ i)
       begin
-        rw [has_space_eq_row_mat v _],
+        rw [finite_free_module_eq_row_mat v _],
       end,
     conv in (M i _ * v _ )
       begin
-        rw [has_space_eq_col_mat v _],
+        rw [finite_free_module_eq_col_mat v _],
       end,
-    show (matrix.mul F (has_space_to_row_mat v) (Mᵀ)) 0 i = _,
-    show _ = matrix.mul F M (has_space_to_col_mat v) i 0,
-    show _ =(matrix.mul F M (has_space_to_col_mat v))ᵀ 0 i,
+    show (matrix.mul F (finite_free_module_to_row_mat v) (Mᵀ)) 0 i = _,
+    show _ = matrix.mul F M (finite_free_module_to_col_mat v) i 0,
+    show _ =(matrix.mul F M (finite_free_module_to_col_mat v))ᵀ 0 i,
     rw [transpose_of_product],
-    have h₂ : (has_space_to_row_mat v) = has_space_to_col_mat vᵀ,
-      unfold has_space_to_row_mat,
-      unfold has_space_to_col_mat,
+    have h₂ : (finite_free_module_to_row_mat v) = finite_free_module_to_col_mat vᵀ,
+      unfold finite_free_module_to_row_mat,
+      unfold finite_free_module_to_col_mat,
       funext,
       rw [transpose],
     rw [h₂],
@@ -291,32 +222,32 @@ have h₁ : v ≠ 0 ∧ smul' M v = smul eva v,
   simp at h₀_hr,
   unfold matrix_to_map at h₀_hr,
   unfold_coes,
-  unfold mat_to_has_space_is_linear,
+  unfold mat_to_finite_free_module_is_linear,
   simp,
-  unfold mat_to_has_space,
+  unfold mat_to_finite_free_module,
   unfold mat_mul_vec,
   unfold vec_to_mat,
   unfold matrix.mul,
-  unfold has_space_to_vec,
+  unfold finite_free_module_to_vec,
   rw [← h₀_hr],
   funext,
   simp,
   conv in (v _ * (Mᵀ) _ I)
     begin
-        rw [has_space_eq_row_mat v _],
+        rw [finite_free_module_eq_row_mat v _],
     end,
   conv in (M I _ * v _ )
     begin
-      rw [has_space_eq_col_mat v _],
+      rw [finite_free_module_eq_col_mat v _],
     end,
   rw [eq_comm],
-  show (matrix.mul F (has_space_to_row_mat v) (Mᵀ)) 0 I = _,
-  show _ = matrix.mul F M (has_space_to_col_mat v) I 0,
-  show _ =(matrix.mul F M (has_space_to_col_mat v))ᵀ 0 I,
+  show (matrix.mul F (finite_free_module_to_row_mat v) (Mᵀ)) 0 I = _,
+  show _ = matrix.mul F M (finite_free_module_to_col_mat v) I 0,
+  show _ =(matrix.mul F M (finite_free_module_to_col_mat v))ᵀ 0 I,
   rw [transpose_of_product],
-  have h₂ : (has_space_to_row_mat v) = has_space_to_col_mat vᵀ,
-    unfold has_space_to_row_mat,
-    unfold has_space_to_col_mat,
+  have h₂ : (finite_free_module_to_row_mat v) = finite_free_module_to_col_mat vᵀ,
+    unfold finite_free_module_to_row_mat,
+    unfold finite_free_module_to_col_mat,
     funext,
     rw [transpose],
   rw [h₂],
@@ -328,12 +259,11 @@ end eigen
 
 namespace Cayley_Hamilton
 
---smul_M eva (vec_to_mat (has_space_to_vec v)
 open eigen
 
-theorem L0 {F : Type} [comm_ring F] {n : ℕ} (v : has_space F n):
-∀ eva : F, smul_M eva (vec_to_mat (has_space_to_vec v)) = 
-matrix.mul F (smul_M eva (matrix.identity_matrix F)) (vec_to_mat (has_space_to_vec v)) :=
+theorem L0 {F : Type} [comm_ring F] {n : ℕ} (v : finite_free_module F n):
+∀ eva : F, smul_M eva (vec_to_mat (finite_free_module_to_vec v)) = 
+matrix.mul F (smul_M eva (matrix.identity_matrix F)) (vec_to_mat (finite_free_module_to_vec v)) :=
 begin
 intro eva,
 unfold smul_M,
@@ -341,7 +271,7 @@ unfold matrix.mul,
 funext,
 unfold matrix.identity_matrix,
 unfold vec_to_mat,
-unfold has_space_to_vec,
+unfold finite_free_module_to_vec,
 simp,
 conv in ( _ * _ * _)
 begin
@@ -366,21 +296,6 @@ contradiction,
 simp,
 end
 
-theorem matrix_mul_sub_mul {R : Type} [comm_ring R] (a b c : ℕ) :
-∀ (A B: matrix R a b), ∀ C : matrix R b c,
-matrix.sub R (matrix.mul R A C) (matrix.mul R B C) = matrix.mul R (matrix.sub R A B) C :=
-begin 
-intros A B C,
-unfold matrix.sub,
-unfold matrix.mul,
-funext,
-conv in ((A _ _ - B _ _) * C _ _)
-begin
-  rw [sub_mul],
-end,
-{simp[finset.sum_add_distrib]},
-end
-
 lemma sub_eq_sub {R : Type} [ring R] {a b : ℕ} (A B : matrix R a b) :
 A - B = matrix.sub R A B :=
 begin
@@ -390,9 +305,9 @@ end
 @[simp] lemma val_eq_coe {α β γ : Type*} [ring α] [module α β] [module α γ] 
   (f : linear_map β γ) : f.val = f := rfl
 
-theorem L1 {R : Type} [comm_ring R] {n : ℕ} (M : matrix R n n) (v : has_space R n):
+theorem L1 {R : Type} [comm_ring R] {n : ℕ} (M : matrix R n n) (v : finite_free_module R n):
 ∀ eva : R, (smul' M v = smul eva v) ↔ 
-smul' (matrix.sub R M (smul_M eva (@matrix.identity_matrix R _ n))) v = (0 : has_space R n) :=
+smul' (matrix.sub R M (smul_M eva (@matrix.identity_matrix R _ n))) v = (0 : finite_free_module R n) :=
 begin
 intro eva,
 split,
@@ -407,11 +322,11 @@ rw val_eq_coe at h₀,
 conv at h₀
 begin
   to_lhs,
-  rw ← @linear_map.map_sub _ _ _ _ _ _ (mat_to_has_space_is_linear) _ _,
+  rw ← @linear_map.map_sub _ _ _ _ _ _ (mat_to_finite_free_module_is_linear) _ _,
 end,
-have h₁ : matrix.sub R (matrix.mul R M (vec_to_mat (has_space_to_vec v))) (smul_M eva (vec_to_mat (has_space_to_vec v)))
-= matrix.mul R (matrix.sub R M (smul_M eva (matrix.identity_matrix R))) (vec_to_mat (has_space_to_vec v)),
-  rw [← matrix_mul_sub_mul],
+have h₁ : matrix.sub R (matrix.mul R M (vec_to_mat (finite_free_module_to_vec v))) (smul_M eva (vec_to_mat (finite_free_module_to_vec v)))
+= matrix.mul R (matrix.sub R M (smul_M eva (matrix.identity_matrix R))) (vec_to_mat (finite_free_module_to_vec v)),
+  rw [← matrix.mul_sub_mul],
 congr,
 rw [L0],
 conv at h₀ in (matrix.mul R M _ - smul_M eva _)
@@ -428,21 +343,21 @@ unfold_coes at h₀,
 unfold mat_mul_vec at h₀,
 conv at h₀ in ((matrix.mul R (matrix.sub R _ _) _))
 begin
-  rw [← matrix_mul_sub_mul],
+  rw [← matrix.mul_sub_mul],
 end,
-unfold mat_to_has_space_is_linear at h₀,
+unfold mat_to_finite_free_module_is_linear at h₀,
 simp at h₀,
-have h₁ :   mat_to_has_space
-      (matrix.sub R (matrix.mul R M (vec_to_mat (has_space_to_vec v)))
-         (matrix.mul R (smul_M eva (matrix.identity_matrix R)) (vec_to_mat (has_space_to_vec v)))) =
+have h₁ :   mat_to_finite_free_module
+      (matrix.sub R (matrix.mul R M (vec_to_mat (finite_free_module_to_vec v)))
+         (matrix.mul R (smul_M eva (matrix.identity_matrix R)) (vec_to_mat (finite_free_module_to_vec v)))) =
     smul' M v - smul eva v,
     unfold smul',
     unfold smul,
-    unfold mat_to_has_space,
+    unfold mat_to_finite_free_module,
     unfold_coes,
-    unfold mat_to_has_space_is_linear,
+    unfold mat_to_finite_free_module_is_linear,
     simp,
-    unfold mat_to_has_space,
+    unfold mat_to_finite_free_module,
     unfold matrix.sub,
     unfold mat_mul_vec,
     simp,
@@ -450,7 +365,7 @@ have h₁ :   mat_to_has_space
     congr,
     unfold matrix.mul,
     unfold vec_to_mat,
-    unfold has_space_to_vec,
+    unfold finite_free_module_to_vec,
     simp,
     unfold smul_M,
     conv in (_ * _ * _)
@@ -476,7 +391,56 @@ have h₁ :   mat_to_has_space
   exact h₀,  
 end
 
---v ≠ 0 ∧ smul' M v = smul eva v
+-- noncomputable def det_grl {R : Type} [comm_ring R] : Π {n : ℕ} (M : matrix R (n + 1) (n + 1)) 
+-- (a : fin (n + 1)), R 
+-- | 0 M a := M 0 0
+-- | (n + 1) M a :=
+--   finset.sum finset.univ (λ (K : fin (n + 1)), M a K * 
+-- (((-1) ^ (a.val + K.val)) * (λ b : fin n, @det_grl n (minor M a.val K.val) b)))
+
+-- theorem det_grl_eq_det {R : Type} [comm_ring R] :
+-- ∀ n : ℕ, ∀ M : matrix R (n + 1) (n + 1), ∀ a : fin (n + 1),
+-- det_grl M a = det M := 
+-- begin
+-- intros n M a,
+-- unfold det,
+-- unfold det_grl,
+
+-- end
+
+
+theorem L3 {R : Type} [comm_ring R] {n : ℕ} :
+∀ a : R,
+smul_M a (@matrix.identity_matrix _ _ n) = λ I J, if I = J then a else 0 :=
+begin
+intro a,
+unfold smul_M,
+funext,
+unfold matrix.identity_matrix,
+split_ifs,
+rw [mul_one],
+rw [mul_zero],
+end
+
+#check equiv.perm
+
+theorem L2 {R : Type} [comm_ring R] {n : ℕ} (M : matrix R (n + 1) (n + 1)) :
+smul_M (det M) (@matrix.identity_matrix _ _ (n + 1)) = matrix.mul R M (adj M) :=
+begin
+rw [L3],
+funext,
+unfold matrix.mul,
+split_ifs,
+unfold adj,
+unfold transpose,
+unfold cofactor,
+unfold_coes,
+unfold det,
+unfold minor,
+funext,
+sorry
+end
+
 
 theorem Cayley_Hamilton {R : Type} [comm_ring R] {n : ℕ} (M : matrix R n n) :
 ∀ eva : R, @det n R _ (matrix.sub R M (smul_M eva (@matrix.identity_matrix R _ n))) = 0 
@@ -493,9 +457,7 @@ unfold is_eigenvalue_M at h₀,
 cases h₀ with v,
 cases h₀_h with h₀_hl h₀_hl,
 rw [L1] at h₀_hl,
-
-
-
+sorry
 end
 
 end Cayley_Hamilton

@@ -1,6 +1,8 @@
 -- copyright 2017/18 Ellen Arlt
+-- August 2018, Proved module R (matrix R n m) by Blair Shi
 
 import algebra.big_operators data.set.finite
+import algebra.module 
 
 definition matrix (R: Type) (n m : nat)[ring R] :=  fin n →( fin m → R ) 
  
@@ -14,6 +16,9 @@ definition neg ( R : Type) [ring R] {n m: nat } (A:matrix R m n) : (matrix R m n
 
 definition zero ( R : Type) [ring R] {m n: nat }: (matrix R m n):= 
 λ  I J , 0 
+
+definition sub ( R : Type) [ring R] {n m: nat }(A:matrix R m n) ( B : matrix R m n): (matrix R m n):=
+λ I J, A I J - B I J
 
 theorem add_assoc1 ( R : Type) [ring R] {m n: nat }(A:matrix R m n) ( B : matrix R m n) ( C : matrix R m n) :
  add R A (add R  B C) = add R (add R A B) C :=
@@ -207,9 +212,20 @@ intro z,
 rw [right_distrib]
 end
 
-
-
-
+theorem mul_sub_mul {R : Type} [comm_ring R] (a b c : ℕ) :
+∀ (A B: matrix R a b), ∀ C : matrix R b c,
+matrix.sub R (matrix.mul R A C) (matrix.mul R B C) = matrix.mul R (matrix.sub R A B) C :=
+begin 
+intros A B C,
+unfold matrix.sub,
+unfold matrix.mul,
+funext,
+conv in ((A _ _ - B _ _) * C _ _)
+begin
+  rw [sub_mul],
+end,
+{simp[finset.sum_add_distrib]},
+end
 
 definition identity_matrix ( R : Type) [ring R] { n: nat }: (matrix R n n):= 
 λ  I J ,
@@ -306,6 +322,59 @@ right_distrib := @matrix.right_distrib R _ n n n
 }
 
 end matrix
+
+namespace M_module
+
+def smul_M {F : Type} {n m : ℕ} [ring F] (a : F) (M : matrix F n m) :
+matrix F n m := λ I, λ J, a * (M I J)
+
+instance (F : Type) [ring F] (n m : ℕ) : has_scalar F (matrix F n m) :=
+{ 
+    smul := smul_M
+}
+
+theorem smul_add' {F : Type} {n m : ℕ} [ring F] (s : F) (m1 m2 : matrix F n m) : 
+  smul_M s (matrix.add F m1 m2) = matrix.add F (smul_M s m1) (smul_M s m2) := 
+begin
+unfold smul_M,
+funext,
+unfold matrix.add,
+rw [mul_add],
+end
+
+theorem add_smul' {F : Type} {n m : ℕ} [ring F] (s t : F) (M : matrix F n m) :
+smul_M (s + t) M = (smul_M s M) + (smul_M t M) := 
+begin
+unfold smul_M,
+simp only [add_mul],
+funext,
+congr,
+end
+
+theorem mul_smul' {F : Type} {n m : ℕ} [ring F] (s t : F) (M : matrix F n m) :
+smul_M (s * t) M = smul_M s (smul_M t M) := 
+begin
+unfold smul_M,
+funext,
+rw [mul_assoc],
+end
+
+theorem one_smul' {F : Type} {n m : ℕ} [ring F] (M : matrix F n m) :
+smul_M (1 : F) M = M :=
+begin
+  unfold smul_M,
+  funext,
+  rw [one_mul],
+end
+
+instance {R : Type} {n m : ℕ} [ring R] : module R (matrix R n m) :=
+{
+  smul_add := smul_add',
+  add_smul := add_smul',
+  mul_smul := mul_smul',
+  one_smul := one_smul',
+}
+end M_module
 /-
 
 dec_trivial

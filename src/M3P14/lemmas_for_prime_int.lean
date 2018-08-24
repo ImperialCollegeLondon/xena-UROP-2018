@@ -3,6 +3,7 @@ import data.int.modeq
 import data.int.order
 import algebra.group_power
 import tactic.ring
+import chris_hughes_various.zmod
 open nat 
 
 --#check int.le
@@ -19,7 +20,7 @@ definition quadratic_res (a n : ℤ) := ∃ x : ℤ, a ≡ x^2 [ZMOD (int.nat_ab
 --definition quadratic_res' (p : ℤ) (hp : prime_int_int p ∧ p ≠ 2) (a n : zmod p) := ∃ x : ℕ, a ≡ x^2 [ZMOD n]
 
 attribute [instance, priority 0] classical.prop_decidable
-noncomputable definition legendre_sym {p : ℤ} (a : ℤ) (H1 : prime_int p ∧ p≠ 2) : ℤ := 
+noncomputable definition legendre_sym {p : ℤ} (a : ℤ) (H1 : prime_int p ∧ p ≠ 2) : ℤ := 
 if quadratic_res a p ∧ ¬ ((p : ℤ) ∣ a) then 1 else 
 if ¬ quadratic_res a p then -1 
 else 0
@@ -76,8 +77,21 @@ have b2 := b1 hpp,
 have b3 := legendre_sym_one_implies_quadratic_res (-1) h b2,
 unfold quadratic_res at b3,
 rcases b3 with x,
+let y := x % ↑(int.nat_abs p),
+have b3_hh : -1 ≡ y ^ 2 [ZMOD ↑(int.nat_abs p)], 
+begin 
+haveI : pos_nat p.nat_abs := sorry,
+rw ← zmod.eq_iff_modeq_int,
+rw ← zmod.eq_iff_modeq_int at b3_h,
+have : x ≡ y [ZMOD ↑(p.nat_abs)], 
+exact (int.mod_mod x p.nat_abs).symm,
+rw ← zmod.eq_iff_modeq_int at this,
+rw int.cast_pow at b3_h,
+rw int.cast_pow,
+exact eq.subst this b3_h,
+end,
 have b4 : 1 ≡ 1 [ZMOD ↑(int.nat_abs p)], by refl,
-have b5 := int.modeq.modeq_add b3_h b4, 
+have b5 := int.modeq.modeq_add b3_hh b4, 
 have b6 : (-1 :ℤ) + 1 = 0, by simp,
 rw b6 at b5, 
 have b7 := int.modeq.symm b5,
@@ -87,16 +101,31 @@ have b9 := exists_eq_mul_right_of_dvd b8,
 rcases b9 with r,
 have c : (1 ≤ r) ∧ (r < p), 
 begin
-split, 
-sorry, 
-have c1 : x < p, sorry,
-sorry, 
+    split, 
+    have c1 : 0 < y ^ 2 + 1, 
+    { 
+        rw int.lt_add_one_iff,
+        exact pow_two_nonneg y,
+    },
+    have c2 : p * r > 0, from eq.subst b9_h c1,  
+    have c3 := pos_of_mul_pos_left c2 H, exact c3,
+    have c4 : y ≥ 0 ∧ y ≤ p - 1, 
+    split, 
+    have h5 : ↑(int.nat_abs p) ≠ 0, sorry,
+    have c5 : x % ↑(int.nat_abs p) ≥ 0, sorry, --from int.mod_nonneg _ h5, 
+    --exact int.mod_nonneg x (int.nat_abs p),
+    --have c5 : p * r ≤ (p - 1) ^ 2 + 1 , from eq.subst b9_h begin end,
+    sorry,
+    sorry,
+    sorry, 
 end,   
+unfold is_sum_of_two_squares,
 sorry,
 exact H,
 end 
- 
-#check exists_eq_mul_right_of_dvd
+
+
+
 --inductive less_than_or_equal (a : ℤ) : ℤ → Prop
 --| refl : less_than_or_equal a
 --| step : Π {b}, less_than_or_equal b → less_than_or_equal (succ b)
