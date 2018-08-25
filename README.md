@@ -17,11 +17,15 @@ and not get errors, you're probably good to go. Don't forget to make sure that y
 
 `$ git clone git@github.com:ImperialCollegeLondon/xena-UROP-2018.git`
 
+or
+
+`$ git clone https://github.com/ImperialCollegeLondon/xena-UROP-2018.git`
+
 2) Install the dependencies (currently mathlib; in the future there will be a xena repository containing more mathematics):
 
 ```
 $ cd xena-UROP-2018
-$ leanpkg upgrade
+$ leanpkg configure
 ```
 
 3) (optional, will take a while and will use a lot of power, but will make mathlib run *much* faster): build mathlib.
