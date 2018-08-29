@@ -48,7 +48,7 @@ have h1 : p ≠ y,
   intro h_2,
   rw [←h_2, mid.refl p] at hy,
   exact h_1 hy.1,
-let h2 := ten1 p y,
+have h2 := ten1 p y,
 have h3 : mid p y = x,
   apply hx.2,
   refine ⟨hy.1,_⟩,
@@ -94,19 +94,19 @@ apply unique_of_exists_unique (ten2 h h_1),
   exact ten3a h h_1,
 have h_2 : p ∉ l b a,
   rwa six17,
-let h2 := ten3a h.symm h_2,
+have h2 := ten3a h.symm h_2,
 rwa six17 a b
 end
 
 theorem ten3c {A : set point} (h : line A) {a : point} : a ∉ A → Sl h a ∉ A :=
 begin
 intro h1,
-let h2 := ten3a h h1,
+have h2 := ten3a h h1,
 cases em (a = Sl h a),
   rwa ←h_1,
 intro h3,
 apply h1,
-let h4 := ten1 a (Sl h a),
+have h4 := ten1 a (Sl h a),
 suffices : A = l (Sl h a) (mid a (Sl h a)),
   rw this,
   left,
@@ -136,9 +136,9 @@ end
 @[simp] theorem ten5 {A : set point} (h : line A) (a : point) : Sl h (Sl h a) = a := 
 begin
 cases em (a ∈ A),
-  let h1 := ten3b h h_1,
+  have h1 := ten3b h h_1,
   rwa h1,
-let h1 := ten3a h h_1,
+have h1 := ten3a h h_1,
 have h2 : Sl h a ∉ A,
   exact ten3c h h_1,
 rw [mid.symm, six17] at h1,
@@ -176,7 +176,7 @@ split,
   intro h1,
   by_contradiction h_1,
   apply h_1,
-  let h2 := ten3a h h_1,
+  have h2 := ten3a h h_1,
   rw h1 at *,
   simp at h2,
   exact h2.1,
@@ -187,7 +187,7 @@ end
 theorem ten9 {A : set point} (h : line A) {a : point} : a ∉ A → perp A (l a (mid a (Sl h a))) :=
 begin
 intro h1,
-let h2 := ten3a h h1,
+have h2 := ten3a h h1,
 suffices : l a (Sl h a) = l a (mid a (Sl h a)),
   rw ←this,
   exact h2.2,
@@ -195,7 +195,7 @@ have h3 : a ≠ Sl h a,
   intro h_1,
   apply h1,
   exact (ten8 h).1 h_1.symm,
-let h4 := ten1 a (Sl h a),
+have h4 := ten1 a (Sl h a),
 apply six18 (six14 h3),
     intro h_1,
     apply h3,
@@ -212,12 +212,12 @@ rw [ten3d h p, ten3d h q],
 generalize h1 : mid p (Sl h p) = x,
 generalize h2 : mid q (Sl h q) = y,
 generalize h3 : mid x y = z,
-let h4 := midtoS x y,
+have h4 := midtoS x y,
 rw h3 at h4,
-let h5 := seven5 x p,
-let h6 := (seven14 z).1 h5,
+have h5 := seven5 x p,
+have h6 := (seven14 z).1 h5,
 rw h4 at h6,
-let h7 := seven6 h6,
+have h7 := seven6 h6,
 have h8 : eqd q (S z p) (S y q) (S z (S x p)),
   rw h7,
   apply seven13,
@@ -297,7 +297,7 @@ split,
   intro h1,
   exact (ten10 h a b).symm.trans (h1.trans (ten10 h c d)),
 intro h1,
-let h2 := (ten10 h (Sl h a) (Sl h b)).symm.trans (h1.trans (ten10 h (Sl h c) (Sl h d))),
+have h2 := (ten10 h (Sl h a) (Sl h b)).symm.trans (h1.trans (ten10 h (Sl h c) (Sl h d))),
 simpa using h2
 end
 
@@ -389,7 +389,7 @@ cases em (b = c),
   exact h2,
 cases em (b = z),
   subst z,
-  let h5 := six14 (ne.symm h_1),
+  have h5 := six14 (ne.symm h_1),
   have h6 : a' = Sl h5 a,
     suffices : a = S b a',
       rw this,
@@ -402,7 +402,7 @@ cases em (b = z),
     simp,
   rw h6,
   simpa [h7.symm] using (ten10 h5 a c),
-let h5 := six14  h_2,
+have h5 := six14  h_2,
 have h6 : a = (Sl h5 a'),
   rw [(midtoS a a').symm, h3],
   exact ten12b h5 h4,
@@ -470,7 +470,7 @@ cases em (b = y),
   apply ten12c h,
     exact eight10 h7 h11,
   exact h2.trans (h6.1.trans h11.1),
-let h10 := six14 h_1,
+have h10 := six14 h_1,
 have h11 : c = Sl h10 (S x c'),
   rw [←midtoS c (S x c'), h8],
   exact ten12b h10 h9,
@@ -586,9 +586,9 @@ apply exists_unique_of_exists_of_unique,
   intro h_1,
   exact h (four13 h_1 h5.symm),
 intros c' c'' hc' hc'',
-let h3 := hc'.1.symm.trans hc''.1,
-let h4 := hc'.2.trans hc''.2.symm,
-let h5 := six14 (six26 h1).1,
+have h3 := hc'.1.symm.trans hc''.1,
+have h4 := hc'.2.trans hc''.2.symm,
+have h5 := six14 (six26 h1).1,
 generalize h6 : Sl h5 c'' = c₁,
 have h7 : Bl c'' (l a' b') c₁,
   rw ←h6,
@@ -807,7 +807,7 @@ end
 theorem eqa.trans {a b c d e f p q r : point} : eqa a b c d e f → eqa d e f p q r → eqa a b c p q r :=
 begin
 intros h g,
-let h1 := h,
+have h1 := h,
 rw eleven3 at h1,
 rcases h1 with ⟨a', c', d', f', h1, h2, h3, h4, h5, h6, h7⟩,
 rw eleven4 at g,
@@ -837,7 +837,7 @@ have h16 : sided q p₁ p,
   exact (six7 hp.1 g.2.2.1).symm,
 have h17 : sided q r₁ r,
   exact (six7 hr.1 g.2.2.2.1).symm,
-let h18 := g.2.2.2.2 d₁ f₁ p₁ r₁ h14 h15 h16 h17 h10 h11,
+have h18 := g.2.2.2.2 d₁ f₁ p₁ r₁ h14 h15 h16 h17 h10 h11,
 rw eleven3,
 existsi [a₁, c₁, p₁, r₁],
 simp *,
@@ -850,7 +850,7 @@ rw eleven4 at h,
 exact h.2.2.2.2 a₁ c₁ d₁ f₁ h12 h13 h14 h15 h8 h9
 end
 
-theorem eleven8 {a b c : point} : a ≠ b → c ≠ b → eqa a b c c b a :=
+theorem eleven6 {a b c : point} : a ≠ b → c ≠ b → eqa a b c c b a :=
 begin
 intros h h1,
 cases seg_cons a c b b with a' ha,
@@ -868,8 +868,14 @@ split,
 exact two5 (eqd.refl a' c')
 end
 
-theorem eqa.flip {a b c d e f : point} : eqa a b c d e f → eqa c b a f e d := assume h,
-(eleven8 h.2.1 h.1).trans (h.trans (eleven8 h.2.2.1 h.2.2.2.1))
+theorem eleven7 {a b c d e f : point} : eqa a b c d e f → eqa c b a d e f :=
+λ h, (eleven6 h.1 h.2.1).symm.trans h
+
+theorem eleven8 {a b c d e f : point} : eqa a b c d e f → eqa a b c f e d :=
+λ h, h.trans (eleven6 h.2.2.1 h.2.2.2.1)
+
+theorem eqa.flip {a b c d e f : point} : eqa a b c d e f → eqa c b a f e d :=
+λ h, eleven8 (eleven7 h)
 
 theorem eleven9 {a b c a' c' : point} : sided b a' a → sided b c' c → eqa a b c a' b c' :=
 begin
@@ -976,7 +982,7 @@ intros h h1,
 cases exists_of_exists_unique (six11 (six26 h1).1 (six26 h).1.symm) with d' hd,
 have h2 : ¬col d' e p,
   intro h_1,
-  let h_2 := (six4.1 hd.1).1,
+  have h_2 := (six4.1 hd.1).1,
   exact (four10 h1).2.2.1 (five4 hd.1.1.symm (four11 h_1).2.1 (four11 h_2).2.1),
 cases ten16 h h2 hd.2.symm.flip with f hf,
 dsimp at hf,
@@ -1002,7 +1008,7 @@ intros h h1 f1 f2 h2 h3 h4 h5,
 cases exists_of_exists_unique (six11 (six26 h1).1 (six26 h).1.symm) with d' hd,
 have h6 : ¬col d' e p,
   intro h_1,
-  let h_2 := (six4.1 hd.1).1,
+  have h_2 := (six4.1 hd.1).1,
   exact (four10 h1).2.2.1 (five4 hd.1.1.symm (four11 h_1).2.1 (four11 h_2).2.1),
 cases ten16 h h6 hd.2.symm.flip with f hf,
 dsimp at hf,
@@ -1057,6 +1063,16 @@ have h16 : f₂ = f,
   exact h15,
 subst f₂,
 exact h9.1.symm.trans h10.1
+end
+
+theorem eleven15c {a b c x : point} : eqa a b c a b x → side (l a b) c x → sided b c x :=
+begin
+intros h h1,
+have h2 : ¬col a b c,
+  exact (nine11 h1).2.1,
+apply eleven15b h2 h2 c x (eqa.refl (six26 h2).1 (six26 h2).2.1.symm) (side.refla (four10 h2).2.1) h,
+rwa six17,
+exact h1.symm
 end
 
 theorem eleven16 {a b c a' b' c' : point} : a ≠ b → c ≠ b → a' ≠ b' → c' ≠ b' → R a b c → R a' b' c' → 
@@ -1188,12 +1204,12 @@ cases h_1,
   exfalso,
   apply (eight14b h6.2),
   exact six18 h hy.1 (six17a a b) h_1,
-let h12 := six14 hb.1,
+have h12 := six14 hb.1,
 have h13 : side (l a b) y (Sl h12 c),
   exact (nine8 h_1.symm).1 (ten14 h12 h7).symm,
 have h14 : side (l a b) y (S a c),
   have h_2 : S a c = Sl h12 c,
-    let h_3 := ten12b h12.symm h9.flip,
+    have h_3 := ten12b h12.symm h9.flip,
     rw Sl.symm at h_3,
     simpa using h_3,
   rwa h_2,

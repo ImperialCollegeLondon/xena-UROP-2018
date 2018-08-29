@@ -1,8 +1,9 @@
 import euclid.axioms data.set tactic.interactive
 open classical
 namespace Euclidean_plane
-
 variables {point : Type} [Euclidean_plane point]
+
+local attribute [instance] prop_decidable
 
 --Conclusions from the first 5 axioms
 theorem eqd.refl (a b : point) : eqd a b a b :=
@@ -90,8 +91,7 @@ split,
 intros y hy,
 cases h1 with h2 h3,
 cases hy with h4 h5,
-apply classical.by_contradiction,
-intro h1,
+by_contradiction h_1,
 have h6 : eqd a x a y,
   exact eqd_trans b c a x a y h3.symm h5.symm,
 have h7 : eqd q x q y,
@@ -343,17 +343,10 @@ split,
 exact eqd.trans h.2.2 h1.2.2
 end
 
-lemma four4 {a b c a' b' c' : point} : cong a b c a' b' c' → cong b c a b' c' a' :=
-begin
-intro h,
-cases h with h h1,
-cases h1 with h1 h2,
-unfold cong,
-repeat {split},
-  assumption,
-  exact h2.flip,
-exact h.flip
-end
+lemma four4 {a b c a' b' c' : point} : cong a b c a' b' c' → cong a c b a' c' b' ∧ cong b a c b' a' c' ∧ 
+cong b c a b' c' a' ∧ cong c a b c' a' b' ∧ cong c b a c' b' a' :=
+λ h, ⟨⟨h.2.2, h.2.1.flip, h.1⟩, ⟨h.1.flip, h.2.2, h.2.1⟩, ⟨h.2.1, h.2.2.flip, h.1.flip⟩, 
+⟨h.2.2.flip, h.1, h.2.1.flip⟩, ⟨h.2.1.flip, h.1.flip, h.2.2.flip⟩⟩
 
 theorem four5 {a b c a' c' : point} : B a b c → eqd a c a' c' 
 → ∃ b', B a' b' c' ∧ cong a b c a' b' c' :=
@@ -466,9 +459,9 @@ cases h,
   have : B a' b' c', exact four6 h h1,
   simp *,
 cases h,
-  have : B b' c' a', exact four6 h (four4 h1),
+  have : B b' c' a', exact four6 h (four4 h1).2.2.1,
   simp *,
-have : B c' a' b', exact four6 h (four4 (four4 h1)),
+have : B c' a' b', exact four6 h (four4 h1).2.2.2.1,
   simp *,
 end
 
@@ -486,7 +479,7 @@ cases seg_cons b' b c a' with c' hc,
   exact two11 h1 hc.1 h hc.2.symm,
 cases h2 with h2 h3,
   cases four5 h2 h.flip with c' hc,
-  constructor, exact four4 (four4 hc.2),
+  constructor, exact (four4 hc.2).2.2.2.1,
 cases seg_cons a' a c b' with c' hc,
 existsi c',
 unfold cong,
@@ -512,7 +505,7 @@ cases hbc with hb hc,
   have : ifs b c a d b' c' a' d',
     repeat {split};
       try {assumption},
-        exact four6 hb (four4 h2),
+        exact four6 hb (four4 h2).2.2.1,
       exact h2.1.flip,
     exact h2.2.2.flip,
   exact four2 this,
@@ -815,7 +808,7 @@ have : col a x b,
 cases four14 this hx.2 with y hy,
 constructor,
   split,
-    exact (four6 hx.1.symm (four4 hy)).symm,
+    exact (four6 hx.1.symm (four4 hy).2.2.1).symm,
 exact hy.2.2
 end
 
@@ -831,7 +824,7 @@ constructor,
 exact eqd.trans h1.symm (eqd.trans hx.2 hy.2.1)
 end
 
-theorem five7 (a b : point) : distle a b a b :=
+theorem distle.refl (a b : point) : distle a b a b :=
 begin
 constructor,
   split,
@@ -839,7 +832,7 @@ constructor,
 exact eqd.refl a b
 end
 
-theorem five8 {a b c d e f : point} : distle a b c d → distle c d e f → distle a b e f :=
+theorem distle.trans {a b c d e f : point} : distle a b c d → distle c d e f → distle a b e f :=
 begin
 intros h h1,
 cases h with x hx,
@@ -850,6 +843,9 @@ constructor,
     exact three6b hz.1 hy.1,
 exact eqd.trans hx.2 hz.2.1
 end
+
+theorem distle.flip {a b c d : point} : distle a b c d → distle b a d c :=
+λ h, five6 h (two5 (eqd.refl a b)) (two5 (eqd.refl c d))
 
 theorem five9 {a b c d : point} : distle a b c d → distle c d a b → eqd a b c d :=
 begin
@@ -921,8 +917,6 @@ split,
 exact hx.2.symm
 end
 
-def distlt (a b c d : point) : Prop := distle a b c d ∧ ¬eqd a b c d
-
 theorem five12 {a b c : point} : col a b c → (B a b c ↔ distle a b a c ∧ distle b c a c) :=
 begin
 intro h,
@@ -982,6 +976,71 @@ have : B q c y,
   exact hy.2.symm,
 rw ←this at *,
 exact hy.1.symm
+end
+
+def distlt (a b c d : point) : Prop := distle a b c d ∧ ¬eqd a b c d
+
+theorem five13 {a b c d : point} : distlt a b c d → ∃ y, B c y d ∧ eqd a b c y ∧ y ≠ d :=
+begin
+rintros ⟨h, h1⟩,
+cases h with y hy,
+refine ⟨y, hy.1, hy.2, _⟩,
+intro h_1,
+subst y,
+exact h1 hy.2
+end
+
+theorem five14 {a b c d a' b' c' d' : point} : distlt a b c d → eqd a b a' b' →
+eqd c d c' d' → distlt a' b' c' d' :=
+λ h h1 h2, ⟨five6 h.1 h1 h2, λ h_1, h.2 (h1.trans (h_1.trans h2.symm))⟩
+
+theorem distlt.trans {a b c d e f : point} : distlt a b c d → distlt c d e f → distlt a b e f :=
+λ h h1, ⟨h.1.trans h1.1, λ h_1, h.2 (five9 h.1 (five6 h1.1 (eqd.refl c d) h_1.symm))⟩
+
+theorem distlt.flip {a b c d : point} : distlt a b c d → distlt b a d c :=
+λ h, ⟨h.1.flip, λ h_1, h.2 h_1.flip⟩
+
+theorem five15 {a b c d : point} : distlt a b c d → distlt c d a b → false :=
+λ h h1, (h.trans h1).2 (eqd.refl a b)
+
+theorem dist_lt_or_eq_of_le {a b c d : point} : distle a b c d → distlt a b c d ∨ eqd a b c d :=
+begin
+intro h,
+cases em (eqd a b c d),
+  exact or.inr h_1,
+exact or.inl ⟨h, h_1⟩
+end
+
+theorem dist_lt_iff_not_le {a b c d : point} : distlt a b c d ↔ ¬distle c d a b :=
+begin
+split,
+  intros h h1,
+  exact h.2 (five9 h.1 h1),
+intro h,
+split,
+  have h1 := five10 a b c d,
+  simp [h] at h1,
+  exact h1,
+intro h1,
+exact h (five6 (distle.refl a b) h1 (eqd.refl a b))
+end
+
+theorem dist_le_iff_not_lt {a b c d : point} : distle a b c d ↔ ¬distlt c d a b :=
+begin
+split,
+  intros h h1,
+  exact dist_lt_iff_not_le.1 h1 h,
+intro h,
+by_contradiction h_1,
+exact h (dist_lt_iff_not_le.2 h_1)
+end
+
+theorem dist_total (a b c d : point) : distlt a b c d ∨ eqd a b c d ∨ distlt c d a b :=
+begin
+cases em (distle a b c d),
+  cases dist_lt_or_eq_of_le h;
+  simp *,
+simp [dist_lt_iff_not_le.2 h]
 end
 
 -- Rays and Lines
