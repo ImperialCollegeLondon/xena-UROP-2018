@@ -2,4 +2,6 @@
 -- Say f and g are functions from R to R defined by f(x) = x2 + 3 and g(x) = 2x. Write down explicit formulae for the following functions:
 -- (i) f ◦ g
 -- (ii) g ◦ f
--- (iii) x 􏰀→ f(x)g(x) (iv) x 􏰀→ f(x) + g(x) (v) x 􏰀→ f(g(x)).
+-- (iii) x 􏰀→ f(x)g(x) 
+-- (iv) x 􏰀→ f(x) + g(x) 
+-- (v) x 􏰀→ f(g(x)).

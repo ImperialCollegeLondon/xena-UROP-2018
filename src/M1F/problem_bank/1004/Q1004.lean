@@ -1,6 +1,4 @@
 -- this question should read Q4 (but on the 2016/17 example sheet, this reads 3)
 -- 4. (One-sided inverses.)
--- (i)Sayf:X→Y isafunctionandthereexistsafunctiong:Y →Xsuchthatf◦gisthe
--- identity function Y → Y . Prove that f is surjective.
--- (ii) Say f : X → Y is a function and there exists a function g : Y → X such that g ◦ f is the
--- identity function X → X. Prove that f is injective.
+-- (i) Sayf:X→Y isafunctionandthereexistsafunctiong:Y →X suchthat f◦g is the identity function Y → Y . Prove that f is surjective.
+-- (ii) Say f : X → Y is a function and there exists a function g : Y → X such that g ◦ f is the identity function X → X. Prove that f is injective.

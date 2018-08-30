@@ -1,4 +1,8 @@
--- 3. For each of the following “functions”, explain why I just lost a mark. (i) f : R → R, f(x) = 1/x.
+-- 3. For each of the following “functions”, explain why I just lost a mark. 
+-- (i) f : R → R, f(x) = 1/x.
+
 -- (ii) f : R → R, f(x) = √x.
+
 -- (iii) f : Z → Z, f(n) = (n + 1)2/2.
+
 -- (iv) f : R → R, f(x) is a solution to y3 − y = x. (v) f : R\{1} → R, f (x) = 1 + x + x2 + x3 + · · · .
