@@ -1,0 +1,5 @@
+-- 5∗. This relatively straightforward (if you’ve understood the idea correctly) question makes sure that you understand the composition of functions, and how it differs from other things like mul- tiplication of functions.
+-- Say f and g are functions from R to R defined by f(x) = x2 + 3 and g(x) = 2x. Write down explicit formulae for the following functions:
+-- (i) f ◦ g
+-- (ii) g ◦ f
+-- (iii) x 􏰀→ f(x)g(x) (iv) x 􏰀→ f(x) + g(x) (v) x 􏰀→ f(g(x)).

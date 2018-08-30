@@ -1,0 +1,1 @@
+-- 6. Say A and B are finite sets, with sizes a and b respectively. Prove that the set BA of functions A → B has size ba. What about the case a = b = 0?

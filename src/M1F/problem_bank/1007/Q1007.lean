@@ -1,0 +1,7 @@
+-- 6. (converse of 3 with added bits.)
+-- (i) Say f : X → Y is surjective. Prove that there exists a function g : Y → X such that f ◦ g
+-- is the identity function. Bonus point: in general, is g “natural”?
+-- (ii) Say f : X → Y is injective. Does there always exist a function g : Y → X such that g ◦ f
+-- is the identity function?
+-- (iii)Sayf:X→Y isanyfunction. Doestherealwaysexistaninjectiong:X→Zanda
+-- surjectionh:Z→Y suchthatf=h◦g?

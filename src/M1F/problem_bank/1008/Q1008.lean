@@ -1,0 +1,1 @@
+-- 7. Provethat◦isassociative. Inotherwords,provethatifh:A→Bandg:B→Cand f:C→Dthen(f◦g)◦h=f◦(g◦h)(NBthesearebothfunctionsA→D). Thisisagreat example of a question that is dead easy once you actually figure out what it’s asking.
