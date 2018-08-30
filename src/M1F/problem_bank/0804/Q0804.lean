@@ -4,14 +4,21 @@ import data.real.basic
 -- figure out whether or not the relation is reflexive. Then figure out whether or not
 --  it is symmetric. Finally figure out whether or not the relation is transitive.
 
-definition S5 := {x : ℕ | x = 1 ∨ x = 2 ∨ x = 3 ∨ x = 4}
-definition S6 := {x : ℕ | false}
+inductive S5
+| one : S5
+| two : S5
+| three : S5
+| four : S5
+
+inductive S6.
+
+open S5
 
 definition r1 (a b : ℝ) : Prop := a ≤ b
 definition r2 (a b : ℤ) : Prop := ∃ k, a - b = k ^ 2
 definition r3 (a b : ℝ) : Prop := a = b ^ 2
 definition r4 (a b : ℤ) : Prop := a + b = 0
-definition r5 (a b : S5) : Prop := a = 1 ∧ b = 3
+definition r5 (a b : S5) : Prop := a = one ∧ b = three
 definition r6 (a b : S6) : Prop := true
 
 theorem Q1r : reflexive r1 := sorry
