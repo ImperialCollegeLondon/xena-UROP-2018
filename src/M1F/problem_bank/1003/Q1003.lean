@@ -1,4 +1,7 @@
 /- 3. For each of the following “functions”, explain why I just lost a mark. 
+
+-- i'm not sure i can do this in lean
+
 (i) f : R → R, f(x) = 1/x.
 
 (ii) f : R → R, f(x) = √x.

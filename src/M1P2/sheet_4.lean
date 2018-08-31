@@ -42,7 +42,8 @@ theorem sheet04_q8a (a b c : G) : a * b = a * c ↔ b = c := by apply mul_left_i
 theorem sheet04_q8b (a b c : G) : ∃! x : G, a * x * b = c := 
 begin
 intros,
-existsi (a⁻¹ * c * b⁻¹),simp [mul_assoc],
+existsi (a⁻¹ * c * b⁻¹),
+simp [mul_assoc],
 assume y h,
 rw ← h,
 simp [mul_assoc],
