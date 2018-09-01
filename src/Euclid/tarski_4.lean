@@ -9,6 +9,9 @@ local attribute [instance] prop_decidable
 
 def Bl (a : point) (A : set point) (b : point) : Prop := line A ∧ a ∉ A ∧ b ∉ A ∧ ∃ t, t ∈ A ∧ B a t b
 
+theorem nine1 {a p : point} {A : set point} : line A → a ∈ A → p ∉ A → Bl p A (S a p) :=
+λ h h1 h2, ⟨h, h2, (λ h_2, h2 ((seven24 h h1).2 h_2)), a, h1, (seven5 a p).1⟩
+
 theorem nine2 {a b : point} {A : set point} : Bl a A b → a ≠ b :=
 begin
 intros h h1,
@@ -19,7 +22,7 @@ cases h.2.2.2 with x hx,
 suffices : a = x,
   rw this,
   exact hx.1,
-exact bet_same a x hx.2
+exact bet_same hx.2
 end
 
 theorem Bl.symm {a b : point} {A : set point} : Bl a A b → Bl b A a :=
@@ -40,7 +43,7 @@ exact ht.2.symm
 end
 
 lemma nine3 {a c m r : point} {A : set point} : Bl a A c → m ∈ A → M a m c → r ∈ A → 
-∀ b, sided r a b → Bl b A c :=
+∀ {b}, sided r a b → Bl b A c :=
 begin
 unfold Bl,
 intros h h1 h2 h3 b hb,
@@ -49,7 +52,7 @@ cases hb.2.2,
   have h5 := (seven6 h2).symm,
   rw h5 at h4,
   have h6 := seven5 m b,
-  cases pasch b (S m r) (S m b) m c h6.1 h4 with t ht,
+  cases pasch h6.1 h4 with t ht,
   split,
     exact h.1,
   split,
@@ -63,7 +66,7 @@ cases hb.2.2,
     have h_2 := (seven24 h.1 h1).1 h3,
     exact six27 h.1 h1 h_2 ht.1,
   exact ht.2.symm,
-cases pasch r c a b m h_1 h2.1.symm with t ht,
+cases pasch h_1 h2.1.symm with t ht,
 split,
   exact h.1,
 split,
@@ -83,7 +86,7 @@ end
 
 lemma nine4a {a c m r s t : point} {A : set point} (h3 : r ∈ A) (h4 : A ⊥ l a r) (h5 : s ∈ A) (h6 : A ⊥ l c s) 
 (h2 : Bl a A c) (ht : t ∈ A ∧ B a t c) (h_1 : ¬r = s) (h_2 : distle s c r a) : 
-M r m s → ∀ u, (sided r u a ↔ sided s (S m u) c) :=
+M r m s → ∀ {u}, (sided r u a ↔ sided s (S m u) c) :=
 begin
 unfold Bl at h2,
 have g2 := six18 h2.1 (ne.symm h_1) h5 h3,
@@ -108,7 +111,7 @@ have h_3 : sided r a b,
       intro h_4,
       subst b,
       apply six13 (eight14e h6).2,
-      exact id_eqd c s r (two4 gb.2),
+      exact id_eqd (two4 gb.2),
     right,
     exact gb.1,
 split,
@@ -153,7 +156,7 @@ end
 
 lemma nine4b {a c r s t : point} {A : set point} (h3 : r ∈ A) (h4 : A ⊥ l a r) (h5 : s ∈ A) (h6 : A ⊥ l c s) 
 (h2 : Bl a A c) (ht : t ∈ A ∧ B a t c) (h_1 : ¬r = s) (h_2 : distle s c r a) : 
-∀ u v, sided r u a → sided s v c → Bl u A v :=
+∀ {u v}, sided r u a → sided s v c → Bl u A v :=
 begin
 have g2 := six18 h2.1 (ne.symm h_1) h5 h3,
 have g3 : (l s r) ⊥ (l c s),
@@ -165,10 +168,10 @@ have g5 : col s r t,
   exact ht.1,
 cases h_2 with b gb,
 cases eight24 g3.symm g4.symm g5 ht.2.symm gb.1 gb.2 with m hm,
-have h7 := nine4a h3 h4 h5 h6 h2 ht h_1 ⟨b, gb⟩ hm.1.symm,
 unfold Bl at h2,
 intros u v hu hv,
-have h8 := (h7 u).1 hu,
+have h7 := nine4a h3 h4 h5 h6 h2 ht h_1 ⟨b, gb⟩ hm.1.symm,
+have h8 := (h7).1 hu,
 have h9 := sided.trans h8 hv.symm,
 have h10 : u ∉ A,
   intro h_2,
@@ -199,12 +202,12 @@ have h12 : Bl (S m u) A u,
     exact h11,
   exact (seven5 m u).1.symm,
 apply Bl.symm,
-exact nine3 h12 h11 (seven5 m u).symm h5 v h9
+exact nine3 h12 h11 (seven5 m u).symm h5 h9
 end
 
 
 theorem nine4 {a c m r s : point} {A : set point} : Bl a A c → r ∈ A → perp A (l a r) → s ∈ A → perp A (l c s) → 
-(M r m s → ∀ u, (sided r u a ↔ sided s (S m u) c)) ∧ ∀ u v, sided r u a → sided s v c → Bl u A v :=
+(M r m s → ∀ {u}, (sided r u a ↔ sided s (S m u) c)) ∧ ∀ {u v}, sided r u a → sided s v c → Bl u A v :=
 begin
 intros h2 h3 h4 h5 h6,
 cases h2.2.2.2 with t ht,
@@ -233,8 +236,8 @@ cases em (r = s),
       exact eight14a h6.symm,
     simp,
     exact h5,
-  have h_4 := h_2.2.2.2.2 a t (six17a a r) ht.1,
-  have h_5 := h_3.2.2.2.2 c t (six17a c s) ht.1,
+  have h_4 := h_2.2.2.2.2 (six17a a r) ht.1,
+  have h_5 := h_3.2.2.2.2 (six17a c s) ht.1,
   subst h,
   have h_6 : r = t,
     exact eight6 h_4 h_5 ht.2,
@@ -242,7 +245,7 @@ cases em (r = s),
   split,
     intros h7 u,
     have h_7 : m = r,
-      exact (bet_same r m h7.1).symm,
+      exact (bet_same h7.1).symm,
     rw h_7,
     have h8 := seven5 r u,
     apply iff.intro,
@@ -310,20 +313,18 @@ have g5 : col r s t,
   exact ht.1,
 cases h_1 with b gb,
 cases eight24 g4.symm g3.symm g5 ht.2 gb.1 gb.2 with m' hm,
-have h7 := nine4a h5 h6 h3 h4 h2.symm ⟨ht.1, ht.2.symm⟩ (ne.symm h) ⟨b, gb⟩ hm.1.symm,
 split,
   intro h_2,
-  have h_3 : m' = m,
-    exact unique_of_exists_unique (eight22 r s) hm.1 h_2,
+  have h_3 := unique_of_exists_unique (eight22 r s) hm.1 h_2,
     subst m',
   intro u,
   suffices : sided r (S m (S m u)) a ↔ sided s (S m u) c,
     simp at this,
     exact this,
-  exact (h7 (S m u)).symm,
+  exact (nine4a h5 h6 h3 h4 h2.symm ⟨ht.1, ht.2.symm⟩ (ne.symm h) ⟨b, gb⟩ hm.1.symm).symm,
 intros u v hu hv,
 apply Bl.symm,
-apply nine4b h5 h6 h3 h4 h2.symm ⟨ht.1, ht.2.symm⟩ (ne.symm h) ⟨b, gb⟩ v u hv hu
+apply nine4b h5 h6 h3 h4 h2.symm ⟨ht.1, ht.2.symm⟩ (ne.symm h) ⟨b, gb⟩ hv hu
 end
 
 theorem nine5 {a b c r : point} {A : set point} : Bl a A c → r ∈ A → sided r a b → Bl b A c :=
@@ -356,9 +357,9 @@ have h7 : c ≠ z,
   rw h_1,
   exact hz.1.1,
 have h8 := nine4 h hx.1.1 hx.1.2 hz.1.1 hz.1.2,
-have h9 := (h8.1 hm.1 a).1 (six5 h5),
-have h10 := h8.2 a (S m a) (six5 h5) h9,
-have h11 := nine3 h10 h4 (seven5 m a) h1 b h2,
+have h9 := (h8.1 hm.1).1 (six5 h5),
+have h10 := h8.2 (six5 h5) h9,
+have h11 := nine3 h10 h4 (seven5 m a) h1 h2,
 have h12 : (S m a) ≠ z,
   intro h_1,
   apply h5,
@@ -371,7 +372,7 @@ have h13 : l c z = l (S m a) z,
   simp,
 have h14 := hz.1,
 rw h13 at h14,
-have h15 := (nine4 h11 hy.1.1 hy.1.2 h14.1 h14.2).2 b c (six5 h6) h9.symm,
+have h15 := (nine4 h11 hy.1.1 hy.1.2 h14.1 h14.2).2 (six5 h6) h9.symm,
 exact h15,
 exact a
 end
@@ -426,7 +427,7 @@ have h4 : sided p c a,
     intro h_1,
     subst h_1,
     apply (six26 h_1).2.2,
-    exact bet_same a c h,
+    exact bet_same h,
   left,
   exact h.symm,
 have h5 := nine5 h3 (six17a p q) h4,
@@ -434,7 +435,7 @@ cases h5.2.2.2 with x hx,
 constructor,
 split,
   exact hx.2,
-cases pasch p b a c x h.symm hx.2.symm with t ht,
+cases pasch h.symm hx.2.symm with t ht,
 suffices : t = q,
   subst t,
   exact ht.2.symm,
@@ -457,7 +458,7 @@ intro h1,
 cases h1 with d hd,
 cases hd.1.2.2.2 with x hx,
 cases hd.2.2.2.2 with y hy,
-cases pasch a b d x y hx.2 hy.2 with z hz,
+cases pasch hx.2 hy.2 with z hz,
 cases em (x = y),
   subst y,
   suffices : sided x a b,
@@ -630,6 +631,9 @@ split,
   exact h3,
 exact hd.1
 end
+
+theorem nine17a {a b c p : point} {A : set point} : side A p a → side A p c → B a b c → side A p b :=
+λ h h1 h2, h.trans (nine17 (h.symm.trans h1) h2).symm
 
 theorem nine18 {a b p : point} {A : set point} : line A → p ∈ A → col a b p → 
 (Bl a A b ↔ B a p b ∧ a ∉ A ∧ b ∉ A) :=
@@ -916,7 +920,7 @@ have h7 : sided (S a c) t x,
       rw ←this,
       exact ht.1,
     subst x,
-    exact (bet_same (S a c) t ht.2).symm,
+    exact (bet_same ht.2).symm,
   left,
   exact ht.2.symm,
 cases ht.1,

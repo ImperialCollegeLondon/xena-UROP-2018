@@ -80,11 +80,11 @@ wlog h1 : B a b c := (h.2.2) using b c,
   split,
     intro h_1,
     subst b',
-    exact h.1.symm (id_eqd a b a' h2.1),
+    exact h.1.symm (id_eqd h2.1),
   split,
     intro h_1,
     subst c',
-    exact h.2.1.symm (id_eqd a c a' h2.2.2),
+    exact h.2.1.symm (id_eqd h2.2.2),
   exact or.inl (four6 h1 h2),
 apply (this h.symm _).symm,
 exact ⟨a_1.2.2, a_1.2.1.flip, a_1.1⟩
@@ -171,6 +171,9 @@ have : col p r q,
   exact (four11 h2).1,
 exact five4 h1 this h3
 end
+
+theorem six16a {p q r : point} : sided p q r → l p q = l p r :=
+λ h, six16 h.1.symm h.2.1.symm (four11 (six4.1 h).1).2.1
 
 theorem six17 (p q : point) : l p q = l q p :=
 begin
@@ -309,37 +312,26 @@ rw this at *,
 exact h.2.2.2
 end
 
-theorem six24 : ∃ (x y z : point), ¬col x y z :=
-let ⟨x, y, z, h⟩ := (two_dim point) in
+theorem six24 : ¬col (P1 : point) P2 P3 :=
 begin
-have : ¬col x y z,
-  intro h1,
-  cases h1,
-    exact h.1 h1,
-  cases h1,
-    exact h.2.1 h1,
-  exact h.2.2 h1,
-exact ⟨x, ⟨y, ⟨z, this⟩⟩⟩
+have h := two_dim point,
+intro h1,
+cases h1,
+  exact h.1 h1,
+cases h1,
+  exact h.2.1 h1,
+exact h.2.2 h1
 end
 
 theorem six25 {a b : point} : a ≠ b → ∃ c, ¬col a b c :=
-let ⟨(x : point), y, z, h⟩ := six24 in
 begin
 intro h1,
-apply classical.by_contradiction,
-rw not_exists,
-intro h2,
+by_contradiction h2,
+rw not_exists at h2,
 simp at h2,
-apply h,
+apply @six24 point,
 apply six23.2,
-existsi l a b,
-split,
-  exact six14 h1,
-split,
-  exact h2 x,
-split,
-  exact h2 y,
-exact h2 z
+exact ⟨l a b, six14 h1, h2 P1, h2 P2, h2 P3⟩
 end
 
 lemma six13a (a : point) : ¬line (l a a) :=
@@ -388,7 +380,7 @@ intros h h1 h2 h3,
 cases em (a = c),
   rw h_1 at h3,
   have : c = b,
-    exact bet_same c b h3,
+    exact bet_same h3,
   rwa this at h2,
 have h4 := six18 h h_1 h1 h2,
 rw h4,
@@ -428,7 +420,7 @@ theorem seven3 {a m : point} : M a m a ↔ a = m :=
 begin
 split,
   intro h,
-  exact bet_same a m h.1,
+  exact bet_same h.1,
 intro h,
 rw h at *,
 split,
@@ -446,7 +438,7 @@ cases em (a = p),
     refl,
   intros y hy,
   cases hy with h1 h2,
-  exact id_eqd y p p h2.symm.flip,
+  exact id_eqd h2.symm.flip,
 cases seg_cons a a p p with q hq,
 apply exists_unique.intro,
 exact ⟨hq.1, hq.2.symm⟩,
@@ -477,9 +469,9 @@ rw hr at *,
 cases em (q = a),
   rw h at *,
   have ha : a = r,
-    exact id_eqd a r a h4.symm,
+    exact id_eqd h4.symm,
   rw ha at *,
-  exact id_eqd r p r h2,
+  exact id_eqd h2,
 apply unique_of_exists_unique (two12 a a p q h),
   split,
     exact h3,
@@ -526,7 +518,7 @@ rw h,
 have : M a a (S a a),
   exact seven5 a a,
 cases this with h1 h2,
-exact id_eqd (S a a) a a h2.symm.flip
+exact id_eqd h2.symm.flip
 end
 
 @[simp] theorem seven11 (a : point) : S a a = a :=
@@ -601,7 +593,7 @@ have h12 : afs x a x' y' y' a y x,
 have h13 : x ≠ a,
   intro h_1,
   rw h_1 at h1,
-  exact h (bet_same a p h1).symm,
+  exact h (bet_same h1).symm,
 have h14 : eqd x' y' y x,
   exact afive_seg h12 h13,
 have h15 : ifs y q a x y' q' a x',
@@ -671,6 +663,19 @@ split,
 exact (seven16 a).2 h1
 end
 
+theorem S_of_col {p q r : point} (a : point) : col p q r ↔ col (S a p) (S a q) (S a r) :=
+begin
+split,
+  intro h,
+  unfold col,
+  repeat {cases h};
+  simp [(seven15 a).1 h],
+intro h,
+unfold col,
+repeat {cases h};
+simp [(seven15 a).2 h]
+end
+
 theorem seven17 {a b p q : point} : M p a q → M p b q → a = b :=
 begin
 intros h h1,
@@ -700,6 +705,9 @@ have h3 := seven5 b p,
 rw (eq.trans h.symm h1) at h3,
 exact seven17 h2 h3
 end
+
+theorem seven18a {a b p : point} : a ≠ b → S a p ≠ S b p:=
+λ h h1, h (seven18 h1)
 
 theorem seven19 {a b p : point} : S a (S b p) = S b (S a p) ↔ a = b :=
 begin
@@ -737,12 +745,12 @@ cases h,
   have h2 := three3 b m,
   have h3 : eqd a b b b,
     exact four3 h.symm h2 h1.flip (eqd.refl b m),
-  exact id_eqd a b b h3,
+  exact id_eqd h3,
 left,
 have h2 := three3 a m,
 have h3 : eqd b a a a,
   exact four3 h h2 h1.symm.flip (eqd.refl a m),
-exact id_eqd a b a h3.flip
+exact id_eqd h3.flip
 end
 
 theorem seven21 {a b c d p : point} : ¬col a b c → b ≠ d → eqd a b c d → eqd b c d a → 
@@ -806,7 +814,7 @@ cases h4 with h4 h5,
 cases em (p = c),
   rw h_2 at *,
   have h_3 : q = c,
-    exact id_eqd q c c h3.symm.flip,
+    exact id_eqd h3.symm.flip,
   rw h_3 at *,
   have h_4 : c = n,
     exact seven3.1 h5,
@@ -832,7 +840,7 @@ have h13 : distle c a c a',
 cases em (a = c),
   rw h_3 at *,
   have : b = c,
-    exact id_eqd b c c h2.symm.flip,
+    exact id_eqd h2.symm.flip,
   rw this at *,
   have : c = m,
     exact seven3.1 h4,
@@ -843,7 +851,7 @@ have h_4 : a' ≠ c,
   rw h_4 at *,
   have : eqd c a c c,
     exact five9 h13 (five11 c c a),
-  exact h_3 (id_eqd a c c this.flip),
+  exact h_3 (id_eqd this.flip),
 have h14 : sided c a a',
   apply six3.2,
   split,
@@ -863,11 +871,11 @@ have h16 : distle c b c b',
 have h_5 : q ≠ c,
   intro h_5,
   rw h_5 at *,
-  exact h_2 (id_eqd p c c h3.flip),
+  exact h_2 (id_eqd h3.flip),
 cases em (b = c),
   rw h_6 at *,
   have : a = c,
-   exact id_eqd a c c h2.flip,
+   exact id_eqd h2.flip,
   rw this at *,
   have : c = m,
     exact seven3.1 h4,
@@ -878,7 +886,7 @@ have h_7 : b' ≠ c,
   rw h_7 at *,
   have : eqd c b c c,
     exact five9 h16 (five11 c c b),
-  exact h_6 (id_eqd b c c this.flip),
+  exact h_6 (id_eqd this.flip),
 have h17 : sided c b b',
   apply six3.2,
   split,
@@ -914,7 +922,7 @@ have h22 : eqd r a r b,
   cases em (m' = c),
     rw h_8 at *,
     have : c = r,
-      exact bet_same c r hr.1,
+      exact bet_same hr.1,
     rw this at *,
     exact h20.flip,
   exact four17 h_8 h21 h20.flip h2,
@@ -986,8 +994,8 @@ cases em (col a c b),
   constructor, exact h_2,
 cases three14 c a with p hp,
 cases seg_cons b a p c with q hq,
-cases pasch p q c a b hp.1.symm hq.1.symm with r hr,
-cases pasch c b p a r hp.1 hr.2 with x hx,
+cases pasch hp.1.symm hq.1.symm with r hr,
+cases pasch hp.1 hr.2 with x hx,
 existsi x,
 suffices : eqd x a x b,
   split,
@@ -1000,7 +1008,7 @@ suffices : eqd r a r b,
   cases em (c = r),
     rw h_2 at hx,
     have : r = x,
-      exact bet_same r x hx.2,
+      exact bet_same hx.2,
     rw this at *,
     exact this,
   exact four17 h_2 h1 h this,

@@ -7,17 +7,16 @@ local attribute [instance] prop_decidable
 
 --Conclusions from the first 5 axioms
 theorem eqd.refl (a b : point) : eqd a b a b :=
-eqd_trans b a a b a b (eqd_refl b a) (eqd_refl b a)
+eqd_trans (eqd_refl b a) (eqd_refl b a)
 
 theorem eqd.symm {a b c d : point} : eqd a b c d → eqd c d a b :=
-assume h : eqd a b c d,
-eqd_trans a b c d a b h (eqd.refl a b)
+λ h, eqd_trans h (eqd.refl a b)
 
 theorem eqd.trans {a b c d e f: point} : eqd a b c d → eqd c d e f → eqd a b e f :=
 assume h h1,
-eqd_trans c d a b e f h.symm h1
+eqd_trans h.symm h1
 
-theorem two4 {a b c d : point} : eqd a b c d → eqd b a c d := assume h, eqd_trans a b b a c d (eqd_refl a b) h
+theorem two4 {a b c d : point} : eqd a b c d → eqd b a c d := assume h, eqd_trans (eqd_refl a b) h
 
 theorem two5 {a b c d : point} : eqd a b c d → eqd a b d c := assume h, eqd.trans h (eqd_refl c d)
 
@@ -37,12 +36,12 @@ theorem two7 {a b c d : point} : eqd a b c d → a ≠ b → c ≠ d :=
 begin
 intros h h1 h2,
 subst d,
-exact h1 (id_eqd a b c h)
+exact h1 (id_eqd h)
 end
 
 theorem two8 (a b : point) : eqd a a b b := 
 let ⟨x, h⟩ := seg_cons a b b b in
-have a = x, from id_eqd a x b h.2,
+have a = x, from id_eqd h.2,
 by rw ←this at h; exact h.2
 
 def afs (a b c d a' b' c' d' : point) : Prop := B a b c ∧ B a' b' c' ∧ eqd a b a' b' 
@@ -50,12 +49,7 @@ def afs (a b c d a' b' c' d' : point) : Prop := B a b c ∧ B a' b' c' ∧ eqd a
 
 theorem afive_seg {a b c d a' b' c' d' : point} : afs a b c d a' b' c' d' → 
 a ≠ b → eqd c d c' d' := 
-begin
-intros h h1,
-apply five_seg a b c d a' b' c' d' h1,
-  repeat {cases h with h2 h},
-all_goals {assumption}
-end
+λ h h1, five_seg h1 h.1 h.2.1 h.2.2.1 h.2.2.2.1 h.2.2.2.2.1 h.2.2.2.2.2
 
 theorem two11 {a b c a' b' c' : point} : B a b c → B a' b' c' → eqd a b a' b' 
 → eqd b c b' c' → eqd a c a' c' := 
@@ -93,7 +87,7 @@ cases h1 with h2 h3,
 cases hy with h4 h5,
 by_contradiction h_1,
 have h6 : eqd a x a y,
-  exact eqd_trans b c a x a y h3.symm h5.symm,
+  exact eqd.trans h3 h5.symm,
 have h7 : eqd q x q y,
   apply two11 h2 h4,
     exact eqd.refl _ _,
@@ -105,7 +99,7 @@ have : afs q a x x q a x y,
 have : eqd x x x y,
   apply afive_seg this h,
 have : x = y,
-  exact id_eqd x y x this.symm,
+  exact id_eqd this.symm,
 have : y = x,
   exact eq.symm this,
 contradiction
@@ -117,7 +111,7 @@ theorem three1 (a b : point) : B a b b :=
 begin
 cases seg_cons b b b a with x h,
 have : b = x,
-  exact id_eqd b x b h.2,
+  exact id_eqd h.2,
 rw ←this at h,
 exact h.1
 end
@@ -125,9 +119,9 @@ end
 theorem B.symm {a b c : point} : B a b c → B c b a :=
 begin
 intro h,
-cases pasch a b c b c h (three1 b c) with x hx,
+cases pasch h (three1 b c) with x hx,
 have : b = x,
-  exact bet_same b x hx.1,
+  exact bet_same hx.1,
 rw ←this at hx,
 exact hx.2
 end
@@ -148,20 +142,20 @@ end
 theorem three4 {a b c: point} : B a b c → B b a c → a = b :=
 begin
 intros h h1,
-cases pasch a b c b a h h1 with x hx,
+cases pasch h h1 with x hx,
 have : a = x,
-  exact bet_same a x hx.2,
+  exact bet_same hx.2,
 have : b = x,
-  exact bet_same b x hx.1,
+  exact bet_same hx.1,
 simp *
 end
 
 theorem three5a {a b c d : point} : B a b d → B b c d → B a b c:=
 begin
 intros h h1,
-cases pasch a b d b c h h1 with x hx,
+cases pasch h h1 with x hx,
 have : b = x,
-  exact bet_same b x hx.1,
+  exact bet_same hx.1,
 rw ←this at hx,
 exact hx.2.symm,
 end
@@ -220,15 +214,12 @@ exact (three5b h3.symm h.symm).symm
 end
 
 theorem three13 : ∃ (x y : point), x ≠ y := 
-let ⟨a, b, c, hp⟩ := (two_dim point) in
 begin
-have : a ≠ b,
-  intro h,
-  have : B a b c,
-    rw h,
-    exact three3 b c,
-  exact hp.1 this,
-constructor, exact ⟨b, this⟩
+refine ⟨P1, P2, _⟩,
+intro h,
+apply (two_dim point).1,
+rw h,
+exact three3 P2 P3
 end
 
 theorem three14 (a b : point) : ∃ c, B a b c ∧ b ≠ c := 
@@ -241,7 +232,7 @@ have : b ≠ c,
   have : eqd x y b b,
     apply eqd.symm,
     rwa ←hq at h2,
-  exact hp (id_eqd x y b this) ,
+  exact hp (id_eqd this) ,
 constructor, exact ⟨h1, this⟩
 end
 
@@ -249,14 +240,14 @@ theorem three17 {a b c a' b' p : point} : B a b c → B a' b' c
 → B a p a' → ∃ q, B p q c ∧ B b q b' := 
 begin
 intros h1 h2 h3,
-cases pasch a c a' p b' h3 h2.symm with x h4,
-cases pasch c b' a b x h1.symm h4.2 with y h5,
+cases pasch h3 h2.symm with x h4,
+cases pasch h1.symm h4.2 with y h5,
 have : B p y c,
   exact three5b h4.1 h5.2,
 constructor, exact ⟨this, h5.1⟩
 end
 
--- Statements about eqd + B
+-- cong + col
 
 def ifs (a b c d a' b' c' d' : point) : Prop := B a b c ∧ B a' b' c' ∧ eqd a c a' c' 
 ∧ eqd b c b' c' ∧ eqd a d a' d' ∧ eqd c d c' d'
@@ -273,14 +264,14 @@ cases em (a = c),
   have : a' = c',
     have : eqd c c a' c',
       rwa h_1 at h2,
-    exact id_eqd a' c' c this.symm,
+    exact id_eqd this.symm,
   have h6 : c = b,
-    apply bet_same c b,
+    apply bet_same,
     rwa h_1 at h,
   have h7 : b' = c',
     have : eqd b b b' c',
       rwa h6 at h3,
-    exact id_eqd b' c' b this.symm,
+    exact id_eqd this.symm,
   rw [h6, ←h7] at h5,
   exact h5,
 cases three14 a c with e he,
@@ -404,7 +395,7 @@ have : ifs a' b'' c' b'' a' b'' c' b',
 have : b'' = b',
   have h4 : eqd b'' b'' b'' b',
     exact four2 this,
-  exact id_eqd b'' b' b'' h4.symm,
+  exact id_eqd h4.symm,
 rwa this at *
 end
 
@@ -500,7 +491,7 @@ cases h1 with h1 h2,
 cases h2 with h2 h3,
 cases h3 with h3 h4,
 cases h1 with ha hbc,
-  exact five_seg a b c d a' b' c' d' h ha (four6 ha h2) h2.1 h2.2.1 h3 h4,
+  exact five_seg h ha (four6 ha h2) h2.1 h2.2.1 h3 h4,
 cases hbc with hb hc,
   have : ifs b c a d b' c' a' d',
     repeat {split};
@@ -517,7 +508,7 @@ have : cong b a c b' a' c',
   split,
     exact h2.2.2,
   exact h2.2.1,
-exact five_seg b a c d b' a' c' d' h.symm hc (four6 hc this) h2.1.flip h2.2.2 h4 h3
+exact five_seg h.symm hc (four6 hc this) h2.1.flip h2.2.2 h4 h3
 end
 
 theorem four17 {a b c p q : point} : a ≠ b → col a b c → eqd a p a q → eqd b p b q → eqd c p c q :=
@@ -535,7 +526,7 @@ begin
 intros h h3 h1 h2,
 have : eqd c c c c',
   exact four17 h h3 h1 h2,
-exact id_eqd c c' c this.symm
+exact id_eqd this.symm
 end
 
 theorem four19 {a b c b' : point} : B a b c → eqd a b a b' → eqd b c b' c → b = b' :=
@@ -543,9 +534,9 @@ begin
 intros h h1 h2,
 cases em (a = c) with h3 h4,
   rw ←h3 at *,
-  have : a = b, exact bet_same a b h,
+  have : a = b, exact bet_same h,
   rw this at *,
-  exact id_eqd b b' b h1.symm,
+  exact id_eqd h1.symm,
 have : col a c b,
   right, left,
   exact h.symm,
@@ -567,13 +558,13 @@ have h_2 : d ≠ c',
   intro h_2,
   rw ←h_2 at hc,
   have : c = d,
-    exact id_eqd c d d hc.2.symm.flip,
+    exact id_eqd hc.2.symm.flip,
   contradiction,
 have h_3 : d' ≠ c,
   intro h_3,
   rw h_3 at hd,
   have : c = d,
-    exact id_eqd c d c hd.2.symm,
+    exact id_eqd hd.2.symm,
   contradiction,
 have h3 : B b d c',
   exact three6a h2 hc.1,
@@ -615,7 +606,7 @@ cases em (b = c),
   rw ←h_7, exact h2,
 have h10 : eqd c d c' d',
   exact (afive_seg h9 h_7).symm.flip,
-cases pasch d' c' a c d hd.1.symm hc.1.symm with e he,
+cases pasch hd.1.symm hc.1.symm with e he,
 have h11 : ifs d e d' c d e d' c',
   repeat {split}; try {assumption},
     exact he.2,
@@ -667,7 +658,7 @@ have h_13 : eqd d' d p q,
 cases em (d' = e),
   rw ←h_14 at *,
   have : d' = d,
-    exact id_eqd d' d d' h_9,
+    exact id_eqd h_9,
   rw this at *,
   left, exact hd.1,
 have h_15 : eqd c q c d,
@@ -678,10 +669,10 @@ have h_16 : r ≠ c,
   intro hrc,
   rw hrc at *,
   have : c = e,
-    exact id_eqd c e c hr.2.symm,
+    exact id_eqd hr.2.symm,
   rw ←this at *,
   have : c = c',
-    exact id_eqd c c' c h_8.symm,
+    exact id_eqd h_8.symm,
   exact h_10 this,
 have h16 : col r c d',
   left, exact hr.1.symm,
@@ -701,7 +692,7 @@ have h_20 : b ≠ b',
   intro hbb,
   rw ←hbb at *,
   have : b = c,
-    exact bet_same b c h6,
+    exact bet_same h6,
   exact h_7 this,
 have h_21 : eqd c' p c' q,
   exact four17 h_20 h19 h_18 h_19,
@@ -710,10 +701,10 @@ have h20 : col c' c p,
 have h_22 : eqd p p p q,
   exact four17 (ne.symm h_10) h20 h_21 h15,
 have h21 : p = q,
-  exact id_eqd p q p h_22.symm,
+  exact id_eqd h_22.symm,
 rw h21 at *,
 have : d' = d,
-  exact id_eqd d' d q h_13,
+  exact id_eqd h_13,
 rw this at *,
 left,
 exact hd.1
@@ -858,7 +849,7 @@ rw three2 at h1,
 cases em (a = b),
   rw h_1 at *,
   have : b = x,
-    exact bet_same b x hx.1,
+    exact bet_same hx.1,
   rw this at *,
   exact hx.2.symm,
 have h2 : p ≠ a,
@@ -906,10 +897,10 @@ cases five10 a a b c with h,
   assumption,
 cases h with x hx,
 have : a = x ,
-  exact bet_same a x hx.1,
+  exact bet_same hx.1,
 rw this at *,
 have : b = c,
-  exact id_eqd b c x hx.2,
+  exact id_eqd hx.2,
 rw this at *,
 existsi c,
 split,
@@ -1139,7 +1130,7 @@ split,
   right, left,
   exact three1 p a,
 intro h1,
-exact h (bet_same a p h1)
+exact h (bet_same h1)
 end
 
 theorem six6 {a b c d : point} : B a b c → sided b c d → B a b d :=
@@ -1156,7 +1147,7 @@ intros h h1,
 refine ⟨h1, _, or.inl h⟩,
 intro h_1,
 subst h_1,
-exact h1.symm (bet_same b a h)
+exact h1.symm (bet_same h)
 end
 
 theorem sided.symm {a b p : point} : sided p a b → sided p b a :=
@@ -1229,7 +1220,7 @@ have h2 : x ≠ a,
   intro ha,
   rw ha at hx,
   have : b = c,
-    exact id_eqd b c a hx.2.symm,
+    exact id_eqd hx.2.symm,
   contradiction,
 have h3 : sided a x r,
   split,
@@ -1246,6 +1237,9 @@ apply unique_of_exists_unique (two12 a b c p hp.2.symm),
   exact ⟨this, hy.2⟩,
 exact hx
 end
+
+theorem six11a {p a b : point} : sided p a b → eqd p a p b → a = b :=
+λ h h1, unique_of_exists_unique (six11 h.1 h.1.symm) ⟨(six5 h.1), eqd.refl p a⟩ ⟨h.symm, h1.symm⟩
 
 theorem six12 {a b p : point} : sided p a b → (distle p a p b ↔ B p a b) :=
 begin
