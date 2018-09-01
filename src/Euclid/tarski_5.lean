@@ -15,11 +15,11 @@ theorem ten1 (a b : point) : M a (mid a b) b := (classical.some_spec (eight22 a 
 
 theorem mid.symm (a b : point) : mid a b = mid b a := seven17 (ten1 a b) (ten1 b a).symm
 
-theorem mid_to_Sa (a b : point) : S (mid a b) a = b := (seven6 $ ten1 a b).symm
+@[simp] theorem mid_to_Sa (a b : point) : S (mid a b) a = b := (seven6 $ ten1 a b).symm
 
-theorem mid_to_Sb (a b : point) : S (mid a b) b = a := mid.symm b a ▸ mid_to_Sa b a
+@[simp] theorem mid_to_Sb (a b : point) : S (mid a b) b = a := mid.symm b a ▸ mid_to_Sa b a
 
-theorem mid_of_S (a b : point) : mid b (S a b) = a := seven17 (ten1 b (S a b)) (seven5 a b)
+@[simp] theorem mid_of_S (a b : point) : mid b (S a b) = a := seven17 (ten1 b (S a b)) (seven5 a b)
 
 theorem mid.neq {a b : point} : a ≠ b → mid a b ≠ a := --λ h h1, h ((seven11 a) ▸ h1 ▸ mid_to_Sa a b)
 begin
@@ -583,9 +583,7 @@ apply exists_unique_of_exists_of_unique,
   split,
     exact h5,
   apply side.trans _ hq.2,
-  apply (nine19 (six14 (six26 h1).1) h3 (four11 (six4.1 hc'.1.1).1).1).2,
-  split,
-    exact hc'.1.1,
+  apply nine12 (six14 (six26 h1).1) h3 hc'.1.1,
   intro h_1,
   exact h (four13 h_1 h5.symm),
 intros c' c'' hc' hc'',
@@ -1049,10 +1047,10 @@ have h13 : l e d = l d' e,
   exact six18 (six14 (six26 h1).1.symm) hd.1.1 (four11 (six4.1 hd.1).1).2.2.1 (six17a e d),
 have h14 : side (l d' e) f₁ p,
   rw h13 at *,
-  apply (nine19a h3 (six17b d' e) h9.1),
+  exact (nine19a h3.symm (six17b d' e) h9.1.symm).symm,
 have h15 : side (l d' e) f₂ p,
   rw h13 at *,
-  apply (nine19a h5 (six17b d' e) h10.1),
+  exact (nine19a h5.symm (six17b d' e) h10.1.symm).symm,
 have h16 : f₁ = f,
   apply hf.2,
   split,

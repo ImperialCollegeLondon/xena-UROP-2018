@@ -546,6 +546,9 @@ split,
 exact hx.2.2.1
 end
 
+theorem nine12 {a b p : point} {A : set point} : line A → p ∈ A → sided p a b → a ∉ A → side A a b :=
+λ h h1 h2 h3, let ⟨c, hc⟩ := nine10 h h3 in ⟨c, hc, nine5 hc h1 h2⟩
+
 theorem side.refl {a : point} {A : set point} : line A → a ∉ A → side A a a :=
 begin
 intros h h1,
@@ -667,11 +670,9 @@ exact h3.1
 end
 
 theorem nine19 {a b p : point} {A : set point} : line A → p ∈ A → col a b p → 
-(side A a b ↔ sided p a b ∧ a ∉ A) :=
+side A a b → sided p a b ∧ a ∉ A :=
 begin
-intros h h1 h2,
-split,
-  intro h3,
+intros h h1 h2 h3,
   split,
     apply six4.2,
     split,
@@ -680,25 +681,14 @@ split,
     cases nine17 h3 h with x hx,
     exact hx.1.2.1 h1,
   cases h3 with d hd,
-  exact hd.1.2.1,
-intro h3,
-cases nine10 h h3.2 with c hc,
-existsi c,
-split,
-  exact hc,
-exact nine5 hc h1 h3.1
+exact hd.1.2.1
 end
 
-theorem nine19a {a b c p : point} {A : set point} : side A a b → p ∈ A → sided p c a → side A c b :=
-begin
-intros h h1 h2,
-apply side.trans _ h,
-apply side.symm,
-apply (nine19 (nine11 h).1 h1 (four11 (six4.1 h2.symm).1).1).2,
-split,
-  exact h2.symm,
-exact (nine11 h).2.1
-end
+theorem nine19a {a b c p : point} {A : set point} : side A a b → p ∈ A → sided p b c → side A a c :=
+λ h h1 h2, h.trans (nine12 (nine11 h).1 h1 h2 (nine11 h).2.2)
+
+theorem nine15 {a b x y p : point} : ¬col a b p → B a p x → B b p y → side (l a b) x y :=
+λ h h1 h2, nine19a (nine12 (six14 (six26 h).1) (six17a a b) (six7 h1 (six26 h).2.2.symm) h).symm (six17b a b) (six7 h2 (six26 h).2.1.symm)
 
 def pl (A : set point) (a : point) : set point := {x | side A x a ∨ x ∈ A ∨ Bl a A x}
 
@@ -815,12 +805,7 @@ cases hp,
     exact h.2.2.2.1,
   exact hp,
 left,
-suffices : sided x p a,
-  apply side.symm,
-  apply ((nine19 h.1 h.2.2.2.1 (four11 h6).1).2 ),
-  split,
-    exact this.symm,
-  exact h3,
+apply nine12 h.1 h.2.2.2.1 _ h5,
 split,
   exact h_1,
 split,
@@ -1252,9 +1237,7 @@ have h6 : sided (S p r) t s,
   subst t,
   exact h4.2.2.1 ht.1,
 have h7 : side (l p r) t s,
-  apply (nine19 (nine11 h1).1 ((seven24 (nine11 h1).1 (six17a p r)).1 (six17b p r)) _).2,
-    split,
-      exact h6,
+  apply nine12 (nine11 h1).1 ((seven24 (nine11 h1).1 (six17a p r)).1 (six17b p r)) h6,
     intro h_1,
     suffices : (S p r) ≠ t,
       apply (nine11 h1).2.1,
@@ -1270,10 +1253,8 @@ have h7 : side (l p r) t s,
     subst t,
     apply h4.2.2.1,
     exact ht.1,
-  right, right,
-  exact ht.2,
 have h8 : sided p t q,
-  apply ((nine19 (six14 (six26 h2).2.2) (six17a p r) _).1 _).1,
+  apply (nine19 (six14 (six26 h2).2.2) (six17a p r) _ _).1,
     exact (four11 ht.1).2.2.2.2,
   exact side.trans h7 h1,
 have h9 : p ≠ s,
@@ -1282,16 +1263,13 @@ have h9 : p ≠ s,
   apply (nine11 h).2.1,
   simp,
 have h10 : side (l p s) t q,
-  apply (nine19 (six14 h9) (six17a p s) _).2,
-    split,
-      exact h8,
-    intro h_1,
-    apply (nine11 h).2.1,
-    suffices : l p q = l p s,
-      rw this,
-      simp,
-    exact six21 h8.1 (nine11 h).1 (six14 h9) ht.1 h_1 (six17a p q) (six17a p s),
-  exact (four11 ht.1).2.2.2.2,
+  apply nine12 (six14 h9) (six17a p s) h8 _,
+  intro h_1,
+  apply (nine11 h).2.1,
+  suffices : l p q = l p s,
+    rw this,
+    simp,
+  exact six21 h8.1 (nine11 h).1 (six14 h9) ht.1 h_1 (six17a p q) (six17a p s),
 have h11 : Bl r (l p s) (S p r),
   split,
     exact six14 h9,
@@ -1306,17 +1284,10 @@ have h11 : Bl r (l p s) (S p r),
     simp,
   exact h3.1,
 apply (nine8 h11.symm).2 (side.trans _ h10),
-apply (nine19 (six14 h9) (six17b p s) _).2,
-  split,
-    apply sided.symm,
-    apply six7 ht.2.symm,
-    intro h_1,
-    apply (nine11 h).2.1,
-    subst t,
-    exact ht.1,
-  exact h11.2.2.1,
-left,
-exact ht.2
+apply (nine12 (six14 h9) (six17b p s) (six7 ht.2.symm _) (nine11 h10).2.1).symm,
+intro h_1,
+subst t,
+exact (nine11 h10).2.1 (six17b p s)
 end
 
 end Euclidean_plane
