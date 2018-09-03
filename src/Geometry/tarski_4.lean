@@ -1,4 +1,4 @@
-import Euclid.tarski_3
+import geometry.tarski_3
 open classical set
 namespace Euclidean_plane
 variables {point : Type} [Euclidean_plane point]

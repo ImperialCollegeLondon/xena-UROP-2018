@@ -1,4 +1,4 @@
-import Euclid.tarski_1
+import geometry.tarski_1
 open classical set
 namespace Euclidean_plane
 variables {point : Type} [Euclidean_plane point]
@@ -443,9 +443,7 @@ cases seg_cons a a p p with q hq,
 apply exists_unique.intro,
 exact ⟨hq.1, hq.2.symm⟩,
 intros y hy,
-apply unique_of_exists_unique (two12 a a p p (ne.symm h)),
-exact ⟨hy.1, hy.2.symm⟩,
-exact hq
+exact two12 a p (ne.symm h) hy.1 hy.2.symm hq.1 hq.2
 end
 
 noncomputable def S (a p : point) : point := classical.some (seven4 a p)
@@ -472,13 +470,7 @@ cases em (q = a),
     exact id_eqd h4.symm,
   rw ha at *,
   exact id_eqd h2,
-apply unique_of_exists_unique (two12 a a p q h),
-  split,
-    exact h3,
-  exact (eqd.trans h2 h4).symm,
-split,
-  exact h1.symm,
-exact eqd.refl a p
+exact two12 a p h h3 (eqd.trans h2 h4).symm h1.symm (eqd.refl a p)
 end
 
 theorem seven8 (a p : point) : ∃! q, S a q = p :=

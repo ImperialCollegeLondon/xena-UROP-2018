@@ -1,4 +1,4 @@
-import Euclid.tarski_4
+import geometry.tarski_4
 open classical set
 namespace Euclidean_plane
 variables {point : Type} [Euclidean_plane point]
@@ -1128,13 +1128,7 @@ have : a₁ = a',
   exact h4.2.2.2.2.1.flip,
 subst a₁,
 have : d' = (S b c'),
-  apply unique_of_exists_unique (two12 b b c' c' h4.2.1.1),
-    split,
-      exact six8 h4.2.1 h4.2.2.2.1 h,
-    exact h4.2.2.2.2.2.1.symm,
-  split,
-    exact (seven5 b c').1,
-  exact (seven5 b c').2.symm,
+  exact two12 b c' h4.2.1.1 (six8 h4.2.1 h4.2.2.2.1 h) h4.2.2.2.2.2.1.symm (seven5 b c').1 (seven5 b c').2.symm,
 subst d',
 have h5 : R a' b c',
   unfold R,

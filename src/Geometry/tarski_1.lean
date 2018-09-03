@@ -1,4 +1,4 @@
-import euclid.axioms data.set tactic.interactive
+import geometry.axioms data.set tactic.interactive
 open classical
 namespace Euclidean_plane
 variables {point : Type} [Euclidean_plane point]
@@ -75,16 +75,9 @@ apply afive_seg this,
   assumption
 end
 
-theorem two12 (a b c q : point) : q ≠ a → ∃! x, B q a x ∧ eqd a x b c :=
+theorem two12 {a q x y : point} (b c : point) (h : q ≠ a) : B q a x → eqd a x b c → B q a y → eqd a y b c → x = y :=
 begin
-intro h,
-cases seg_cons a b c q with x h1,
-existsi x,
-split,
-  assumption,
-intros y hy,
-cases h1 with h2 h3,
-cases hy with h4 h5,
+intros h2 h3 h4 h5,
 by_contradiction h_1,
 have h6 : eqd a x a y,
   exact eqd.trans h3 h5.symm,
@@ -98,11 +91,7 @@ have : afs q a x x q a x y,
   exact eqd.refl _ _,
 have : eqd x x x y,
   apply afive_seg this h,
-have : x = y,
-  exact id_eqd this.symm,
-have : y = x,
-  exact eq.symm this,
-contradiction
+exact h_1 (id_eqd this.symm)
 end
 
 -- Properties of B
@@ -171,21 +160,11 @@ theorem three7a {a b c d : point} : B a b c → B b c d → b ≠ c
 begin
 intros h h1 h2,
 cases seg_cons c c d a with x hx,
-have : B b c x,
+have h3 : B b c x,
   exact three6a h hx.1,
-cases two12 c c d b h2 with y hy,
-have : x = y,
-  apply hy.2,
-  split,
-    exact this, exact hx.2,
-have : d = y,
-  apply hy.2,
-  split,
-    exact h1, exact eqd.refl c d,
-have : x = d,
-  simp *,
-rw this at hx,
-exact hx.1
+suffices : x = d,
+  exact this ▸ hx.1,
+exact two12 c d h2 h3 hx.2 h1 (eqd.refl c d)
 end
 
 theorem three5b {a b c d : point} : B a b d → B b c d → B a c d :=
@@ -213,38 +192,36 @@ have h3 : B a c d,
 exact (three5b h3.symm h.symm).symm
 end
 
-theorem three13 : ∃ (x y : point), x ≠ y := 
+theorem three13 : (P1 : point) ≠ P2 := 
 begin
-refine ⟨P1, P2, _⟩,
 intro h,
 apply (two_dim point).1,
 rw h,
 exact three3 P2 P3
 end
 
-theorem three14 (a b : point) : ∃ c, B a b c ∧ b ≠ c := 
-let ⟨(x : point), y, hp⟩ := three13 in
+theorem three14 (a b : point) : {c // B a b c ∧ b ≠ c} := 
 begin
-cases seg_cons b x y a with c h,
+cases seg_cons b P1 P2 a with c h,
 cases h with h1 h2,
 have : b ≠ c,
   intro hq,
-  have : eqd x y b b,
+  have : eqd P1 P2 b b,
     apply eqd.symm,
     rwa ←hq at h2,
-  exact hp (id_eqd this) ,
-constructor, exact ⟨h1, this⟩
+  exact three13 (id_eqd this),
+exact ⟨c, h1, this⟩
 end
 
 theorem three17 {a b c a' b' p : point} : B a b c → B a' b' c 
-→ B a p a' → ∃ q, B p q c ∧ B b q b' := 
+→ B a p a' → {q // B p q c ∧ B b q b'} :=
 begin
 intros h1 h2 h3,
 cases pasch h3 h2.symm with x h4,
 cases pasch h1.symm h4.2 with y h5,
 have : B p y c,
   exact three5b h4.1 h5.2,
-constructor, exact ⟨this, h5.1⟩
+exact ⟨y, this, h5.1⟩
 end
 
 -- cong + col
@@ -340,7 +317,7 @@ cong b c a b' c' a' ∧ cong c a b c' a' b' ∧ cong c b a c' b' a' :=
 ⟨h.2.2.flip, h.1, h.2.1.flip⟩, ⟨h.2.1.flip, h.1.flip, h.2.2.flip⟩⟩
 
 theorem four5 {a b c a' c' : point} : B a b c → eqd a c a' c' 
-→ ∃ b', B a' b' c' ∧ cong a b c a' b' c' :=
+→ {b'// B a' b' c' ∧ cong a b c a' b' c'} :=
 begin
 intros h h1,
 cases three14 c' a' with d' hd,
@@ -353,13 +330,7 @@ have h2 : B a' b' c'' ∧ B d' a' c'',
 have h3 : eqd a' c'' a c,
   exact two11 h2.1 h hb.2 hc.2,
 have h4 : c' = c'',
-  apply unique_of_exists_unique (two12 a' a c d' hd.2.symm),
-    split,
-      exact hd.1.symm,
-      exact h1.symm,
-  split,
-    exact h2.2,
-  exact h3,
+  exact (two12 a c hd.2.symm) hd.1.symm h1.symm h2.2 h3,
 rw ←h4 at *,
 existsi b',
 split,
@@ -587,12 +558,7 @@ have h_6 : B a b b'',
     exact three7b hd.1 hb.1 h_3.symm,
   exact three6b h1 this,
 have h8 : b' = b'',
-  apply unique_of_exists_unique (two12 b b b' a h),
-    split,
-      exact h_5,
-    exact eqd.refl b b',
-  split,
-    exact h_6,
+  apply two12 b b' h h_5 (eqd.refl b b') h_6,
   exact two4 h7.symm,
 rw ←h8 at *,
 have h9 : afs b c d' c' b' c' d c,
@@ -855,13 +821,7 @@ cases em (a = b),
 have h2 : p ≠ a,
   exact h2.symm,
 have : x = z,
-  apply unique_of_exists_unique (two12 a c d p h2),
-    split,
-    exact three5a h1 hx.1,
-    exact hx.2.symm,
-  split,
-    exact three7b h1 hz.1 h_1,
-  exact hz.2,
+  exact two12 c d h2 (three5a h1 hx.1) hx.2.symm (three7b h1 hz.1 h_1) hz.2,
 rw this at *,
 have : b = z,
   exact three4 hx.1.symm hz.1.symm,
@@ -942,13 +902,7 @@ cases h with h3 h4,
   have : B p a x,
     exact three5a this hx.1,
   have : b = x,  
-    apply unique_of_exists_unique (two12 a a b p hp.2.symm),
-      split,
-        exact hp.1.symm,
-      exact eqd.refl a b,
-    split,
-      exact this,
-    exact hx.2.symm,
+    exact two12 a b hp.2.symm hp.1.symm (eqd.refl a b) this hx.2.symm,
   rw ←this at *,
   exact hx.1,
 rw three2 at h4,
@@ -958,13 +912,7 @@ have : B q c a,
 have : B q c y,
   exact three5a this hy.1,
  have : b = y,
-  apply unique_of_exists_unique (two12 c c b q hq.2.symm),
-    split,
-      exact hq.1.symm,
-    exact eqd.refl c b,
-  split,
-    exact this,
-  exact hy.2.symm,
+  exact two12 c b hq.2.symm hq.1.symm (eqd.refl c b) this hy.2.symm,
 rw ←this at *,
 exact hy.1.symm
 end
@@ -1233,9 +1181,7 @@ apply exists_unique.intro,
 intros y hy,
 have : B p a y,
   exact ((six2 h2 hy.1.1 hp.2.symm hx.1.symm).2 (sided.trans h3 hy.1.symm)).symm,
-apply unique_of_exists_unique (two12 a b c p hp.2.symm),
-  exact ⟨this, hy.2⟩,
-exact hx
+exact two12 b c hp.2.symm this hy.2 hx.1 hx.2
 end
 
 theorem six11a {p a b : point} : sided p a b → eqd p a p b → a = b :=
@@ -1261,13 +1207,7 @@ split,
   have h4 : B q p b,
     exact ((six2 h1 h2 hq.2.symm hq.1).2 hp).symm,
   have : a = b,
-    apply unique_of_exists_unique (two12 p p a q hq.2.symm),
-      split,
-        exact hq.1.symm,
-      exact eqd.refl p a,
-    split,
-      exact h4,
-    exact this.symm,
+    exact two12 p a hq.2.symm hq.1.symm (eqd.refl p a) h4 this.symm,
   rw this,
   exact three1 p b,
 intro h,

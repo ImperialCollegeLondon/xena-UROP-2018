@@ -1,4 +1,4 @@
-import Euclid.tarski_6
+import geometry.tarski_6
 open classical set
 namespace Euclidean_plane
 variables {point : Type} [Euclidean_plane point]
@@ -221,7 +221,7 @@ suffices : ∃ c', c' ∈ C ∧ Bl t B c',
     subst h_2,
     exact hc2.2.2.1 h3,
   suffices : a ≠ d,
-    rcases euclids hd.1 hd.2 this with ⟨x, y, hx, hy, ht⟩,
+    rcases euclids hd.1 hd.2 this with ⟨⟨x, y⟩, hx, hy, ht⟩,
     suffices : side (l s t) a t,
       exact (nine11 this).2.2 (six17b s t),
     apply nine17a (twelve6 h2 h3 _) (twelve6 h4 h5 _) ht,
@@ -482,13 +482,8 @@ have h5 : col a (S (mid a c) b) (S (mid a b) c),
   suffices : par (l b c) (l a (S (mid a c) b)),
     exact this.symm.trans ((twelve21 h2).2 h3.flip),
   exact six17 c b ▸ ((twelve21 h1).2 h4.flip),
-apply ((nine18 h2.1 (six17a a b) (four11 h5).2.2.1).1 _).1,
-apply (nine8 h2).2 _,
-apply nine15 _ (ten1 a c).1 (seven5 (mid a c) b).1,
-intro h_1,
-apply h,
-rw ←mid_to_Sa a c,
-exact (seven24 h2.1 h_1).1 (six17a a b)
+exact ((nine18 h2.1 (six17a a b) (four11 h5).2.2.1).1 ((nine8 h2).2 (nine15 (λ h_1, h (mid_to_Sa a c
+ ▸ (seven24 h2.1 h_1).1 (six17a a b))) (ten1 a c).1 (seven5 (mid a c) b).1))).1
 end
 
 end Euclidean_plane
