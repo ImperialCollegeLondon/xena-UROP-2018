@@ -7,4 +7,6 @@ gcd(a, b) = 1.
 then gcd(a, b) = 7.-/
 variables {a b μ ν: ℕ}
 
---theorem Q0802i (hp: gcd a b = 1) : ∃ μ ν ∧ ν*a +  
+theorem Q0802i : ∃ μ, ∃ ν, μ*a + ν*b = 1 → gcd a b = 1 := sorry
+
+theorem Q0802ii : ∃ μ, ∃ ν, μ*a + ν*b = 7 → gcd a b = 7 := sorry 
