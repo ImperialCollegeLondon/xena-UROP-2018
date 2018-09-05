@@ -8,5 +8,5 @@ Prove that there is some integer N with the property that for all integers m ≥
 it is possible to buy exactly m nuggets. -/
 variables {a b N m c d : ℕ}
 
-theorem chicken_mcnugget (hp: gcd a b = 1) : ∃ N, ∀ m ≥ N, m = a*c + b*d := sorry
+theorem chicken_mcnugget (hp: gcd a b = 1) (h1: a > 0) (h2 : b >0): ∃ N, ∀ m ≥ N, m = a*c + b*d := sorry
 
