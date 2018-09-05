@@ -6,6 +6,18 @@ open function
 -/
 variables {X: Type*} {Y : Type*} {f : X → Y} {g : Y → X} 
 
-theorem Q1004i : f ∘ g = id → surjective f := sorry
+#check id_of_right_inverse
+theorem Q1004i : f ∘ g = id → surjective f := 
+begin
+intros,
+apply surjective_of_has_right_inverse,
+unfold has_right_inverse,
+sorry
+end
 
-theorem Q1004ii : g ∘ f = id → injective f := sorry 
+theorem Q1004ii : g ∘ f = id → injective f := 
+begin 
+intros,
+apply injective_of_has_left_inverse,
+sorry
+end
