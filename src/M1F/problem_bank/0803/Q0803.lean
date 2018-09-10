@@ -18,7 +18,7 @@ trivial,
 apply modeq.trans (modeq.modeq_mul_right 10 e_ih) h,
 end
 
--- sum of digits
+-- sum of digits (thanks to kevin)
 lemma digit_sum_aux (n : ℕ) : succ n / 10 < succ n := begin
   rw lt_succ_iff,
   cases n with d,refl,
@@ -47,6 +47,7 @@ theorem Q0803ic (hp : a = s N) : 9 ∣ N ↔ 9 ∣ a :=
 begin
 rw hp,
 split,
+
 sorry
 end
 
@@ -57,6 +58,7 @@ theorem Q0803ii (hp : a = s N) : 3 ∣ N ↔ 3 ∣ a :=
 begin
 rw hp,
 split,
+
 sorry,
 end
 
@@ -65,4 +67,4 @@ theorem Q0803iii (hp : e ≥ r) : 10^e % 2*r = 0 := sorry
 
 --(iv) Prove (either by induction or directly) that if e ∈ Z≥1 then 10e ≡ (−1)e mod 11. Deduce that if N is any positive integer and s is the number you get by doing (last digit of N) minus (second-last digit of N ) add (third-last digit of N ) minus. . . , then N − s is a multiple of 11. What is the remainder when 1234567 is divided by 11?
 theorem Q0803iv : 10^e % 11 = (-1 : ℤ)^e := sorry
---theorem Q
+

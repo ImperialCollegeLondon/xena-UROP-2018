@@ -91,6 +91,7 @@ suffices : ∃ d₁, col b' p' d₁ ∧ (B p' b' d₁ ↔ B p b d) ∧ eqd b' d�
     exact ⟨d₁, hd.1, hc.1.symm⟩,
   rw six17 at h,
   rw six17 at h10,
+  rw six17 at h11,
   apply eleven15b h.2.2.1 h10 h3 h11 h8,
   rw six17 b' p' at *,
   exact side.refl h1.1 h10,
@@ -389,10 +390,10 @@ suffices : sided e r q,
 have h5 : ¬col d e r,
   intro h_3,
   exact h_2 (eleven21d h_3 h1.symm),
-apply eleven15b h_2 h5 h1 (side.refl (six14 ht.1.symm) (four10 h5).2.1) h3.symm,
-apply nine12 (six14 ht.1.symm) (six17b e d)((six7 (three6b hr.1 ht.2.2.2.1) (six26 h5).2.2.symm).symm),
+apply eleven15b h_2 h5 h1 (side.refl (six14 ht.1) h5) h3.symm,
+apply nine12 (six14 ht.1) (six17a d e) ((six7 (three6b hr.1 ht.2.2.2.1) (six26 h5).2.2.symm).symm),
 intro h_3,
-exact h5 (eleven21d (four11 h_3).2.1 (h3.trans h1))
+exact h5 (eleven21d h_3 (h3.trans h1))
 end
 
 theorem eleven35 {a b c d e f : point} : a ≠ b → c ≠ b → d ≠ e → f ≠ e → ang_le a b c d e f ∨ ang_le d e f a b c :=
@@ -407,6 +408,7 @@ by_cases h5 : col d e f,
     exact or.inl (eleven31b h h1 h2 h3 h_1),
   exact or.inr (eleven31a h_1 h h1),
 rcases eleven15a h5 h4 with ⟨c', h6, hc⟩,
+rw six17 at hc,
 have h7 : c' ∈ pl (l b c) a,
   suffices : pl (l b a) c = pl (l b c) a,
     exact this ▸ (or.inl hc),
@@ -657,6 +659,18 @@ end
 
 def right (a b c : point) : Prop := a ≠ b ∧ c ≠ b ∧ R a b c
 
+theorem right.symm {a b c : point} : right a b c → right c b a :=
+λ h, ⟨h.2.1, h.1, h.2.2.symm⟩
+
+theorem right.flip {a b c : point} : right a b c → right a b (S b c) :=
+λ h, ⟨h.1, (seven12a h.2.1.symm).symm, h.2.2.flip⟩
+
+theorem eleven16a {a b c d e f : point} : right a b c → right d e f → eqa a b c d e f :=
+λ h h1, eleven16 h.1 h.2.1 h1.1 h1.2.1 h.2.2 h1.2.2
+
+theorem eleven17a {a b c d e f : point} : R a b c → eqa a b c d e f → right d e f :=
+λ h h1, ⟨h1.2.2.1, h1.2.2.2.1, eleven17 h h1⟩
+
 theorem lt_right_of_acute {a b c p q r : point} : acute a b c → right p q r → ang_lt a b c p q r :=
 begin
 rintros ⟨x, y, z, h⟩ h1,
@@ -702,12 +716,12 @@ have h5 : I p c a d,
   exact (six7 hx.1 h6).2.1,
 refine ⟨⟨p, h5, h4⟩, _⟩,
 intro h_1,
-suffices h7 : side (l a c) d p,
+suffices h7 : side (l c a) d p,
   suffices : ¬col d a p,
     have h8 : ¬sided a d p,
       intro h_2,
       exact this (six4.1 h_2).1,
-    apply h8 (eleven15b (four10 h).1 (four10 (nine11 h7).2.1).2.1 h_1 _ h4 h7.symm),
+    apply h8 (eleven15b (four10 h).1 (nine11 h7).2.1 h_1 _ h4 h7.symm),
     exact side.trans h7 h7.symm,
   intro h_2,
   apply h (six23.2 ⟨l d a, six14 h2,(six17b d a), or.inl h1.symm, _⟩),
@@ -716,6 +730,7 @@ suffices h7 : side (l a c) d p,
   apply six27 (six14 h2) (or.inl h1.symm) h_2,
   rw ←h3,
   exact (seven5 (mid a c) b).1,
+rw six17,
 refine ⟨b, ⟨six14 (six26 h).2.2, _, (four10 h).1, ⟨a, (six17a a c), h1.symm⟩⟩, ⟨six14 (six26 h).2.2, _⟩⟩,
   intro h_2,
   exact h (six23.2 ⟨l d a, six14 h2,(six17b d a), or.inl h1.symm, (four11 h_2).2.2.2.1⟩),
@@ -954,8 +969,8 @@ suffices : sided b' x c',
     exact (four11 this).1,
   rw h_1,
   exact six17a b' c',
-apply eleven15b h h5 (eleven11 h2.1 h2.2.1 h4) _ h2 (side.refla (four10 h5).2.1),
-apply (nine12 (six14 h1.2.2.1) (six17b b' a') hx.1.symm (four10 h5).2.1).symm
+apply eleven15b h h5 (eleven11 h2.1 h2.2.1 h4) _ h2 (side.refla h5),
+exact (nine12 (six14 h2.2.2.1) (six17a a' b') hx.1.symm h5).symm
 end
 
 theorem AAS {a b c a' b' c' : point} : ¬col a b c → eqa b c a b' c' a' → eqa a b c a' b' c' → 

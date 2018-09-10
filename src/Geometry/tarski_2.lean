@@ -257,9 +257,14 @@ end
 
 def is (x : point) (A B : set point) : Prop := line A ∧ line B ∧ A ≠ B ∧ x ∈ A ∧ x ∈ B
 
+theorem is.symm {x : point} (A B : set point) : is x A B → is x B A :=
+λ h, ⟨h.2.1, h.1, h.2.2.1.symm, h.2.2.2.2, h.2.2.2.1⟩
+
 theorem six21a {x y : point} {A B : set point} : line A → line B → A ≠ B → x ∈ A → x ∈ B → y ∈ A → y ∈ B → x = y :=
-λ h h1 h2 h3 h4 h5 h6, classical.by_contradiction (λ h_1,
-h2 (six21 h_1 h h1 h3 h4 h5 h6))
+λ h h1 h2 h3 h4 h5 h6, classical.by_contradiction (λ h_1, h2 (six21 h_1 h h1 h3 h4 h5 h6))
+
+theorem six21b {x y : point} {A B : set point} : is x A B → x ≠ y → y ∈ A → y ∉ B :=
+λ h h1 h2 h3, h1 (six21a h.1 h.2.1 h.2.2.1 h.2.2.2.1 h.2.2.2.2 h2 h3)
 
 theorem six22 {x : point} {A : set point} : line A → x ∈ A → ∃ y, x ≠ y ∧ A = l x y :=
 begin
@@ -698,7 +703,7 @@ rw (eq.trans h.symm h1) at h3,
 exact seven17 h2 h3
 end
 
-theorem seven18a {a b p : point} : a ≠ b → S a p ≠ S b p:=
+theorem seven18a {a b : point} (p : point) : a ≠ b → S a p ≠ S b p :=
 λ h h1, h (seven18 h1)
 
 theorem seven19 {a b p : point} : S a (S b p) = S b (S a p) ↔ a = b :=

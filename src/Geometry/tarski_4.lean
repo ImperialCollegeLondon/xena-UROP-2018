@@ -340,23 +340,24 @@ cases eight17 h.1 h.2.1 with x hx,
 cases eight17 h.1 h3 with y hy,
 cases eight17 h.1 h.2.2.1 with z hz,
 cases eight22 x z with m hm,
-have h4 := six27 h.1 hx.1.1 hz.1.1 hm.1.1,
+dsimp at *,
+have h4 := six27 h.1 hx.1.2.2.1 hz.1.2.2.1 hm.1.1,
 have h5 : a ≠ x,
   intro h_1,
   apply h.2.1,
   rw h_1,
-  exact hx.1.1,
+  exact hx.1.2.2.1,
 have h6 : b ≠ y,
   intro h_1,
   apply h3,
   rw h_1,
-  exact hy.1.1,
+  exact hy.1.2.2.1,
 have h7 : c ≠ z,
   intro h_1,
   apply h.2.2.1,
   rw h_1,
-  exact hz.1.1,
-have h8 := nine4 h hx.1.1 hx.1.2 hz.1.1 hz.1.2,
+  exact hz.1.2.2.1,
+have h8 := nine4 h hx.1.2.2.1 ⟨x, hx.1⟩ hz.1.2.2.1 ⟨z, hz.1⟩,
 have h9 := (h8.1 hm.1).1 (six5 h5),
 have h10 := h8.2 (six5 h5) h9,
 have h11 := nine3 h10 h4 (seven5 m a) h1 h2,
@@ -372,7 +373,7 @@ have h13 : l c z = l (S m a) z,
   simp,
 have h14 := hz.1,
 rw h13 at h14,
-have h15 := (nine4 h11 hy.1.1 hy.1.2 h14.1 h14.2).2 (six5 h6) h9.symm,
+have h15 := (nine4 h11 hy.1.2.2.1 ⟨y, hy.1⟩ h14.2.2.1 ⟨z, h14⟩).2 (six5 h6) h9.symm,
 exact h15,
 exact a
 end
@@ -535,6 +536,9 @@ split,
 exact hb.1
 end
 
+theorem nine10a {a p : point} {A : set point} : line A → a ∈ A → p ∉ A → Bl p A (S a p) :=
+λ h h1 h2, ⟨h, h2, λ h_1, h2 ((seven24 h h1).2 h_1), a, h1, (seven5 a p).1⟩
+
 theorem nine11 {p q : point} {A : set point} : side A p q → line A ∧ p ∉ A ∧ q ∉ A :=
 begin
 intro h,
@@ -591,6 +595,9 @@ split,
 intro h1,
 exact side.trans h1 h
 end
+
+theorem nine16 {a p : point} {A : set point} : line A → a ∉ A → p ∈ A → Bl a A (S p a) :=
+λ h h1 h2, ⟨h, h1, λ h_1, h1 ((seven24 h h2).2 h_1), p, h2, (seven5 p a).1⟩
 
 theorem nine17 {a b c : point} {A : set point} : side A a b → B a c b → side A c a :=
 begin

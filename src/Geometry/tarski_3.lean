@@ -308,6 +308,10 @@ rw h_2 at hb,
 exact hb
 end
 
+theorem perp_of_R {a b c : point} : a ≠ b → c ≠ b → R a b c → perp (l a b) (l c (S b c)) :=
+λ h h1 h2, ⟨b, eight13.2 ⟨six14 h, six14 (seven12b h1.symm), six17b a b,
+or.inr (or.inl (seven5 b c).1.symm), a, c, six17a a b, six17a c (S b c), h, h1, h2⟩⟩
+
 theorem eight15 {x : point} {A B : set point} : perp A B → x ∈ A → x ∈ B → xperp x A B :=
 begin
 intros h h1 h2,
@@ -371,11 +375,9 @@ split,
 exact h5.symm
 end
 
-theorem eight18 {c : point} {A : set point} : line A → c ∉ A → ∃! x, x ∈ A ∧ perp A (l c x) :=
+theorem eight18 {a b c : point} : ¬col a b c → ∃! x, col a b x ∧ perp (l a b) (l c x) :=
 begin
-intros h1 h,
-rcases h1 with ⟨a, b, ha, h2⟩,
-subst h2,
+intros h,
 cases seg_cons a a c b with y hy,
 cases seven25 hy.2.symm with p hp,
 have h1: R a p y,
@@ -563,17 +565,18 @@ have h23 : R c x' x,
 exact eight7 h23 h22
 end
 
-theorem eight17 {a : point} {A : set point}: line A → a ∉ A → ∃! x, x ∈ A ∧ perp A (l a x) :=
+theorem eight17 {a : point} {A : set point}: line A → a ∉ A → ∃! x, xperp x A (l a x) :=
 begin
 intros h h1,
-cases h with p hp,
-cases hp with q hq,
-cases hq with hq h2,
+rcases h with ⟨p, q, hq, h2⟩,
 subst h2,
 have h3 : ¬col p q a,
   intro h_1,
   exact h1 h_1,
-exact eight18 (six14 hq) h3
+cases eight18 h3 with x hx,
+refine ⟨x, eight15 hx.1.2 hx.1.1 (six17b a x), _⟩,
+intros y hy,
+exact hx.2 y ⟨hy.2.2.1, y, hy⟩
 end
 
 theorem eight19 {p q r : point} (a : point) : R p q r ↔ R (S a p) (S a q) (S a r) :=
@@ -659,7 +662,7 @@ theorem eight21 {a b : point} (hab : a ≠ b) (c : point) : ∃ p t, perp (l a b
 begin
 cases em (col a b c) with habc h,
   cases six25 hab with c' h,
-  cases eight18 (six14 hab) h with x hx,
+  cases eight18 h with x hx,
   have h1 : c' ≠ x,
     intro h_1,
     rw h_1 at *,
@@ -717,7 +720,7 @@ cases em (col a b c) with habc h,
   split,
     exact habc,
   exact three3 c p,
-cases eight18 (six14 hab) h with x hx,
+cases eight18 h with x hx,
 have h1 : c ≠ x,
   intro h_1,
   rw h_1 at *,
@@ -970,7 +973,7 @@ have h24 : perp (l a b) (l r m),
   constructor,
   exact h22,
 have h25 : m = b,
-  apply unique_of_exists_unique (eight18 (six14 h) h8),
+  apply unique_of_exists_unique (eight18 h8),
     split,
       exact h20,
     exact h24,

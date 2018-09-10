@@ -16,7 +16,7 @@ theorem eqd.trans {a b c d e f: point} : eqd a b c d → eqd c d e f → eqd a b
 assume h h1,
 eqd_trans h.symm h1
 
-theorem two4 {a b c d : point} : eqd a b c d → eqd b a c d := assume h, eqd_trans (eqd_refl a b) h
+theorem two4 {a b c d : point} : eqd a b c d → eqd b a c d := eqd_trans (eqd_refl a b)
 
 theorem two5 {a b c d : point} : eqd a b c d → eqd a b d c := assume h, eqd.trans h (eqd_refl c d)
 
@@ -739,6 +739,16 @@ cases five2 h.symm h1.symm h2.symm,
   assumption,
 right, left,
 exact h_1.symm
+end
+
+theorem five7 {a b x y z : point} : B a x b → B a z b → B x y z → B a y b :=
+begin
+intros h h1 h2,
+cases five3 h h1,
+  apply three6b _ h1,
+  exact three5b h_1 h2,
+apply three6b _ h,
+exact three5b h_1 h2.symm
 end
 
 def distle (a b c d : point) : Prop := ∃ y, B c y d ∧ eqd a b c y

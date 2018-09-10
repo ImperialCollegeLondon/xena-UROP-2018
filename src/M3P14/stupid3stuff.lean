@@ -55,5 +55,5 @@ begin
 end
 
 example (x : ℤ) : x ^ 2 ≡ 1 [ZMOD 3] ∨ x ^ 2 ≡ 0 [ZMOD 3] := begin
-  sorry
+sorry,
 end
