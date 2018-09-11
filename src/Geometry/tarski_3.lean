@@ -156,30 +156,15 @@ end
 theorem eight14a {A A' : set point} : perp A A' → A ≠ A' :=
 begin
 intros h h1,
-unfold perp at h,
-cases h with x hx,
-unfold xperp at hx,
-cases hx.1 with u hu,
-cases hu with v hv,
-  cases em (u = x),
-  rw h at *,
-  rw ←h1 at *,
-  rw hv.2 at *,
-  have h2 := hx.2.2.2.2 (six17b x v) (six17b x v),
-  exact hv.1 (eight8 h2).symm,
-rw ←h1 at *,
-  rw hv.2 at *,
-  have h2 := hx.2.2.2.2 (six17a u v) (six17a u v),
-exact h (eight8 h2)
+subst A',
+rcases h with ⟨x, h1, h2, h3, h4, h5⟩,
+cases six22 h1 h3 with y hy,
+rw hy.2 at h5,
+exact hy.1.symm (eight8 (h5 (six17b x y) (six17b x y)))
 end
 
 theorem eight14b {x : point} {A A' : set point} : xperp x A A' → A ≠ A' :=
-begin
-intro h,
-apply eight14a,
-constructor,
-exact h
-end
+λ h, eight14a ⟨x, h⟩
 
 theorem eight14c {x : point} {A A' : set point} : xperp x A A' ↔ perp A A' ∧ is x A A' :=
 begin

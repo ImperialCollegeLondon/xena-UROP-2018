@@ -92,17 +92,10 @@ end
 
 def l (a b : point) : set point := {x | col a b x}
 
-def line (k : set point) : Prop := ∃ a b, a ≠ b ∧ k = l a b
+class line (k : set point) : Prop :=
+(hyp : ∃ a b, a ≠ b ∧ k = l a b)
 
-lemma six14 {a b : point} : a ≠ b → line (l a b) :=
-begin
-intro h,
-existsi a,
-existsi b,
-split,
-  exact h,
-refl
-end
+lemma six14 {a b : point} (h : a ≠ b) : line (l a b) := ⟨⟨a, b, ⟨h, rfl⟩⟩⟩
 
 theorem six15 {p q r : point} : p ≠ q → p ≠ r → B q p r → l p q = ray p q ∪ {p} ∪ ray p r :=
 begin
@@ -194,8 +187,7 @@ theorem line.symm {a b : point} (h : line (l a b)) : line (l b a) := (six17 a b)
 theorem six18 {a b : point} {L : set point} : line L → a ≠ b → a ∈ L → b ∈ L → L = l a b :=
 begin
 intros h h1 h2 h3,
-cases h with p hp,
-cases hp with q hq,
+rcases h with ⟨p, q, hq⟩,
 rw hq.2 at *,
 cases em (a = p),
   rw h at *,
@@ -223,17 +215,7 @@ end
 theorem six19 {a b : point} : a ≠ b → ∃! L : set point, line L ∧ a ∈ L ∧ b ∈ L :=
 begin
 intro h,
-existsi l a b,
-split,
-  split,
-    existsi a,
-    existsi b,
-    split,
-      exact h,
-    refl,
-  split;
-  simp,
-intros y hy,
+refine ⟨l a b, ⟨six14 h, six17a a b, six17b a b⟩, λ Y hy, _⟩,
 exact six18 hy.1 h hy.2.1 hy.2.2
 end
 
@@ -269,20 +251,12 @@ theorem six21b {x y : point} {A B : set point} : is x A B → x ≠ y → y ∈ 
 theorem six22 {x : point} {A : set point} : line A → x ∈ A → ∃ y, x ≠ y ∧ A = l x y :=
 begin
 intros h h1,
-have h2 := h,
-cases h with u hu,
-cases hu with v hv,
-cases em (u = x),
-  rw h at *,
-  constructor,
-  exact hv,
-constructor,
-split,
-  exact ne.symm h,
-have : u ∈ A,
-  rw hv.2,
-  simp,
-exact six18 h2 (ne.symm h) h1 this
+rcases h with ⟨u, v, h⟩,
+by_cases h_1 : x = u,
+  subst u,
+  exact ⟨v, h⟩,
+rw h.2 at *,
+exact ⟨u, h_1, six18 (six14 h.1) h_1 h1 (six17a u v)⟩
 end
 
 theorem six23 {a b c : point} : col a b c ↔ ∃ (L : set point), line L ∧ a ∈ L ∧ b ∈ L ∧ c ∈ L :=
@@ -342,12 +316,11 @@ end
 lemma six13a (a : point) : ¬line (l a a) :=
 begin
 intro h,
-cases h with p hp,
-cases hp with q hq,
-cases six25 hq.1 with r hr,
+rcases h with ⟨u, v, h⟩,
+cases six25 h.1 with r hr,
 apply hr,
 suffices : r ∈ l a a,
-  rw hq.2 at this,
+  rw h.2 at this,
   exact this,
 left,
 exact three3 a r
@@ -448,7 +421,7 @@ cases seg_cons a a p p with q hq,
 apply exists_unique.intro,
 exact ⟨hq.1, hq.2.symm⟩,
 intros y hy,
-exact two12 a p (ne.symm h) hy.1 hy.2.symm hq.1 hq.2
+exact two12 (ne.symm h) hy.1 hy.2.symm hq.1 hq.2
 end
 
 noncomputable def S (a p : point) : point := classical.some (seven4 a p)
@@ -475,7 +448,7 @@ cases em (q = a),
     exact id_eqd h4.symm,
   rw ha at *,
   exact id_eqd h2,
-exact two12 a p h h3 (eqd.trans h2 h4).symm h1.symm (eqd.refl a p)
+exact two12 h h3 (eqd.trans h2 h4).symm h1.symm (eqd.refl a p)
 end
 
 theorem seven8 (a p : point) : ∃! q, S a q = p :=

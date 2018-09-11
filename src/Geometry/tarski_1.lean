@@ -22,16 +22,6 @@ theorem two5 {a b c d : point} : eqd a b c d → eqd a b d c := assume h, eqd.tr
 
 theorem eqd.flip {a b c d : point} : eqd a b c d → eqd b a d c := assume h, two4 (two5 h)
 
-instance point_setoid : setoid (point × point) :=
-{ r := λ ⟨a,b⟩ ⟨c,d⟩, eqd a b c d,
-  iseqv := ⟨ λ ⟨a,b⟩, eqd.refl a b, λ ⟨a,b⟩ ⟨c,d⟩, eqd.symm, λ ⟨a,b⟩ ⟨c,d⟩ ⟨e,f⟩, eqd.trans⟩
-}
-
-definition distance_values (point : Type) [Euclidean_plane point] := 
-quotient (@Euclidean_plane.point_setoid point _)
-
-theorem refl_dist (a b : point) : (a,b) ≈ (b,a) := eqd_refl a b
-
 theorem two7 {a b c d : point} : eqd a b c d → a ≠ b → c ≠ d :=
 begin
 intros h h1 h2,
@@ -75,7 +65,7 @@ apply afive_seg this,
   assumption
 end
 
-theorem two12 {a q x y : point} (b c : point) (h : q ≠ a) : B q a x → eqd a x b c → B q a y → eqd a y b c → x = y :=
+theorem two12 {a q x y b c : point} (h : q ≠ a) : B q a x → eqd a x b c → B q a y → eqd a y b c → x = y :=
 begin
 intros h2 h3 h4 h5,
 by_contradiction h_1,
@@ -164,7 +154,7 @@ have h3 : B b c x,
   exact three6a h hx.1,
 suffices : x = d,
   exact this ▸ hx.1,
-exact two12 c d h2 h3 hx.2 h1 (eqd.refl c d)
+exact two12 h2 h3 hx.2 h1 (eqd.refl c d)
 end
 
 theorem three5b {a b c d : point} : B a b d → B b c d → B a c d :=
@@ -330,7 +320,7 @@ have h2 : B a' b' c'' ∧ B d' a' c'',
 have h3 : eqd a' c'' a c,
   exact two11 h2.1 h hb.2 hc.2,
 have h4 : c' = c'',
-  exact (two12 a c hd.2.symm) hd.1.symm h1.symm h2.2 h3,
+  exact (two12 hd.2.symm) hd.1.symm h1.symm h2.2 h3,
 rw ←h4 at *,
 existsi b',
 split,
@@ -427,31 +417,35 @@ have : B c' a' b', exact four6 h (four4 h1).2.2.2.1,
   simp *,
 end
 
-theorem four14 {a b c a' b' : point} : col a b c → eqd a b a' b' → ∃ c', cong a b c a' b' c' :=
-begin
-intros h1 h,
-cases h1 with h1 h2,
-cases seg_cons b' b c a' with c' hc,
-  existsi c',
-  unfold cong,
-  split,
-    exact h,
-  split,
-    exact hc.2.symm,
-  exact two11 h1 hc.1 h hc.2.symm,
-cases h2 with h2 h3,
-  cases four5 h2 h.flip with c' hc,
-  constructor, exact (four4 hc.2).2.2.2.1,
+noncomputable def four14 {a b c a' b' : point} (h : col a b c) (h1 : eqd a b a' b') : {c' // cong a b c a' b' c'} :=
+if h2 : B a b c then
+by cases seg_cons b' b c a' with c' hc;
+exact ⟨c', h1, hc.2.symm, two11 h2 hc.1 h1 hc.2.symm⟩
+else if h3 : B b c a then
+by cases four5 h3 h1.flip with c' hc;
+exact ⟨c', (four4 hc.2).2.2.2.1⟩
+else 
+by {replace h : B c a b,
+  unfold col at h,
+  simpa [h2, h3] using h,
 cases seg_cons a' a c b' with c' hc,
-existsi c',
-unfold cong,
-split,
-  exact h,
-split,
-  exact two11 h3.symm hc.1 h.flip hc.2.symm,
-exact hc.2.symm
+exact ⟨c', h1, two11 h.symm hc.1 h1.flip hc.2.symm, hc.2.symm⟩}
+/-
+begin
+intros h h1,
+by_cases h2 : B a b c,
+  cases seg_cons b' b c a' with c' hc,
+  exact ⟨c', h1, hc.2.symm, two11 h2 hc.1 h1 hc.2.symm⟩
+by_cases h3 : B b c a,
+  cases four5 h3 h1.flip with c' hc,
+  exact ⟨c', (four4 hc.2).2.2.2.1⟩,
+replace h : B c a b,
+  unfold col at h,
+  simpa [h2, h3] using h,
+cases seg_cons a' a c b' with c' hc,
+exact ⟨c', h1, two11 h.symm hc.1 h1.flip hc.2.symm, hc.2.symm⟩
 end
-
+-/
 def fs (a b c d a' b' c' d' : point) : Prop := col a b c ∧ cong a b c a' b' c' ∧
 eqd a d a' d' ∧ eqd b d b' d'
 
@@ -558,7 +552,7 @@ have h_6 : B a b b'',
     exact three7b hd.1 hb.1 h_3.symm,
   exact three6b h1 this,
 have h8 : b' = b'',
-  apply two12 b b' h h_5 (eqd.refl b b') h_6,
+  apply two12 h h_5 (eqd.refl b b') h_6,
   exact two4 h7.symm,
 rw ←h8 at *,
 have h9 : afs b c d' c' b' c' d c,
@@ -831,7 +825,7 @@ cases em (a = b),
 have h2 : p ≠ a,
   exact h2.symm,
 have : x = z,
-  exact two12 c d h2 (three5a h1 hx.1) hx.2.symm (three7b h1 hz.1 h_1) hz.2,
+  exact two12 h2 (three5a h1 hx.1) hx.2.symm (three7b h1 hz.1 h_1) hz.2,
 rw this at *,
 have : b = z,
   exact three4 hx.1.symm hz.1.symm,
@@ -912,7 +906,7 @@ cases h with h3 h4,
   have : B p a x,
     exact three5a this hx.1,
   have : b = x,  
-    exact two12 a b hp.2.symm hp.1.symm (eqd.refl a b) this hx.2.symm,
+    exact two12 hp.2.symm hp.1.symm (eqd.refl a b) this hx.2.symm,
   rw ←this at *,
   exact hx.1,
 rw three2 at h4,
@@ -922,7 +916,7 @@ have : B q c a,
 have : B q c y,
   exact three5a this hy.1,
  have : b = y,
-  exact two12 c b hq.2.symm hq.1.symm (eqd.refl c b) this hy.2.symm,
+  exact two12 hq.2.symm hq.1.symm (eqd.refl c b) this hy.2.symm,
 rw ←this at *,
 exact hy.1.symm
 end
@@ -1191,7 +1185,7 @@ apply exists_unique.intro,
 intros y hy,
 have : B p a y,
   exact ((six2 h2 hy.1.1 hp.2.symm hx.1.symm).2 (sided.trans h3 hy.1.symm)).symm,
-exact two12 b c hp.2.symm this hy.2 hx.1 hx.2
+exact two12 hp.2.symm this hy.2 hx.1 hx.2
 end
 
 theorem six11a {p a b : point} : sided p a b → eqd p a p b → a = b :=
@@ -1217,7 +1211,7 @@ split,
   have h4 : B q p b,
     exact ((six2 h1 h2 hq.2.symm hq.1).2 hp).symm,
   have : a = b,
-    exact two12 p a hq.2.symm hq.1.symm (eqd.refl p a) h4 this.symm,
+    exact two12 hq.2.symm hq.1.symm (eqd.refl p a) h4 this.symm,
   rw this,
   exact three1 p b,
 intro h,
@@ -1227,4 +1221,5 @@ split,
   exact h,
 exact eqd.refl p a
 end
+
 end Euclidean_plane
