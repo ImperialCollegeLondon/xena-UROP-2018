@@ -3,7 +3,7 @@ open classical set
 namespace Euclidean_plane
 variables {point : Type} [Euclidean_plane point]
 
-local attribute [instance] prop_decidable
+local attribute [instance, priority 0] prop_decidable
 
 theorem eleven22a {a b c p a' b' c' p' : point} : Bl a (l b p) c → Bl a' (l b' p') c' → eqa a b p a' b' p' →
 eqa p b c p' b' c' → eqa a b c a' b'  c' :=
@@ -611,85 +611,60 @@ replace h1 := eleven37 h1 (eqa.refl (eleven38a.1 h1).1 (eleven38a.1 h1).2.1) h_1
 exact eleven38b h h1
 end
 
-def acute (a b c : point) : Prop := ∃ x y z, R x y z ∧ ang_lt a b c x y z
+def ang_acute (a b c : point) : Prop := ∃ x y z, R x y z ∧ ang_lt a b c x y z
 
-theorem tri_of_acute {a b c : point} : acute a b c → a ≠ b ∧ c ≠ b :=
+theorem tri_of_ang_acute {a b c : point} : ang_acute a b c → a ≠ b ∧ c ≠ b :=
 λ ⟨x, y, z, h⟩, ⟨(eleven38a.1 h.2).1, (eleven38a.1 h.2).2.1⟩
 
-theorem acute.symm {a b c : point} : acute a b c → acute c b a :=
+theorem ang_acute.symm {a b c : point} : ang_acute a b c → ang_acute c b a :=
 begin
 rintros ⟨x, y, z, h, h1⟩,
 refine ⟨x, y, z, h, (eleven37 h1 (eleven6 (eleven38a.1 h1).1 (eleven38a.1 h1).2.1) _)⟩,
 exact (eqa.refl (eleven38a.1 h1).2.2.1 (eleven38a.1 h1).2.2.2.1)
 end
 
-theorem eleven40a {a b c : point} : sided b a c → acute a b c :=
-begin
-intro h,
-cases eight25 h.1 with d hd,
-refine ⟨a, b, d, hd.1, eleven31a h h.1 hd.2, _⟩,
-intro h1,
-cases (eight9 hd.1 (six4.1 ((eleven21a h).1 h1)).1),
-  exact h.1 h_1,
-exact hd.2 h_1
-end
+def ang_obtuse (a b c : point) : Prop := ∃ x y z, R x y z ∧ ang_lt x y z a b c
 
-def obtuse (a b c : point) : Prop := ∃ x y z, R x y z ∧ ang_lt x y z a b c
-
-theorem tri_of_obtuse {a b c : point} : obtuse a b c → a ≠ b ∧ c ≠ b :=
+theorem tri_of_ang_obtuse {a b c : point} : ang_obtuse a b c → a ≠ b ∧ c ≠ b :=
 λ ⟨x, y, z, h⟩, ⟨(eleven38a.1 h.2).2.2.1, (eleven38a.1 h.2).2.2.2.1⟩
 
-theorem obtuse.symm {a b c : point} : obtuse a b c → obtuse c b a :=
+theorem ang_obtuse.symm {a b c : point} : ang_obtuse a b c → ang_obtuse c b a :=
 begin
 rintros ⟨x, y, z, h, h1⟩,
 refine ⟨x, y, z, h, (eleven37 h1 _ (eleven6 (eleven38a.1 h1).2.2.1 (eleven38a.1 h1).2.2.2.1))⟩,
 exact (eqa.refl (eleven38a.1 h1).1 (eleven38a.1 h1).2.1)
 end
 
-theorem eleven40b {a b c : point} : a ≠ b → c ≠ b → B a b c → obtuse a b c :=
-begin
-intros h h1 h2,
-cases eight25 h with d hd,
-refine ⟨a, b, d, hd.1, eleven31b h hd.2 h h1 h2, _⟩,
-intro h3,
-cases (eight9 hd.1 (or.inl ((eleven21b h2) h3.symm))),
-  exact h h_1,
-exact hd.2 h_1
-end
+def ang_right (a b c : point) : Prop := a ≠ b ∧ c ≠ b ∧ R a b c
 
-def right (a b c : point) : Prop := a ≠ b ∧ c ≠ b ∧ R a b c
+theorem eleven40a {a b c d e f : point} : ang_acute a b c → eqa a b c d e f → ang_acute d e f :=
+λ ⟨x, y, z, h⟩ h1, ⟨x, y, z, h.1, eleven37 h.2 h1 (eqa.refl (eleven38a.1 h.2).2.2.1 (eleven38a.1 h.2).2.2.2.1)⟩
 
-theorem right.symm {a b c : point} : right a b c → right c b a :=
-λ h, ⟨h.2.1, h.1, h.2.2.symm⟩
+theorem eleven40b {a b c d e f : point} : ang_obtuse a b c → eqa a b c d e f → ang_obtuse d e f :=
+λ ⟨x, y, z, h⟩ h1, ⟨x, y, z, h.1, eleven37 h.2 (eqa.refl (eleven38a.1 h.2).1 (eleven38a.1 h.2).2.1) h1⟩
 
-theorem right.flip {a b c : point} : right a b c → right a b (S b c) :=
-λ h, ⟨h.1, (seven12a h.2.1.symm).symm, h.2.2.flip⟩
+theorem eleven40c {a b c d e f : point} : ang_right a b c → eqa a b c d e f → ang_right d e f :=
+λ h h1, ⟨h1.2.2.1, h1.2.2.2.1, eleven17 h.2.2 h1⟩
 
-theorem eleven16a {a b c d e f : point} : right a b c → right d e f → eqa a b c d e f :=
-λ h h1, eleven16 h.1 h.2.1 h1.1 h1.2.1 h.2.2 h1.2.2
-
-theorem eleven17a {a b c d e f : point} : R a b c → eqa a b c d e f → right d e f :=
-λ h h1, ⟨h1.2.2.1, h1.2.2.2.1, eleven17 h h1⟩
-
-theorem lt_right_of_acute {a b c p q r : point} : acute a b c → right p q r → ang_lt a b c p q r :=
+theorem lt_ang_right_of_ang_acute {a b c p q r : point} : ang_acute a b c → ang_right p q r → ang_lt a b c p q r :=
 begin
 rintros ⟨x, y, z, h⟩ h1,
 apply eleven37 h.2 (eqa.refl (eleven38a.1 h.2).1 (eleven38a.1 h.2).2.1),
 exact eleven16 (eleven38a.1 h.2).2.2.1 (eleven38a.1 h.2).2.2.2.1 h1.1 h1.2.1 h.1 h1.2.2
 end
 
-theorem gt_right_of_obtuse {a b c p q r : point} : obtuse a b c → right p q r → ang_lt p q r a b c :=
+theorem gt_ang_right_of_ang_obtuse {a b c p q r : point} : ang_obtuse a b c → ang_right p q r → ang_lt p q r a b c :=
 begin
 rintros ⟨x, y, z, h⟩ h1,
 apply eleven37 h.2 _ (eqa.refl (eleven38a.1 h.2).2.2.1 (eleven38a.1 h.2).2.2.2.1),
 exact eleven16 (eleven38a.1 h.2).1 (eleven38a.1 h.2).2.1 h1.1 h1.2.1 h.1 h1.2.2
 end
 
-theorem lt_obtuse_of_acute {a b c d e f : point} : acute a b c → obtuse d e f → ang_lt a b c d e f :=
+theorem lt_ang_obtuse_of_ang_acute {a b c d e f : point} : ang_acute a b c → ang_obtuse d e f → ang_lt a b c d e f :=
 begin
 rintros ⟨x, y, z, h⟩ h1,
-suffices : right x y z,
-  exact h.2.trans (gt_right_of_obtuse h1 this),
+suffices : ang_right x y z,
+  exact h.2.trans (gt_ang_right_of_ang_obtuse h1 this),
 exact ⟨(eleven38a.1 h.2).2.2.1, (eleven38a.1 h.2).2.2.2.1, h.1⟩
 end
 
@@ -752,7 +727,7 @@ apply eleven37 _ (eqa.refl (six26 h).1 (six26 h).2.1.symm) h3.symm,
 exact eleven41a (four10 h).1 (seven5 a c).1 (seven12a (six26 h).2.2).symm
 end
 
-theorem eleven42 {a b c d: point} : B a b d → (d ≠ b ∧ acute a b c ↔ a ≠ b ∧ obtuse d b c) :=
+theorem eleven42 {a b c d: point} : B a b d → (d ≠ b ∧ ang_acute a b c ↔ a ≠ b ∧ ang_obtuse d b c) :=
 begin
 intros h,
 split,
@@ -772,7 +747,7 @@ intro h_1,
 exact h4 (eleven13 h_1.symm (eleven33 h3).1 (seven5 y x).1.symm (eleven33 h3).2.2.1 h)
 end
 
-theorem eleven43 {a b c : point} : ¬col a b c → (R b a c ∨ obtuse b a c) → acute a b c ∧ acute a c b :=
+theorem eleven43 {a b c : point} : ¬col a b c → (R b a c ∨ ang_obtuse b a c) → ang_acute a b c ∧ ang_acute a c b :=
 begin
 intros h h1,
 have h2 := eleven41 h (seven5 a b).1 (seven12a (six26 h).1).symm,
@@ -780,36 +755,10 @@ cases h1,
   refine ⟨⟨c, a, (S a b), h1.symm.flip, _⟩, c, a, (S a b), h1.symm.flip, _⟩,
     exact h2.2,
   exact h2.1,
-suffices : acute c a (S a b),
+suffices : ang_acute c a (S a b),
   rcases this with ⟨x, y, z, h3, h4⟩,
   refine ⟨⟨x, y, z, h3, h2.2.trans h4⟩, x, y, z, h3, h2.1.trans h4⟩,
 exact ((eleven42 (seven5 a b).1.symm).2 ⟨(seven12a (six26 h).1).symm, h1⟩).2.symm
-end
-
-theorem ang_total {a b c d e f : point} : a ≠ b → c ≠ b → d ≠ e → f ≠ e → 
-(ang_lt a b c d e f ∨ eqa a b c d e f ∨ ang_lt d e f a b c) :=
-begin
-intros h h1 h2 h3,
-unfold ang_lt,
-cases eleven35 h h1 h2 h3,
-  by_cases h_2 : eqa a b c d e f;
-  simp [h_1, h_2],
-by_cases h_2 : eqa a b c d e f,
-  simp [h_2, h_1],
-refine or.inr (or.inr ⟨h_1, _⟩),
-intro h_3,
-exact h_2 h_3.symm
-end
-
-theorem right_total {a b c d e f : point} : a ≠ b → c ≠ b → (acute a b c ∨ right a b c ∨ obtuse a b c) :=
-begin
-intros h h1,
-cases eight25 h with t ht,
-cases ang_lt_or_ge h h1 h ht.2,
-  exact or.inl ⟨a, b, t, ht.1, h_1⟩,
-cases ang_lt_or_eq_of_le h_1,
-  exact or.inr (or.inr ⟨a, b, t, ht.1, h_2⟩),
-exact or.inr (or.inl ⟨h, h1, (eleven17 ht.1 h_2)⟩)
 end
 
 lemma eleven44c {a b c : point} : ¬col a b c → eqd a b a c → eqa a c b a b c :=
@@ -864,34 +813,22 @@ cases h_1,
 exact (eleven38b h1 (eleven44d (four10 h).1 h_1)).elim
 end
 
-def isoc (a b c : point) : Prop := ¬col a b c ∧ eqd b a b c
+theorem eleven45 {a b c : point} : ang_acute a b c → ¬ang_right a b c ∧ ¬ang_obtuse a b c :=
+λ h, ⟨λ h1, (lt_ang_right_of_ang_acute h h1).2 (eqa.refl (tri_of_ang_acute h).1 (tri_of_ang_acute h).2),
+λ h1, (lt_ang_obtuse_of_ang_acute h h1).2 (eqa.refl (tri_of_ang_acute h).1 (tri_of_ang_acute h).2)⟩
 
-def equil (a b c : point) : Prop := tri a b c ∧ eqd a b b c ∧ eqd a b a c
-
-theorem eleven45a {a b c : point} : acute a b c → ¬right a b c ∧ ¬obtuse a b c :=
-λ h, ⟨λ h1, (lt_right_of_acute h h1).2 (eqa.refl (tri_of_acute h).1 (tri_of_acute h).2),
-λ h1, (lt_obtuse_of_acute h h1).2 (eqa.refl (tri_of_acute h).1 (tri_of_acute h).2)⟩
-
-theorem eleven45b {a b c : point} : right a b c → ¬acute a b c ∧ ¬obtuse a b c :=
-λ h, ⟨λ h1, (lt_right_of_acute h1 h).2 (eqa.refl h.1 h.2.1),
-λ h1, (gt_right_of_obtuse h1 h).2 (eqa.refl h.1 h.2.1)⟩
-
-theorem eleven45c {a b c : point} : obtuse a b c → ¬acute a b c ∧ ¬right a b c :=
-λ h, ⟨λ h1, (lt_obtuse_of_acute h1 h).2 (eqa.refl (tri_of_obtuse h).1 (tri_of_obtuse h).2),
-λ h1, (gt_right_of_obtuse h h1).2 (eqa.refl (tri_of_obtuse h).1 (tri_of_obtuse h).2)⟩
-
-theorem eleven46 {a b c : point} : ¬col a b c → (R b a c ∨ obtuse b a c) → distlt a b b c ∧ distlt a c b c :=
+theorem eleven46 {a b c : point} : ¬col a b c → (R b a c ∨ ang_obtuse b a c) → distlt a b b c ∧ distlt a c b c :=
 begin
 intros h h1,
 split,
   apply five14 ((eleven44b (four10 h).2.1).2 _) (two5 (eqd.refl b a)) (eqd.refl b c),
   cases h1,
-    exact lt_right_of_acute (eleven43 h (or.inl h1)).2.symm ⟨(six26 h).1.symm, (six26 h).2.2.symm, h1⟩,
-  exact lt_obtuse_of_acute (eleven43 h (or.inr h1)).2.symm h1,
+    exact lt_ang_right_of_ang_acute (eleven43 h (or.inl h1)).2.symm ⟨(six26 h).1.symm, (six26 h).2.2.symm, h1⟩,
+  exact lt_ang_obtuse_of_ang_acute (eleven43 h (or.inr h1)).2.symm h1,
 apply five14 ((eleven44b (four10 h).2.2.2.1).2 _) (two5 (eqd.refl c a)) (two5 (eqd.refl c b)),
 cases h1,
-  exact lt_right_of_acute (eleven43 h (or.inl h1)).1.symm ⟨(six26 h).2.2.symm, (six26 h).1.symm, h1.symm⟩,
-exact lt_obtuse_of_acute (eleven43 h (or.inr h1)).1.symm h1.symm
+  exact lt_ang_right_of_ang_acute (eleven43 h (or.inl h1)).1.symm ⟨(six26 h).2.2.symm, (six26 h).1.symm, h1.symm⟩,
+exact lt_ang_obtuse_of_ang_acute (eleven43 h (or.inr h1)).1.symm h1.symm
 end
 
 theorem eleven47 {a b c x : point} : R a c b → xperp x (l c x) (l a b) → B a x b ∧ x ≠ a ∧ x ≠ b :=
@@ -904,11 +841,11 @@ have h3 := eleven43 (four10 h2).2.2.2.1 (or.inl h),
 have h4 : x ≠ a,
   intro h_1,
   subst x,
-  exact (eleven45a h3.1).1 ⟨(six26 h2).2.2.symm, (six26 h2).1.symm, h1.2.2.2.2 (six17a c a) (six17b a b)⟩,
+  exact (eleven45 h3.1).1 ⟨(six26 h2).2.2.symm, (six26 h2).1.symm, h1.2.2.2.2 (six17a c a) (six17b a b)⟩,
 have h5 : x ≠ b,
   intro h_1,
   subst x,
-  exact (eleven45a h3.2).1 ⟨(six26 h2).2.1.symm, h4.symm, h1.2.2.2.2 (six17a c b) (six17a a b)⟩,
+  exact (eleven45 h3.2).1 ⟨(six26 h2).2.1.symm, h4.symm, h1.2.2.2.2 (six17a c b) (six17a a b)⟩,
 refine ⟨_, h4, h5⟩,
   wlog h6 : distle b x a x := (five10 b x a x) using a b,
   suffices : distle a x a b,

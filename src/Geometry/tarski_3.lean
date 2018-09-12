@@ -3,7 +3,7 @@ open classical set
 namespace Euclidean_plane
 variables {point : Type} [Euclidean_plane point]
 
-local attribute [instance] prop_decidable
+local attribute [instance, priority 0] prop_decidable
 
 -- Right Angles
 
@@ -156,30 +156,15 @@ end
 theorem eight14a {A A' : set point} : perp A A' → A ≠ A' :=
 begin
 intros h h1,
-unfold perp at h,
-cases h with x hx,
-unfold xperp at hx,
-cases hx.1 with u hu,
-cases hu with v hv,
-  cases em (u = x),
-  rw h at *,
-  rw ←h1 at *,
-  rw hv.2 at *,
-  have h2 := hx.2.2.2.2 (six17b x v) (six17b x v),
-  exact hv.1 (eight8 h2).symm,
-rw ←h1 at *,
-  rw hv.2 at *,
-  have h2 := hx.2.2.2.2 (six17a u v) (six17a u v),
-exact h (eight8 h2)
+subst A',
+rcases h with ⟨x, h1, h2, h3, h4, h5⟩,
+cases six22 h1 h3 with y hy,
+rw hy.2 at h5,
+exact hy.1.symm (eight8 (h5 (six17b x y) (six17b x y)))
 end
 
 theorem eight14b {x : point} {A A' : set point} : xperp x A A' → A ≠ A' :=
-begin
-intro h,
-apply eight14a,
-constructor,
-exact h
-end
+λ h, eight14a ⟨x, h⟩
 
 theorem eight14c {x : point} {A A' : set point} : xperp x A A' ↔ perp A A' ∧ is x A A' :=
 begin
@@ -589,7 +574,7 @@ split,
     exact (seven16 a).1 h,
   have h1 := seven5 (S a q) (S a r),
   suffices : M (S a r) (S a q) (S a (S q r)),
-    exact unique_of_exists_unique (seven4 (S a q) (S a r)) h1 this,
+    exact seven4 h1 this,
   apply (seven14 a).1,
   exact seven5 q r,
 intro h,
@@ -603,7 +588,7 @@ suffices : S a (S a (S (S a q) (S a r))) = (S a (S q r)),
 simp,
 have h1 := seven5 (S a q) (S a r),
 suffices : M (S a r) (S a q) (S a (S q r)),
-  exact unique_of_exists_unique (seven4 (S a q) (S a r)) h1 this,
+  exact seven4 h1 this,
 apply (seven14 a).1,
 exact seven5 q r
 end
@@ -653,7 +638,7 @@ have h12 := seven7 a c,
 rw hap at *,
 have h13 := seven5 p (S p c),
 simp at h13,
-have h14 := unique_of_exists_unique (seven4 p (S p c)) h13 h1,
+have h14 := seven4 h13 h1,
 rw ←h14 at h2,
 exact (seven3.1 h2).symm
 end
@@ -855,7 +840,7 @@ have h10 := seven5 a p,
 cases seg_cons x x r (S a p) with r' hr',
 cases seven25 hr'.2 with m hm,
 have h11 := seven5 m r,
-have h12 := unique_of_exists_unique (seven4 m r) h11 hm.symm,
+have h12 := seven4 h11 hm.symm,
 have h13 : R x m r,
   unfold R,
   rw ←h12 at hr',
