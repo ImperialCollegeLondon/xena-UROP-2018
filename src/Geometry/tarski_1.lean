@@ -3,7 +3,7 @@ open classical
 namespace Euclidean_plane
 variables {point : Type} [Euclidean_plane point]
 
-local attribute [instance] prop_decidable
+local attribute [instance, priority 0] prop_decidable
 
 --Conclusions from the first 5 axioms
 theorem eqd.refl (a b : point) : eqd a b a b :=
@@ -29,7 +29,7 @@ subst d,
 exact h1 (id_eqd h)
 end
 
-theorem two8 (a b : point) : eqd a a b b := 
+@[simp] theorem two8 (a b : point) : eqd a a b b := 
 let ⟨x, h⟩ := seg_cons a b b b in
 have a = x, from id_eqd h.2,
 by rw ←this at h; exact h.2
@@ -86,7 +86,7 @@ end
 
 -- Properties of B
 
-theorem three1 (a b : point) : B a b b := 
+@[simp] theorem three1 (a b : point) : B a b b := 
 begin
 cases seg_cons b b b a with x h,
 have : b = x,
@@ -113,9 +113,21 @@ intro h,
 exact h.symm
 end
 
-theorem three3 (a b : point) : B a a b := 
+@[simp] theorem three3 (a b : point) : B a a b := 
 begin
 exact (three1 b a).symm
+end
+
+instance dec_eqp : decidable_eq point :=
+begin
+intros a b,
+cases dec_B a b a,
+  left,
+  intro h_1,
+  subst b,
+  exact h (three1 a a),
+right,
+exact bet_same h
 end
 
 theorem three4 {a b c: point} : B a b c → B b a c → a = b :=
@@ -190,7 +202,7 @@ rw h,
 exact three3 P2 P3
 end
 
-theorem three14 (a b : point) : {c // B a b c ∧ b ≠ c} := 
+def three14 (a b : point) : {c // B a b c ∧ b ≠ c} := 
 begin
 cases seg_cons b P1 P2 a with c h,
 cases h with h1 h2,
@@ -306,7 +318,7 @@ cong b c a b' c' a' ∧ cong c a b c' a' b' ∧ cong c b a c' b' a' :=
 λ h, ⟨⟨h.2.2, h.2.1.flip, h.1⟩, ⟨h.1.flip, h.2.2, h.2.1⟩, ⟨h.2.1, h.2.2.flip, h.1.flip⟩, 
 ⟨h.2.2.flip, h.1, h.2.1.flip⟩, ⟨h.2.1.flip, h.1.flip, h.2.2.flip⟩⟩
 
-theorem four5 {a b c a' c' : point} : B a b c → eqd a c a' c' 
+def four5 {a b c a' c' : point} : B a b c → eqd a c a' c' 
 → {b'// B a' b' c' ∧ cong a b c a' b' c'} :=
 begin
 intros h h1,
@@ -362,20 +374,34 @@ end
 
 def col (a b c : point) : Prop := B a b c ∨ B b c a ∨ B c a b
 
+instance dec_col : ∀ (a : point) b c, decidable (col a b c) :=
+begin
+intros,
+cases dec_B a b c,
+  cases dec_B b c a,
+    cases dec_B c a b,
+      left,
+      unfold col,
+      simp *,
+    exact is_true (or.inr (or.inr h_2)),
+  exact is_true (or.inr (or.inl h_1)),
+exact is_true (or.inl h)
+end
+
 theorem four11 {a b c : point} : col a b c → col a c b ∧ col b a c ∧ col b c a ∧ col c a b ∧ col c b a := 
 begin
 intro h,
 cases h with h1 h2,
-have : B c b a, exact h1.symm,
-repeat {split}; unfold col;
+  have := h1.symm,
+  repeat {split}; unfold col;
   simp *,
 cases h2 with h2 h3,
-have : B a c b, exact h2.symm,
+  have := h2.symm,
   repeat {split};unfold col;
   simp *,
-have : B b a c, exact h3.symm,
-repeat {split};unfold col;
-  simp *
+have := h3.symm,
+repeat {split}; unfold col;
+simp *
 end
 
 theorem four10 {a b c : point} : ¬col a b c → ¬col a c b ∧ ¬col b a c ∧ ¬col b c a ∧ ¬col c a b ∧ ¬col c b a :=
@@ -398,54 +424,37 @@ exact h (four11 h_1).2.2.2.2
 end
 
 theorem four12 (a b : point) : col a a b := 
-begin
-unfold col,
-left, exact three3 a b
-end
+or.inl (three3 a b)
 
 theorem four13 {a b c a' b' c' : point} : col a b c → cong a b c a' b' c' → col a' b' c' :=
 begin
 intros h h1,
 unfold col,
 cases h,
-  have : B a' b' c', exact four6 h h1,
+  have := four6 h h1,
   simp *,
 cases h,
-  have : B b' c' a', exact four6 h (four4 h1).2.2.1,
+  have := four6 h (four4 h1).2.2.1,
   simp *,
-have : B c' a' b', exact four6 h (four4 h1).2.2.2.1,
-  simp *,
+have := four6 h (four4 h1).2.2.2.1,
+simp *
 end
 
-noncomputable def four14 {a b c a' b' : point} (h : col a b c) (h1 : eqd a b a' b') : {c' // cong a b c a' b' c'} :=
-if h2 : B a b c then
-by cases seg_cons b' b c a' with c' hc;
-exact ⟨c', h1, hc.2.symm, two11 h2 hc.1 h1 hc.2.symm⟩
-else if h3 : B b c a then
-by cases four5 h3 h1.flip with c' hc;
-exact ⟨c', (four4 hc.2).2.2.2.1⟩
-else 
-by {replace h : B c a b,
-  unfold col at h,
-  simpa [h2, h3] using h,
-cases seg_cons a' a c b' with c' hc,
-exact ⟨c', h1, two11 h.symm hc.1 h1.flip hc.2.symm, hc.2.symm⟩}
-/-
+def four14 {a b c a' b' : point} (h : col a b c) (h1 : eqd a b a' b') : {c' // cong a b c a' b' c'} :=
 begin
-intros h h1,
-by_cases h2 : B a b c,
-  cases seg_cons b' b c a' with c' hc,
-  exact ⟨c', h1, hc.2.symm, two11 h2 hc.1 h1 hc.2.symm⟩
-by_cases h3 : B b c a,
-  cases four5 h3 h1.flip with c' hc,
+cases dec_B a b c,
+  cases dec_B b c a,
+    replace h : B c a b,
+      unfold col at h,
+      simpa [h_1, h_2] using h,
+      cases seg_cons a' a c b' with c' hc,
+    exact ⟨c', h1, two11 h.symm hc.1 h1.flip hc.2.symm, hc.2.symm⟩,
+  cases four5 h_2 h1.flip with c' hc,
   exact ⟨c', (four4 hc.2).2.2.2.1⟩,
-replace h : B c a b,
-  unfold col at h,
-  simpa [h2, h3] using h,
-cases seg_cons a' a c b' with c' hc,
-exact ⟨c', h1, two11 h.symm hc.1 h1.flip hc.2.symm, hc.2.symm⟩
+cases seg_cons b' b c a' with c' hc,
+exact ⟨c', h1, hc.2.symm, two11 h_1 hc.1 h1 hc.2.symm⟩
 end
--/
+
 def fs (a b c d a' b' c' d' : point) : Prop := col a b c ∧ cong a b c a' b' c' ∧
 eqd a d a' d' ∧ eqd b d b' d'
 

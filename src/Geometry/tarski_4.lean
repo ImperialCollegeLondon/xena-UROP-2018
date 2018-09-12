@@ -3,7 +3,7 @@ open classical set
 namespace Euclidean_plane
 variables {point : Type} [Euclidean_plane point]
 
-local attribute [instance] prop_decidable
+local attribute [instance, priority 0] prop_decidable
 
 -- Planes and Half-planes
 
@@ -122,7 +122,7 @@ split,
     have h_7 := seven5 m u,
     rw h_6 at h_7,
     apply h_4.1,
-    exact unique_of_exists_unique (seven4 m s) h_7.symm hm.1,
+    exact seven4 h_7.symm hm.1,
   split,
     exact six13 (eight14e h6).2,
   have h_6 := seven6 h_2,

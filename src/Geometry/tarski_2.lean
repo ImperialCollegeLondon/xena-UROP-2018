@@ -3,7 +3,7 @@ open classical set
 namespace Euclidean_plane
 variables {point : Type} [Euclidean_plane point]
 
-local attribute [instance] prop_decidable
+local attribute [instance, priority 0] prop_decidable
 
 theorem six9 {a b p : point} : b ∈ ray p a → ray p a = ray p b :=
 begin
@@ -169,14 +169,13 @@ theorem six16a {p q r : point} : sided p q r → l p q = l p r :=
 λ h, six16 h.1.symm h.2.1.symm (four11 (six4.1 h).1).2.1
 
 theorem six17 (p q : point) : l p q = l q p :=
-begin
+ext (λ x, ⟨λ h, (four11 h).2.1, λ h, (four11 h).2.1⟩)
+/-begin
 ext,
-split,
-  intro h1,
-  exact (four11 h1).2.1,
-intro h1,
-exact (four11 h1).2.1
-end
+split;
+intro h;
+exact (four11 h).2.1
+end-/
 
 theorem line.symm {a b : point} (h : line (l a b)) : line (l b a) := (six17 a b) ▸ h
 
@@ -213,11 +212,7 @@ simpa using h
 end
 
 theorem six19 {a b : point} : a ≠ b → ∃! L : set point, line L ∧ a ∈ L ∧ b ∈ L :=
-begin
-intro h,
-refine ⟨l a b, ⟨six14 h, six17a a b, six17b a b⟩, λ Y hy, _⟩,
-exact six18 hy.1 h hy.2.1 hy.2.2
-end
+λ h, ⟨l a b, ⟨six14 h, six17a a b, six17b a b⟩, λ Y hy, six18 hy.1 h hy.2.1 hy.2.2⟩
 
 theorem six20 {a b c : point} {A : set point} : line A → a ∈ A → b ∈ A → a ≠ b → col a b c → c ∈ A :=
 begin
@@ -297,9 +292,7 @@ have h := two_dim point,
 intro h1,
 cases h1,
   exact h.1 h1,
-cases h1,
-  exact h.2.1 h1,
-exact h.2.2 h1
+exact h1.elim h.2.1 h.2.2
 end
 
 theorem six25 {a b : point} : a ≠ b → ∃ c, ¬col a b c :=
@@ -330,8 +323,7 @@ lemma six13 {a b : point} : line (l a b) → a ≠ b :=
 begin
 intros h h1,
 subst b,
-apply six13a a,
-exact h
+exact (six13a a) h
 end
 
 def tri (a b c : point) : Prop := a ≠ b ∧ b ≠ c ∧ a ≠ c
@@ -375,10 +367,10 @@ split,
   exact six14 (six26 h).2.2,
 split,
   intro h1,
-  have h2 : c ∈ l a b,
-    rw h1,
-    simp,
-  contradiction,
+  apply h,
+  show c ∈ l a b,
+  rw h1,
+  simp,
 simp
 end
 
@@ -387,12 +379,7 @@ end
 def M (a m b : point) : Prop := B a m b ∧ eqd m a m b 
 
 theorem M.symm {a b m : point} : M a m b → M b m a :=
-begin
-intro h,
-split,
-  exact h.1.symm,
-exact h.2.symm
-end
+λ h, ⟨h.1.symm, h.2.symm⟩
 
 theorem seven3 {a m : point} : M a m a ↔ a = m :=
 begin
@@ -406,32 +393,34 @@ split,
 exact eqd.refl m m
 end
 
-theorem seven4 (a p : point) : ∃! q, M p a q :=
+theorem seven4 {a m p q : point} : M a m p → M a m q → p = q :=
 begin
-cases em (a = p),
-  rw h,
-  existsi p,
-  split,
-    apply seven3.2,
-    refl,
-  intros y hy,
-  cases hy with h1 h2,
-  exact id_eqd h2.symm.flip,
-cases seg_cons a a p p with q hq,
-apply exists_unique.intro,
-exact ⟨hq.1, hq.2.symm⟩,
-intros y hy,
-exact two12 (ne.symm h) hy.1 hy.2.symm hq.1 hq.2
+intros h h1,
+by_cases h_1 : a = m,
+  subst m,
+  exact (id_eqd h.2.symm).symm.trans (id_eqd h1.2.symm),
+exact two12 h_1 h.1 h.2.symm h1.1 h1.2.symm
 end
 
-noncomputable def S (a p : point) : point := classical.some (seven4 a p)
+def S [decidable_eq point] (a p : point) : point :=
+if a = p then a else (seg_cons a a p p).1
 
-theorem seven5 (a p : point) : M p a (S a p) := (classical.some_spec (seven4 a p)).1
+theorem seven5 (a p : point) : M p a (S a p) := 
+begin
+unfold S,
+by_cases h : a = p,
+  subst h,
+  rw if_pos rfl,
+  exact ⟨three1 a a, eqd.refl a a⟩,
+rw if_neg h,
+rcases seg_cons a a p p with ⟨q, hq⟩,
+exact ⟨hq.1, hq.2.symm⟩
+end
 
 theorem seven6 {a p q : point} : M p a q → q = S a p :=
 begin
 intro h,
-exact unique_of_exists_unique (seven4 a p) h (classical.some_spec (seven4 a p)).1
+exact seven4 h (seven5 a p)
 end
 
 @[simp] theorem seven7 (a p : point) : S a (S a p) = p :=

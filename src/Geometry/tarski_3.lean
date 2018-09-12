@@ -3,7 +3,7 @@ open classical set
 namespace Euclidean_plane
 variables {point : Type} [Euclidean_plane point]
 
-local attribute [instance] prop_decidable
+local attribute [instance, priority 0] prop_decidable
 
 -- Right Angles
 
@@ -574,7 +574,7 @@ split,
     exact (seven16 a).1 h,
   have h1 := seven5 (S a q) (S a r),
   suffices : M (S a r) (S a q) (S a (S q r)),
-    exact unique_of_exists_unique (seven4 (S a q) (S a r)) h1 this,
+    exact seven4 h1 this,
   apply (seven14 a).1,
   exact seven5 q r,
 intro h,
@@ -588,7 +588,7 @@ suffices : S a (S a (S (S a q) (S a r))) = (S a (S q r)),
 simp,
 have h1 := seven5 (S a q) (S a r),
 suffices : M (S a r) (S a q) (S a (S q r)),
-  exact unique_of_exists_unique (seven4 (S a q) (S a r)) h1 this,
+  exact seven4 h1 this,
 apply (seven14 a).1,
 exact seven5 q r
 end
@@ -638,7 +638,7 @@ have h12 := seven7 a c,
 rw hap at *,
 have h13 := seven5 p (S p c),
 simp at h13,
-have h14 := unique_of_exists_unique (seven4 p (S p c)) h13 h1,
+have h14 := seven4 h13 h1,
 rw ←h14 at h2,
 exact (seven3.1 h2).symm
 end
@@ -840,7 +840,7 @@ have h10 := seven5 a p,
 cases seg_cons x x r (S a p) with r' hr',
 cases seven25 hr'.2 with m hm,
 have h11 := seven5 m r,
-have h12 := unique_of_exists_unique (seven4 m r) h11 hm.symm,
+have h12 := seven4 h11 hm.symm,
 have h13 : R x m r,
   unfold R,
   rw ←h12 at hr',

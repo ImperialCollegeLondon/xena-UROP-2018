@@ -3,7 +3,7 @@ open classical set
 namespace Euclidean_plane
 variables {point : Type} [Euclidean_plane point]
 
-local attribute [instance] prop_decidable
+local attribute [instance, priority 0] prop_decidable
 
 -- Line Reflections
 
@@ -68,7 +68,7 @@ have h3 : mid p y = x,
   right, left,
   exact h2.1.symm,
 rw h3 at *,
-exact unique_of_exists_unique (seven4 x p) h2 (seven5 x p)
+exact seven4 h2 (seven5 x p)
 end
 
 noncomputable def Sl (A : set point) [line A] (a : point) : point := if h1 : a ∉ A then classical.some (ten2 A h1) else a
@@ -91,22 +91,7 @@ have h2 : ¬a ∉ A,
   contradiction,
 rw dif_neg h2
 end
-/-
-theorem Sl.symm {a b : point} (h : line (l a b)) (p : point) : Sl (l a b) p = Sl (l b a) p :=
-begin
-cases em (p ∈ l a b),
-  rw ten3b h h_1,
-  suffices : p ∈ l b a,
-    rw ten3b h.symm this,
-  simpa [six17 a b] using h_1,
-apply unique_of_exists_unique (ten2 h h_1),
-  exact ten3a h h_1,
-have h_2 : p ∉ l b a,
-  rwa six17,
-have h2 := ten3a h.symm h_2,
-rwa six17 a b
-end
--/
+
 theorem ten3c {A : set point} (h : line A) {a : point} : a ∉ A → Sl A a ∉ A :=
 begin
 intro h1,
@@ -409,14 +394,14 @@ cases em (b = c),
   exact h2,
 cases em (b = z),
   subst z,
-  haveI h5 := six14 (ne.symm h_1),
-  have h6 : a' = @Sl point _inst_1 (l c b) h5 a,--simp only six17 _ _
+  haveI h5 : line (l c b) := six14 (ne.symm h_1),
+  have h6 : a' = Sl (l c b) a,
     suffices : a = S b a',
       rw this,
       exact ten12b h5 h1.symm,
     rw [h_2, mid.symm],
     exact (mid_to_Sa a' a).symm,
-  have h7 : c = @Sl point _inst_1 (l c b) h5 c,
+  have h7 : c = Sl (l c b) c,
     apply (ten3b h5 _).symm,
     simp,
   rw h6,
@@ -627,8 +612,7 @@ have h9 : cong a' b' c' a' b' c₁,
     exact ten10 h5 _ _,
   simpa [h_2.symm, h_1.symm] using h_3,
 have h10 : c₁ = S t c',
-  suffices : M c' t c₁,
-    exact unique_of_exists_unique (seven4 t c') this (seven5 t c'),
+  apply seven4 _ (seven5 t c'),
   split,
     exact ht.2,
   exact four17 (six26 h1).1 ht.1 h9.2.2 h9.2.1,

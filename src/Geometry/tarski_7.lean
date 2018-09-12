@@ -3,7 +3,7 @@ open classical set
 namespace Euclidean_plane
 variables {point : Type} [Euclidean_plane point]
 
-local attribute [instance] prop_decidable
+local attribute [instance, priority 0] prop_decidable 
 
 theorem col_of_perp {a b p q : point} : p ≠ q → R a p q → R b p q → col p a b :=
 λ h h1 h2, not_3dim (seven12b h) (seven5 p q).2 h1 h2
@@ -573,7 +573,7 @@ have h4 : c ∉ l p q,
   apply six14,
   intro h_2,
   subst q,
-  exact (six26 h).1 (unique_of_exists_unique (seven4 p c) h2 h1),
+  exact (six26 h).1 (seven4 h2 h1),
 cases exists_of_exists_unique (eight17 (six14 (six26 h4).1) h4) with c' hc,
 cases exists_of_exists_unique (eight22 (S q c') (S p c')) with x hx,
 cases exists_of_exists_unique (unique_perp x hc.1) with A' hA,
@@ -831,18 +831,18 @@ suffices : eqa (S c b) a c e' a d,
     intro h_1,
     exact h.2.2.1 (six23.2 ⟨l a t, six14 ht.2.2.1.symm, six17a a t, or.inl ht.1, (four11 h_1).1⟩),
   apply h7.symm.flip.trans,
-  haveI had := (nine11 h6).1,
+  replaceI h6 := (nine11 h6).1,
   suffices : S d b = Sl (l a d) b,
     rw this,
-    simpa [ten3b had (six17a a d), ten3b had (six17b a d)] using eleven12a had h7.2.1 h7.1,
-  apply unique_of_Sl had (four10 h.2.2.1).1 _ (perp_of_R h7.2.1.symm (six26 h.2.2.1).2.1 h2.symm),
+    simpa [ten3b h6 (six17a a d), ten3b h6 (six17b a d)] using eleven12a h6 h7.2.1 h7.1,
+  apply unique_of_Sl h6 (four10 h.2.2.1).1 _ (perp_of_R h7.2.1.symm (six26 h.2.2.1).2.1 h2.symm),
   simp [mid_of_S d b, six17b a d],
 apply (he.2.2.symm.trans _).symm.flip,
-haveI hac := (nine11 h4).1,
+replaceI h4 := (nine11 h4).1,
 suffices : S c b = Sl (l a c) b,
   rw this,
-  simpa [ten3b hac (six17a a c), ten3b hac (six17b a c)] using eleven12a hac he.2.2.1 h7.1,
-apply unique_of_Sl hac (four10 h.2.1).1 _ (perp_of_R he.2.2.1.symm (six26 h.2.1).2.1 h1.symm),
+  simpa [ten3b h4 (six17a a c), ten3b h4 (six17b a c)] using eleven12a h4 he.2.2.1 h7.1,
+apply unique_of_Sl h4 (four10 h.2.1).1 _ (perp_of_R he.2.2.1.symm (six26 h.2.1).2.1 h1.symm),
 simp [mid_of_S c b, six17b a c]
 end
 /-
@@ -973,7 +973,7 @@ instance eqa_setoid : setoid (set_angle point) :=
 
 definition angle (point : Type) [Euclidean_plane point] := 
 quotient (@Euclidean_plane.eqa_setoid point _)
-
+/-
 def acute_triple (x : set_angle point) : Prop := ang_acute x.1.1 x.1.2.1 x.1.2.2
 
 theorem acute_well_defined (α β : set_angle point) : α ≈ β → acute_triple α = acute_triple β :=
@@ -989,7 +989,7 @@ exact eleven40a h1 h.symm
 end
 
 def acute := quotient.lift acute_triple (@acute_well_defined point _)
-
+-/
 def seg_cons_dist {a b : point} (hab : a ≠ b) (D : dist point) : {x // B a b x ∧ quotient.mk (b, x) = D} :=
 ⟨quotient.lift_on D (λ x : point × point, (seg_cons b x.1 x.2 a).1) 
 (begin
@@ -1002,29 +1002,67 @@ end), begin apply quotient.induction_on D,
 rintros ⟨x, y⟩,
 exact ⟨(seg_cons b x y a).2.1, quotient.sound (seg_cons b x y a).2.2⟩ end⟩
 
+instance : has_zero (dist point) := ⟨⟦(P1, P1)⟧⟩
 
-noncomputable def cos_triple (x : set_angle point) (h : acute_triple x) (C : dist point) : dist point :=
+theorem zero_def : (0 : dist point) = ⟦(P1, P1)⟧ := rfl
+
+@[simp] theorem zero_dist (a : point) : ⟦(a, a)⟧ = (0 : dist point) :=
 begin
-rcases x with ⟨⟨a, b, c⟩, h1⟩,
-dsimp only at h1,
-by_cases h_1 : sided b a c,
-  exact C,
-cases three14 a b with d hd,
-cases seg_cons_dist h1.1 C with d hd,
-have h2 : ¬col a b c,
-  apply mt six1,
-  apply not_or _ h_1,
-  intro h_2,
-  rcases h with ⟨x, y, z, hx⟩,
-  dsimp only at hx,
-  apply eleven38b hx.2,
-  refine ⟨eleven31b (eleven38a.1 hx.2).2.2.1 (eleven38a.1 hx.2).2.2.2.1 h1.1 h1.2 h_2, λ h_3, _⟩,
-  exact (eight9 (eleven17 hx.1 h_3) (or.inl h_2)).elim h1.1 h1.2,
-cases indefinite_description (λ x, xperp x (l c b) (l a x)) 
-(exists_of_exists_unique (eight17 (six14 h1.2) (four10 h2).2.2.2.2)) with x hx,
-exact quotient.mk (b, x)
+rw zero_def,
+apply quotient.sound,
+exact two8 a P1
 end
 
---def cos (α : angle point) [h : acute α] (C : dist point) : dist point := sorry
+noncomputable def thirteen4 {a b c : point} {C : dist point} : ¬col a b c → C ≠ 0 → {x : point × point // sided b a x.1 ∧ ⟦(b, x.1)⟧ = C ∧ xperp x.2 (l b c) (l x.1 x.2)} :=
+begin
+intros h h1,
+cases three14 a b with d hd,
+cases seg_cons_dist hd.2.symm C with p hp,
+have h2 : b ≠ p,
+  intro h_1,
+  subst p,
+  apply h1,
+  rw ←zero_dist b,
+  exact hp.2.symm,
+have h3 : sided b a p,
+  exact ⟨(six26 h).1, h2.symm, five2 hd.2.symm hd.1.symm hp.1⟩,
+have h4 : ¬col b c p,
+  intro h_1,
+  apply (four10 h).2.1,
+  exact five4 h2 (four11 (six4.1 h3).1).2.2.1 (four11 h_1).1,
+cases indefinite_description (λ x, xperp x (l b c) (l p x)) (exists_of_exists_unique (eight17 (six14 (six26 h).2.1) h4)) with x hx,
+exact ⟨⟨p, x⟩, h3, hp.2, hx⟩
+end
 
+noncomputable def cos_triple (x : set_angle point) (C : dist point) : dist point :=
+if h : C = 0 then 0 else
+(if h1 : (col x.1.1 x.1.2.1 x.1.2.2) then C else (
+quotient.mk ((((x.val).snd).fst), (thirteen4 h1 h).1.2)))
+
+noncomputable def cos (α : angle point) (C : dist point) : dist point :=
+quotient.lift_on α (λ x : set_angle point, cos_triple x C) (λ x y h, 
+begin
+dsimp,
+unfold cos_triple,
+by_cases h1 : C = 0,
+  rw [dif_pos h1, dif_pos h1],
+rw [dif_neg h1, dif_neg h1],
+rcases x with ⟨⟨a, b, c⟩, h1⟩,
+rcases y with ⟨⟨d, e, f⟩, h2⟩,
+dsimp [- ne.def] at *,
+change eqa a b c d e f at h,
+by_cases h2 : col a b c,
+  have h3 := eleven21d h2 h,
+  rw [dif_pos h2, dif_pos h3],
+have h3 : ¬col d e f,
+  intro h_1,
+  exact h2 (eleven21d h_1 h.symm),
+rw [dif_neg h2, dif_neg h3],
+apply quotient.sound,
+rcases thirteen4 h2 h1 with ⟨⟨p, x⟩, h4⟩,
+rcases thirteen4 h3 h1 with ⟨⟨q, y⟩, h5⟩,
+dsimp at h4 h5,
+sorry
+end
+  
 end Euclidean_plane

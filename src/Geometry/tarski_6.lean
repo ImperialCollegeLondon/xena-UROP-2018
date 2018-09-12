@@ -3,7 +3,7 @@ open classical set
 namespace Euclidean_plane
 variables {point : Type} [Euclidean_plane point]
 
-local attribute [instance] prop_decidable
+local attribute [instance, priority 0] prop_decidable
 
 theorem eleven22a {a b c p a' b' c' p' : point} : Bl a (l b p) c → Bl a' (l b' p') c' → eqa a b p a' b' p' →
 eqa p b c p' b' c' → eqa a b c a' b'  c' :=
