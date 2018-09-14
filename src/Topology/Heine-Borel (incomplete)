@@ -1,0 +1,670 @@
+import analysis.real
+import logic.basic
+import tactic.norm_num
+import tactic.split_ifs
+import tactic.ring
+open lattice set filter classical
+local attribute [instance, priority 0] classical.prop_decidable
+
+section my_logic
+universe u
+
+theorem for_all_not_all {α : Type u} (P Q R: α → Prop): (∀ x (H : R x), ¬ (P x ∧ Q x)) ↔  ∀ x (H : R x), P x → ¬ Q x := 
+begin
+split,
+    {intro Hnand, assume x Hx,
+        exact not_and.mp (Hnand x Hx)},
+    {intro Hton, assume x Hx,
+        exact not_and.mpr (Hton x Hx)}
+end
+
+
+theorem exists_not_imp {α :  Type u}(a b:α→ Prop): (∃ x,¬(a x → b x))↔ ∃ x,a x ∧ ¬b x:=
+have A:∀ x, ¬(a x → b x)↔ a x ∧ ¬b x, from assume x, by rw not_imp,
+exists_congr A
+
+ 
+example {α :Type u} (A:set α) (P:Prop): (∀  x⊆ A, P) ↔ ∀ x (H:x⊆ A),  P:= iff.rfl
+
+theorem exists_not_bex {α :Type u}(P :α → Prop)(Q P':α→ α→ Prop): (∃ x, P x ∧ ¬ ∃ y (H:P' x y), Q x y)↔ ∃ x, P x ∧ ∀ y (H:P' x y), ¬ Q x y:= 
+have A:∀ x, P x ∧ ¬ (∃ y (H:P' x y), Q x y)↔P x ∧ ∀ y (H:P' x y), ¬ Q x y,
+from assume x, calc
+    P x ∧ ¬ (∃ y (H:P' x y), Q x y)↔P x ∧ ∀ y (H:P' x y), ¬ Q x y: by rw not_bex,
+exists_congr A
+
+theorem exists_not_imp2 {α :Type u}{R a b:α → Prop}:(∃ x (H: R x), ¬(a x → ¬ b x)) ↔∃ x (H: R x), a x ∧ b x:=
+have A: ∀ (x:α ) (H:R x), ¬(a x → ¬ b x) ↔ a x ∧ b x, from (assume (y:α), assume: R y, by rw [not_imp, not_not]),
+bex_congr A
+
+end my_logic
+
+section intervals
+
+def closed_interval (a b : ℝ) : set ℝ := {r : ℝ | a ≤ r ∧ r ≤ b} 
+notation ⟦a,b] := closed_interval a b 
+
+def clopen (a b : ℝ) : set ℝ := {r : ℝ | a ≤ r ∧ r < b}
+notation ⟦a,b) := clopen a b
+
+theorem intervals_equal {a b c d :ℝ} (H1:a=c) (H2: b=d): ⟦a,b] = ⟦c,d]:= 
+begin
+rw [H1, H2]
+end
+
+theorem subinter_subset {a b c d: ℝ} (H1: a ≤ c ) (H2:  d ≤ b): 
+⟦c,d] ⊆ ⟦a,b]:=
+assume x, assume : x∈ ⟦c, d], and.intro (le_trans H1 this.left) (le_trans this.right H2)
+
+theorem halfway {a b:ℝ }(H:a≤ b): a ≤ (a + b) / 2 ∧ (a + b) / 2 ≤ b:=
+⟨le_div_of_mul_le (by norm_num) (by rwa [mul_two,add_le_add_iff_left]),
+ div_le_of_le_mul (by norm_num) (by rwa [two_mul,add_le_add_iff_right])⟩
+
+theorem inter_eq_union {a b c :ℝ }(H1 : a ≤ c)(H2 : c ≤ b): ⟦a, b ]= ⟦a,c ] ∪ ⟦c, b]:=
+begin
+ext ,split,
+    {intro Hab,
+        by_cases Hc: (x ≤ c),
+            left, exact ⟨Hab.1,Hc⟩,
+            right, exact ⟨le_of_lt $ lt_of_not_ge Hc,Hab.2⟩ 
+    },
+    {intro H, cases H,
+            exact ⟨H.1,le_trans H.2 H2⟩,
+            exact ⟨le_trans H1 H.1,H.2⟩ 
+    }
+end
+
+lemma notnot {p : Prop} : ¬ ¬ p ↔ p := not_not
+
+lemma clopen_nat_inter (n m : ℕ) (Hneq : n ≠ m) (a : ℝ) : 
+¬ (a ∈ clopen (n : ℝ) (n + 1 : ℝ) ∧ a ∈ clopen (m : ℝ) (m + 1 : ℝ)) :=
+classical.by_contradiction $ λ h,
+begin
+have h' : a ∈ clopen (n : ℝ) (n + 1 : ℝ) ∧ a ∈ clopen (m : ℝ) (m + 1 : ℝ) := notnot.mp h,
+exact or.cases_on (lt_or_ge n m) (λ n_lt_m, 
+(not_lt_of_le (le_trans (nat.cast_le.mpr (nat.succ_le_of_lt n_lt_m)) h'.2.1)) h'.1.2)
+(λ m_le_n, 
+have m_lt_n: m < n := or_iff_not_imp_left.mp (le_iff_eq_or_lt.mp m_le_n) (ne.symm Hneq),
+(not_lt_of_le (le_trans (nat.cast_le.mpr (nat.succ_le_of_lt m_lt_n)) h'.1.1)) h'.2.2)
+end
+
+section open_intervals
+variables a b c d : ℝ
+variable s : set ℝ
+variable S : set (set ℝ)
+
+def open_cover : Prop:=
+(∀ s ∈ S,is_open s) ∧ s ⊆ ⋃₀ S
+
+def openn : set ℝ := {r : ℝ | a < r ∧ r < b}
+
+def open_lt : set ℝ := {r : ℝ | r < a}
+
+def open_gt : set ℝ := {r : ℝ | a < r}
+
+lemma openn_eq_inter_lt_gt : openn a b = open_gt a ∩ open_lt b := rfl
+
+lemma open_generator : let generators := {s : set ℝ | ∃ (a : ℝ), s = {b : ℝ | a < b} ∨ s = {b : ℝ | b < a}} in
+ open_lt a ∈ generators ∧ open_gt a ∈ generators :=
+begin
+split,
+    {existsi a, right, exact rfl},
+    {existsi a, left, exact rfl}
+end
+
+theorem open_lt_open : is_open (open_lt a) :=
+begin
+rw @is_open_iff_generate_intervals _ _ _ _ (open_lt a),
+exact topological_space.generate_open.basic _ (open_generator a).1
+end
+
+theorem open_gt_open : is_open (open_gt a) :=
+begin
+rw @is_open_iff_generate_intervals _ _ _ _ (open_gt a),
+exact topological_space.generate_open.basic _ (open_generator a).2
+end
+ 
+theorem openn_open : is_open (openn a b) :=
+begin
+rw @is_open_iff_generate_intervals _ _ _ _ (openn a b),
+exact topological_space.generate_open.inter _ _ 
+(is_open_iff_generate_intervals.mp (open_gt_open _)) (is_open_iff_generate_intervals.mp (open_lt_open _))
+end
+
+def covering_R : set (set ℝ) :=
+{s | s = open_lt 0 ∨ ∃ n : ℕ, s = openn (n : ℝ) (n + 1 : ℝ) ∨ 
+s = openn (n - 1 / 2) (n + 1 / 2)}
+
+theorem open_covering_R {s : set ℝ} (s_in_cov : s ∈ covering_R) : is_open s :=
+or.cases_on s_in_cov (λ h, begin rw h, exact open_lt_open _ end) $
+λ int_or_half, exists.elim int_or_half $ λ n hn,
+or.cases_on hn (λ int, begin rw int, exact openn_open _ _ end)
+(λ half, begin rw half, exact openn_open _ _ end)
+
+lemma in_ball {b : ℝ} (hpos : 0 < b) : a ∈ openn (a - b) (a + b) :=
+⟨sub_lt_iff_lt_add.mpr (lt_add_of_pos_right _ hpos),lt_add_of_pos_right _ hpos⟩
+
+end open_intervals
+
+end intervals
+
+section closed_intervals_are_compact
+
+section limits
+
+variables a b c l : ℝ
+variable f : ℕ → ℝ
+
+
+theorem le_ε_to_le (Hle_ε : ∀ ε > 0, a ≤ b + ε) : a ≤ b := sorry
+
+
+lemma lim_closed_ge (Hlim : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, abs (f n - l) < ε) 
+(Hge : ∀ n, a ≤ f n) : a ≤ l :=
+le_ε_to_le a l $
+λ ε Hε, exists.elim (Hlim ε Hε) $ λ N HN,
+have basic_ineq : f N - l < ε := lt_of_le_of_lt (le_abs_self _) (HN N (le_refl _)),
+le_of_lt $ lt_of_le_of_lt (Hge N) (lt_add_of_sub_left_lt basic_ineq)
+
+lemma lim_closed_le (Hlim : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, abs (f n - l) < ε) 
+(Hle : ∀ n, f n ≤ b) : l ≤ b :=
+le_ε_to_le l b $
+λ ε Hε, exists.elim (Hlim ε Hε) $ λ N HN,
+have basic_ineq : l - f N < ε := 
+lt_of_le_of_lt (le_trans (le_abs_self _) (le_of_eq (abs_sub _ _))) (HN N (le_refl _)),
+le_of_lt $ lt_of_lt_of_le (lt_add_of_sub_left_lt basic_ineq) $ add_le_add_right (Hle N) _
+
+theorem lim_in_closed (Hlim : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, abs (f n - l) < ε) 
+(Hge : ∀ n, a ≤ f n) (Hle : ∀ n, f n ≤ b) : l ∈ ⟦a,b] := 
+⟨lim_closed_ge _ _ _ Hlim Hge, lim_closed_le _ _ _ Hlim Hle⟩
+
+end limits
+
+theorem compact_iff_finite_cover_me (s:set ℝ): compact s ↔ (∀ c, open_cover s c→ ∃ c'⊆c, finite c' ∧ s ⊆ ⋃₀ c'):=
+iff.intro
+(assume h1, assume c, assume: open_cover s c,compact_elim_finite_subcover h1 (and.left ‹open_cover s c›) 
+(and.right ‹ open_cover s c›))
+(assume h2, have h2':∀c, (∀t∈c, is_open t) → s ⊆ ⋃₀ c → ∃c'⊆c, finite c' ∧ s ⊆ ⋃₀ c',
+from (assume c, assume opens:(∀t∈c, is_open t), assume covered: s ⊆ ⋃₀ c, h2 c (and.intro opens covered)),
+compact_of_finite_subcover h2')
+
+lemma not_compact (a b : ℝ): ¬ compact ⟦a,b] →
+∃ c, open_cover ⟦a,b] c ∧ ∀ c' ⊆ c, ⟦a,b] ⊆ ⋃₀ c'→ ¬ finite c' :=
+begin 
+rw [compact_iff_finite_cover_me, classical.not_forall, exists_not_imp, exists_not_bex],
+intro H, cases H with x hx, existsi x, exact ⟨hx.1, 
+λ c', λ hc', imp_not_comm.mp (not_and.mp (hx.2 c' hc'))⟩
+end
+
+theorem covering_by_parts {c1 c2:set (set ℝ)} {a b: ℝ } (H0:a≤ b)
+(H1: ⟦a,(a + b) / 2] ⊆ ⋃₀ c1)(H2: ⟦(a + b) / 2,b]⊆ ⋃₀ c2): 
+⟦a,b]⊆ ⋃₀ (c1 ∪ c2):=
+have A: ⋃₀ (c1 ∪ c2) = ⋃₀ c1 ∪ ⋃₀ c2 := sUnion_union c1 c2,
+have B:⟦a,b] = ⟦a,(a + b) / 2]∪ ⟦(a + b) / 2,b] := inter_eq_union (halfway H0).1 (halfway H0).2,
+have C:⟦a,(a + b) / 2]∪ ⟦(a + b) / 2,b]⊆ ⋃₀ c1 ∪ ⋃₀ c2 := union_subset_union H1 H2,
+have D: ⟦a,b]⊆ ⋃₀ c1 ∪ ⋃₀ c2, from subset.trans (subset.antisymm_iff.mp B).left C,
+subset.trans D (subset.antisymm_iff.mp A).right
+
+theorem open_cover_subset {c:set (set ℝ)} {S1 S2:set ℝ} 
+(H1: open_cover S1 c) (H2: S2 ⊆ S1): open_cover S2 c:=
+⟨H1.left,subset.trans H2 H1.right⟩ 
+
+theorem open_cover_subinterval {a b c d : ℝ} {C : set (set ℝ)} (H1 : a ≤ c )
+(H2 :  d ≤ b) (H3 : open_cover ⟦a,b] C): open_cover ⟦c,d] C :=
+open_cover_subset H3 (subinter_subset H1 H2)
+
+theorem infinite_cover_basic {a b:ℝ }{c:set (set ℝ )}
+(H0:a≤ b)(H:∀  c'⊆c, ⟦a,b] ⊆ ⋃₀ c'→ ¬ finite c'):
+(∀  c'⊆c, ⟦a, (a + b) / 2] ⊆ ⋃₀ c' → ¬ finite c') ∨ ∀ c' ⊆ c, 
+⟦( a + b) / 2, b] ⊆ ⋃₀ c'→ ¬ finite c':=
+
+classical.by_contradiction
+(assume :¬ ((∀ c' ⊆ c , ⟦a, (a + b) / 2] ⊆ ⋃₀ c'→ ¬ finite c') 
+∨ ∀  c'⊆c, ⟦( a + b) / 2, b] ⊆ ⋃₀ c'→ ¬ finite c'),
+
+have A: ¬ ((∀  c'⊆c, ⟦a,(a+b)/2] ⊆ ⋃₀ c'→ ¬ finite c') ∨ 
+∀ c' ⊆ c, ⟦( a + b) / 2, b] ⊆ ⋃₀ c'→ ¬ finite c')
+↔ (∃ c' ⊆ c, ⟦a, (a + b) / 2] ⊆ ⋃₀ c'∧ finite c') ∧
+∃ c' ⊆ c, ⟦( a + b) / 2, b] ⊆ ⋃₀ c'∧ finite c':= 
+by rw [not_or_distrib, classical.not_ball, 
+classical.not_ball,exists_not_imp2, exists_not_imp2],
+
+have B: (∃ c' ⊆ c, ⟦a, (a + b) / 2] ⊆ ⋃₀ c' ∧ finite c') ∧
+∃ c' ⊆ c, ⟦(a + b) / 2, b] ⊆ ⋃₀ c'∧ finite c', from A.mp this,
+
+have Main: ∃ c'⊆c, ⟦a, b] ⊆ ⋃₀ c'∧ finite c':=
+begin
+cases B.1 with x hx, cases hx with hx1 hx2,
+cases B.2 with y hy, cases hy with hy1 hy2,
+existsi x∪y, existsi union_subset hx1 hy1,
+exact ⟨covering_by_parts H0 hx2.1 hy2.1, finite_union hx2.2 hy2.2⟩
+end,
+
+have auxiliary_logic: (¬ ∃ c'⊆c, ⟦a, b] ⊆ ⋃₀ c'∧ finite c')↔ 
+∀  c'⊆c, ⟦a,b] ⊆ ⋃₀ c'→ ¬ finite c', by rw [not_bex, for_all_not_all],
+
+ (auxiliary_logic.mpr H) Main
+)
+
+section construction_partition
+
+variables {a b c d : ℝ} {C : set (set ℝ)}
+
+definition no_finite_subcover (C : set (set ℝ)) (s t : ℝ) := 
+∀ C' ⊆ C, ⟦s,t] ⊆ ⋃₀ C' → ¬ finite C'
+
+-- this is the structure you want
+structure no_finite_subcover_int (C : set (set ℝ)) :=
+(s : ℝ)
+(t : ℝ)
+(less_than : s ≤ t)
+(no_fin : no_finite_subcover C s t)
+
+
+theorem no_fin_cov_subint (I : no_finite_subcover_int C) :
+no_finite_subcover C I.1 ((I.1 + I.2) / 2) ∨ no_finite_subcover C ((I.s + I.t) / 2) I.t :=
+infinite_cover_basic I.3 I.4 
+
+/-- this function produces a smaller interval with no finite subcover -/
+noncomputable definition no_fin_cov_subint_of_no_fin_cov_int
+(I : no_finite_subcover_int C) : no_finite_subcover_int C :=
+dite (no_finite_subcover C I.s ((I.s + I.t) / 2)) 
+(λ h, ⟨I.s, ((I.s + I.t) / 2), (halfway I.3).1, h⟩)
+(λ noth, ⟨((I.s + I.t) / 2), I.t, (halfway I.3).2, 
+or.elim (no_fin_cov_subint I) (λ h,false.elim (noth h)) id⟩)
+
+
+theorem length_halved (I : no_finite_subcover_int C) :
+let J := no_fin_cov_subint_of_no_fin_cov_int I in (J.t - J.s) = (I.t - I.s) / 2 :=
+begin
+  dsimp,
+  unfold no_fin_cov_subint_of_no_fin_cov_int,
+  split_ifs,
+  ring,ring
+end
+
+-- this defines a sequence of no_finite_subcover_ints
+noncomputable definition interval_sequence
+(Hno_fin_cover : no_finite_subcover C a b) (H0 : a ≤ b) : 
+ℕ → no_finite_subcover_int C := λ n, nat.rec_on n
+-- n=0 case
+⟨a, b, H0, Hno_fin_cover⟩
+-- inductive step
+(λ d Id, no_fin_cov_subint_of_no_fin_cov_int Id)
+
+noncomputable definition length (Hno_fin_cover : no_finite_subcover C a b) (H0 : a ≤ b) (n : ℕ) : ℝ :=
+(interval_sequence Hno_fin_cover H0 n).2 - (interval_sequence Hno_fin_cover H0 n).1
+
+
+theorem in_previous (I : no_finite_subcover_int C) :
+  let s' := (no_fin_cov_subint_of_no_fin_cov_int I).s in
+  let t' := (no_fin_cov_subint_of_no_fin_cov_int I).t in
+  (I.s ≤ s' ∧ s' ≤ I.t) ∧ (I.s ≤ t' ∧ t' ≤ I.t) :=
+begin
+  simp only [no_fin_cov_subint_of_no_fin_cov_int],
+  split_ifs,
+    exact ⟨⟨le_refl _,I.3⟩,⟨(halfway I.3).1,(halfway I.3).2⟩⟩,
+    exact ⟨⟨(halfway I.3).1,(halfway I.3).2⟩,⟨I.3,le_refl _⟩⟩
+end
+
+theorem nested (Hno_fin_cover : no_finite_subcover C a b) (Hleq : a ≤ b) (n : ℕ) :
+let sequence := interval_sequence Hno_fin_cover Hleq in 
+((sequence n).1 ≤ (sequence (n+1)).1 ∧ (sequence (n+1)).1 ≤ (sequence n).2) ∧
+((sequence n).1 ≤ (sequence (n+1)).2 ∧ (sequence (n+1)).2 ≤ (sequence n).2) := 
+let sequence := interval_sequence Hno_fin_cover Hleq in 
+begin
+    have A : (sequence (n + 1)).1 = (no_fin_cov_subint_of_no_fin_cov_int (sequence n)).1 
+    := rfl,
+    have B : (sequence (n + 1)).2 = (no_fin_cov_subint_of_no_fin_cov_int (sequence n)).2 
+    := rfl,
+    exact ⟨⟨le_trans (in_previous (sequence n)).1.1 (le_antisymm_iff.mp A).2, 
+    le_trans (le_antisymm_iff.mp A).1 (in_previous (sequence n)).1.2⟩,
+    ⟨le_trans (in_previous (sequence n)).2.1 (le_antisymm_iff.mp B).2, 
+    le_trans (le_antisymm_iff.mp B).1 (in_previous (sequence n)).2.2⟩⟩
+end
+
+
+theorem nested_general (Hno_fin_cover : no_finite_subcover C a b) (Hleq : a ≤ b) 
+(n m : ℕ) :
+let sequence := interval_sequence Hno_fin_cover Hleq in 
+((sequence n).1 ≤ (sequence (n+m)).1 ∧ (sequence (n+m)).1 ≤ (sequence n).2) ∧
+((sequence n).1 ≤ (sequence (n+m)).2 ∧ (sequence (n+m)).2 ≤ (sequence n).2) := 
+let sequence := interval_sequence Hno_fin_cover Hleq in 
+let nest := nested Hno_fin_cover Hleq in
+begin
+induction m with t ht,
+    exact ⟨⟨le_refl _, (sequence n).3⟩, ⟨(sequence n).3, le_refl _⟩⟩,
+rw [nat.succ_eq_add_one, ←add_assoc],
+exact ⟨⟨le_trans ht.1.1 (nest (n+t)).1.1, le_trans (nest (n+t)).1.2 ht.2.2⟩,
+⟨le_trans ht.1.1 (nest (n+t)).2.1, le_trans (nest (n+t)).2.2 ht.2.2⟩⟩
+end
+
+theorem nested_general' (Hno_fin_cover : no_finite_subcover C a b) (Hleq : a ≤ b) 
+(n N : ℕ) (H : N ≤ n) : let sequence := interval_sequence Hno_fin_cover Hleq in 
+((sequence N).1 ≤ (sequence (n)).1 ∧ (sequence (n)).1 ≤ (sequence N).2) ∧
+((sequence N).1 ≤ (sequence (n)).2 ∧ (sequence (n)).2 ≤ (sequence N).2) := 
+begin
+cases (@nat.le.dest _ _ H) with k hk,
+rw ←hk,
+exact nested_general Hno_fin_cover Hleq N k
+end
+
+theorem interval_seq_length
+(Hno_fin_cover : no_finite_subcover C a b) (Hleq : a ≤ b) (n : ℕ) :
+length Hno_fin_cover Hleq n = (b - a) / 2 ^ n := 
+begin
+induction n with t ht,
+    calc  (interval_sequence Hno_fin_cover Hleq 0).2 - (interval_sequence Hno_fin_cover Hleq 0).1 = 
+        b - a : rfl
+        ... = (b - a) / 1 : by rw div_one
+        ... = (b - a) / 2 ^ 0 : rfl,
+    have def_seq : interval_sequence Hno_fin_cover Hleq (nat.succ t) = 
+    no_fin_cov_subint_of_no_fin_cov_int (interval_sequence Hno_fin_cover Hleq t) := rfl,
+    rw [(pow_add _ t 1), ←div_div_eq_div_mul, ←ht],
+    exact length_halved (interval_sequence Hno_fin_cover Hleq t)
+end
+
+
+lemma little_cancel : a + (-a) ≤ b + (-a) → 0 ≤ b - a :=
+begin
+calc a + -a ≤ b + -a → a - a ≤ b - a : λ h, le_trans (le_of_eq (eq.symm (sub_eq_add_neg _ _))) h
+    ... → 0 ≤ b - a : λ h, le_trans (le_of_eq (sub_self _).symm) h,
+end
+
+theorem positive_length 
+(Hno_fin_cover : no_finite_subcover C a b) (Hleq : a ≤ b) (n : ℕ) :
+0 ≤ length Hno_fin_cover Hleq n := 
+begin
+induction n with t ht,
+    unfold length, 
+    unfold interval_sequence,
+    exact little_cancel (add_le_add_right Hleq _),
+have half : length Hno_fin_cover Hleq (t + 1) = (length Hno_fin_cover Hleq t) / 2 := 
+length_halved (interval_sequence Hno_fin_cover Hleq t),
+rw [half, le_div_iff (show 0 < (2 : ℝ), by norm_num), zero_mul],
+exact ht
+end
+
+theorem abs_length (Hno_fin_cover : no_finite_subcover C a b) (Hleq : a ≤ b) (n : ℕ) :
+length Hno_fin_cover Hleq n = abs (length Hno_fin_cover Hleq n) := 
+(abs_of_nonneg (positive_length Hno_fin_cover Hleq n)).symm
+
+noncomputable definition interval_low_seq
+(Hno_fin_cover : no_finite_subcover C a b) (Hleq : a ≤ b) : ℕ → ℝ :=
+λ n, (interval_sequence Hno_fin_cover Hleq n).1
+
+theorem between_shorter (H1 : b ≤ c) (H2 : c ≤ a) (H3 : b ≤ d) (H4 : d ≤ a) : 
+abs (c - d) ≤ abs (a - b) := sorry
+
+lemma cau_bound {n N : ℕ} (Hno_fin_cover : no_finite_subcover C a b) (Hleq : a ≤ b)
+ (Hn : N ≤ n) : 
+ let seq := interval_low_seq Hno_fin_cover Hleq in
+abs ((seq n) - (seq N)) ≤ (b - a) / 2 ^ N := 
+let seq := interval_low_seq Hno_fin_cover Hleq in
+begin
+rw [←(interval_seq_length Hno_fin_cover Hleq N), 
+←(abs_of_nonneg (positive_length Hno_fin_cover Hleq N))],
+exact between_shorter (nested_general' Hno_fin_cover Hleq n N Hn).1.1
+(nested_general' Hno_fin_cover Hleq n N Hn).1.2 (nested_general' Hno_fin_cover Hleq N N (le_refl _)).1.1
+(nested_general' Hno_fin_cover Hleq N N (le_refl _)).1.2
+end
+
+lemma one_le_pow {a : ℝ} (n : ℕ) (Hleq : 1 ≤ a) : 1 ≤ a ^ n :=
+begin
+induction n with t ht,
+    exact le_refl _,
+rw [pow_add a t 1, pow_one],
+exact le_trans Hleq ((le_mul_iff_one_le_left (lt_of_lt_of_le (show 0 < (1 : ℝ), by norm_num) Hleq)).mpr ht)
+end
+
+theorem le_pow (n : ℕ) : (n : ℝ) ≤ (2 : ℝ) ^ n :=
+begin
+induction n with t ht,
+    rw pow_zero,
+    norm_num,
+rw nat.succ_eq_add_one,
+rw (@pow_add ℝ _ 2 t 1), 
+rw pow_one,
+rw mul_two,
+have plus_one : 1 + (t : ℝ) ≤ 1 + 2 ^ t := (add_le_add_iff_left 1).mpr ht,
+have plus_one_le_double : 1 + (2 : ℝ) ^ t ≤ 2 ^ t + 2 ^ t := (@add_le_add_iff_right ℝ _ _ _ (2 ^ t)).mpr 
+(one_le_pow t (show 1 ≤ (2 : ℝ), by norm_num)),
+exact le_trans plus_one plus_one_le_double
+end
+
+lemma cau_ineq {N : ℕ} {ε : ℝ} (Hε : ε > 0) (H : (N : ℝ) > (b - a) / ε) :
+(b - a) / 2 ^ N < ε :=
+begin
+conv begin
+to_rhs,
+rw ←(div_one ε),
+end,
+rw (div_lt_div_iff (pow_pos (show 0 < (2 : ℝ), by norm_num) N) (show 0 < (1 : ℝ), by norm_num)),
+rw mul_one,
+have ltN : b - a < ε * N := (div_lt_iff' Hε).mp H,
+have lepow : ε * N  ≤ ε * 2 ^ N := (mul_le_mul_left Hε).mpr (le_pow N),
+exact lt_of_lt_of_le ltN lepow
+end
+
+theorem cau_interval_low (Hno_fin_cover : no_finite_subcover C a b) (Hleq : a ≤ b) : 
+is_cau_seq abs (interval_low_seq Hno_fin_cover Hleq) := 
+λ (ε : ℝ) (Hpos : ε > 0),
+begin
+    cases (exists_nat_gt ((b - a) / ε)) with N HN,
+    existsi N,
+    exact λ n (Hn : N ≤ n), lt_of_le_of_lt (cau_bound Hno_fin_cover Hleq Hn) (cau_ineq Hpos HN)
+end
+
+theorem interval_low_converges (Hno_fin_cover : no_finite_subcover C a b) (Hleq : a ≤ b) : 
+∃ x : ℝ, ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, abs (interval_low_seq Hno_fin_cover Hleq n - x) < ε :=
+exists.elim (real.cau_seq_converges ⟨interval_low_seq Hno_fin_cover Hleq, 
+cau_interval_low Hno_fin_cover Hleq⟩) $
+λ l Hl, exists.intro l $
+λ ε Hε, exists.elim (cau_seq.equiv_def₃ Hl Hε) $
+λ N HN, exists.intro N $ 
+HN N (le_refl _)
+
+lemma interval_low_in (Hno_fin_cover : no_finite_subcover C a b) (Hle : a ≤ b) (n : ℕ): 
+let seq := interval_low_seq Hno_fin_cover Hle n in a ≤ seq ∧ seq ≤ b :=
+⟨(nested_general' Hno_fin_cover Hle n 0 (nat.zero_le n)).1.1, 
+(nested_general' Hno_fin_cover Hle n 0 (nat.zero_le n)).1.2⟩
+
+theorem balls_generate_top {s : set ℝ} (H : is_open s) : 
+∀(x : ℝ), x∈s → ∃ε>0, {y | abs (y - x) < ε} ⊆ s := is_open_metric.mp H
+
+lemma half_le_self (H : 0 ≤ a) : a / 2 ≤ a := sorry
+
+lemma length_decreases_aux {n N : ℕ} (Hno_fin_cover : no_finite_subcover C a b) (Hle : a ≤ b):
+length Hno_fin_cover Hle (N + n) ≤ length Hno_fin_cover Hle N :=
+begin
+induction n with t ht,
+    rw add_zero,
+rw [nat.succ_eq_add_one , ←add_assoc],
+have halved : length Hno_fin_cover Hle (N + t + 1) = (length Hno_fin_cover Hle (N + t)) / 2 := 
+length_halved (interval_sequence Hno_fin_cover Hle (N + t)),
+rw halved,
+exact (le_trans (half_le_self (positive_length Hno_fin_cover Hle _)) ht)
+end
+
+lemma length_decreases {n N : ℕ} (Hno_fin_cover : no_finite_subcover C a b) (Hle : a ≤ b) (HNn : N ≤ n):
+length Hno_fin_cover Hle n ≤ length Hno_fin_cover Hle N := 
+begin
+cases nat.le.dest HNn with k hk,
+rw ←hk, exact length_decreases_aux Hno_fin_cover Hle
+end
+
+lemma small_length (Hno_fin_cover : no_finite_subcover C a b) (Hle : a ≤ b) {ε : ℝ} (Hε : ε > 0) :
+∃ N : ℕ, ∀ n ≥ N, length Hno_fin_cover Hle n < ε := 
+begin
+    cases (exists_nat_gt ((b - a) / ε)) with N hN,
+    existsi N, exact λ n hn, lt_of_le_of_lt (length_decreases Hno_fin_cover Hle hn)
+    (lt_of_le_of_lt (le_of_eq (interval_seq_length Hno_fin_cover Hle N)) (cau_ineq Hε hN))
+end
+
+lemma ball_convex (x r : ℝ) (Ha : a ∈ ball x r) (Hb : b ∈ ball x r) : ⟦a,b] ⊆ ball x r := sorry
+
+lemma three_cancel : abs ((a - b) + (b - c)) = abs (a - c) := by ring
+
+lemma add_half : a / 2 + a / 2 = a := by rw [div_add_div_same, half_add_self]
+
+lemma limit_cover (Hno_fin_cover : no_finite_subcover C a b) (Hleq : a ≤ b) 
+(Hcover : open_cover ⟦a,b] C) :
+let seq := interval_sequence Hno_fin_cover Hleq in
+∃ c ∈ C, ∃ n : ℕ, ⟦(seq n).1,(seq n).2] ⊆ c := 
+    let seq := interval_sequence Hno_fin_cover Hleq in
+    let inside := interval_low_in Hno_fin_cover Hleq in
+    begin
+    cases interval_low_converges Hno_fin_cover Hleq with l hl,
+    have lcover : ∃ c ∈ C, l ∈ c := Hcover.2 (lim_in_closed _ _ _ _ hl (λ n, (inside n).1) 
+    (λ n, (inside n).2)),
+    cases lcover with c hc, cases hc with inC l_in_c,
+    cases is_open_metric.mp (Hcover.1 c inC) l l_in_c with r hr, cases hr with zero ball,
+    cases hl (r / 2) (half_pos zero) with N' hN', 
+    cases @small_length _ _ _ Hno_fin_cover Hleq (r / 2) (half_pos zero) with N'' hN'',
+    have tin : abs ((interval_sequence Hno_fin_cover Hleq (max N' N'')).2 - l) < r :=
+    lt_of_lt_of_le (lt_of_le_of_lt (le_trans (le_of_eq three_cancel.symm) (abs_add _ _)) 
+    (add_lt_add (lt_of_le_of_lt (le_of_eq (abs_length Hno_fin_cover Hleq _).symm) 
+    ((hN'' _ (le_max_right _ _)))) (hN' _ (le_max_left _ _))))
+    (le_of_eq add_half),
+    have sin : abs ((interval_sequence Hno_fin_cover Hleq (max N' N'')).1 - l) < r := 
+    lt_trans (hN' _ (le_max_left N' _)) (half_lt_self zero),
+    existsi c, existsi inC, existsi max N' N'', exact subset.trans (ball_convex _ _ sin tin) ball
+end
+
+end construction_partition
+
+theorem closed_interval_is_compact {a b : ℝ} (Hle : a ≤ b) : compact ⟦a,b] :=
+classical.by_contradiction $
+λ h, 
+begin
+cases (not_compact _ _ h) with c hc, cases limit_cover hc.2 Hle hc.1 with c' Hc', 
+cases Hc' with c'_in_c hc', cases hc' with n hn,
+exact ((interval_sequence hc.2 Hle n).4 {c'} (set.singleton_subset_iff.mpr c'_in_c) 
+(subset.trans hn (subset.antisymm_iff.mp (set.sUnion_singleton _)).2)) 
+(set.finite_singleton _)
+end
+
+end closed_intervals_are_compact
+
+section bounded_of_compact 
+
+variable {s : set ℝ}
+
+def bdd (s : set ℝ): Prop := bdd_above s ∧ bdd_below s
+
+def unbdd : Prop := ¬ bdd s
+
+lemma unbdd_above_iff : ¬ bdd_above s ↔ ∀ x, ∃ y ∈ s, x < y := sorry
+
+lemma unbdd_or : ¬ bdd s ↔ ¬ bdd_above s ∨ ¬ bdd_below s := not_and_distrib
+
+variables {a b : ℝ} (N M : ℕ)
+
+def is_gln (a : ℝ) : Prop := (N : ℝ) ≤ a ∧ ∀ n : ℕ, (n : ℝ) ≤ a → n ≤ N
+
+lemma not_le_iff_gt : ¬ N < M ↔ N ≥ M :=
+begin
+split,
+    {intro h, exact le_of_not_gt h},
+    {intro h, exact not_lt_of_ge h}
+end
+
+lemma lt_sub_one {N : ℕ} (h : 0 < N) : N - 1 < N := 
+begin
+induction N with t ht,
+    show 0 - 1 < 0, from false.elim ((not_lt_of_le (le_refl _)) h),
+rw [nat.succ_eq_add_one, nat.add_sub_assoc (le_refl _), nat.sub_self _],
+exact nat.lt_succ_self _
+end
+
+lemma min_gt_zero (hnonneg : 0 ≤ a) : 0 < nat.find (exists_nat_gt a) :=
+nat.cast_lt.mp $ lt_of_le_of_lt hnonneg $ nat.find_spec $ exists_nat_gt a 
+
+lemma aux_succ (hnonneg : 0 ≤ a) :
+nat.succ (nat.find (exists_nat_gt a) - 1) = nat.find (exists_nat_gt a) :=
+let minn := nat.find (exists_nat_gt a) in
+nat.sub_add_cancel $ nat.succ_le_of_lt (min_gt_zero hnonneg)
+
+lemma le_min_sub_one (hnonneg : 0 ≤ a) : (N : ℝ) ≤ a → N ≤ nat.find (exists_nat_gt a) - 1 :=
+let minn := nat.find (exists_nat_gt a) in 
+λ N_le_a, classical.by_contradiction $ λ h,
+have aux : minn ≤ N := le_trans (le_of_eq (aux_succ hnonneg).symm) (nat.succ_le_of_lt (lt_of_not_ge h)),
+have contradiction : a < (N : ℝ) := lt_of_lt_of_le (nat.find_spec (exists_nat_gt a)) (nat.cast_le.mpr aux),
+(not_le_of_gt contradiction) N_le_a
+
+theorem exists_gln (hnonneg : 0 ≤ a) : ∃ m : ℕ, is_gln m a :=
+begin
+existsi (nat.find (exists_nat_gt a) - 1),
+exact ⟨le_of_not_lt (nat.find_min (exists_nat_gt a) (lt_sub_one (min_gt_zero hnonneg))),
+λ n, le_min_sub_one n hnonneg⟩
+end
+
+lemma nat_unbdd_above (Hunbdd : ¬ bdd_above s) (hnonneg : 0 ≤ a): 
+∃ m : ℕ, ∃ s1 ∈ s, a < s1 ∧ is_gln m s1 := 
+begin
+cases unbdd_above_iff.mp Hunbdd a with s1 Hs1, cases Hs1 with s1_in_s hs1,
+cases exists_gln (le_of_lt (lt_of_le_of_lt hnonneg hs1)) with m hm,
+existsi m, existsi s1, existsi s1_in_s, exact ⟨hs1,hm⟩
+end
+
+noncomputable def nat_increasing (hunbdd : ¬ bdd_above s) : ℕ → ℕ := 
+λ n, nat.rec_on n
+    (nat.find (nat_unbdd_above hunbdd (le_refl _))) $
+    λ (n : ℕ) (id : ℕ), nat.find $ nat_unbdd_above hunbdd $ nat.cast_le.mpr 
+    $nat.le_succ_of_le $ nat.zero_le id
+
+lemma strict_mono_one (hunbdd : ¬ bdd_above s) : nat_increasing hunbdd N < nat_increasing hunbdd (N + 1) :=
+begin
+unfold nat_increasing,
+cases nat.find_spec (nat_unbdd_above hunbdd (nat.cast_le.mpr 
+(nat.le_succ_of_le (nat.zero_le (nat_increasing hunbdd N))))) with m Hm,
+cases Hm with m_in_s hm, 
+exact lt_of_lt_of_le (nat.lt_succ_self _) (hm.2.2 _ (le_of_lt hm.1))
+end
+   
+lemma lt_succ_gln {N : ℕ} (H : is_gln N a) : a < N + 1 := 
+classical.by_contradiction $ λ h,
+have hle_a : (N + 1 : ℝ) ≤ a := le_of_not_gt h,
+(nat.not_succ_le_self _) (H.2 (N + 1) hle_a)
+
+lemma a_half_pos : 0 < (1 / 2 : ℝ) := half_pos (show 0 < (1 : ℝ), by norm_num)
+
+lemma cover_covering_R : s ⊆ ⋃₀ covering_R := 
+begin 
+assume x hx, by_cases hlt_zero : x < 0,
+    existsi open_lt 0, existsi or.inl rfl, exact hlt_zero,
+    cases exists_gln (le_of_not_gt hlt_zero) with m hm,
+    by_cases h_eq : (m : ℝ) = x, 
+        existsi openn (m - 1 / 2) (m + 1 / 2), exact exists.intro (or.inr (exists.intro _ (or.inr rfl))) 
+        begin rw h_eq, exact in_ball _ a_half_pos end,
+        existsi openn m (m + 1), exact exists.intro (or.inr (exists.intro m (or.inl rfl))) 
+        ⟨or_iff_not_imp_right.mp (lt_or_eq_of_le hm.1) h_eq,lt_succ_gln hm⟩
+end
+
+theorem open_cover_covering_R : open_cover s covering_R := ⟨λ s hs, open_covering_R hs,cover_covering_R⟩
+
+noncomputable def nat_inc (hunbdd : ¬ bdd_above s) (n : ℕ) : ℕ := nat_increasing hunbdd (2 * n)
+
+lemma nat_inc_mono_one (hunbdd : ¬ bdd_above s) : nat_inc hunbdd N + 1 < nat_inc hunbdd (N + 1) :=
+begin
+unfold nat_inc, rw [mul_add, mul_one, ←one_add_one_eq_two, ←add_assoc],
+exact lt_of_le_of_lt (nat.succ_le_of_lt (strict_mono_one _ hunbdd)) (strict_mono_one _ hunbdd)
+end
+
+lemma nat_inc_mono' (hunbdd : ¬ bdd_above s) : nat_inc hunbdd N + 1 < nat_inc hunbdd (N + 1 + M) :=
+begin
+induction M with t ht,
+    exact nat_inc_mono_one N hunbdd,
+rw nat.add_succ, exact lt_trans ht (lt_trans (lt_add_one _) (nat_inc_mono_one (N + 1 + t) hunbdd))
+end
+
+theorem nat_inc_mono (hunbdd : ¬ bdd_above s) (hNM : N < M): nat_inc hunbdd N + 1 < nat_inc hunbdd M :=
+begin
+cases nat.le.dest (nat.succ_le_of_lt hNM) with k hk,
+rw ←hk, exact nat_inc_mono' N k hunbdd
+end
+
+
+theorem compact_of_bdd (hunbdd : compact s) : bdd s :=
+classical.by_contradiction $ λ h, sorry
+
+end bounded_of_compact 
