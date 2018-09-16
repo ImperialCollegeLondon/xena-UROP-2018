@@ -550,7 +550,7 @@ have h23 : R c x' x,
 exact eight7 h23 h22
 end
 
-theorem eight17 {a : point} {A : set point}: line A → a ∉ A → ∃! x, xperp x A (l a x) :=
+theorem eight17 {a : point} {A : set point} : line A → a ∉ A → ∃! x, xperp x A (l a x) :=
 begin
 intros h h1,
 rcases h with ⟨p, q, hq, h2⟩,
