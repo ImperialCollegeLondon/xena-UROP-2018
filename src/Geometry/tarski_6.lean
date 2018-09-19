@@ -623,6 +623,17 @@ refine ⟨x, y, z, h, (eleven37 h1 (eleven6 (eleven38a.1 h1).1 (eleven38a.1 h1).
 exact (eqa.refl (eleven38a.1 h1).2.2.1 (eleven38a.1 h1).2.2.2.1)
 end
 
+theorem eleven40a {a b c : point} : sided b a c → ang_acute a b c :=
+begin
+intro h,
+cases eight25 h.1 with d hd,
+refine ⟨a, b, d, hd.1, eleven31a h h.1 hd.2, _⟩,
+intro h1,
+cases (eight9 hd.1 (six4.1 ((eleven21a h).1 h1)).1),
+  exact h.1 h_1,
+exact hd.2 h_1
+end
+
 def ang_obtuse (a b c : point) : Prop := ∃ x y z, R x y z ∧ ang_lt x y z a b c
 
 theorem tri_of_ang_obtuse {a b c : point} : ang_obtuse a b c → a ≠ b ∧ c ≠ b :=
@@ -635,15 +646,35 @@ refine ⟨x, y, z, h, (eleven37 h1 _ (eleven6 (eleven38a.1 h1).2.2.1 (eleven38a.
 exact (eqa.refl (eleven38a.1 h1).1 (eleven38a.1 h1).2.1)
 end
 
+theorem eleven40b {a b c : point} : a ≠ b → c ≠ b → B a b c → ang_obtuse a b c :=
+begin
+intros h h1 h2,
+cases eight25 h with d hd,
+refine ⟨a, b, d, hd.1, eleven31b h hd.2 h h1 h2, _⟩,
+intro h3,
+cases (eight9 hd.1 (or.inl ((eleven21b h2) h3.symm))),
+  exact h h_1,
+exact hd.2 h_1
+end
+
 def ang_right (a b c : point) : Prop := a ≠ b ∧ c ≠ b ∧ R a b c
 
-theorem eleven40a {a b c d e f : point} : ang_acute a b c → eqa a b c d e f → ang_acute d e f :=
+theorem right.symm {a b c : point} : ang_right a b c → ang_right c b a :=
+λ h, ⟨h.2.1, h.1, h.2.2.symm⟩
+
+theorem right.flip {a b c : point} : ang_right a b c → ang_right a b (S b c) :=
+λ h, ⟨h.1, (seven12a h.2.1.symm).symm, h.2.2.flip⟩
+
+theorem eleven16a {a b c d e f : point} : ang_right a b c → ang_right d e f → eqa a b c d e f :=
+λ h h1, eleven16 h.1 h.2.1 h1.1 h1.2.1 h.2.2 h1.2.2
+
+theorem acute_trans {a b c d e f : point} : ang_acute a b c → eqa a b c d e f → ang_acute d e f :=
 λ ⟨x, y, z, h⟩ h1, ⟨x, y, z, h.1, eleven37 h.2 h1 (eqa.refl (eleven38a.1 h.2).2.2.1 (eleven38a.1 h.2).2.2.2.1)⟩
 
-theorem eleven40b {a b c d e f : point} : ang_obtuse a b c → eqa a b c d e f → ang_obtuse d e f :=
+theorem obtuse_trans {a b c d e f : point} : ang_obtuse a b c → eqa a b c d e f → ang_obtuse d e f :=
 λ ⟨x, y, z, h⟩ h1, ⟨x, y, z, h.1, eleven37 h.2 (eqa.refl (eleven38a.1 h.2).1 (eleven38a.1 h.2).2.1) h1⟩
 
-theorem eleven40c {a b c d e f : point} : ang_right a b c → eqa a b c d e f → ang_right d e f :=
+theorem right_trans {a b c d e f : point} : ang_right a b c → eqa a b c d e f → ang_right d e f :=
 λ h h1, ⟨h1.2.2.1, h1.2.2.2.1, eleven17 h.2.2 h1⟩
 
 theorem lt_ang_right_of_ang_acute {a b c p q r : point} : ang_acute a b c → ang_right p q r → ang_lt a b c p q r :=
@@ -666,6 +697,32 @@ rintros ⟨x, y, z, h⟩ h1,
 suffices : ang_right x y z,
   exact h.2.trans (gt_ang_right_of_ang_obtuse h1 this),
 exact ⟨(eleven38a.1 h.2).2.2.1, (eleven38a.1 h.2).2.2.2.1, h.1⟩
+end
+
+theorem ang_total {a b c d e f : point} : a ≠ b → c ≠ b → d ≠ e → f ≠ e → 
+(ang_lt a b c d e f ∨ eqa a b c d e f ∨ ang_lt d e f a b c) :=
+begin
+intros h h1 h2 h3,
+unfold ang_lt,
+cases eleven35 h h1 h2 h3,
+  by_cases h_2 : eqa a b c d e f;
+  simp [h_1, h_2],
+by_cases h_2 : eqa a b c d e f,
+  simp [h_2, h_1],
+refine or.inr (or.inr ⟨h_1, _⟩),
+intro h_3,
+exact h_2 h_3.symm
+end
+
+theorem right_total {a b c : point} : a ≠ b → c ≠ b → (ang_acute a b c ∨ ang_right a b c ∨ ang_obtuse a b c) :=
+begin
+intros h h1,
+cases eight25 h with t ht,
+cases ang_lt_or_ge h h1 h ht.2,
+  exact or.inl ⟨a, b, t, ht.1, h_1⟩,
+cases ang_lt_or_eq_of_le h_1,
+  exact or.inr (or.inr ⟨a, b, t, ht.1, h_2⟩),
+exact or.inr (or.inl ⟨h, h1, (eleven17 ht.1 h_2)⟩)
 end
 
 lemma eleven41a {a b c d : point} : ¬col a b c → B b a d → d ≠ a → ang_lt a c b c a d :=

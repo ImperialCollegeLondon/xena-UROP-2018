@@ -274,3 +274,71 @@ begin
     ring
   }
 end 
+
+theorem quad_res_two_int (n : ℤ) : n % 8 = (1:ℤ) ∨ n % 8 = (7:ℤ) → ((n ^ 2 - 1) / 8 % 2 = (0:ℤ)) :=
+begin
+  intro H,
+  have H2 := int.mod_add_div n 8,
+  cases H,
+  { rw H at H2,
+     rw ←H2,
+     rw ←int.dvd_iff_mod_eq_zero,
+     suffices : ∀ t, (2:ℤ) ∣ ((1 + 8 * t) ^ 2 - 1) / (8:ℤ),
+        exact this (n/(8:ℤ)),
+    intro t,
+    existsi t+4*t*t,
+    unfold has_pow.pow, unfold monoid.pow,
+    rw (show (1 + 8 * t) * ((1 + 8 * t) * 1)= 8 * (2 * t + 8 * t * t) + 1, by ring),
+    rw add_sub_cancel,
+    rw int.mul_div_cancel_left _ (show (8:ℤ) ≠ 0, from dec_trivial),
+    ring
+  },
+  { rw H at H2,
+    rw ←H2,
+    rw ←int.dvd_iff_mod_eq_zero,
+    suffices : ∀ t, (2:ℤ) ∣ ((7 + 8 * t) ^ 2 - 1) / 8,
+      exact this (n/(8:ℤ)),
+    intro t,
+    existsi 3+7*t+4*t*t,
+    unfold has_pow.pow, unfold monoid.pow,
+    rw (show (7 + 8 * t) * ((7 + 8 * t) * 1)  = 8 * (6 + 14 * t + 8 * t * t) + 1, by ring),
+    rw add_sub_cancel,
+    rw int.mul_div_cancel_left _ (show (8:ℤ) ≠ 0, from dec_trivial),
+    ring,
+  }
+end 
+
+theorem quad_nonres_two_int (n : ℤ) : n % 8 = (3:ℤ) ∨ n % 8 = (5:ℤ) → ((n ^ 2 - 1) / 8 % 2 = (1:ℤ)) :=
+begin
+  intro H,
+  have H2 := int.mod_add_div n (8:ℤ),
+  cases H,
+  { rw H at H2,
+    rw ←H2,
+     suffices : ∀ t : ℤ, ((3 + 8 * t) ^ 2 - 1) / 8 % 2 = (1:ℤ),
+       exact this (n/(8:ℤ)),
+     intro t,
+     have H3 : (1 + 2 * (4*t^2 + 3*t)) % 2 = (1:ℤ),
+       rw int.add_mul_mod_self_left,exact dec_trivial,
+     suffices : ((3 + 8 * t) ^ 2 - 1) / 8 = (1 + 2 * (4 * t ^ 2 + 3 * t)),
+       rwa this,
+     suffices : ((3 + 8 * t) ^ 2 - 1) = 8 * (1 + 2 * (4 * t ^ 2 + 3 * t)),
+       rw this,
+     rw int.mul_div_cancel_left _ (show (8:ℤ) ≠ 0, from dec_trivial),
+     ring
+  },
+   { rw H at H2,
+     rw ←H2,
+     suffices : ∀ t : ℤ, ((5 + 8 * t) ^ 2 - 1) / 8 % 2 = (1:ℤ),
+       exact this (n/(8:ℤ)),
+     intro t,
+     have H3 : (1 + 2 * (4*t^2 + 5*t + 1)) % 2 = 1,
+       rw int.add_mul_mod_self_left,exact dec_trivial,
+     suffices : ((5 + 8 * t) ^ 2 - 1) / 8 = (1 + 2 * (4 * t ^ 2 + 5 * t + 1)),
+       rwa this,
+     suffices : ((5 + 8 * t) ^ 2 - 1) = 8 * (1 + 2 * (4 * t ^ 2 + 5 * t + 1)),
+       rw this,
+     rw int.mul_div_cancel_left _ (show (8:ℤ) ≠ 0, from dec_trivial),
+     ring
+   }
+end 

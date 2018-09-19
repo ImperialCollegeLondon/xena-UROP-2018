@@ -170,12 +170,6 @@ theorem six16a {p q r : point} : sided p q r → l p q = l p r :=
 
 theorem six17 (p q : point) : l p q = l q p :=
 ext (λ x, ⟨λ h, (four11 h).2.1, λ h, (four11 h).2.1⟩)
-/-begin
-ext,
-split;
-intro h;
-exact (four11 h).2.1
-end-/
 
 theorem line.symm {a b : point} (h : line (l a b)) : line (l b a) := (six17 a b) ▸ h
 
