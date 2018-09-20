@@ -235,7 +235,7 @@ have h5 : ang_lt c a b c a d,
     exact eleven37 this (eleven9 (six5 (six26 h.2.1).2.2.symm) (six7 ht.1 ht.2.2.1).symm) 
     (eqa.refl (six26 h.2.1).2.2.symm (six26 h.2.2.1).2.2.symm),
   exact eleven32d (four10 (nine11 h4).2.2).2.1 ht.2.2.2.2.2 ht.2.1,
-replace h5 := eleven49 h5,
+replace h5 := eleven42b h5,
 cases eleven32c (λ h_1, (four10 (nine11 h4).2.2).2.2.1 (or.inr (or.inl h_1))) h5 with e' he,
 have h6 : side (l a d) e' c,
   suffices : ¬col a d e',
@@ -295,4 +295,109 @@ apply unique_of_Sl h4 (four10 h.2.1).1 _ (perp_of_R he.2.2.1.symm (six26 h.2.1).
 simp [mid_of_S c b, six17b a c]
 end
 
+theorem thirteen7a {α : angle point} {C : dist point} (hα : acute α) (hc : ¬C = 0) (hα1 : ¬α = 0) :
+∃ a b c (hab : a ≠ b) (hcb : c ≠ b), ⟦(a, b)⟧ = C ∧ R a c b ∧ α = ⟦⟨(a, b, c), hab, hcb⟩⟧ :=
+begin
+rcases quotient.exists_rep α with ⟨⟨⟨p, b, q⟩, hpb, hqb⟩, h2⟩,
+subst α,
+change ang_acute p b q at hα,
+have hpbq : ¬col p b q,
+  intro h_1,
+  exact hα1 (zero_iff_sided.2 (sided_of_acute_col hα h_1)),
+rcases thirteen3 hpbq hc with ⟨⟨a, c⟩, h3, h, h4⟩,
+have h2 := h4.symm.2.2.2.2 (six17a a c) (six17a b q),
+have h5 : sided b q c,
+  apply eleven48 (hα.trans (eleven9 h3.symm (six5 hqb))) h4.2.2.1 _ h2,
+  dsimp,
+  intro h_1,
+  subst b,
+  apply (eleven45a hα).1 ⟨hpb, hqb, h4.symm.2.2.2.2 (four11 (six4.1 h3).1).2.2.2.2 (six17b c q)⟩,  
+refine ⟨a, b, c, h3.2.1, h5.2.1, eq.trans (quotient.sound _) h, h2, quotient.sound (eleven9 h3.symm h5.symm)⟩,
+exact eqd_refl a b
+end
+
+theorem thirteen7b {β : angle point} {a b c : point} (hab : a ≠ b) : ¬col a b c → acute β → β ≠ 0 → ∃ d (hdb : d ≠ b), β = ⟦⟨(a, b, d), hab, hdb⟩⟧ ∧ Bl c (l b a) d ∧ R a d b :=
+begin
+intros h h1 h2,
+rcases quotient.exists_rep β with ⟨⟨⟨p, q, r⟩, h3⟩, h4⟩,
+subst β,
+change ang_acute p q r at h1,
+replace h2 : ¬col p q r,
+  intro h_1,
+  apply h2 (zero_iff_sided.2 _),
+  exact sided_of_acute_col h1 h_1,
+cases nine10 (six14 hab) h with t ht,
+cases eleven15a h2 ht.2.2.1 with s hs,
+cases exists_of_exists_unique (eight17 (six14 hs.1.2.2.2.1.symm) (four10 (nine11 hs.2).2.1).2.2.1) with d hd,
+have h3 : sided b s d,
+  apply eleven48 (h1.trans hs.1) hd.2.2.1 _ (hd.symm.2.2.2.2 (six17a a d) (six17a b s)),
+  intro h_1,
+  subst d,
+  exact (eleven45a (h1.trans hs.1)).1 ⟨hs.1.2.2.1, hs.1.2.2.2.1, hd.symm.2.2.2.2 (six17a a b) (six17b b s)⟩,
+refine ⟨d, h3.2.1, _, _,  hd.symm.2.2.2.2 (six17a a d) (six17a b s)⟩,
+  exact quotient.sound (hs.1.trans (eleven9 (six5 hab) h3.symm)),
+exact six17 a b ▸ ((nine8 ht.symm).2 (nine19a hs.2.symm (six17b a b) h3)).symm
+end
+
+theorem thirteen7c {α β : angle point} {C : dist point} : acute α → acute β → cos α (cos β C) = cos β (cos α C) :=
+begin
+intros hα hβ,
+by_cases hc : C = 0,
+  subst C,
+  simp [cos_times_zero],
+by_cases hα1 : α = 0,
+  subst α,
+  rw [cos_zero, cos_zero],
+by_cases hβ1 : β = 0,
+  subst β,
+  rw [cos_zero, cos_zero],
+rcases thirteen7a hα hc hα1 with ⟨a, b, c, hab, hcb, h, h1, h2⟩,
+clear hc,
+subst_vars,
+change ang_acute a b c at hα,
+replace hα1 : ¬col a b c,
+  intro h_1,
+  apply hα1 (zero_iff_sided.2 _),
+  exact sided_of_acute_col hα h_1,
+rcases thirteen7b hab hα1 hβ hβ1 with ⟨d, hdb, h2, hd⟩,
+subst β,
+rw [←thirteen5b hab hcb h1, ←thirteen5b hab hdb hd.2],
+have h2 := thirteen2b hd.1 h1 hd.2,
+cases exists_of_exists_unique (eight17 h2.1 h2.2.1) with e he,
+have h3 := thirteen2 hd.1 h1 hd.2 he.symm,
+suffices : cos ⟦⟨(d, b, e), hdb, h3.1.2.2.2.1⟩⟧ ⟦(d, b)⟧ = cos ⟦⟨(c, b, e), hcb, h3.1.2.2.2.1⟩⟧ ⟦(c, b)⟧,
+  have h4 : (⟦⟨(a, b, c), hab, hcb⟩⟧ : angle point) = ⟦⟨(d, b, e), hdb, h3.1.2.2.2.1⟩⟧,
+    exact quotient.sound h3.1,
+  have h5 : (⟦⟨(a, b, d), hab, hdb⟩⟧ : angle point) = ⟦⟨(c, b, e), hcb, h3.1.2.2.2.1⟩⟧,
+    exact quotient.sound h3.2.1,
+  rwa [h4, h5],
+rw [←thirteen5b hdb h3.1.2.2.2.1 _, ←thirteen5b hcb h3.1.2.2.2.1 _],
+  exact he.2.2.2.2 (six17a c d) (six17a b e),
+exact he.2.2.2.2 (six17b c d) (six17a b e)
+end
+
+theorem thirteen7 {α β : angle point} {C : dist point} : cos α (cos β C) = cos β (cos α C) := 
+begin
+by_cases ha : right α,
+  simp [cos_right ha, cos_right ha],
+by_cases hb : right β,
+  simp [cos_right hb, cos_right hb],
+replace ha : acute α ∨ obtuse α,
+  simpa [ha] using angle_trichotomy α,
+replace hb : acute β ∨ obtuse β,
+  simpa [hb] using angle_trichotomy β,
+cases ha.symm,
+  have h1 := supp_of_obtuse.1 h,
+  rw cos_supp α,
+all_goals 
+{ cases hb.symm,
+    have h2 := supp_of_obtuse.1 h_1,
+    rw cos_supp β,
+  all_goals 
+  { apply thirteen7c;
+  assumption}}
+end
+
 end Euclidean_plane
+
+--thirteen7a refine quotient.sound

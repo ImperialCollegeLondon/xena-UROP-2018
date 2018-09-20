@@ -45,7 +45,7 @@ rw h3 at *,
 have : c = c',
   exact four19 h2 h h1.flip,
 rw ←this at *,
-exact (seven10.1 h3).symm
+exact (seven10.1 h3)
 end
 
 theorem eight7 {a b c : point} : R a b c → R a c b → b = c :=
@@ -294,8 +294,12 @@ exact hb
 end
 
 theorem perp_of_R {a b c : point} : a ≠ b → c ≠ b → R a b c → perp (l a b) (l c (S b c)) :=
-λ h h1 h2, ⟨b, eight13.2 ⟨six14 h, six14 (seven12b h1.symm), six17b a b,
+λ h h1 h2, ⟨b, eight13.2 ⟨six14 h, six14 (seven12b h1).symm, six17b a b,
 or.inr (or.inl (seven5 b c).1.symm), a, c, six17a a b, six17a c (S b c), h, h1, h2⟩⟩
+
+theorem xperp_of_R {a b c : point} : a ≠ b → c ≠ b → R a b c → xperp b (l a b) (l c b) :=
+λ h h1 h2, eight13.2 ⟨six14 h, six14 h1, six17b a b,
+six17b c b, a, c, six17a a b, six17a c b, h, h1, h2⟩
 
 theorem eight15 {x : point} {A B : set point} : perp A B → x ∈ A → x ∈ B → xperp x A B :=
 begin
@@ -854,12 +858,12 @@ have h15 : ¬col x p (S a p),
     exact (seven5 a p).1,
   have h_3 : p ≠ (S a p),
     intro h_3,
-    exact (six13 h2.2.1) (seven10.1 h_3.symm),
-  have h_3 : col p a x,
+    exact (six13 h2.2.1) (seven10.1 h_3.symm).symm,
+  have h_4 : col p a x,
     exact five4 h_3 (four11 h_2).1 (four11 h_1).2.2.1,
-  cases eight9 h14.symm h_3,
-    exact (six13 h2.2.1) h_4,
-  exact h9 h_4,
+  cases eight9 h14.symm h_4,
+    exact (six13 h2.2.1) h_5,
+  exact h9 h_5,
 have h16 : hourglass p (S a p) x r r' a m,
   focus {repeat {split}},
     exact hx.2.symm,

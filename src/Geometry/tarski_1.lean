@@ -157,8 +157,7 @@ intros h h1,
 exact (three5a h1.symm h.symm).symm
 end
 
-theorem three7a {a b c d : point} : B a b c → B b c d → b ≠ c 
-→ B a c d :=
+theorem three7a {a b c d : point} : B a b c → B b c d → b ≠ c → B a c d :=
 begin
 intros h h1 h2,
 cases seg_cons c c d a with x hx,
@@ -185,8 +184,7 @@ cases em (c = b),
 exact (three7a (three6a h h1).symm h.symm h_1).symm
 end
 
-theorem three7b {a b c d : point} : B a b c → B b c d → b ≠ c 
-→ B a b d :=
+theorem three7b {a b c d : point} : B a b c → B b c d → b ≠ c → B a b d :=
 begin
 intros h h1 h2,
 have h3 : B a c d,
@@ -213,6 +211,16 @@ have : b ≠ c,
     rwa ←hq at h2,
   exact three13 (id_eqd this),
 exact ⟨c, h1, this⟩
+end
+
+theorem three15 {a b c : point} : B a b c → eqd a b a c → b = c :=
+begin
+intros h h1,
+by_cases h_1 : a = c,
+  subst c,
+  exact id_eqd h1.flip,
+cases three14 c a with d hd,
+exact two12 hd.2.symm (three5a hd.1.symm h) h1 hd.1.symm (eqd.refl a c)
 end
 
 theorem three17 {a b c a' b' p : point} : B a b c → B a' b' c 
@@ -932,14 +940,18 @@ end
 
 def distlt (a b c d : point) : Prop := distle a b c d ∧ ¬eqd a b c d
 
-theorem five13 {a b c d : point} : distlt a b c d → ∃ y, B c y d ∧ eqd a b c y ∧ y ≠ d :=
+theorem five13 {a b c d : point} : distlt a b c d ↔ ∃ y, B c y d ∧ eqd a b c y ∧ y ≠ d :=
 begin
-rintros ⟨h, h1⟩,
-cases h with y hy,
-refine ⟨y, hy.1, hy.2, _⟩,
+split,
+  rintros ⟨⟨y, hy⟩, h1⟩,
+  refine ⟨y, hy.1, hy.2, _⟩,
+  intro h_1,
+  subst y,
+  exact h1 hy.2,
+rintros ⟨y, h, h1, h2⟩,
+refine ⟨⟨y, h, h1⟩, _⟩,
 intro h_1,
-subst y,
-exact h1 hy.2
+exact h2 (three15 h (h1.symm.trans h_1))
 end
 
 theorem five14 {a b c d a' b' c' d' : point} : distlt a b c d → eqd a b a' b' →

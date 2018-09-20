@@ -458,39 +458,28 @@ intros h h1,
 exact h (seven9 h1)
 end
 
-theorem seven10 {a p : point} : S a p = p ↔ p = a :=
+theorem seven10 {a p : point} : S a p = p ↔ a = p :=
 begin
 split,
   intro h,
   have : M p a (S a p),
     exact seven5 a p,
   rw h at *,
-  exact seven3.1 this,
+  exact (seven3.1 this).symm,
 intro h,
-rw h,
-have : M a a (S a a),
-  exact seven5 a a,
-cases this with h1 h2,
+subst p,
+cases seven5 a a with h1 h2,
 exact id_eqd h2.symm.flip
 end
 
 @[simp] theorem seven11 (a : point) : S a a = a :=
-begin
-apply seven10.2,
-refl
-end
+seven10.2 rfl
 
-theorem seven12a {a p : point} : a ≠ p → a ≠ S a p :=
-begin
-intros h h1,
-apply h,
-have h2 : S a a = a,
-  exact seven11 a,
-exact seven9 (eq.trans h2 h1)
-end
+theorem seven12a {a p : point} : p ≠ a → S a p ≠ a :=
+λ h h1, h (seven9 (h1.trans (seven11 a).symm))
 
-theorem seven12b {a p : point} : a ≠ p → p ≠ S a p :=
-λ h h1, h.symm (seven10.1 h1.symm)
+theorem seven12b {a p : point} : p ≠ a → S a p ≠ p :=
+λ h h1, h (seven10.1 h1).symm
 
 theorem seven13 (a p q : point) : eqd p q (S a p) (S a q) :=
 begin
@@ -504,7 +493,7 @@ rw hp' at *,
 rw hq' at *,
 cases em (p = a),
   have : S a p = p,
-    exact seven10.2 h,
+    exact seven10.2 h.symm,
   rw h at *,
   rw this at *,
   rw ←hp' at *,
@@ -645,7 +634,7 @@ have h8 : eqd q b q (S a b),
   exact eqd.trans h1.2.symm.flip h7,
 have h9 : b = (S a b),
   exact four19 h1.1 h6 h8.flip,
-exact (seven10.1 h9.symm).symm
+exact (seven10.1 h9.symm)
 end
 
 theorem seven18 {a b p : point} : S a p = S b p → a = b :=
@@ -681,7 +670,7 @@ split,
     assumption,
   have h8 : a = (S b a),
     exact seven17 h2 h7,
-  exact seven10.1 h8.symm,
+  exact (seven10.1 h8.symm).symm,
 intro h,
 rw h
 end
@@ -915,7 +904,7 @@ intros h h1,
 split,
   intro h2,
   cases em (a = p),
-    have h3 := seven10.2 h_1.symm,
+    have h3 := seven10.2 h_1,
     rwa h3,
   have h3 := six18 h h_1 h1 h2,
   rw h3,
@@ -924,7 +913,7 @@ split,
   exact h4.1.symm,
 intro h2,
 cases em (a = (S a p)),
-  have h3 := seven10.2 h_1.symm,
+  have h3 := seven10.2 h_1,
   rw ←seven7 a p,
   rwa h3,
 have h3 := six18 h h_1 h1 h2,
