@@ -268,10 +268,10 @@ begin unfold shift_order paste, rw dif_neg, simp, simp, exact help_02,   end
 -- Define (continuous ) reparametrisations to shift domain and construct a homotopy  : a₁ ⬝ a₂ ≈ b₁ ⬝ b₂  
 ----- by pasting homotopies a₁ ≈ b₁ , a₂ ≈ b₂
 def repar_shift_a : set.prod T1 I → I01 × I01 := 
-λ st, shift (  par T1._proof_1 ⟨ st.1.1, (mem_prod.1 st.2).1⟩ , st.1.2 ) 
+λ st, shift (  par zero_lt_half ⟨ st.1.1, (mem_prod.1 st.2).1⟩ , st.1.2 ) 
 
 def repar_shift_b : set.prod T2 I → I01 × I01 := 
-λ st, shift (  par T2._proof_1 ⟨ st.1.1, (mem_prod.1 st.2).1 ⟩ , st.1.2 ) 
+λ st, shift (  par half_lt_one ⟨ st.1.1, (mem_prod.1 st.2).1 ⟩ , st.1.2 ) 
 
 lemma cont_r_shift_a : continuous repar_shift_a := 
 begin 
@@ -302,7 +302,7 @@ lemma f_path_comp_start_pt { a₁ b₁ : path x y} { a₂  b₂  : path y z}
   ∀ (s : I01), f_path_comp F G (s, 0) = x := 
 begin 
   intro s, unfold f_path_comp, unfold repar_shift_a repar_shift_b shift_order paste, rw dif_pos, 
-  show F.to_fun (s, par T1._proof_1 ⟨0, help_T1⟩) = x,  simp,  
+  show F.to_fun (s, par zero_lt_half ⟨0, help_T1⟩) = x,  simp,  
   simp, exact help_T1,    
 end
 
@@ -311,7 +311,7 @@ lemma f_path_comp_end_pt { a₁ b₁ : path x y} { a₂  b₂  : path y z}
   ∀ (s : I01), f_path_comp F G (s, 1) = z := 
 begin 
   intro s, unfold f_path_comp, unfold repar_shift_a repar_shift_b shift_order paste, rw dif_neg, simp, 
-  show G.to_fun (s, par T2._proof_1 ⟨1, help_T2⟩) = z, simp, 
+  show G.to_fun (s, par half_lt_one ⟨1, help_T2⟩) = z, simp, 
   simp [help_02],
 end
 
@@ -346,8 +346,8 @@ begin
     have xeq : w_fst = ⟨ 1/2 , help_01 ⟩ , apply subtype.eq, rw V,
     simp [xeq, -one_div_eq_inv], unfold repar_shift_a repar_shift_b shift_order, 
     simp [-one_div_eq_inv], 
-    show F.to_fun (w_snd, par T1._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T1⟩) =
-    G.to_fun (w_snd, par T2._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T2⟩) , rw [eqn_1, eqn_2], simp,  
+    show F.to_fun (w_snd, par zero_lt_half ⟨⟨1 / 2, help_01⟩, help_half_T1⟩) =
+    G.to_fun (w_snd, par half_lt_one ⟨⟨1 / 2, help_01⟩, help_half_T2⟩) , rw [eqn_1, eqn_2], simp,  
     } ,  
     exact continuous.comp cont_r_shift_a F.cont, 
     exact continuous.comp cont_r_shift_b G.cont, 
@@ -411,7 +411,7 @@ end
 
 
 def repar_stop_a : set.prod T1 I → I01 := 
-λ st, par_aux_a ( shift (  par T1._proof_1 ⟨ st.1.1, (mem_prod.1 st.2).1⟩ , st.1.2 ) )
+λ st, par_aux_a ( shift (  par zero_lt_half ⟨ st.1.1, (mem_prod.1 st.2).1⟩ , st.1.2 ) )
 
 
 lemma cont_r_stop_a : continuous repar_stop_a := 
@@ -458,7 +458,7 @@ end
 
 
 def repar_stop_b : set.prod T2 I → I01  := 
-λ st, par_aux_b ( shift (  par T2._proof_1 ⟨ st.1.1, (mem_prod.1 st.2).1⟩ , st.1.2 ) )
+λ st, par_aux_b ( shift (  par half_lt_one ⟨ st.1.1, (mem_prod.1 st.2).1⟩ , st.1.2 ) )
 
 lemma cont_r_stop_b : continuous repar_stop_b := 
 begin 
@@ -490,14 +490,14 @@ begin
   intro s, unfold f_inv_comp fa_inv_comp fb_inv_comp, 
   unfold repar_stop_a repar_stop_b shift_order par_aux_a par_aux_b paste, simp [-sub_eq_add_neg], 
   rw [dif_pos ], 
-  have H : ite (1 - s.val < (par T1._proof_1 ⟨0, help_T1⟩).val) s (par_inv (par T1._proof_1 ⟨0, help_T1⟩)) = (1 : I01), 
+  have H : ite (1 - s.val < (par zero_lt_half ⟨0, help_T1⟩).val) s (par_inv (par zero_lt_half ⟨0, help_T1⟩)) = (1 : I01), 
     split_ifs,   have H2 : s.val + (0 : I01).val = s.val, show s.val + (0:ℝ ) = s.val, exact  add_zero s.val, 
       have H3 : s.val ≤ (1:I01).val, exact s.2.2, have H4 : 1 - (0:I01).val = 1, exact sub_zero 1, 
       rw [ eqn_start ] at h, rw [sub_lt] at h, have H5 : 1 < s.val, rw H4 at h,  exact h,
       by_contradiction, have G : s.val < s.val, exact lt_of_le_of_lt H3 h, 
         simp [lt_iff_le_and_ne] at G, trivial,
       simp,  
-  show f.to_fun (ite (1 - s.val < (par T1._proof_1 ⟨0, help_T1⟩).val) s (par_inv (par T1._proof_1 ⟨0, help_T1⟩))) = y, 
+  show f.to_fun (ite (1 - s.val < (par zero_lt_half ⟨0, help_T1⟩).val) s (par_inv (par zero_lt_half ⟨0, help_T1⟩))) = y, 
   rw [H], exact f.at_one,
   simp, exact help_T1, 
 end
@@ -506,12 +506,12 @@ end
 lemma f_inv_comp_end_pt (f : path x y) : ∀ (s : I01), f_inv_comp f (s, 1) = y := 
 begin 
   intro s, unfold f_inv_comp, unfold paste, rw dif_neg, unfold fb_inv_comp repar_stop_b shift_order par_aux_b, simp [-sub_eq_add_neg], 
-  have H : ite ((par T2._proof_1 ⟨1, help_T2⟩).val < s.val) s (par T2._proof_1 ⟨1, help_T2⟩) = 1,
+  have H : ite ((par half_lt_one ⟨1, help_T2⟩).val < s.val) s (par half_lt_one ⟨1, help_T2⟩) = 1,
     split_ifs, {  by_contradiction, rw eqn_end at h, have H2 : s.val ≤ (1:I01).val, exact s.2.2, 
       have G : s.val < s.val, exact lt_of_le_of_lt H2 h, simp [lt_iff_le_and_ne] at G, trivial, 
       },  
       exact eqn_end, 
-  show f.to_fun (ite ((par T2._proof_1 ⟨1, help_T2⟩).val < s.val) s (par T2._proof_1 ⟨1, help_T2⟩ )) = y, 
+  show f.to_fun (ite ((par half_lt_one ⟨1, help_T2⟩).val < s.val) s (par half_lt_one ⟨1, help_T2⟩ )) = y, 
   rw H, exact f.at_one, 
   unfold shift_order, simp [help_02], 
 end 
@@ -524,12 +524,12 @@ begin
   unfold paste, unfold shift_order, split_ifs, 
     unfold shift_order at h, simp at h, unfold par_inv comp_of_path paste,  simp [h], 
     unfold fa_path par_aux_a inv_of_path, simp [-sub_eq_add_neg], 
-    show f.to_fun (ite (1 - 0< (par T1._proof_1 ⟨t, _⟩).val) 0 (par_inv (par T1._proof_1 ⟨t, _⟩))) =
-     f.to_fun (par_inv (par T1._proof_1 ⟨t, _⟩)), 
-     simp, rw if_neg, refl, refine not_lt.2 _, exact (par T1._proof_1 ⟨t, _⟩).2.2, 
+    show f.to_fun (ite (1 - 0< (par zero_lt_half ⟨t, _⟩).val) 0 (par_inv (par zero_lt_half ⟨t, _⟩))) =
+     f.to_fun (par_inv (par zero_lt_half ⟨t, _⟩)), 
+     simp, rw if_neg, refl, refine not_lt.2 _, exact (par zero_lt_half ⟨t, _⟩).2.2, 
     unfold shift_order at h, simp at h, unfold comp_of_path paste fb_path, 
     unfold par_aux_b, rw if_neg, simpa [h], 
-    refine not_lt.2 _, simp, exact (par T2._proof_1 ⟨t, _⟩).2.1, 
+    refine not_lt.2 _, simp, exact (par half_lt_one ⟨t, _⟩).2.1, 
 end
 
 lemma f_inv_comp_at_one (f : path x y) :
@@ -540,18 +540,18 @@ begin
     unfold shift_order at h, simp at h, unfold loop_const, unfold par_aux_a, split_ifs with h₂ , 
       exact f.at_one, 
       simp [not_lt,  -sub_eq_add_neg] at h₂ ,
-      have H :  (par T1._proof_1 ⟨t, _⟩).val ≤ 1 - 1,  exact h₂ , rw [sub_self] at H, 
-      have h₃ : (par T1._proof_1 ⟨t, h⟩).val = 0, --
-        exact le_antisymm H ((par T1._proof_1 ⟨t, h⟩).2.1), 
-      have H2 : (par T1._proof_1 ⟨t, h⟩) = (0: I01), 
+      have H :  (par zero_lt_half ⟨t, _⟩).val ≤ 1 - 1,  exact h₂ , rw [sub_self] at H, 
+      have h₃ : (par zero_lt_half ⟨t, h⟩).val = 0, --
+        exact le_antisymm H ((par zero_lt_half ⟨t, h⟩).2.1), 
+      have H2 : (par zero_lt_half ⟨t, h⟩) = (0: I01), 
         exact subtype.eq h₃ , 
-      show f.to_fun (par_inv (par T1._proof_1 ⟨t, h⟩)) = y, rw H2, simp, 
+      show f.to_fun (par_inv (par zero_lt_half ⟨t, h⟩)) = y, rw H2, simp, 
     unfold shift_order at h, simp at h, unfold par_aux_b, unfold loop_const, split_ifs with h₂, 
       exact f.at_one, 
       simp [not_lt,  -sub_eq_add_neg] at h₂, 
-      have H : (par T2._proof_1 ⟨t, _⟩).val = (1:I01).val, 
-       apply eq.symm, exact le_antisymm h₂ (par T2._proof_1 ⟨t, _⟩).2.2, 
-      have H2 : (par T2._proof_1 ⟨t, _⟩) = (1: I01), exact subtype.eq H, 
+      have H : (par half_lt_one ⟨t, _⟩).val = (1:I01).val, 
+       apply eq.symm, exact le_antisymm h₂ (par half_lt_one ⟨t, _⟩).2.2, 
+      have H2 : (par half_lt_one ⟨t, _⟩) = (1: I01), exact subtype.eq H, 
       simp [H2], 
 end
 
@@ -568,11 +568,11 @@ begin
     simp [xeq, -one_div_eq_inv], unfold  fa_inv_comp fb_inv_comp, 
     unfold repar_stop_a repar_stop_b shift_order par_aux_a par_aux_b, simp [-sub_eq_add_neg,-one_div_eq_inv], 
     show f.to_fun
-      (ite (1 - w_snd.val < (par T1._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T1⟩).val) w_snd
-         (par_inv (par T1._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T1⟩))) =
+      (ite (1 - w_snd.val < (par zero_lt_half ⟨⟨1 / 2, help_01⟩, help_half_T1⟩).val) w_snd
+         (par_inv (par zero_lt_half ⟨⟨1 / 2, help_01⟩, help_half_T1⟩))) =
     f.to_fun
-      (ite ((par T2._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T2⟩).val < w_snd.val) w_snd
-         (par T2._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T2 ⟩)),  
+      (ite ((par half_lt_one ⟨⟨1 / 2, help_01⟩, help_half_T2⟩).val < w_snd.val) w_snd
+         (par half_lt_one ⟨⟨1 / 2, help_01⟩, help_half_T2 ⟩)),  
     rw [eqn_1, eqn_2, eqn_2_par_inv], rw sub_lt, 
     show f.to_fun (ite (1 - (1:ℝ ) < w_snd.val) w_snd 0) = 
     f.to_fun (ite ((0:ℝ)  < w_snd.val) w_snd 0), rw sub_self, 
@@ -716,8 +716,8 @@ lemma contr_T1 {x : I01} ( h₁ : x ∈ T1 ) (h₂ : x ∉ T1) : false := by cc
 
 -- 1
 
-lemma step_assoc_1 {t : {x // x ∈ I01}} { h_1 : t ∈ T1 } { h_2 : p3.to_fun t ∈ T1} {h_3 : par T1._proof_1 ⟨p3.to_fun t, h_2 ⟩ ∈ T1} : 
-f.to_fun (par T1._proof_1 ⟨t, h_1⟩) = f.to_fun (par T1._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_2⟩, h_3⟩) :=
+lemma step_assoc_1 {t : {x // x ∈ I01}} { h_1 : t ∈ T1 } { h_2 : p3.to_fun t ∈ T1} {h_3 : par zero_lt_half ⟨p3.to_fun t, h_2 ⟩ ∈ T1} : 
+f.to_fun (par zero_lt_half ⟨t, h_1⟩) = f.to_fun (par zero_lt_half ⟨par zero_lt_half ⟨p3.to_fun t, h_2⟩, h_3⟩) :=
 begin 
  congr, 
  unfold p3, dsimp, unfold paste, simp [dif_pos h_1], 
@@ -739,7 +739,7 @@ begin
 end 
 
 lemma par_T1_ineq₁ {s : {x // x ∈ I01}} {h_1 : s ∈ T1 } (h : s ∈ {x : ↥I01 | 0 ≤ x.val ∧ x.val ≤ 1 / 4 } ) :
-par T1._proof_1 ⟨ s , h_1 ⟩ ∈ T1 := 
+par zero_lt_half ⟨ s , h_1 ⟩ ∈ T1 := 
 begin 
  unfold T1 T, rw mem_set_of_eq, split,
    { unfold par, dsimp [-sub_eq_add_neg], rw sub_zero, rw sub_zero, refine (le_div_iff _ ).2 _, {norm_num}, 
@@ -749,26 +749,26 @@ begin
    exact h.2, 
 end
 
-lemma help_step_assoc_2 {t : {x // x ∈ I01}} (h_1 : t ∈ T1 ) { h_2 : p3.to_fun t ∈ T1} (h_3 : par T1._proof_1 ⟨p3.to_fun t, h_2⟩ ∉ T1) : 
-par T1._proof_1 ⟨p3.to_fun t, h_2⟩ ∈  T2 :=  T2_of_not_T1 h_3 
+lemma help_step_assoc_2 {t : {x // x ∈ I01}} (h_1 : t ∈ T1 ) { h_2 : p3.to_fun t ∈ T1} (h_3 : par zero_lt_half ⟨p3.to_fun t, h_2⟩ ∉ T1) : 
+par zero_lt_half ⟨p3.to_fun t, h_2⟩ ∈  T2 :=  T2_of_not_T1 h_3 
 
 
-lemma step_assoc_2 {t : {x // x ∈ I01}} { h_1 : t ∈ T1 } { h_2 : p3.to_fun t ∈ T1} (h_3 : par T1._proof_1 ⟨p3.to_fun t, h_2⟩ ∉ T1) : 
-f.to_fun (par T1._proof_1 ⟨t, h_1⟩) = g.to_fun (par T2._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_2⟩, help_step_assoc_2 h_1 h_3 ⟩) :=
+lemma step_assoc_2 {t : {x // x ∈ I01}} { h_1 : t ∈ T1 } { h_2 : p3.to_fun t ∈ T1} (h_3 : par zero_lt_half ⟨p3.to_fun t, h_2⟩ ∉ T1) : 
+f.to_fun (par zero_lt_half ⟨t, h_1⟩) = g.to_fun (par half_lt_one ⟨par zero_lt_half ⟨p3.to_fun t, h_2⟩, help_step_assoc_2 h_1 h_3 ⟩) :=
 begin 
  by_contradiction, unfold T1 T at h_2, 
  rw [mem_set_of_eq] at h_2, 
  unfold T1 T at h_3, rw [mem_set_of_eq] at h_3, 
  simp [-one_div_eq_inv] at h_3, 
- have H := h_3 (par T1._proof_1 ⟨p3.to_fun t, h_2⟩).2.1, 
- have G : par T1._proof_1 ⟨p3.to_fun t, h_2⟩ ∈ T1, 
+ have H := h_3 (par zero_lt_half ⟨p3.to_fun t, h_2⟩).2.1, 
+ have G : par zero_lt_half ⟨p3.to_fun t, h_2⟩ ∈ T1, 
  exact par_T1_ineq₁ (p3_ineq_T1 h_1), cc, 
 end 
 
 --3
 
 lemma step_assoc_3 {t : {x // x ∈ I01}} ( h_1 : t ∈ T1 ) ( h_2 : p3.to_fun t ∉ T1) : 
-f.to_fun (par T1._proof_1 ⟨t, h_1⟩) = h.to_fun (par T2._proof_1 ⟨p3.to_fun t, T2_of_not_T1 h_2 ⟩) := 
+f.to_fun (par zero_lt_half ⟨t, h_1⟩) = h.to_fun (par half_lt_one ⟨p3.to_fun t, T2_of_not_T1 h_2 ⟩) := 
 begin 
 by_contradiction, -- as p3.to_fun t ∈ {x : ↥I01 | 0 ≤ x.val ∧ x.val ≤ 1 / 4 } ⊆ T1 
  have h₁ : p3.to_fun t ∈ {x : ↥I01 | 0 ≤ x.val ∧ x.val ≤ 1 / 4 }, exact p3_ineq_T1  h_1, 
@@ -805,7 +805,7 @@ begin
   exact (le_not_le_of_lt h₂).2  , 
 end
 
-lemma par_impl_T1  {t : {x // x ∈ I01}} {h_3 : p3.to_fun t ∈ T1} (h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∈ T1) : 
+lemma par_impl_T1  {t : {x // x ∈ I01}} {h_3 : p3.to_fun t ∈ T1} (h_4 : par zero_lt_half ⟨p3.to_fun t, h_3⟩ ∈ T1) : 
 (p3.to_fun t ).val ≤ 1/4 := 
 begin 
  unfold par T1 T at h_4, rw mem_set_of_eq at h_4, cases h_4 with h₁ h₂ , simp [-one_div_eq_inv] at h₂, 
@@ -814,10 +814,10 @@ begin
  exact (div_le_iff H).1 h₂ ,  
 end
 
-lemma step_assoc_4 {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) ( h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∈ T1) 
-( h_3 : p3.to_fun t ∈ T1) (h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∈ T1) : 
- g.to_fun (par T1._proof_1 ⟨par T2._proof_1 ⟨t, _⟩, h_2⟩) =
-    f.to_fun (par T1._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_3⟩, h_4⟩) := 
+lemma step_assoc_4 {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) ( h_2 : par half_lt_one ⟨t, T2_of_not_T1 h_1 ⟩ ∈ T1) 
+( h_3 : p3.to_fun t ∈ T1) (h_4 : par zero_lt_half ⟨p3.to_fun t, h_3⟩ ∈ T1) : 
+ g.to_fun (par zero_lt_half ⟨par half_lt_one ⟨t, _⟩, h_2⟩) =
+    f.to_fun (par zero_lt_half ⟨par zero_lt_half ⟨p3.to_fun t, h_3⟩, h_4⟩) := 
 begin 
 by_cases H : t.val = (1/2), 
   { unfold p3, dsimp, unfold paste p3_aux, simp [h_1, -one_div_eq_inv, -sub_eq_add_neg], 
@@ -848,10 +848,10 @@ end
 
 
 
-lemma step_assoc_5  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) ( h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∈ T1) 
-( h_3 : p3.to_fun t ∈ T1) (h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∉ T1) : 
-g.to_fun (par T1._proof_1 ⟨par T2._proof_1 ⟨t, T2_of_not_T1 h_1⟩, h_2⟩) =
-    g.to_fun (par T2._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_3⟩, T2_of_not_T1 h_4 ⟩) := 
+lemma step_assoc_5  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) ( h_2 : par half_lt_one ⟨t, T2_of_not_T1 h_1 ⟩ ∈ T1) 
+( h_3 : p3.to_fun t ∈ T1) (h_4 : par zero_lt_half ⟨p3.to_fun t, h_3⟩ ∉ T1) : 
+g.to_fun (par zero_lt_half ⟨par half_lt_one ⟨t, T2_of_not_T1 h_1⟩, h_2⟩) =
+    g.to_fun (par half_lt_one ⟨par zero_lt_half ⟨p3.to_fun t, h_3⟩, T2_of_not_T1 h_4 ⟩) := 
 begin 
  unfold p3,  dsimp, unfold paste, simp [dif_neg h_1], 
  unfold p3_aux,
@@ -892,18 +892,18 @@ end
 
 local attribute [instance] classical.prop_decidable 
 
-lemma help_step_assoc_6₁  {t : {x // x ∈ I01}} {h_1 : t ∉ T1} (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∈ T1) : 
+lemma help_step_assoc_6₁  {t : {x // x ∈ I01}} {h_1 : t ∉ T1} (h_2 : par half_lt_one ⟨t, T2_of_not_T1 h_1 ⟩ ∈ T1) : 
 t.val ≤ 3/4 :=
 begin 
  by_contradiction, rw not_le at a, unfold T1 T at h_2, cases h_2 with g₁ g₂ , 
- have G1 : 1/2 < (par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩).val, unfold par, dsimp [-one_div_eq_inv, -sub_eq_add_neg], 
+ have G1 : 1/2 < (par half_lt_one ⟨t, T2_of_not_T1 h_1 ⟩).val, unfold par, dsimp [-one_div_eq_inv, -sub_eq_add_neg], 
   have a₁ : ↑t = t.val, trivial, have a₂ : (1 - 1 / 2) = (1/2:ℝ ), {norm_num}, rw [a₁, a₂ ], 
   refine (lt_div_iff _).2 _, {norm_num}, 
   have h₁ : 1 / 2 * (1 / 2) ≤ (3/4:ℝ ) - 1/2, {norm_num}, 
   have h₂ : (3/4:ℝ ) - 1/2 < t.val -1/2, refine lt_sub_iff_add_lt.2 _ , 
   have a₂ : 3 / 4 - 1 / 2 + 1 / 2 = (3/4:ℝ ), {norm_num}, rw a₂ , exact a, 
   exact lt_of_le_of_lt h₁ h₂ , 
- have NG1 : ¬ 1/2 < (par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩).val, 
+ have NG1 : ¬ 1/2 < (par half_lt_one ⟨t, T2_of_not_T1 h_1 ⟩).val, 
  exact not_lt_of_le g₂ , cc, 
 end 
 
@@ -917,12 +917,12 @@ begin
   norm_num [l₂, -one_div_eq_inv, le_of_lt l₂ ], 
 end 
 
----h_2 : par T2._proof_1 ⟨t, _⟩ ∈ T1
+---h_2 : par half_lt_one ⟨t, _⟩ ∈ T1
 
-lemma step_assoc_6  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) ( h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∈ T1) 
+lemma step_assoc_6  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) ( h_2 : par half_lt_one ⟨t, T2_of_not_T1 h_1 ⟩ ∈ T1) 
 (h_3 : p3.to_fun t ∉ T1) : 
- g.to_fun (par T1._proof_1 ⟨par T2._proof_1 ⟨t, _⟩, h_2⟩) 
-    = h.to_fun (par T2._proof_1 ⟨p3.to_fun t, T2_of_not_T1 h_3 ⟩) := 
+ g.to_fun (par zero_lt_half ⟨par half_lt_one ⟨t, _⟩, h_2⟩) 
+    = h.to_fun (par half_lt_one ⟨p3.to_fun t, T2_of_not_T1 h_3 ⟩) := 
 begin 
  unfold p3,  dsimp, unfold paste, simp [h_1],  unfold p3_aux,
  by_cases a : t.val = 3/4, 
@@ -940,10 +940,10 @@ end
 -- 7
 
 
-lemma help_step_assoc_7₁  {t : {x // x ∈ I01}} {h_1 : t ∉ T1} (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉  T1) : 
+lemma help_step_assoc_7₁  {t : {x // x ∈ I01}} {h_1 : t ∉ T1} (h_2 : par half_lt_one ⟨t, T2_of_not_T1 h_1 ⟩ ∉  T1) : 
 3/4 < t.val := 
 begin 
-  unfold T1 T at h_2, simp [(par T2._proof_1 ⟨t, _⟩).2.1, -one_div_eq_inv] at h_2, 
+  unfold T1 T at h_2, simp [(par half_lt_one ⟨t, _⟩).2.1, -one_div_eq_inv] at h_2, 
   unfold par at h_2, dsimp [-one_div_eq_inv, -sub_eq_add_neg] at h_2, 
   have a₁ : ↑t = t.val, trivial, have a₂  : (1 - 1 / 2) = (1/2:ℝ ), {norm_num}, rw [a₁, a₂] at h_2, 
   have H : 1 / 2 * (1 / 2) < (t.val - 1 / 2), refine (lt_div_iff _).1 h_2, {norm_num}, 
@@ -967,10 +967,10 @@ begin
  cc, 
 end
 
-lemma step_assoc_7  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
-( h_3 : p3.to_fun t ∈ T1) (h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∈ T1) : 
-h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, T2_of_not_T1 h_1⟩, T2_of_not_T1 h_2⟩) =
-    f.to_fun (par T1._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_3⟩, h_4⟩) := 
+lemma step_assoc_7  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par half_lt_one ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
+( h_3 : p3.to_fun t ∈ T1) (h_4 : par zero_lt_half ⟨p3.to_fun t, h_3⟩ ∈ T1) : 
+h.to_fun (par half_lt_one ⟨par half_lt_one ⟨t, T2_of_not_T1 h_1⟩, T2_of_not_T1 h_2⟩) =
+    f.to_fun (par zero_lt_half ⟨par zero_lt_half ⟨p3.to_fun t, h_3⟩, h_4⟩) := 
 begin 
  by_contradiction, 
  have g₁ : 3/4 < t.val, exact help_step_assoc_7₁ h_2, 
@@ -981,10 +981,10 @@ end
 
 -- 8
 
-lemma help_step_assoc_8₁  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) : 
+lemma help_step_assoc_8₁  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par half_lt_one ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) : 
 3/4 < t.val := 
 begin 
- unfold T1 T at h_2, simp [-one_div_eq_inv] at h_2,  have h₁  := h_2 (par T2._proof_1 ⟨t, _⟩).2.1, 
+ unfold T1 T at h_2, simp [-one_div_eq_inv] at h_2,  have h₁  := h_2 (par half_lt_one ⟨t, _⟩).2.1, 
  unfold par at h₁,dsimp [-one_div_eq_inv, -sub_eq_add_neg] at h₁,  
  have g₁ : (1 - 1 / 2) = (1/2:ℝ ), {norm_num},  have a₁ : ↑t = t.val, trivial, rw [g₁, a₁] at h₁,
  have h₂ : 1 / 2 * (1 / 2) < (t.val - 1 / 2), refine (lt_div_iff _).1 h₁ , {norm_num}, 
@@ -992,10 +992,10 @@ begin
  rw a₂ at h₂, exact h₂, 
 end
 
-lemma step_assoc_8  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
-( h_3 : p3.to_fun t ∈ T1) (h_4 : par T1._proof_1 ⟨p3.to_fun t, h_3⟩ ∉ T1) : 
-h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, T2_of_not_T1 h_1⟩, T2_of_not_T1 h_2 ⟩) =
-    g.to_fun (par T2._proof_1 ⟨par T1._proof_1 ⟨p3.to_fun t, h_3⟩, T2_of_not_T1 h_4 ⟩) :=
+lemma step_assoc_8  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par half_lt_one ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
+( h_3 : p3.to_fun t ∈ T1) (h_4 : par zero_lt_half ⟨p3.to_fun t, h_3⟩ ∉ T1) : 
+h.to_fun (par half_lt_one ⟨par half_lt_one ⟨t, T2_of_not_T1 h_1⟩, T2_of_not_T1 h_2 ⟩) =
+    g.to_fun (par half_lt_one ⟨par zero_lt_half ⟨p3.to_fun t, h_3⟩, T2_of_not_T1 h_4 ⟩) :=
 begin 
  have g₁ : ¬ 3/4 < t.val, exact not_lt_of_ge (p3_in_T1  h_1 h_3) , 
  have g₂ : 3/4 < t.val, exact help_step_assoc_8₁ h_1 h_2, cc, 
@@ -1007,10 +1007,10 @@ end
 -- 9 
 
 
-lemma step_assoc_9  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par T2._proof_1 ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
+lemma step_assoc_9  {t : {x // x ∈ I01}} ( h_1 : t ∉ T1 ) (h_2 : par half_lt_one ⟨t, T2_of_not_T1 h_1 ⟩ ∉ T1) 
 ( h_3 : p3.to_fun t ∉ T1) :
-h.to_fun (par T2._proof_1 ⟨par T2._proof_1 ⟨t, T2_of_not_T1 h_1⟩, T2_of_not_T1 h_2⟩) = 
-h.to_fun (par T2._proof_1 ⟨p3.to_fun t, T2_of_not_T1 h_3⟩) := 
+h.to_fun (par half_lt_one ⟨par half_lt_one ⟨t, T2_of_not_T1 h_1⟩, T2_of_not_T1 h_2⟩) = 
+h.to_fun (par half_lt_one ⟨p3.to_fun t, T2_of_not_T1 h_3⟩) := 
 begin
  unfold p3, dsimp, unfold paste, simp [dif_neg h_1], 
  have a₁ : ¬ t.val < 3/4, exact not_lt_of_gt (help_step_assoc_8₁ h_1 h_2), 

@@ -39,7 +39,7 @@ instance : has_one I01 := ⟨⟨1, zero_le_one, le_refl _⟩⟩
 
                                                                                                 
 
-structure path {α} [topological_space α] (x y : α) :=
+structure path (x y : α) :=
 (to_fun : I01 → α)
 (at_zero : to_fun 0 = x)
 (at_one : to_fun 1 = y)
@@ -77,20 +77,22 @@ def check_pts_of_path ( x y : α ) { z w : α } ( h : path z w ) := check_pts x 
 ------
 
 -- For equality of path, necessary and sufficient equality of constructor 
-theorem path_equal { x y : α } {f  g: path x y} :  f = g  ↔  f.to_fun = g.to_fun  := 
-begin split, intro H, rw H, intro H2, cases f, cases g, cc,  end 
-
+theorem path_equal { x y : α } { f g : path x y } : f = g  ↔  f.to_fun = g.to_fun := 
+begin split, intro h₁, rw h₁, intro h₂, cases f, cases g, cc  end 
 
 -- for later paths homotopy
 def is_path ( x y : α ) ( f : I01 → α ) : Prop := f 0 = x ∧ f 1 = y ∧ continuous f 
 
 
-def to_path { x y : α} ( f : I01 → α ) ( H : is_path x y f) : path x y := 
+def to_path' { x y : α} ( f : I01 → α ) ( H : is_path x y f) : path x y := 
 {  to_fun := f,
    at_zero := H.left,
    at_one := H.right.left,
    cont := H.right.right  
 }
+
+def to_path { x y : α} ( f : I01 → α ) ( h : is_path x y f) : path x y := 
+path.mk f h.1 h.2.1 h.2.2
 
 --- Can Remove
 lemma cont_of_path { z w : α }( g : path z w ) : continuous g.to_fun := g.cont 
@@ -120,7 +122,7 @@ begin
     existsi {x : ℝ | 0 ≤ x ∧ x ≤ (min 1 s)},
     split,
       exact is_closed_inter (is_closed_ge' 0)  (is_closed_le' _),
-      apply set.ext,intro x,
+      apply set.ext, intro x,
       show x.val ≤ s ↔ 0 ≤ x.val ∧ x.val ≤ min 1 s,
       split,
         intro H,
@@ -186,10 +188,13 @@ end
 
 
 -- Define T1 = [0, 1/2] and  T2 = [1/2, 1] 
+lemma zero_lt_half : 0 < (1 / 2 : ℝ ) := by norm_num
 
-def T1 : set I01 := T 0 (1/2: ℝ ) ( by norm_num  )
+lemma half_lt_one : (1 / 2 : ℝ ) < 1 := by norm_num
 
-def T2 : set I01 := T (1/2: ℝ ) 1 ( by norm_num  )
+def T1 : set I01 := T 0 ( 1/2: ℝ ) ( zero_lt_half )
+
+def T2 : set I01 := T ( 1/2: ℝ ) 1 ( half_lt_one  )
 
 lemma T1_is_closed : is_closed T1 := 
 begin unfold T1, exact T_is_closed _, end 
@@ -197,10 +202,10 @@ begin unfold T1, exact T_is_closed _, end
 lemma T2_is_closed : is_closed T2 := 
 begin unfold T2, exact T_is_closed _, end 
 
-lemma help_T1 : (0 : I01) ∈ T 0 (1/2) T1._proof_1 := 
+lemma help_T1 : (0 : I01) ∈ T 0 (1/2) zero_lt_half := 
 begin unfold T, rw mem_set_of_eq, show 0 ≤ (0:ℝ)  ∧ ( 0:ℝ ) ≤ 1 / 2, norm_num,  end 
 
-lemma help_T2 : (1 : I01) ∈ T (1 / 2) 1 T2._proof_1 := 
+lemma help_T2 : (1 : I01) ∈ T (1 / 2) 1 half_lt_one := 
 begin unfold T, rw mem_set_of_eq, split, show 1/2 ≤ (1:ℝ) , norm_num, show (1:ℝ )≤ 1, norm_num,  end 
 
 
@@ -208,7 +213,7 @@ lemma help_01 : (1 / 2 :ℝ) ∈ I01 := begin unfold I01, rw mem_set_of_eq, norm
 
 lemma help_02 : (1:I01) ∉ T1 := begin unfold T1 T,rw mem_set_of_eq, show ¬(0 ≤ (1:ℝ ) ∧ (1:ℝ) ≤ 1 / 2) , norm_num,  end 
 
-lemma help_half_T1 : ( ⟨ 1/2, help_01⟩  : I01) ∈ T 0 (1/2) T1._proof_1 := 
+lemma help_half_T1 : ( ⟨ 1/2, help_01⟩  : I01) ∈ T 0 (1/2) zero_lt_half := 
 begin 
   unfold T, exact set.mem_sep 
     (begin dsimp [has_mem.mem, -one_div_eq_inv], unfold set.mem, norm_num, end ) 
@@ -216,7 +221,7 @@ begin
 end 
 
 
-lemma help_half_T2 : ( ⟨ 1/2, help_01⟩  : I01) ∈ T (1/2) 1 T2._proof_1 := 
+lemma help_half_T2 : ( ⟨ 1/2, help_01⟩  : I01) ∈ T (1/2) 1 half_lt_one := 
 begin 
   unfold T, exact set.mem_sep 
     (begin dsimp [has_mem.mem, -one_div_eq_inv], unfold set.mem, norm_num, end ) 
@@ -253,19 +258,19 @@ end
 
 ---- Lemmas to simplify evaluations of par 
 @[simp]
-lemma eqn_start : par T1._proof_1 ⟨0, help_T1⟩ = 0 := 
+lemma eqn_start : par zero_lt_half ⟨0, help_T1⟩ = 0 := 
 begin unfold par, simp [-one_div_eq_inv], exact subtype.mk_eq_mk.2 (begin exact zero_div _,  end  ), end  
 
 @[simp]
-lemma eqn_1 : par T1._proof_1 ⟨⟨1 / 2, begin unfold I01, rw mem_set_of_eq, norm_num end⟩, begin unfold T, rw mem_set_of_eq, show 0 ≤ (1/2 : ℝ ) ∧ (1/2 : ℝ ) ≤ 1 / 2 ,  norm_num end ⟩ 
+lemma eqn_1 : par zero_lt_half ⟨⟨1 / 2, begin unfold I01, rw mem_set_of_eq, norm_num end⟩, begin unfold T, rw mem_set_of_eq, show 0 ≤ (1/2 : ℝ ) ∧ (1/2 : ℝ ) ≤ 1 / 2 ,  norm_num end ⟩ 
 = 1 :=  begin unfold par, simp [-one_div_eq_inv], exact subtype.mk_eq_mk.2 (begin exact div_self (begin norm_num, end), end) end 
 
 @[simp]
-lemma eqn_2 : par T2._proof_1 ⟨⟨1 / 2, help_01  ⟩, begin unfold T, rw mem_set_of_eq, show 1/2 ≤ (1/2 : ℝ ) ∧ (1/2 : ℝ ) ≤ 1  ,  norm_num end⟩ 
+lemma eqn_2 : par half_lt_one ⟨⟨1 / 2, help_01  ⟩, begin unfold T, rw mem_set_of_eq, show 1/2 ≤ (1/2 : ℝ ) ∧ (1/2 : ℝ ) ≤ 1  ,  norm_num end⟩ 
 = 0 := begin unfold par, simp [-one_div_eq_inv], exact subtype.mk_eq_mk.2 (by refl) end 
 
 @[simp]
-lemma eqn_end : par T2._proof_1 ⟨1, help_T2 ⟩ = 1 :=  
+lemma eqn_end : par half_lt_one ⟨1, help_T2 ⟩ = 1 :=  
 begin unfold par, exact subtype.mk_eq_mk.2 ( begin show ( ( 1:ℝ ) - 1 / 2) / (1 - 1 / 2) = 1,  norm_num, end ),  end 
 
 -------------------------------------
@@ -279,16 +284,30 @@ def fgen_path { x y : α } {r s : ℝ} (Hrs : r < s) (f : path x y ) : T r s Hrs
 lemma pp_cont { x y : α }{r s : ℝ} (Hrs : r < s)(f : path x y ) : continuous (fgen_path Hrs f) := 
 begin unfold fgen_path, exact continuous.comp (continuous_par Hrs) f.cont, end 
 
-definition fa_path { x y : α } (f : path x y ) : T1 → α := λ t, f.to_fun (par T1._proof_1 t)
+definition fa_path { x y : α } (f : path x y ) : T1 → α := λ t, f.to_fun (par zero_lt_half t)
 
 lemma CA { x y : α } (f : path x y ) : continuous ( fa_path f):= 
-begin unfold fa_path, exact continuous.comp (continuous_par T1._proof_1 ) f.cont, end 
+begin unfold fa_path, exact continuous.comp (continuous_par zero_lt_half ) f.cont, end 
 
-definition fb_path { x y : α }(f : path x y ) : T2 → α := λ t, f.to_fun (par T2._proof_1  t)
+definition fb_path { x y : α } (f : path x y ) : T2 → α := λ t, f.to_fun (par half_lt_one t)
 
 lemma CB { x y : α } (f : path x y ) :  continuous ( fb_path f):= 
-begin unfold fb_path, exact continuous.comp (continuous_par T2._proof_1 ) f.cont, 
+begin unfold fb_path, exact continuous.comp (continuous_par half_lt_one ) f.cont, 
 end 
+
+lemma match_lemma { x y z : α } ( f : path x y ) ( g : path y z ) : 
+  match_of_fun (fa_path f) (fb_path g) :=
+begin
+  unfold match_of_fun,  intros x B1 B2,
+  have Int : x ∈ set.inter T1 T2, exact ⟨ B1 , B2 ⟩ , 
+  rwa [inter_T] at Int, 
+  have V : x.val = 1/2, rwa [mem_set_of_eq] at Int, 
+  have xeq : x = (⟨ 1/2 , help_01 ⟩ : I01 ) , apply subtype.eq, rw V, 
+  unfold fa_path fb_path, simp [xeq, -one_div_eq_inv], 
+  show f.to_fun (par zero_lt_half ⟨⟨1 / 2, help_01⟩, help_half_T1⟩) = 
+    g.to_fun (par half_lt_one ⟨⟨1 / 2, help_01⟩, help_half_T2⟩),
+  simp [eqn_1, eqn_2, -one_div_eq_inv], 
+end
 
 ----- Composition of Path function 
 
@@ -299,26 +318,14 @@ definition comp_of_path  { x y z : α } ( f : path x y )( g : path y z ) : path 
     begin unfold paste, rw dif_pos, unfold fa_path, rw eqn_start, exact f.at_zero end, 
 
     at_one := 
-    begin unfold paste, rw dif_neg, unfold fb_path, 
-      show g.to_fun (par T2._proof_1 ⟨1,  help_T2 ⟩) = z, by simp [eqn_end],  
+    begin unfold paste, rw dif_neg, unfold fb_path,
+      show g.to_fun (par half_lt_one ⟨1,  help_T2 ⟩) = z, by simp [eqn_end],  
       exact help_02, 
     end,
     
     cont := 
-    begin 
-    -- both images are f.to_fun 1 = g.to_fun 0 = y 
-      have HM :  match_of_fun (fa_path f) (fb_path g),  
-        unfold match_of_fun,  intros x B1 B2,
-        have Int : x ∈ set.inter T1 T2, exact ⟨ B1 , B2 ⟩ , 
-        rwa [inter_T] at Int, 
-        have V : x.val = 1/2, rwa [mem_set_of_eq] at Int, 
-        have xeq : x = (⟨ 1/2 , help_01 ⟩ : I01 ) , apply subtype.eq, rw V, 
-        unfold fa_path fb_path, simp [xeq, -one_div_eq_inv], 
-        show f.to_fun (par T1._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T1⟩) = g.to_fun (par T2._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T2⟩),
-        simp [eqn_1, eqn_2, -one_div_eq_inv], 
-      -- Use pasting lemma via closed T1, T2    
-      exact cont_of_paste T1_is_closed T2_is_closed HM (CA f) (CB g),  
-    end
+      cont_of_paste (T1_is_closed) (T2_is_closed) (match_lemma f g) (CA f) (CB g)
+
 }
 
 ----------------------------------------------------

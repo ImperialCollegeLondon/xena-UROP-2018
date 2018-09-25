@@ -210,16 +210,16 @@ begin
 end
 
 def fa_hom { x y : α }{f g: path x y } ( F : path_homotopy f g) : (set.prod T1 I) → α  := 
-@fgen_hom _ _ _ _ 0 (1/2 : ℝ ) _ _  T1._proof_1 F 
+@fgen_hom _ _ _ _ 0 (1/2 : ℝ ) _ _  zero_lt_half F 
 
 lemma CA_hom { x y : α }{f g: path x y } ( F : path_homotopy f g) : continuous (fa_hom F) := 
-p_hom_cont T1._proof_1 F 
+p_hom_cont zero_lt_half F 
  
 def fb_hom { x y : α }{f g: path x y } ( F : path_homotopy f g) : (set.prod T2 I) → α  := 
-@fgen_hom _ _ _ _ (1/2 : ℝ ) 1 _ _  T2._proof_1 F 
+@fgen_hom _ _ _ _ (1/2 : ℝ ) 1 _ _  half_lt_one F 
 
 lemma CB_hom { x y : α }{f g: path x y } ( F : path_homotopy f g) : continuous (fb_hom F) := 
-p_hom_cont T2._proof_1 F 
+p_hom_cont half_lt_one F 
 
 ---
 
@@ -249,11 +249,11 @@ def path_homotopy_comp  {f : path x y} {g : path x y} {h : path x y}
         
       unfold paste, unfold fa_hom fb_hom fgen_hom, simp, 
       by_cases H : ∀ t : I01, (s, t) ∈ set.prod T1 I, simp [H],  
-        refine (F.path_s (par T1._proof_1 ⟨ s, _ ⟩  )).2.2, unfold set.prod at H, 
+        refine (F.path_s (par zero_lt_half ⟨ s, _ ⟩  )).2.2, unfold set.prod at H, 
         have H2 : (s, s) ∈ {p : ↥I01 × ↥I01 | p.fst ∈ T1 ∧ p.snd ∈ univ}, exact H s, simp [mem_set_of_eq] at H2, exact H2, 
         simp at H,
         have H3:  s ∉ T1, simp [not_forall] at H, exact H.2,
-        simp [H3], refine (G.path_s (par T2._proof_1 ⟨ s, _ ⟩  )).2.2,        
+        simp [H3], refine (G.path_s (par half_lt_one ⟨ s, _ ⟩  )).2.2,        
         exact T2_of_not_T1 H3, 
     end,  
 
