@@ -100,7 +100,7 @@ local attribute [instance] classical.prop_decidable
 ---- Right identity - mul_one
 
 noncomputable def p1 : repar_I01 := 
-{   to_fun :=  λ  t, (paste cover_I01 (λ s, par T1._proof_1 s ) (λ s, 1) ) t ,  
+{   to_fun :=  λ  t, (paste cover_I01 (λ s, par zero_lt_half s ) (λ s, 1) ) t ,  
     at_zero := begin unfold paste, rw dif_pos, swap, exact help_T1, simp   end, 
     at_one := begin unfold paste, rw dif_neg, exact help_02 end, 
     cont := begin simp, refine cont_of_paste _ _ _ (continuous_par _) continuous_const, 
@@ -112,7 +112,7 @@ noncomputable def p1 : repar_I01 :=
         have V : x.val = 1/2, rwa [mem_set_of_eq] at Int, 
         have xeq : x = (⟨ 1/2 , help_01 ⟩ : I01 ) , apply subtype.eq, rw V, 
         simp [xeq, -one_div_eq_inv], 
-        show par T1._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T1⟩  = 1, exact eqn_1, 
+        show par zero_lt_half ⟨⟨1 / 2, help_01⟩, help_half_T1⟩  = 1, exact eqn_1, 
     end
 }
 
@@ -147,7 +147,7 @@ end
 ---- Left identity - one_mul
 
 noncomputable def p2 : repar_I01 := 
-{   to_fun :=  λ  t, (paste cover_I01 (λ s, 0 )(λ s, par T2._proof_1 s ) ) t ,  
+{   to_fun :=  λ  t, (paste cover_I01 (λ s, 0 )(λ s, par half_lt_one s ) ) t ,  
     at_zero := begin unfold paste, rw dif_pos, exact help_T1,  end, 
     at_one := begin unfold paste, rw dif_neg, exact eqn_end , exact help_02  end, 
     cont := begin simp, refine cont_of_paste _ _ _ continuous_const (continuous_par _), 
@@ -159,7 +159,7 @@ noncomputable def p2 : repar_I01 :=
         have V : x.val = 1/2, rwa [mem_set_of_eq] at Int, 
         have xeq : x = (⟨ 1/2 , help_01 ⟩ : I01 ) , apply subtype.eq, rw V, 
         simp [xeq, -one_div_eq_inv], 
-        show 0 = par T2._proof_1 ⟨⟨1 / 2, help_01⟩, help_half_T2⟩, apply eq.symm, exact eqn_2
+        show 0 = par half_lt_one ⟨⟨1 / 2, help_01⟩, help_half_T2⟩, apply eq.symm, exact eqn_2
     end
 }
 

@@ -19,12 +19,14 @@ variables (f : G → H) [is_group_isom f]
 
 def automorphism (f₁ : G → G) := is_group_isom f₁
 
-
+--lemma quot_is_isom (f :)
 
 theorem isomorphism_thm_one (φ : G → H) [is_group_hom φ] : 
-injective φ → ∃ (f₂ : (quotient (ker φ)) → H), is_group_isom f₂ := 
+surjective φ → ∃ (f₂ : (quotient (ker φ)) → H), is_group_isom f₂ := 
 begin
 intros,
+existsi _,
+swap,
 sorry,
 end
 
