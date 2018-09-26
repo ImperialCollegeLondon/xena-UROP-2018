@@ -236,7 +236,6 @@ begin
   
   exact continuous_subtype_val,
 end
---!!!!!! THIS AGAIN !!!!!!
 
 --Product Topologies
 def product_top {α : Type*} {β : Type*} (X : topological_space α) (Y : topological_space β) : topological_space (α × β) :=
@@ -432,8 +431,8 @@ product_top X Y = topological_space.induced prod.fst X ⊔ topological_space.ind
 begin
   apply topological_space_eq,
   unfold product_top, unfold lattice.has_sup.sup, unfold semilattice_sup.sup, unfold semilattice_sup_bot.sup,
-  unfold bounded_lattice.sup, unfold complete_lattice.sup, unfold Inf, unfold has_Inf.Inf, 
-  simp only [exists_and_distrib_left, exists_prop, mem_set_of_eq, not_and, and_imp],
+  unfold bounded_lattice.sup, unfold complete_lattice.sup, unfold Inf, unfold has_Inf.Inf,
+  simp only [exists_prop, mem_set_of_eq, not_and, and_imp],
   apply set.ext,
   intro U, split,
     intro HU, rcases HU with ⟨I_U,HI_U,HI_U2⟩,
@@ -446,7 +445,7 @@ begin
     intros rect Hrect,
     --Split rect into the intersection of prod U1 univ and prod univ V1
     have Hrect2 := HI_U Hrect,
-    rcases Hrect2 with ⟨Urect,HUrect,Vrect,HVrect,HUrectVrect⟩,
+    rcases Hrect2 with ⟨Urect,Vrect,HUrect,HVrect,HUrectVrect⟩,
     have HUrectuniv : topological_space.is_open T (set.prod Urect univ),
       apply HXT, existsi Urect, split,
         exact HUrect,
@@ -467,10 +466,23 @@ begin
       rw inter_univ, rw univ_inter, rw HUrectVrect,
     rw Hrect_prod at H_open_rect,
     exact H_open_rect,
-  intro HU,  
-  
-    
-     sorry,
+  intro HU,
+  have H := HU (product_top X Y),
+  have HX : topological_space.induced prod.fst X ≤ product_top X Y,
+    intros V HV, unfold topological_space.induced at HV, cases HV with S HS, cases HS with HS HV,
+    unfold preimage at HV, rw HV,
+    existsi {set.prod S univ}, existsi _, 
+      rw sUnion_singleton, apply set.ext, intro x, rw mem_set_of_eq,rw mem_prod, rw and_iff_left, exact mem_univ _,
+    intros x Hx, existsi S, existsi univ, exact ⟨HS, is_open_univ, mem_singleton_iff.1 Hx⟩,
+  have HY :  topological_space.induced prod.snd Y ≤ product_top X Y,
+    intros V HV, cases HV with S HS, cases HS with HS HV, unfold preimage at HV, rw HV,
+    existsi {set.prod univ S}, existsi _,
+      rw sUnion_singleton, apply set.ext, intro x, rw mem_set_of_eq, rw mem_prod, rw and_iff_right, exact mem_univ _,
+    intros x Hx, existsi univ, existsi S, exact ⟨is_open_univ, HS, mem_singleton_iff.1 Hx⟩,
+  have H1 := H HX HY, 
+  unfold product_top at H1,
+   simp only [exists_prop, mem_set_of_eq, not_and, and_imp] at H1,
+  exact H1,
 end
 
 #print prefix set
@@ -546,3 +558,6 @@ begin
   rw ← EQ,
   exact H1,
 end
+
+
+

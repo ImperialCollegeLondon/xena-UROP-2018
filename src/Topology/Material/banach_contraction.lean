@@ -8,6 +8,7 @@ import analysis.limits
 
 import Topology.Material.topological_sequences
 
+
 --Start of Chris's Stuff
 import data.complex.basic algebra.archimedean data.nat.binomial algebra.field_power tactic.linarith
 
@@ -25,6 +26,14 @@ by rw [sum_range_succ, ← mul_div_cancel (x ^ n) this, geo_sum_eq n hx1, ← ad
 end
 --End of Chris's stuff
 
+--Kevin's Lemma
+open filter
+
+lemma tendsto_succ (X : Type*) (f : ℕ → X) (F : filter X) (H : tendsto f at_top F) :
+tendsto (λ n, f (n + 1)) at_top F :=
+tendsto.comp (tendsto_def.2 $ λ U HU,
+  let ⟨a,Ha⟩ := mem_at_top_sets.1 HU in
+  mem_at_top_sets.2 ⟨a,λ x Hx,Ha _ $ le_trans Hx $ by simp⟩) H
 
 local attribute [instance, priority 0] classical.prop_decidable
 noncomputable theory
@@ -82,8 +91,6 @@ end
 
 
 
-
-
 --Proposition 17.4
 theorem complete_iff_of_uniform_cts_bij {α : Type*} [metric_space α] {β : Type*} [metric_space β] (f : α → β) 
     (g : β → α) (Hf : uniform_continuous f) (Hg : uniform_continuous g) (left_inv : function.left_inverse g f)
@@ -98,24 +105,33 @@ def iteration_map {α : Type*} (f : α → α) (start : α) : ℕ → α
 | zero := start
 | (succ x) := f (iteration_map x)
 
-#print prefix iteration_map
 
 --Definition 17.24
 def is_contraction {α : Type*} [metric_space α] (f : α → α) := 
 ∃ (k : ℝ) (H1 : k < 1) (H2 : 0 < k), ∀ (x y : α), dist (f x) (f y) ≤ k* (dist x y)
 
 --Lemma 17.25
+lemma uniform_continuous_of_contraction {α : Type*} [metric_space α] (f : α → α) 
+(H : is_contraction f) : uniform_continuous f := 
+begin
+  rw uniform_continuous_of_metric, intros ε Hε,
+  existsi [ε, Hε], intros a b Hab,
+  rcases H with ⟨K, H1, H2, H3⟩, refine lt_of_le_of_lt _ Hab,
+  have H4 := H3 a b,
+  apply le_trans H4,
+  convert mul_le_mul_of_nonneg_right (le_of_lt H1) dist_nonneg, rw one_mul,  
+end
 
 
-set_option pp.all false
+
 --Banach's fixed point theorem
 theorem Banach_fixed_point {α : Type*} [metric_space α] [complete_space α] (H1 : nonempty α) {f : α → α} (H : is_contraction f)
 : ∃! (p : α), f p = p :=
 begin
   cases classical.exists_true_of_nonempty H1 with start trivial,
   let seq := iteration_map f start,
+  let H' := H,
   rcases H with ⟨K, HK1, HK2, Hf⟩,
---My zero is his one
   have consecutive_distance : ∀ n, dist (seq (n+1)) (seq (n)) ≤ K^n * dist (seq 1) (seq 0),
     intro n, induction n with N HN,
       show dist (seq 1) (seq 0) ≤ 1 * dist (seq 1) (seq 0),
@@ -194,7 +210,6 @@ begin
       existsi N,
       intros r s Hr Hs,
       wlog h : s ≤ r,
-      --Something about r > s
       have := HN Hs,
       rw real.dist_eq at this, rw sub_zero at this,
       replace := (abs_lt.1 this).2, rw equal at this,
@@ -211,13 +226,29 @@ begin
     
   rw ← metric_space.seq_cauchy_of_mathematician at cauchy_seq,
 
-  cases @complete_space.complete _ _ _inst_2 _ cauchy_seq with p Hp,
+  cases @complete_space.complete _ _ _inst_2 _ cauchy_seq with p Hseq_tendsto_p,
 
   existsi p,
-  have f_p_is_p : f p = p, 
-   
 
-  sorry,
+
+
+  have f_p_is_p : f p = p, 
+    have f_cont : continuous f := uniform_continuous.continuous (uniform_continuous_of_contraction f H'),
+  let next_seq := f ∘ seq,
+  have Hnext_seq_tendsto_fp : filter.tendsto next_seq filter.at_top (nhds (f p)),
+    exact filter.tendsto.comp Hseq_tendsto_p (continuous.tendsto f_cont p),
+  
+  have Hnext_seq_eq_seqsucc : next_seq = (λ n, seq (n + 1)),
+    apply funext, intro x, refl,
+  
+  have Hnext_seq_tendsto_p : filter.tendsto next_seq filter.at_top (nhds p),
+    rw Hnext_seq_eq_seqsucc,
+    exact tendsto_succ _ _ _ Hseq_tendsto_p,
+
+  exact metric_space.unique_limit_seq next_seq (f p) p 
+    ((seq_tendsto_iff next_seq (f p)).1 Hnext_seq_tendsto_fp)
+    ((seq_tendsto_iff next_seq p).1 Hnext_seq_tendsto_p),
+
   split,
     exact f_p_is_p,
 
@@ -236,16 +267,5 @@ begin
     refine lt_of_le_of_lt this this1_5, rw one_mul at this2, apply lt_irrefl (dist p y) this2,
   
 end
-#print prefix Banach_fixed_point
-#print tendsto_of_tendsto_of_tendsto_of_le_of_le
-#print prefix canonically_ordered_comm_semiring
-#print by_contradiction
 
-#print tendsto_map
---Lemma 17.25, applying continuous function applied to sequence 
---tending to limit, seq(succ n) tendsto same,
-
---
-
--- limits section is good
-
+#print set.preimage
