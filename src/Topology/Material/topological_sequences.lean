@@ -171,17 +171,11 @@ lemma subtype.seq_tendsto [metric_space α] {Y : set α} (u : ℕ → α) (H1 : 
   metric_space.seq_tendsto u a ↔ metric_space.seq_tendsto (λ (n : ℕ), (⟨u n, H1 n⟩ : Y)) ⟨a, H2⟩ := by refl
 
 
-lemma metric_space.convergent_of_cauchy_of_complete [metric_space α] (u : ℕ → α) [complete_space α] 
+theorem metric_space.convergent_of_cauchy_of_complete [metric_space α] (u : ℕ → α) [complete_space α] 
   (H : metric_space.seq_cauchy u) :
-  ∃ (x : α), metric_space.seq_tendsto u x := 
-begin 
-  have H2 := complete_space.complete H,
-  cases H2 with a Ha,
-  existsi a,
-  change tendsto u at_top (nhds a) at Ha,
-  rw seq_tendsto_iff at Ha,
-  exact Ha,
-end  
+  ∃ (x : α), metric_space.seq_tendsto u x := let ⟨a, Ha⟩ := (complete_space.complete H) in 
+    ⟨a, by change tendsto u at_top (nhds a) at Ha; exact (seq_tendsto_iff u a).1 Ha⟩
+
 
 --Proposition 17.6
 theorem closed_of_complete_subspace_of_metric {α : Type*} [metric_space α] (Y : set α) [complete_space Y] :

@@ -88,17 +88,13 @@ begin
 end
 
 
-
-
-
 --Proposition 17.4
 theorem complete_iff_of_uniform_cts_bij {α : Type*} [metric_space α] {β : Type*} [metric_space β] (f : α → β) 
     (g : β → α) (Hf : uniform_continuous f) (Hg : uniform_continuous g) (left_inv : function.left_inverse g f)
     (right_inv : function.right_inverse g f) : complete_space α ↔ complete_space β := 
-begin
-  exact ⟨complete_of_complete_of_uniform_cts_bij f g Hf Hg left_inv right_inv,
-        complete_of_complete_of_uniform_cts_bij g f Hg Hf right_inv left_inv⟩,
-end
+        ⟨complete_of_complete_of_uniform_cts_bij f g Hf Hg left_inv right_inv,
+        complete_of_complete_of_uniform_cts_bij g f Hg Hf right_inv left_inv⟩
+
 
 open nat
 def iteration_map {α : Type*} (f : α → α) (start : α) : ℕ → α
@@ -112,16 +108,9 @@ def is_contraction {α : Type*} [metric_space α] (f : α → α) :=
 
 --Lemma 17.25
 lemma uniform_continuous_of_contraction {α : Type*} [metric_space α] (f : α → α) 
-(H : is_contraction f) : uniform_continuous f := 
-begin
-  rw uniform_continuous_of_metric, intros ε Hε,
-  existsi [ε, Hε], intros a b Hab,
-  rcases H with ⟨K, H1, H2, H3⟩, refine lt_of_le_of_lt _ Hab,
-  have H4 := H3 a b,
-  apply le_trans H4,
-  convert mul_le_mul_of_nonneg_right (le_of_lt H1) dist_nonneg, rw one_mul,  
-end
-
+(H : is_contraction f) : uniform_continuous f := uniform_continuous_of_metric.2 
+    (λ ε Hε, ⟨ε,Hε,(λ a b Hab, let ⟨K, H1, H2, H3⟩ := H in lt_of_le_of_lt (le_trans (H3 a b) 
+      (by convert mul_le_mul_of_nonneg_right (le_of_lt H1) dist_nonneg; rw one_mul)) Hab)⟩)
 
 
 --Banach's fixed point theorem
