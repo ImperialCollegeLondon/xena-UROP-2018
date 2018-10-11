@@ -27,93 +27,86 @@ lemma seq_tendsto_iff [metric_space α] (u : ℕ → α) (a : α) : tendsto u at
 --Sutherland Exercise 6.26 (as setup for prop 17.6)
 set_option trace.simplify.rewrite true
 theorem lim_sequence_of_mem_closure {α : Type*} [metric_space α] {Y : set α} {a : α} (H : a ∈ closure Y) :
-∃ (f : ℕ → α) (H1 : ∀ (n : ℕ), f n ∈ Y), filter.tendsto f at_top (nhds a)  := begin
-  let ball_n := λ (n : ℕ), ball a ((1 : ℝ)/n),
-  
+∃ (f : ℕ → α) (H1 : ∀ (n : ℕ), f n ∈ Y), filter.tendsto f at_top (nhds a)  := 
+begin
+  let ball_n := λ (n : ℕ), ball a ((1 : ℝ)/n),  
   have H1 : ∀ (n : ℕ), nonempty {x : α | x ∈ (ball_n (n+1)) ∩ Y},
-    intro n,
+  { intro n,
     apply @nonempty_of_exists _ (λ _,true),
     have H3 := set.exists_mem_of_ne_empty ((mem_closure_iff_nhds.1 H) (ball_n (n+1)) (ball_mem_nhds _ _)),
-    cases H3 with xn Hxn,
-    existsi (⟨xn, Hxn⟩ : ↥{x : α | x ∈ ball_n (n+1) ∩ Y}),
-    trivial,
+    { cases H3 with xn Hxn,
+      existsi (⟨xn, Hxn⟩ : ↥{x : α | x ∈ ball_n (n+1) ∩ Y}),
+      trivial },
     apply div_pos, exact zero_lt_one, rw ← nat.cast_zero, apply nat.cast_lt.2,
-    apply zero_lt_iff_ne_zero.2, apply nat.succ_ne_zero, 
+    apply zero_lt_iff_ne_zero.2, apply nat.succ_ne_zero },
   
-
   have sequence := λ (n : ℕ), classical.choice (H1 n),
   let sequencevals := λ (n : ℕ), (sequence n).val,
   existsi sequencevals,
 
   have H1 : ∀ (n : ℕ), sequencevals n ∈ Y,
-    show ∀ (n : ℕ), (sequence n).val ∈ Y,
+  { show ∀ (n : ℕ), (sequence n).val ∈ Y,
     let sequenceprops := λ (n : ℕ), ((sequence n).property).2,
-    exact sequenceprops,
+    exact sequenceprops },
   existsi H1,
   rw tendsto_nhds_iff _ _ _,
   intros ep Hep,
   let nat_one_over_ep := int.nat_abs (ceil (1/ep)),
   existsi [{n : ℕ | nat_one_over_ep ≤ n}, _], swap,
-    rw filter.mem_at_top_sets,
+  { rw filter.mem_at_top_sets,
     existsi nat_one_over_ep,
-    intros b Hb, exact Hb,
+    exact λ b Hb, Hb }, 
 
   intros n Hn,
   show dist (sequence n).val a < ep,
     
-  have : dist (sequence n).val a < (1 / ↑(n+1)),
-    exact (sequence n).property.1,
+  have : dist (sequence n).val a < (1 / ↑(n+1)) := (sequence n).property.1,
   apply lt.trans this,
-
   rw one_div_eq_inv,
-    
-    have H3: 0 < (↑(n + 1) : ℝ), 
-      rw ← nat.cast_zero,
-      rw (@nat.cast_lt ℝ _ 0 (n+1)),
-      exact zero_lt_iff_ne_zero.2 (nat.succ_ne_zero n),
-    rw  (@inv_lt ℝ _ ↑(n + 1) ep) H3 Hep,
-    dsimp at Hn, rw ← one_div_eq_inv,
-    have H4 := nat.lt_succ_of_le Hn,
-    rw nat.succ_eq_add_one at H4,
-    rw ← @nat.cast_lt ℝ _ nat_one_over_ep (n+1) at H4,
-
-    exact lt_of_le_of_lt (le_trans (le_ceil (1 / ep)) ((@int.cast_le ℝ _ _ _).2 (@int.le_nat_abs ⌈1 / ep⌉))) H4,  
+  
+  have H3: 0 < (↑(n + 1) : ℝ), 
+  { rw ← nat.cast_zero,
+    rw (@nat.cast_lt ℝ _ 0 (n+1)),
+    exact zero_lt_iff_ne_zero.2 (nat.succ_ne_zero n) },
+  rw (@inv_lt ℝ _ ↑(n + 1) ep) H3 Hep,
+  dsimp at Hn, rw ← one_div_eq_inv,
+  have H4 := nat.lt_succ_of_le Hn,
+  rw [nat.succ_eq_add_one, ← @nat.cast_lt ℝ _ nat_one_over_ep (n+1)] at H4,
+  exact lt_of_le_of_lt (le_trans (le_ceil (1 / ep)) ((@int.cast_le ℝ _ _ _).2 (@int.le_nat_abs ⌈1 / ep⌉))) H4,  
 end
 
---We think of sequences as functions (f : ℕ → α)
-
+--We think here of sequences as functions (f : ℕ → α)
 def metric_space.seq_cauchy [metric_space α] (u : ℕ → α) : Prop := cauchy (filter.map u at_top)
 
 lemma metric_space.seq_cauchy_of_mathematician [metric_space α] (u : ℕ → α) : 
 metric_space.seq_cauchy u ↔ ∀ ε > 0, ∃ (N : ℕ), ∀ {n m}, n ≥ N → m ≥ N → dist (u n) (u m) < ε :=
 begin
-  split, intros H ε Hε,
+  split, 
+  { intros H ε Hε,
     unfold metric_space.seq_cauchy at H,
     rw cauchy_of_metric at H,
     rcases H.2 ε Hε with ⟨t, Ht, Ht2⟩,
-    rw mem_map at Ht, rw mem_at_top_sets at Ht,
-
+    rw [mem_map, mem_at_top_sets] at Ht,
     cases Ht with N HN,
     existsi N,
     intros n m Hn Hm,
-    exact Ht2 (u n) (u m) (HN n Hn) (HN m Hm),
+    exact Ht2 (u n) (u m) (HN n Hn) (HN m Hm) },
   intro H,
   unfold metric_space.seq_cauchy, rw cauchy_of_metric,
   apply and.intro _,
-  intros ε Hε,
-  cases H ε Hε with N HN,
-  existsi u '' {x : ℕ | N ≤ x},
-  existsi _, swap, rw mem_map, rw mem_at_top_sets, existsi N, intros b Hb, rw set.mem_set_of_eq,
-  rw set.mem_image, existsi b, exact ⟨Hb, rfl⟩,
-  
-  intros x y Hx Hy,
-  rw set.mem_image at Hx,
-  rw set.mem_image at Hy,
-  cases Hx with n Hn,
-  cases Hy with m Hm,
-  have := HN Hn.1 Hm.1, rw Hn.2 at this, rw Hm.2 at this,
-  assumption,
-
+  { intros ε Hε,
+    cases H ε Hε with N HN,
+    existsi u '' {x : ℕ | N ≤ x},
+    existsi _, swap, 
+    { rw [mem_map, mem_at_top_sets], existsi N, intros b Hb, rw [set.mem_set_of_eq, set.mem_image], 
+    existsi b, exact ⟨Hb, rfl⟩ },
+    intros x y Hx Hy,
+    rw set.mem_image at Hx,
+    rw set.mem_image at Hy,
+    cases Hx with n Hn,
+    cases Hy with m Hm,
+    have := HN Hn.1 Hm.1, rw Hn.2 at this, rw Hm.2 at this,
+    assumption },
   exact map_ne_bot at_top_ne_bot,
 end
 
@@ -128,7 +121,6 @@ begin
   unfold metric_space.seq_tendsto at Hb,
   apply metric_space.eq_of_dist_eq_zero,
   by_contradiction Hnab,
-
   cases @dist_nonneg _ _ a b, swap, cc,
   cases Ha ((dist a b)/2) (div_pos h (by norm_num)) with N Ha1,
   cases Hb ((dist a b)/2) (div_pos h (by norm_num)) with M Hb1,
@@ -139,8 +131,7 @@ begin
   have := add_lt_add Ha2 Hb2,
   have this2 := dist_triangle a (u k) b,
   have this3 := lt_of_le_of_lt this2 this,
-  rw ← two_mul at this3,
-  rw mul_div_cancel' (dist a b) two_ne_zero at this3,
+  rw [← two_mul, mul_div_cancel' (dist a b) two_ne_zero] at this3,
   exact lt_irrefl (dist a b) this3,
 end
 
@@ -154,11 +145,9 @@ begin
   cases Ha (ε / 2) (div_pos Hε (by norm_num)) with N HN,
   existsi N,
   intros n m Hn Hm,
-  have dist_n := HN Hn,
-  have dist_m := (HN Hm), rw dist_comm at dist_m,
-  have dist_tot := dist_triangle (u n) a (u m),  
-  have := add_lt_add dist_n dist_m, rw ← two_mul (ε / 2) at this, rw mul_div_cancel' ε two_ne_zero at this,
-  exact lt_of_le_of_lt dist_tot this,
+  have dist_m := HN Hm, rw dist_comm at dist_m,
+  have := add_lt_add (HN Hn) (dist_m), rw [← two_mul (ε / 2), mul_div_cancel' ε two_ne_zero] at this, 
+  exact lt_of_le_of_lt (dist_triangle (u n) a (u m)) this,
 end
 
 
@@ -179,30 +168,27 @@ theorem metric_space.convergent_of_cauchy_of_complete [metric_space α] (u : ℕ
 
 --Proposition 17.6
 theorem closed_of_complete_subspace_of_metric {α : Type*} [metric_space α] (Y : set α) [complete_space Y] :
-is_closed Y := begin
+is_closed Y := 
+begin
   rw ← closure_eq_iff_is_closed, 
   apply set.eq_of_subset_of_subset,
-    intros x Hx,
+  { intros x Hx,
     rcases lim_sequence_of_mem_closure Hx with ⟨sequence, Hxn, Hsequence⟩,
     rw seq_tendsto_iff at Hsequence,
-
     have Ha := metric_space.convergent_of_cauchy_of_complete (λ (n : ℕ), (⟨sequence n, Hxn n⟩ : Y)) 
-      ((subtype.seq_cauchy sequence Hxn).1 (metric_space.cauchy_of_convergent sequence ⟨x, Hsequence⟩)),
-    
+      ((subtype.seq_cauchy sequence Hxn).1 (metric_space.cauchy_of_convergent sequence ⟨x, Hsequence⟩)), 
     cases Ha with a Ha,
     change metric_space.seq_tendsto (λ (n : ℕ), (⟨sequence n, Hxn n⟩ : Y)) a at Ha,
     cases a with a ha,
     rw ← subtype.seq_tendsto at Ha,
     change metric_space.seq_tendsto sequence x at Hsequence,
-    dsimp at Ha,
+    change metric_space.seq_tendsto sequence a at Ha,
     have H4 := metric_space.unique_limit_seq sequence x a Hsequence Ha,
-    rw H4, exact ha,
+    rw H4, exact ha },
   exact subset_closure,
 end
 
---Lemma for following lemma 
-#print prefix int.nat_abs
-
+--Lemma for following lemma   
 --Showing the filter definition of complete is equivalent to the sequences defintion for a metric space
 lemma complete_iff_seq_complete {α : Type*} [metric_space α] :
   complete_space α ↔ ( ∀ (f : ℕ → α), cauchy (filter.map f at_top) → (∃ (a : α), tendsto f at_top (nhds a))) :=
@@ -376,27 +362,22 @@ theorem complete_of_closed_subspace_of_complete {α : Type*} [metric_space α] [
 begin
   rw complete_iff_seq_complete,
   intros f Hf,
-  rw complete_iff_seq_complete at _inst_2,--??
+  rw complete_iff_seq_complete at _inst_2,
   have : metric_space.seq_cauchy f := Hf,
   have this2 : f = (λ (n : ℕ), (⟨(f n).val, (f n).property⟩ : Y)),
-    simp,
+  { simp },
   rw this2 at this,
   cases _inst_2 (λ n, (f n).val) ((subtype.seq_cauchy _ _).2 this) with a Ha,
-  have H2 : a ∈ Y,
-  
-  apply mem_of_closed_of_tendsto at_top_ne_bot Ha HY,
-  rw mem_at_top_sets, existsi 0, exact λ n _, (f n).property,
+  have H2 : a ∈ Y,  
+  { apply mem_of_closed_of_tendsto at_top_ne_bot Ha HY,
+  rw mem_at_top_sets, existsi 0, exact λ n _, (f n).property },
   existsi (⟨a, H2⟩ : Y),
   have H3 := subtype.seq_tendsto (λ n, (f n).val) (λ n, (f n).property) H2,
-    simp at H3,
+  simp at H3,
   rw seq_tendsto_iff,
   apply H3.1,
-  rw seq_tendsto_iff at Ha,
-  exact Ha,
+  exact (seq_tendsto_iff (λ (n : ℕ), (f n).val) a).1 Ha
 end
-
---Prop 17.9
---theorem complete_of_compact_metric_space
 
 def subseq {α : Type*} (f : ℕ → α) (u : ℕ → α) := ∃ (map : ℕ → ℕ), u = f ∘ map ∧ tendsto map at_top at_top
 --tendsto map at_top at_top is the same as being a subsequence, but we don't require strict increasingness
@@ -412,11 +393,18 @@ begin
   unfold metric_space.seq_tendsto, rw ← seq_tendsto_iff,
   unfold metric_space.seq_tendsto at H2, rw ← seq_tendsto_iff at H2,
   apply tendsto.comp,
-  exact tendsto_id,
+  { exact tendsto_id },
   apply tendsto.comp,
-  exact Hmap.2,
+  { exact Hmap.2 },
   exact H2,
 end
 
---Prop 17.11 (IS THIS EXACTLY THE BELOW??? MAYBE NOT, but it should be an instance)
-#print complete_space.prod
+theorem convergent_of_cauchy_of_subseq_convergent' {α : Type*} [metric_space α] {f : ℕ → α} (H : cauchy (filter.map f at_top))
+ {sub : ℕ → α} (H1 : subseq sub f) {x : α} (H2 : metric_space.seq_tendsto sub x) : metric_space.seq_tendsto f x :=
+begin
+  cases H1 with map Hmap,
+  rw Hmap.1, unfold tendsto at Hmap, unfold metric_space.seq_tendsto, 
+  rw ← seq_tendsto_iff,
+  unfold metric_space.seq_tendsto at H2,
+  rw ← seq_tendsto_iff at H2, exact tendsto.comp tendsto_id (tendsto.comp Hmap.2 H2),
+end
