@@ -6,7 +6,7 @@ variables {point : Type} [Euclidean_plane point]
 local attribute [instance, priority 0] prop_decidable
 
 --Conclusions from the first 5 axioms
-theorem eqd.refl (a b : point) : eqd a b a b :=
+@[simp] theorem eqd.refl (a b : point) : eqd a b a b :=
 eqd_trans (eqd_refl b a) (eqd_refl b a)
 
 theorem eqd.symm {a b c d : point} : eqd a b c d → eqd c d a b :=
@@ -31,7 +31,7 @@ end
 
 @[simp] theorem two8 (a b : point) : eqd a a b b := 
 let ⟨x, h⟩ := seg_cons a b b b in
-have a = x, from id_eqd h.2,
+have a = x := id_eqd h.2,
 by rw ←this at h; exact h.2
 
 def afs (a b c d a' b' c' d' : point) : Prop := B a b c ∧ B a' b' c' ∧ eqd a b a' b' 
@@ -44,79 +44,38 @@ a ≠ b → eqd c d c' d' :=
 theorem two11 {a b c a' b' c' : point} : B a b c → B a' b' c' → eqd a b a' b' 
 → eqd b c b' c' → eqd a c a' c' := 
 begin
-intros,
-have : afs a b c a a' b' c' a',
-  repeat {split}; try {assumption},
-  exact two8 _ _,
-  exact a_3.flip,
-cases em (a = b),
-  have : eqd a' b' a a,
-    apply eqd.symm,
-    rw ←h at a_3,
-    assumption,
-  have : a' = b',
-    apply id_eqd,
-    assumption,
-  rw ←h at a_4,
-  rw ←this at a_4,
-  assumption,  
-apply eqd.flip,
-apply afive_seg this,
-  assumption
+intros h h1 h2 h3,
+by_cases h_1 : a = b,
+  subst b,
+  rwa id_eqd h2.symm,
+exact (five_seg h_1 h h1 h2 h3 (two8 a a') h2.flip).flip
 end
 
 theorem two12 {a q x y b c : point} (h : q ≠ a) : B q a x → eqd a x b c → B q a y → eqd a y b c → x = y :=
 begin
-intros h2 h3 h4 h5,
+intros h1 h2 h3 h4,
 by_contradiction h_1,
-have h6 : eqd a x a y,
-  exact eqd.trans h3 h5.symm,
-have h7 : eqd q x q y,
-  apply two11 h2 h4,
-    exact eqd.refl _ _,
-  assumption,
-have : afs q a x x q a x y,
-  repeat {split}; try {assumption},
-    exact eqd.refl _ _,
-  exact eqd.refl _ _,
-have : eqd x x x y,
-  apply afive_seg this h,
-exact h_1 (id_eqd this.symm)
+suffices : eqd x x x y,
+  exact h_1 (id_eqd this.symm),
+apply five_seg h h1 h1 _ _ (two11 h1 h3 _ (h2.trans h4.symm)) (eqd.trans h2 h4.symm);
+simp
 end
 
 -- Properties of B
 
 @[simp] theorem three1 (a b : point) : B a b b := 
-begin
-cases seg_cons b b b a with x h,
-have : b = x,
-  exact id_eqd h.2,
-rw ←this at h,
-exact h.1
-end
+let ⟨x, h, h1⟩ := seg_cons b b b a in
+by rwa (id_eqd h1).symm at h
 
 theorem B.symm {a b c : point} : B a b c → B c b a :=
-begin
-intro h,
-cases pasch h (three1 b c) with x hx,
-have : b = x,
-  exact bet_same hx.1,
-rw ←this at hx,
-exact hx.2
-end
+λ h, let ⟨x, h1, h2⟩ := pasch h (three1 b c) in
+by rwa (bet_same h1).symm at h2
 
 theorem three2 (a b c : point) : B a b c ↔ B c b a :=
-begin
-split,
-  exact B.symm,
-intro h,
-exact h.symm
-end
+⟨B.symm, B.symm⟩
 
 @[simp] theorem three3 (a b : point) : B a a b := 
-begin
-exact (three1 b a).symm
-end
+(three1 b a).symm
 
 instance dec_eqp : decidable_eq point :=
 begin
@@ -131,42 +90,19 @@ exact bet_same h
 end
 
 theorem three4 {a b c: point} : B a b c → B b a c → a = b :=
-begin
-intros h h1,
-cases pasch h h1 with x hx,
-have : a = x,
-  exact bet_same hx.2,
-have : b = x,
-  exact bet_same hx.1,
-simp *
-end
+λ h h1, let ⟨x, hx⟩ := pasch h h1 in
+(bet_same hx.2).trans (bet_same hx.1).symm
 
-theorem three5a {a b c d : point} : B a b d → B b c d → B a b c:=
-begin
-intros h h1,
-cases pasch h h1 with x hx,
-have : b = x,
-  exact bet_same hx.1,
-rw ←this at hx,
-exact hx.2.symm,
-end
+theorem three5a {a b c d : point} : B a b d → B b c d → B a b c :=
+λ h h1, let ⟨x, h2, h3⟩ := pasch h h1 in
+(bet_same h2).symm ▸ h3.symm
 
 theorem three6a {a b c d : point} : B a b c → B a c d → B b c d :=
-begin
-intros h h1,
-exact (three5a h1.symm h.symm).symm
-end
+λ h h1, (three5a h1.symm h.symm).symm
 
 theorem three7a {a b c d : point} : B a b c → B b c d → b ≠ c → B a c d :=
-begin
-intros h h1 h2,
-cases seg_cons c c d a with x hx,
-have h3 : B b c x,
-  exact three6a h hx.1,
-suffices : x = d,
-  exact this ▸ hx.1,
-exact two12 h2 h3 hx.2 h1 (eqd.refl c d)
-end
+λ h h1 h2, let ⟨x, h3, h4⟩ := seg_cons c c d a in
+(two12 h2 (three6a h h3) h4 h1 (eqd.refl c d)) ▸ h3
 
 theorem three5b {a b c d : point} : B a b d → B b c d → B a c d :=
 begin
@@ -177,20 +113,10 @@ exact three7a (three5a h h1) h1 h_1
 end
 
 theorem three6b {a b c d : point} : B a b c → B a c d → B a b d :=
-begin
-intros h h1,
-cases em (c = b),
-  rwa h_1 at h1,
-exact (three7a (three6a h h1).symm h.symm h_1).symm
-end
+λ h h1, (three5b h1.symm h.symm).symm
 
 theorem three7b {a b c d : point} : B a b c → B b c d → b ≠ c → B a b d :=
-begin
-intros h h1 h2,
-have h3 : B a c d,
-  exact three7a h h1 h2,
-exact (three5b h3.symm h.symm).symm
-end
+λ h h1 h2, (three5b (three7a h h1 h2).symm h.symm).symm
 
 theorem three13 : (P1 : point) ≠ P2 := 
 begin
@@ -204,13 +130,10 @@ def three14 (a b : point) : {c // B a b c ∧ b ≠ c} :=
 begin
 cases seg_cons b P1 P2 a with c h,
 cases h with h1 h2,
-have : b ≠ c,
-  intro hq,
-  have : eqd P1 P2 b b,
-    apply eqd.symm,
-    rwa ←hq at h2,
-  exact three13 (id_eqd this),
-exact ⟨c, h1, this⟩
+refine ⟨c, h1, _⟩,
+intro h_1,
+subst c,
+exact three13 (id_eqd h2.symm)
 end
 
 theorem three15 {a b c : point} : B a b c → eqd a b a c → b = c :=
@@ -229,9 +152,7 @@ begin
 intros h1 h2 h3,
 cases pasch h3 h2.symm with x h4,
 cases pasch h1.symm h4.2 with y h5,
-have : B p y c,
-  exact three5b h4.1 h5.2,
-exact ⟨y, this, h5.1⟩
+exact ⟨y, three5b h4.1 h5.2, h5.1⟩
 end
 
 -- cong + col
@@ -241,26 +162,11 @@ def ifs (a b c d a' b' c' d' : point) : Prop := B a b c ∧ B a' b' c' ∧ eqd a
 
 theorem four2 {a b c d a' b' c' d' : point} : ifs a b c d a' b' c' d' → eqd b d b' d' :=
 begin
-intro h,
-cases h with h h1,
-cases h1 with h1 h2,
-cases h2 with h2 h3,
-cases h3 with h3 h4,
-cases h4 with h4 h5,
+rintro ⟨h, h1, h2, h3, h4, h5⟩,
 cases em (a = c),
-  have : a' = c',
-    have : eqd c c a' c',
-      rwa h_1 at h2,
-    exact id_eqd this.symm,
-  have h6 : c = b,
-    apply bet_same,
-    rwa h_1 at h,
-  have h7 : b' = c',
-    have : eqd b b b' c',
-      rwa h6 at h3,
-    exact id_eqd this.symm,
-  rw [h6, ←h7] at h5,
-  exact h5,
+  subst c,
+  rw (bet_same h) at h3 h5,
+  rwa (id_eqd h3.symm).symm at h5,
 cases three14 a c with e he,
 cases seg_cons c' c e a' with e' he',
 have : afs a c e d a' c' e' d',
@@ -271,14 +177,7 @@ have : afs a c e d a' c' e' d',
   exact he'.2.symm,
 have : eqd e d e' d',
   exact afive_seg this h_1,
-have : afs e c b d e' c' b' d',
-  repeat {split};
-    try{assumption},
-    exact (three6a h he.1).symm,
-    exact (three6a h1 he'.1).symm,
-    exact he'.2.symm.flip,
-  exact h3.flip,
-exact afive_seg this he.2.symm
+exact five_seg he.2.symm (three6a h he.1).symm (three6a h1 he'.1).symm he'.2.symm.flip h3.flip this h5
 end
 
 theorem four3 {a b c a' b' c' : point} : B a b c → B a' b' c' → eqd a c a' c' 
