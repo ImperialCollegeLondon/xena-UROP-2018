@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2018 Rohan Mitta. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Rohan Mitta
+-/
 import analysis.metric_space
 import analysis.topology.topological_space
 import order.filter
@@ -25,7 +30,7 @@ lemma seq_tendsto_iff [metric_space α] (u : ℕ → α) (a : α) : tendsto u at
    sub $ mem_ball.2 $ H' nN⟩⟩
 
 --Sutherland Exercise 6.26 (as setup for prop 17.6)
-set_option trace.simplify.rewrite true
+
 theorem lim_sequence_of_mem_closure {α : Type*} [metric_space α] {Y : set α} {a : α} (H : a ∈ closure Y) :
 ∃ (f : ℕ → α) (H1 : ∀ (n : ℕ), f n ∈ Y), filter.tendsto f at_top (nhds a)  := 
 begin
@@ -353,8 +358,6 @@ begin
   exact set.subset.trans (set.subset.trans HS3 Hballε) HS1,
 
 end
-
-
 
 --Proposition 17.7
 theorem complete_of_closed_subspace_of_complete {α : Type*} [metric_space α] [complete_space α] 

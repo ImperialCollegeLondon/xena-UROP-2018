@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2018 Rohan Mitta. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Rohan Mitta
+-/
 import analysis.topology.topological_space
 import analysis.topology.continuity
 import analysis.metric_space
@@ -7,6 +12,9 @@ import analysis.limits
 
 import Topology.Material.topological_sequences
 
+
+--import data.complex.exponential
+--Move this to algebra.big_operators
 
 --Start of Chris's Stuff
 import data.complex.basic algebra.archimedean data.nat.binomial algebra.field_power tactic.linarith
@@ -50,8 +58,8 @@ begin
   intros filt Hfilt,
   cases H1 (cauchy_map Hg Hfilt) with x H_converges_to_x,
   existsi f x,
-  rw [filter.map_le_iff_le_vmap,
-      ←filter.map_eq_vmap_of_inverse (id_of_right_inverse right_inv) (id_of_left_inverse left_inv)] at H_converges_to_x,
+  rw [map_le_iff_le_comap,
+      ←filter.map_eq_comap_of_inverse (id_of_right_inverse right_inv) (id_of_left_inverse left_inv)] at H_converges_to_x,
   exact le_trans H_converges_to_x (continuous.tendsto Hf.continuous x)
 end
 
@@ -196,22 +204,21 @@ end
 def Banach's_fixed_point {α : Type*} [metric_space α] [complete_space α] (H1 : nonempty α) {f : α → α} (H : is_contraction f)
 : α := classical.some (Banach_fixed_point_exists H1 H)
 
-theorem Banach's_fixed_point_unique {α : Type*} [metric_space α] [complete_space α] (H1 : nonempty α) {f : α → α} (H : is_contraction f)
-: sorry := sorry
+theorem Banach's_fixed_point_is_fixed_point {α : Type*} [metric_space α] [complete_space α] (H1 : nonempty α) {f : α → α} (H : is_contraction f)
+: f (Banach's_fixed_point H1 H) = Banach's_fixed_point H1 H := classical.some_spec (Banach_fixed_point_exists H1 H)
 
-theorem Banach_fixed_point {α : Type*} [metric_space α] [complete_space α] (H1 : nonempty α) {f : α → α} (H : is_contraction f)
-: ∃! (p : α), f p = p :=
-begin
-  cases Banach_fixed_point_exists H1 H with p Hp,
-  existsi p,
-  refine ⟨Hp,_⟩,  
+theorem Banach's_fixed_point_is_unique {α : Type*} [metric_space α] [complete_space α] (H1 : nonempty α) {f : α → α} (H : is_contraction f)
+: ∀ (p : α), f p = p → p = Banach's_fixed_point H1 H :=
+begin 
   intros y Hy,
   by_contra Hnot,
+  let p := Banach's_fixed_point H1 H,
   have H4 := @dist_nonneg _ _ p y,
   have H3 : 0 < dist p y, exact or.elim H4 (λ x, x) (λ m, by_contradiction 
     (λ o, Hnot (eq_of_dist_eq_zero (eq.symm (eq.trans m (dist_comm p y)))))),
+  let H' := H,
   rcases H with ⟨K,HK1,_,Hf⟩, 
-  have := Hf p y, rw [Hy, Hp] at this,
+  have := Hf p y, rw [Hy, (Banach's_fixed_point_is_fixed_point H1 H')] at this,
   have this1_5 : K * dist p y < 1 * dist p y,
   { apply lt_of_sub_pos, rw ← mul_sub_right_distrib, refine mul_pos (sub_pos_of_lt HK1) H3 },
 
@@ -220,3 +227,4 @@ begin
   rw one_mul at this2, exact lt_irrefl (dist p y) this2,
 end
 
+ 
