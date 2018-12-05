@@ -211,9 +211,10 @@ begin unfold T, rw mem_set_of_eq, split, show 1/2 ≤ (1:ℝ) , norm_num, show (
 
 lemma help_01 : (1 / 2 :ℝ) ∈ I01 := begin unfold I01, rw mem_set_of_eq, norm_num end
 
-lemma help_02 : (1:I01) ∉ T1 := begin unfold T1 T,rw mem_set_of_eq, show ¬(0 ≤ (1:ℝ ) ∧ (1:ℝ) ≤ 1 / 2) , norm_num,  end 
+lemma help_02 : (1:I01) ∉ T1 := 
+begin unfold T1 T,rw mem_set_of_eq, show ¬(0 ≤ (1:ℝ ) ∧ (1:ℝ) ≤ 1 / 2) , norm_num  end 
 
-lemma help_half_T1 : ( ⟨ 1/2, help_01⟩  : I01) ∈ T 0 (1/2) zero_lt_half := 
+lemma help_half_T1 : ( ⟨ 1/2, help_01⟩ : I01) ∈ T 0 (1/2) zero_lt_half := 
 begin 
   unfold T, exact set.mem_sep 
     (begin dsimp [has_mem.mem, -one_div_eq_inv], unfold set.mem, norm_num, end ) 

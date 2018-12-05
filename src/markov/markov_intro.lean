@@ -1,8 +1,9 @@
 /-
 Copyright (c) 2018 Luca Gerolla. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Luca Gerolla, Kevin Buzzard
-Fundamental Group of pointed space, inverse, reparametrisation for fundamental group. 
+Authors: Luca Gerolla, Kenny Lau
+Basic definitions of probability theory and 
+(one-sided/discrete) stochastic processes
 -/
 import analysis.topology.continuity
 import analysis.topology.topological_space
@@ -38,6 +39,8 @@ universes u v w x
 
 
 section 
+-- Section containing prelimanary definitions for 
+-- later works (only ind_fun needed for next section)
 
 variables {α : Type*} [measure_space α]
 variables { μ : measure α }{ v : measure α  } {s : set α }
@@ -48,7 +51,7 @@ variables { μ : measure α }{ v : measure α  } {s : set α }
 definition abs_cont ( μ : measure α  )(v : measure α ) : Prop := 
 ∀ (s : set α), v s = 0 → μ s = 0 
 
--- stronger then needed
+-- (stronger then needed)
 def finite_measure ( μ : measure α ) := μ (univ : set α) < (⊤ : ennreal)
 
 
@@ -221,15 +224,26 @@ structure markov_process extends stoch_process α β  :=
 
 end 
 
+
+
 -- TO DO ----------------------------------------------
 
+------- Definitions
+-- Push forward 
+
+-- Stopping time
+
+-- Independence
+
+
+------- Lemmas 
 -- Filtration of sigma algebras
 
 -- a.s. as function of α → Prop and measure of reference
 
 -- Towering property of cond expectation and f measurable checking 
 
------ Notation of cond. expect
+-- +++ Notation of cond. expect
 
 -- Subst a.s equality when appropriate
 
@@ -239,3 +253,8 @@ end
 -- v = P restricted to F'
 -- essentially unique
 
+
+-------- Further
+-- Tight, weak convergence
+
+-- Ergodicity / invariant map 

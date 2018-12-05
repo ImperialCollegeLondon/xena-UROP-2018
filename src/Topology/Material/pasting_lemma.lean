@@ -14,7 +14,7 @@ definition restriction {X Y : Type*} (f : X → Y) (A : set X) : A → Y :=
 
 
 lemma preimage_sub (X Y : Type*) (f : X → Y) (C : set Y) (A : set X) : 
-(restriction f A) ⁻¹' C = { a : A | a.val ∈ f⁻¹' C} := by finish 
+(restriction f A) ⁻¹' C = { a : A | a.val ∈ f⁻¹' C} := by finish
 
 lemma and.congr_right_iff {a b c : Prop} : (a ∧ b ↔ a ∧ c) ↔ (a → (b ↔ c)) :=
 ⟨λ h ha, by simp [ha] at h; exact h, and_congr_right⟩

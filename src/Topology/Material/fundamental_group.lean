@@ -41,7 +41,7 @@ setoid.mk is_homotopic_to (is_equivalence)
 instance setoid_hom_loop  (x : α) : setoid (loop x) := 
 by unfold loop; apply_instance
 
-def space_π₁ (x : α) := quotient (fundamental_group.setoid_hom_loop x)
+definition space_π₁ (x : α) := quotient (fundamental_group.setoid_hom_loop x)
 
 def eq_class  ( f : loop x ) : space_π₁ x := quotient.mk f
 
@@ -215,17 +215,16 @@ end
 -- Group π₁ (α  , x)
 
 noncomputable def π₁_group (x : α ) : group ( space_π₁ x) := 
-{   mul := fundamental_group.mul ,  
+{ 
+  mul := fundamental_group.mul ,   
+  mul_assoc := fundamental_group.mul_assoc, 
     
-    mul_assoc := fundamental_group.mul_assoc, 
-    
-    one := id_eq_class x , 
-    one_mul := fundamental_group.one_mul , 
-    mul_one := fundamental_group.mul_one , 
+  one := id_eq_class x , 
+  one_mul := fundamental_group.one_mul , 
+  mul_one := fundamental_group.mul_one , 
 
-    inv :=  inv_eq_class  ,
-    mul_left_inv := fundamental_group.mul_left_inv 
-
+  inv :=  inv_eq_class  ,
+  mul_left_inv := fundamental_group.mul_left_inv 
 }
 
 end 
