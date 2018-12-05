@@ -164,6 +164,7 @@ lintegral (( ind_fun s h ).to_fun * f ) = lintegral (( ind_fun s h ).to_fun * g 
 
 structure cond_exp ( X : random_variable α ennreal) ( t : measurable_space α ) := 
 ( to_fun : α → ennreal)
+-- add now function measurability in terms of sigma algebra
 ( aver_match : ∀ (s : set α ) (h : t.is_measurable s), match_integ t X.to_fun to_fun h ) 
 
 
