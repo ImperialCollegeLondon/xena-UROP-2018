@@ -152,6 +152,27 @@ definition random_variable.comp (x : random_variable α β ) {f : β  → γ } (
   meas := measurable.comp x.2 h, 
 }
 
+-- measure_of
+def push_forward {α : Type*} [probability_space α] {β : Type*} [measurable_space β ] (x : random_variable α β ) : measure β := 
+{ measure_of := λ s, sorry,  --(x ⁻¹' s) , 
+ empty := sorry, 
+ mono := sorry,
+ Union_nat := sorry, 
+ m_Union := sorry,
+ trimmed := sorry, 
+}
+
+
+definition to_prob_space {β : Type*} [measurable_space β ] (x : random_variable α β ) : 
+  probability_space β := 
+{ μ := push_forward x, 
+  univ_one := begin unfold volume, sorry end,
+}
+
+-- add condition that F of probability space ≥ m₁ m₂?  
+definition independent (m₁ : measurable_space α )(m₂ : measurable_space α ) : Prop := 
+∀ (a b : set α ) (h₁ : m₁.is_measurable a) (h₂  : m₂.is_measurable a), volume (a ∩ b) = volume a * volume b 
+
 
 ---- Expectation and conditional expectation 
 
@@ -219,22 +240,73 @@ cond_exp  ( rv_of_stoch_proc.comp h x (n+1)) ( gen_from_stoch n x ) = cond_exp (
 structure markov_process extends stoch_process α β  := 
 ( markov : ∀ (n :ℕ) {f : β → ennreal} (h : measurable f), markov_property h (to_stoch_process) n)
 
+instance : measurable_space (with_top ℕ) := ⊤ 
+
+-- sort out β as csm_space / 
+structure stopping_time {α : Type*} [probability_space α] {β : Type*} [measurable_space β ] 
+ ( x : stoch_process α β ) extends random_variable α (with_top ℕ)  := 
+( meas_at_n : ∀ (n:ℕ), (gen_from_stoch n x).is_measurable ( to_random_variable.to_fun⁻¹' {n}) ) 
+-- prove equivalent to ≤ n 
+
+
+/- structure random_variable (α : Type*) [probability_space α] (β : Type*) [measurable_space β ]:=
+( to_fun : α → β )
+( meas : measurable to_fun )-/
+
+
+end 
+
+
+section 
+
+
+-- unbundled 
+structure is_measure_inv {α : Type*} [measure_space α] (f : α → α) :=
+( meas : measurable f )
+( inv : ∀ (s : set α) (h : measurable s), volume (f ⁻¹' s) = volume s ) 
+
+
+structure ergodic {α β : Type*} [probability_space α] (f : α → α ) 
+  extends is_measure_inv f := 
+( ergod : ∀ (s : set α) (h : measurable s) (h₂ : (f ⁻¹' s) = s ), 
+  volume s = 0 ∨ volume s = 1 )
 
 
 
-
+--- un bundled 
+/- class is_linear_map {α : Type u} {β : Type v} {γ : Type w}
+  [ring α] [add_comm_group β] [add_comm_group γ] [module α β] [module α γ]
+  (f : β → γ) : Prop :=
+(add  : ∀x y, f (x + y) = f x + f y)
+(smul : ∀c x, f (c • x) = c • f x)
+-- bundled 
+structure linear_map {α : Type u} (β : Type v) (γ : Type w)
+  [ring α] [add_comm_group β] [add_comm_group γ] [module α β] [module α γ] :=
+(to_fun : β → γ)
+(add  : ∀x y, to_fun (x + y) = to_fun x + to_fun y)
+(smul : ∀c x, to_fun (c • x) = c • to_fun x)-/
 end 
 
 
 
 -- TO DO ----------------------------------------------
 
+-- almost surely 
+
+
+------- FIXES
+-- Sort out sigma algebra on sample space (set it to be power set?) 
+---- so sort out independence 
+
+-- Push forward and induced probability space
+
+
 ------- Definitions
 -- Push forward 
 
--- Stopping time
+-- Stopping time ++ prove definition equivalent to ≤ n 
 
--- Independence
+-- Independence ++ For finite collection 
 
 
 ------- Lemmas 
@@ -259,3 +331,4 @@ end
 -- Tight, weak convergence
 
 -- Ergodicity / invariant map 
+------  + Transition probability 
