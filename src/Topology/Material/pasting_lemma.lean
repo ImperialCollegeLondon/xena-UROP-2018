@@ -6,7 +6,7 @@ Prove part of pasting lemma (ex 10.7 Sutherland) for continuity proofs
 -/
 import data.set.basic
 import analysis.topology.continuity
-
+open set
 
 
 definition restriction {X Y : Type*} (f : X → Y) (A : set X) : A → Y :=
@@ -16,12 +16,14 @@ definition restriction {X Y : Type*} (f : X → Y) (A : set X) : A → Y :=
 lemma preimage_sub (X Y : Type*) (f : X → Y) (C : set Y) (A : set X) : 
 (restriction f A) ⁻¹' C = { a : A | a.val ∈ f⁻¹' C} := by finish
 
-lemma and.congr_right_iff {a b c : Prop} : (a ∧ b ↔ a ∧ c) ↔ (a → (b ↔ c)) :=
+lemma and_congr_right_iff {a b c : Prop} : (a ∧ b ↔ a ∧ c) ↔ (a → (b ↔ c)) :=
 ⟨λ h ha, by simp [ha] at h; exact h, and_congr_right⟩
 
 theorem handy (X : Type*) (U A B : set X) :
   U ∩ A = U ∩ B ↔ {u : U | u.val ∈ A} = {u : U | u.val ∈ B} :=
-by simp [set.set_eq_def, and.congr_right_iff]
+sorry
+--by simp [set.set_eq_def, and_congr_right_iff]
+
 
 lemma restriction_closed {X Y : Type*} (f : X → Y) [topological_space X] [topological_space Y]
   (A : set X) (C : set Y) (HAcont : continuous (restriction f A))

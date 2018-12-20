@@ -22,6 +22,7 @@ import analysis.measure_theory.measurable_space
 import analysis.measure_theory.measure_space
 import data.set order.galois_connection analysis.ennreal
        analysis.measure_theory.outer_measure
+import Topology.Material.path
 import data.set.lattice
 
 noncomputable theory
@@ -289,9 +290,7 @@ end
 
 
 
--- TO DO ----------------------------------------------
-
--- almost surely 
+-- TO DO (/wish list) ----------------------------------------------
 
 
 ------- FIXES
@@ -302,11 +301,19 @@ end
 
 
 ------- Definitions
+-- almost surely 
+
 -- Push forward 
 
 -- Stopping time ++ prove definition equivalent to ≤ n 
 
 -- Independence ++ For finite collection 
+
+-- Product measures (!) 
+
+-- F(x, ξ ) 
+
+-- General T sided processes, Feller property 
 
 
 ------- Lemmas 
@@ -326,9 +333,85 @@ end
 -- v = P restricted to F'
 -- essentially unique
 
+-- THMS of lectures... 
+
 
 -------- Further
--- Tight, weak convergence
+-- Tight, weak convergence (weak topology) 
 
 -- Ergodicity / invariant map 
 ------  + Transition probability 
+
+-- ODEs
+
+---------------------------------
+
+
+------- Concrete
+-- Bernoulli (or Multinoulli?) -> Random walk on integers
+section 
+variables {α : Type*} [probability_space α] 
+open path
+
+instance ennreal_of_I01 : has_coe I01 ennreal := ⟨ λ t, option.some ⟨t.1, t.2.1⟩ ⟩ 
+
+
+-- lemma ennreal_of_I01 (t : I01) : ennreal := 
+-- begin unfold ennreal nnreal, have h : 0 ≤ t.1, exact t.2.1, exact ⟨t.1, h ⟩,    end
+-- instance {α} [topological_space α] (x y : α) : has_coe_to_fun (path x y) := ⟨_, path.to_fun⟩ 
+
+structure ref_event (α : Type*) [probability_space α] ( p : I01 ) := 
+( to_set : set α )
+( meas : is_measurable to_set) 
+( prob : volume to_set =  p )
+
+@[simp] lemma prob_ref_event {α : Type*} [probability_space α] { p : I01 } (s : ref_event α p) : 
+  volume s.1 = p := s.3 
+ 
+
+
+def base {p : I01} (A : ref_event α p): random_variable α Prop := 
+{ to_fun := λ w, if w ∈ A.1 then tt else ff,
+  meas := measurable.if A.2 measurable_const measurable_const,
+}
+
+-- def cite (a b : ℝ ) : Prop → ℝ := λ w, ite w a b 
+def gen_bernoulli {p : I01} (A : ref_event α p) (a b : ℝ ): random_variable α ℝ := 
+{ to_fun := (λ s, ite s a b) ∘ (base A).1,
+--ite ((base A).1 w) a b, 
+  meas := begin refine measurable.comp (base A).2 _, 
+  refine measurable.if _ measurable_const measurable_const, apply measurable_space.generate_measurable.basic _, show topological_space.is_open _ _,
+  apply generate_open.basic, left, ext a, rcases eq_true_or_eq_false a with rfl | rfl; simp, 
+  end
+}
+
+def bernoulli {p : I01} (A : ref_event α p) := gen_bernoulli A 0 1
+
+lemma prob_bernoulli {p : I01} {A : ref_event α p} {a b : ℝ } ( x = gen_bernoulli A a b) : 
+  volume (x.to_fun ⁻¹' {a} ) = p := 
+begin rw H, unfold gen_bernoulli, simp, 
+  suffices h : (λ (s : Prop), ite s a b) ∘ (base A).to_fun ⁻¹' {a} = A.1, 
+    rw h, exact A.3, --simp
+  rw preimage_comp, 
+  have h₂ : (λ (s : Prop), ite s a b) ⁻¹' {a} = {true}, 
+  {  apply set.ext, intro q, split, intro hq, sorry,--rw mem_set_of_eq at hq,   
+    --have y : q = true → (ite q a b) = a) 
+    simp, sorry, 
+  }, 
+  rw h₂, unfold base, simp, sorry , 
+  
+ end
+
+-- general 
+def F {p : I01} (A : ref_event α p) : α → (ℝ → ℝ ) := λ w, ( λ x, x + ((gen_bernoulli A 1 (-1 : ℝ) ).1 w) )
+
+
+-- def F_rec (x : stoch_process α ℝ ) {p : I01} (A : ref_event α p):  α → ℕ → 
+
+
+#check (by apply_instance : measurable_space Prop)
+#check (by apply_instance : complete_lattice (topological_space Prop))
+#check topological_space.lattice.complete_lattice
+
+
+end

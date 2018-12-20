@@ -601,8 +601,8 @@ whose corresponding homotopy will serve for associativity proof.
 lemma help_p3_aux₁  (s : T2) : (s.val).val - 1 / 4 ∈ I01 := 
 begin 
 unfold I01, rw mem_set_of_eq, split, 
- refine  le_sub_iff_add_le.2 _,  rw [add_comm, add_zero], refine le_trans _ s.2.1, norm_num,
- refine le_trans s.2.2 _, norm_num, 
+ refine  le_sub_iff_add_le.2 _,  rw [add_comm, add_zero], refine le_trans _ s.2.1, {norm_num},
+ rw sub_le_iff_le_add, refine le_trans s.2.2 _, norm_num, 
 end
 
 
@@ -693,7 +693,8 @@ noncomputable def p3 : repar_I01 :=
       have Int : x ∈ set.inter T1 T2, exact ⟨ B1 , B2 ⟩ , 
       rwa [inter_T] at Int, 
       have V : x.val = 1/2, rwa [mem_set_of_eq] at Int, 
-      unfold p3_aux p3_T1_aux, dsimp, rw if_pos, rw subtype.ext , dsimp, norm_num [V], 
+      unfold p3_aux p3_T1_aux, dsimp, rw if_pos, rw subtype.ext , dsimp, 
+      {rw V, norm_num},  rw V, norm_num,
   end, 
 
 }
@@ -792,7 +793,7 @@ begin
   simp at h_1, 
   have a₁ : 5 / 4 < 2 * t.val, 
     { have H : 5 / 4 = (5 /3 )*(3/4:ℝ ), {norm_num}, rw H, 
-    refine mul_lt_mul _ h_1 _ _, norm_num }, 
+    refine mul_lt_mul _ h_1 _ _, {norm_num}, {norm_num}, norm_num }, 
   norm_num [a₁ ] , 
 end
 
