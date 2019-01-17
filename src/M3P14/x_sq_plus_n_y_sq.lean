@@ -1,10 +1,13 @@
+/-
+Copyright (c) 2018 Clara List. All rights reserved.
+-/
+
 import M3P14.lqr
 import data.list.basic
 import data.padics.padic_norm
 
 
 open int list
-
 
 lemma identity (c d n x y : ℤ) : (c^2 + n*d^2)*(x^2 + n*y^2) = (x*c - n*d*y)^2 + n*(c*y + d*x)^2 := by ring
 
@@ -1533,7 +1536,6 @@ end
 
 ------------ lemmas for reciprocity step ------------------
 
-
 lemma lemma_17 {n p: ℤ} (h_n : n ≠ 0) (hp : prime_int p ∧ nat_abs p ≠ 2) (h_dvd : ¬ p ∣ n ) (zero_le_p : 0 ≤ p): 
 (∃  x y : ℤ, p ∣ x^2 + n*y^2 ∧ nat.coprime (nat_abs x) (nat_abs y)) ↔ legendre_sym (-n) hp = 1 := 
 begin
@@ -1545,16 +1547,6 @@ split,
   rw ←modeq.modeq_zero_iff at h,
   have H : quadratic_res (-n) p, 
   {
-    -- have h1 := modeq.modeq_sub h.1 (modeq.refl (n*y^2)),
-    -- rw [pow_two, pow_two, add_sub_cancel, sub_eq_add_neg, zero_add, h0, 
-    -- ←(zmodp.eq_iff_modeq_int hp.1), neg_mul_eq_neg_mul, cast_mul (-n) _] at h1,
-    -- replace h1 := eq_div_of_mul_eq _ _ _ h1.symm,
-    -- have h2 := zmodp.mul_inv_eq_gcd hp.1 (nat_abs y),
-    -- have h3 : (↑(nat_abs y) : zmodp _ hp.1) = (↑(↑(nat_abs y) : ℤ) : zmodp _ hp.1), by refl,
-    -- rw [h3, mul_comm, ←div_eq_iff_mul_eq] at h2,
-    -- have : (↑x * (↑↑(nat_abs y))⁻¹ : zmodp _ hp.1) = (↑↑(nat_abs y))⁻¹ * ↑x, by {rw mul_comm},
-    -- rw [division_def, ←(@nat_abs_mul_self y), int.coe_nat_mul, cast_mul, cast_mul, (inv_div_left _ _).symm, div_eq_mul_inv,
-    -- h2.symm] at h1,
     sorry,
   },
   unfold legendre_sym, split_ifs with a1 a2, 
