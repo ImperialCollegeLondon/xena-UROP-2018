@@ -1,4 +1,4 @@
-import geometry.tarski_7
+import geometry.tarski_7 linear_algebra.basic
 open classical set
 namespace Euclidean_plane
 variables {point : Type} [Euclidean_plane point]
@@ -311,9 +311,9 @@ have h5 : sided b q c,
   dsimp,
   intro h_1,
   subst b,
-  apply (eleven45a hα).1 ⟨hpb, hqb, h4.symm.2.2.2.2 (four11 (six4.1 h3).1).2.2.2.2 (six17b c q)⟩,  
-refine ⟨a, b, c, h3.2.1, h5.2.1, eq.trans (quotient.sound _) h, h2, quotient.sound (eleven9 h3.symm h5.symm)⟩,
-exact eqd_refl a b
+  apply (eleven45a hα).1 ⟨hpb, hqb, h4.symm.2.2.2.2 (four11 (six4.1 h3).1).2.2.2.2 (six17b c q)⟩,
+exact ⟨a, b, c, h3.2.1, h5.2.1, eq.trans (quotient.sound (show (a, b) ≈ (b, a), from eqd_refl a b)) h,
+  h2, quotient.sound (eleven9 h3.symm h5.symm)⟩
 end
 
 theorem thirteen7b {β : angle point} {a b c : point} (hab : a ≠ b) : ¬col a b c → acute β → β ≠ 0 → ∃ d (hdb : d ≠ b), β = ⟦⟨(a, b, d), hab, hdb⟩⟧ ∧ Bl c (l b a) d ∧ R a d b :=
@@ -376,7 +376,7 @@ rw [←thirteen5b hdb h3.1.2.2.2.1 _, ←thirteen5b hcb h3.1.2.2.2.1 _],
 exact he.2.2.2.2 (six17b c d) (six17a b e)
 end
 
-theorem thirteen7 {α β : angle point} {C : dist point} : cos α (cos β C) = cos β (cos α C) := 
+theorem thirteen7 (α β : angle point) (C : dist point) : cos α (cos β C) = cos β (cos α C) := 
 begin
 by_cases ha : right α,
   simp [cos_right ha, cos_right ha],
@@ -395,9 +395,50 @@ all_goals
     rw cos_supp β,
   all_goals 
   { apply thirteen7c;
-  assumption}}
+    assumption}}
+end
+
+lemma thirteen11a {o a b a' b' : point} : ¬col o a a' → col o a b → col o a' b' → b ≠ o → b' ≠ o →
+¬col o a b' ∧ ¬col o b a' :=
+begin
+sorry
+end
+
+lemma thirteen11b {o a b a' b' : point} : ¬col o a b' → ¬col o b a' → par (l a b') (l b a') →
+∃ x x', xperp x (l o x) (l a b') ∧ xperp x' (l o x) (l b a') :=
+begin
+sorry
+end
+
+lemma thirteen11c {o a b a' b' x x' : point} : ¬col o a a' → col o a b → col o a' b' → b ≠ o → b' ≠ o → 
+par (l a b') (l b a') → xperp x (l o x) (l a b') → xperp x' (l o x) (l b a') → eqa a o x b o x' ∧ eqa a' o x' b' o x :=
+begin
+sorry
+end
+
+lemma thirteen11d {o a b a' b' x x' : point} (h : eqa a o x b o x') (h1 : eqa a' o x' b' o x) : ¬col o a a' →
+col o a b → col o a' b' → b ≠ o → b' ≠ o → par (l a b') (l b a') → xperp x (l o x) (l a b') → xperp x' (l o x) (l b a') :=
+begin
+sorry
+end
+
+theorem thirteen11 {o a b c a' b' c' : point} : ¬col o a a' → col o a b → col o a c → b ≠ o → c ≠ o → col o a' b' → 
+col o a' c' → b' ≠ o → c' ≠ o → par (l b c') (l c b') → par (l c a') (l a c') → par (l a b') (l b a') :=
+begin
+intros h h1 h2 h3 h4 h5 h6 h7 h8 h9 h10,
+sorry
+
+
+
+
+
+
+
+
+
+
+
+
 end
 
 end Euclidean_plane
-
---thirteen7a refine quotient.sound

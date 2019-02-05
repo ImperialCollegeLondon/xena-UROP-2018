@@ -112,9 +112,27 @@ theorem dpar_of_par_neq {A B : set point} : par A B → A ≠ B → dpar A B :=
 theorem line_of_par {A B : set point} : par A B → line A ∧ line B :=
 λ h, h.elim (λ h, ⟨h.1, h.2.1⟩) (λ h, ⟨h.1, h.2 ▸ h.1⟩)
 
-theorem is_of_not_par {A B : set point} : line A → line B → ¬par A B → ∃ x, is x A B :=
+theorem not_par_of_perp {A B : set point} : perp A B → ¬par A B :=
 begin
-intros h h1 h2,
+intro h,
+cases h with x hx,
+intro h_1,
+cases h_1,
+  exact h_1.2.2 ⟨x, hx.2.2.1, hx.2.2.2.1⟩,
+exact (eight14b hx) h_1.2
+end
+
+theorem is_iff_not_par {A B : set point} : (∃ x, is x A B) ↔ line A ∧ line B ∧ ¬par A B :=
+begin
+split,
+  intro h,
+  cases h with x hx,
+  refine ⟨hx.1, hx.2.1, _⟩,
+  intro h_1,
+  cases h_1,
+    exact h_1.2.2 ⟨x, hx.2.2.2.1, hx.2.2.2.2⟩,
+  exact hx.2.2.1 h_1.2,
+rintro ⟨h, h1, h2⟩,
 rw [par, not_or_distrib] at h2,
 have h3 : ∃ x, x ∈ A ∧ x ∈ B,
   by_contradiction h_1,
@@ -194,48 +212,6 @@ cases h_1 with x hx,
 exact h1 ⟨x, hx.1, hx.2⟩
 end
 
-theorem twelve8 (a : point) {L : set point} : line L → ∃! (A : set point), a ∈ A ∧ perp L A :=
-begin
-intro h,
-by_cases h1 : a ∈ L,
-  rcases six22 h h1 with ⟨b, hb, h2⟩,
-  subst h2,
-  cases eight25 hb.symm with c hc,
-  refine ⟨l a c, ⟨six17a a c, _⟩, _⟩,
-    suffices : xperp a (l a b) (l a c),
-      exact ⟨a, this⟩,
-    apply eight13.2,
-    simp *,
-    exact ⟨six14 hc.2.symm, b, six17b a b, c, six17b a c, hb.symm, hc.2, hc.1⟩,
-  intros Y hy,
-  rcases six22 (eight14e hy.2).2 hy.1 with ⟨x, hx, h2⟩,
-  subst h2,
-  apply six18 (six14 hx) hc.2.symm (six17a a x) _,
-  apply col_of_perp hb _ hc.1.symm,
-  have h2 := eight15 hy.2.symm (six17a a x) (six17a a b),
-  exact h2.2.2.2.2 (six17b a x) (six17b a b),
-have h2 := eight17 h h1,
-cases exists_of_exists_unique h2 with x hx,
-refine ⟨l a x, ⟨(six17a a x), x, hx⟩, _⟩,
-intros Y hy,
-apply six18 (eight14e hy.2).2 _ hy.1 _,
-  intro h_1,
-  subst h_1,
-  exact h1 hx.2.2.1,
-cases hy.2 with z hz,
-suffices : z = x,
-  subst z,
-  exact hz.2.2.2.1,
-apply unique_of_exists_unique h2 _ hx,
-suffices : Y = l a z,
-  subst Y,
-  exact hz,
-apply six18 (eight14e hy.2).2 _ hy.1 hz.2.2.2.1,
-intro h_1,
-subst h_1,
-exact h1 hz.2.2.1
-end
-
 theorem twelve9 {A B C : set point} : perp A C → perp B C → par A B :=
 begin
 intros h h1,
@@ -244,7 +220,7 @@ by_cases h_1 : A = B,
 refine or.inl ⟨(eight14e h).1, (eight14e h1).1, λ h_2, _⟩,
 cases h_2 with x hx,
 apply h_1,
-exact unique_of_exists_unique (twelve8 x (eight14e h1).2) ⟨hx.1, h.symm⟩ ⟨hx.2, h1.symm⟩
+exact unique_of_exists_unique (unique_perp x (eight14e h1).2) ⟨hx.1, h.symm⟩ ⟨hx.2, h1.symm⟩
 end
 
 theorem twelve10 {A : set point} {a : point} : line A → ∃ B, par A B ∧ a ∈ B :=
@@ -252,8 +228,8 @@ begin
 intro h,
 by_cases h1 : a ∈ A,
   exact ⟨A, or.inr ⟨h, rfl⟩, h1⟩,
-cases exists_of_exists_unique (twelve8 a h) with C hc,
-cases exists_of_exists_unique (twelve8 a (eight14e hc.2).2) with B hb,
+cases exists_of_exists_unique (unique_perp a h) with C hc,
+cases exists_of_exists_unique (unique_perp a (eight14e hc.2).2) with B hb,
 exact ⟨B, twelve9 hc.2 hb.2.symm, hb.1⟩
 end
 
@@ -622,6 +598,21 @@ end
 theorem twelve24 {a b c d e f x y : point} : eqa a b c d e f → xperp x (l b c) (l a x) → xperp y (l e f) (l d y) → (sided b c x ↔ sided e f y) :=
 λ h h1 h2, ⟨twelve24a h h1 h2, twelve24a h.symm h2 h1⟩
 
+theorem twelve25 {A B C : set point} : par A B → perp A C → perp B C :=
+begin
+intros h h1,
+have h2 : ¬par B C,
+  intro h_1,
+  exact (not_par_of_perp h1) (h.trans h_1),
+cases is_iff_not_par.2 ⟨(line_of_par h).2, (eight14e h1).2, h2⟩ with x hx,
+cases exists_of_exists_unique (unique_perp x hx.2.1) with L hl,
+suffices : B = L,
+  subst L,
+  exact hl.2.symm,
+apply unique_of_exists_unique (twelve13 x (line_of_par h).1) ⟨h, hx.2.2.2.1⟩,
+exact ⟨twelve9 h1 hl.2.symm, hl.1⟩
+end
+
 -- distance + angle interface
 
 instance eqd_setoid : setoid (point × point) :=
@@ -776,11 +767,7 @@ end
 def supp := quotient.lift (λ x, ⟦supp_triple x⟧) (λ x y h, quotient.sound (@supp_well_defined point _ x y h))
 
 theorem supp_def {a b c : point} (h : a ≠ b) (h1 : c ≠ b) : supp ⟦⟨⟨a, b, c⟩, h, h1⟩⟧ = ⟦⟨⟨a, b, S b c⟩, h, seven12a h1⟩⟧ :=
-begin
-unfold supp supp_triple,
-apply quotient.sound,
-exact eqa.refl h (seven12a h1)
-end
+quotient.sound (eqa.refl h (seven12a h1))
 
 @[simp] theorem supp_of_supp (α : angle point) : supp (supp α) = α :=
 begin
